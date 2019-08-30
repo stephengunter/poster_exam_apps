@@ -2,9 +2,9 @@
 	<v-app>
 		<loading :active.sync="loading"></loading>
 		
-		<core-toolbar v-if="currentUser" :user="currentUser" :responsive="responsive"/> 
+		<core-toolbar :user="currentUser" :title="title" :responsive="responsive"/> 
 
-		<core-drawer v-if="currentUser" :responsive="responsive" />
+		<core-drawer :menus="menus" :responsive="responsive" />
 
 		<core-view />
 
@@ -44,6 +44,7 @@ export default {
 	name:'App',
 	data(){
 		return {
+			title: '',
 			err: {
 				show: false,
 				msg: 'Server no response. Please try later.'
@@ -56,8 +57,13 @@ export default {
 			}
 		}
 	},
+	watch:{
+      '$route' (val) {
+         this.title = val.meta.title;
+      }
+   },
 	computed:{
-		...mapGetters(['currentUser']),
+		...mapGetters(['currentUser', 'menus']),
       ...mapState({
 			loading: state => state.app.loading,
 			responsive: state => state.app.responsive,
@@ -109,7 +115,11 @@ export default {
 }
 </script>
 
+
 <style lang="scss">
+* :not(.v-icon) {
+  font-family: "微軟正黑體",sans-serif!important;
+}
 @import '@/styles/index.scss';
 
 /* Remove in 1.2 */
@@ -123,5 +133,8 @@ export default {
 .successText{
 	font-size: 1.2rem;
 	color: #fff;
+}
+.cn {
+    font-family: "微軟正黑體", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 </style>

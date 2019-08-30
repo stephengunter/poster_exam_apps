@@ -12,7 +12,7 @@
     	</div>
 
     	<v-spacer />
-    	<v-toolbar-items>
+    	<v-toolbar-items v-if="isAuthenticated">
 			<v-flex align-center layout py-2>
 				<router-link v-ripple class="toolbar-items" to="/">
 					<v-icon color="tertiary">mdi-view-dashboard</v-icon>
@@ -41,7 +41,7 @@
 						<v-icon color="tertiary">mdi-account</v-icon>
                </v-btn>
 					<v-btn v-else dark flat slot="activator" style="text-transform: lowercase">
-                  <span v-if="user"  class="mr-1" style="color: #000;">{{ user.email }}</span> 
+                  <span class="mr-1" style="color: #000;">{{ user.email }}</span> 
                   <v-icon style="color: #000;">mdi-menu-down</v-icon>
                </v-btn>
                <v-card>
@@ -64,12 +64,17 @@
 
 <script>
 
+import { mapGetters } from 'vuex';
 import { TOGGLE_DRAWER } from '@/store/mutations.type';
 import { LOGOUT } from '@/store/actions.type';
 import { SITE_URL } from '@/config';
 
 export default {
 	props:{
+		title: {
+			type: String,
+         default: ''
+		},
       user: {
          type: Object,
          default: null
@@ -81,22 +86,12 @@ export default {
    },
 	data(){
 		return {
-			notifications: [
-            // 'Mike, John responded to your email',
-            // 'You have 5 new tasks',
-            // 'You\'re now a friend with Andrew',
-            // 'Another Notification',
-            // 'Another One'
-         ],
-			title: '',
-			
+			notifications: [],
     		responsiveInput: false
 		}
 	},
-	watch:{
-      '$route' (val) {
-         this.title = val.meta.title;
-      }
+	computed: {
+      ...mapGetters(['isAuthenticated'])      
    },
   	methods:{
       onClickBtn(){
@@ -106,9 +101,8 @@ export default {
          
       },
       logout(){
-         this.$store
-         .dispatch(LOGOUT)
-         .then(() => this.$router.push({ path: '/' }))
+			this.$store.dispatch(LOGOUT)
+			.then(() => this.$router.push({ path: '/login' }))
       }
 	}
 }

@@ -10,50 +10,34 @@
 					<v-img :src="logo_src" height="34" contain />
 				</v-list-tile-avatar>
 				<v-list-tile-title class="title">
-					Quantium Admin
+					{{ site_title }}
 				</v-list-tile-title>
 			</v-list-tile>
 			
 			<v-divider/>
-
-			<core-drawer-menu v-for="(item, index) in mainMenus" :key="index" 
-            :item="item" :color="color"
-         />
-			
-			<div v-if="false">
-				<v-list-tile v-for="(link, i) in links" :key="i"
-				:to="link.to" :active-class="color" avatar class="v-list-item"
-				>
-					<v-list-tile-action>
-						<v-icon>{{ link.icon }}</v-icon>
-					</v-list-tile-action>
-					<v-list-tile-title v-text="link.text" />
-				</v-list-tile>
+			<div v-if="isAuthenticated">
+				<core-drawer-menu  v-for="(item, index) in menus" :key="index" 
+					:item="item" :color="color"
+				/>
 			</div>
 			
-
-			<v-list-tile v-if="false" disabled active-class="primary" class="v-list-item v-list__tile--buy" 
-			to="/upgrade"
-			>
-				<v-list-tile-action>
-					<v-icon>mdi-package-up</v-icon>
-				</v-list-tile-action>
-				<v-list-tile-title class="font-weight-light">
-					Upgrade To PRO
-				</v-list-tile-title>
-			</v-list-tile>
+			
 		</v-layout>
 	</v-navigation-drawer>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import { SITE_TITLE, LOGO_SRC } from '@/config';
-import Menu from '@/models/menu';
 import { SET_DRAWER, TOGGLE_DRAWER } from '@/store/mutations.type';
 
 export default {
 	name:'Drawer',
 	props:{
+		menus: {
+         type: Array,
+         default: null
+      },
       color: {
          type: String,
          default: 'info'
@@ -66,10 +50,11 @@ export default {
 	data(){
 		return {
 			logo_src: LOGO_SRC,
-			mainMenus:[]
+			site_title: SITE_TITLE
 		}
    },
    computed: {
+		...mapGetters(['isAuthenticated']), 
     	inputValue: {
          get () {
             return this.$store.state.app.drawer
@@ -77,21 +62,12 @@ export default {
          set (val) {
             this.setDrawer(val)
          }
-      }
+		}
 	},
-	watch: {
-      '$route' (){
-         this.initRoute();
-      }
-   },
 	beforeMount(){
       this.title = SITE_TITLE;
-      this.initRoute();
 	},
   	methods:{
-		initRoute(){
-         this.mainMenus = Menu.mainMenus(this.$router.options.routes, this.$route);
-      },
       setDrawer(val){
          this.$store.commit(SET_DRAWER, val);
       },

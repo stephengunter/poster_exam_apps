@@ -5,4 +5,9 @@ export const resolveErrorData = (error) => {
    return null; 
 }
 
+export const onError = (error) => {
+   console.log(error);
+   Bus.$emit('errors');
+}
+
 export * from './helper';

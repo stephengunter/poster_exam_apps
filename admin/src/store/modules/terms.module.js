@@ -1,17 +1,17 @@
-import CategoryService from '@/services/category.service';
+import TermsService from '@/services/terms.service';
 import { resolveErrorData } from '@/utils';
 
 import {
-   FETCH_CATEGORIES, CREATE_CATEGORY, STORE_CATEGORY, 
-   EDIT_CATEGORY, UPDATE_CATEGORY, DELETE_CATEGORY
+   FETCH_TERMS, CREATE_TERM, STORE_TERM, 
+   EDIT_TERM, UPDATE_TERM, DELETE_TERM
 } from '@/store/actions.type';
 
-import { SET_CATEGORIES, SET_CATEGORY_TYPES, SET_LOADING } from '@/store/mutations.type';
+import { SET_TERMS, SET_LOADING } from '@/store/mutations.type';
 
 
 
 const initialState = {
-   passwordCategories: []
+   
 };
 
 export const state = { ...initialState };
@@ -22,16 +22,12 @@ const getters = {
 
 
 const actions = {
-   [FETCH_CATEGORIES](context, params) {
+   [FETCH_TERMS](context, params) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         CategoryService.fetch(params)
-            .then(model => {
-               context.commit(SET_CATEGORIES, model.pageList);
-               if(model.types && model.types.length){
-                  context.commit(SET_CATEGORY_TYPES, model.types);
-               }
-               resolve(model);
+         TermsService.fetch(params)
+            .then(terms => {
+               resolve(terms);
             })
             .catch(error => {
                reject(error);
@@ -41,11 +37,10 @@ const actions = {
             });
       });
    },
-   [CREATE_CATEGORY](context) {
+   [CREATE_TERM](context, params) {
       return new Promise((resolve, reject) => {
-         CategoryService.create()
+         TermsService.create(params)
             .then(model => {
-               context.commit(SET_REGIONS, model.regions);
                resolve(model);
             })
             .catch(error => {
@@ -56,12 +51,12 @@ const actions = {
             });
       });
    },
-   [STORE_CATEGORY](context, model) {
+   [STORE_TERM](context, model) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         CategoryService.store(model)
-            .then(CATEGORY => {
-               resolve(CATEGORY);
+         TermsService.store(model)
+            .then(TERM => {
+               resolve(TERM);
             })
             .catch(error => {
                reject(resolveErrorData(error)); 
@@ -71,11 +66,10 @@ const actions = {
             });
       });
    },
-   [EDIT_CATEGORY](context, id) {
+   [EDIT_TERM](context, id) {
       return new Promise((resolve, reject) => {
-         CategoryService.edit(id)
+         TermsService.edit(id)
             .then(model => {
-               context.commit(SET_REGIONS, model.regions);
                resolve(model);
             })
             .catch(error => {
@@ -86,10 +80,10 @@ const actions = {
             });
       });
    },
-   [UPDATE_CATEGORY](context, model) {
+   [UPDATE_TERM](context, model) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         CategoryService.update(model)
+         TermsService.update(model.id, model)
             .then(() => {
                resolve(true);
             })
@@ -101,10 +95,10 @@ const actions = {
             });
       });
    },
-   [DELETE_CATEGORY](context, id) {
+   [DELETE_TERM](context, id) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         CategoryService.remove(id)
+         TermsService.remove(id)
             .then(() => {
                resolve(true);
             })
@@ -122,12 +116,7 @@ const actions = {
 
 
 const mutations = {
-   [SET_CATEGORYS](state, pageList) {
-      state.pageList = pageList;
-   },
-   [SET_CATEGORY_CATEGORIES](state, categories) {
-      state.categories = categories;
-   }
+   
 };
 
 export default {

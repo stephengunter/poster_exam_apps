@@ -22,10 +22,10 @@
           name="header"
         />
         <span v-else>
-          <h4
-            class="title font-weight-light mb-2"
-            v-text="title"
-          />
+          
+          <h3 class="title font-weight-light mb-2">
+            <span class="cn" v-text="title" ></span>
+          </h3>
           <p
             class="category font-weight-thin"
             v-text="text"

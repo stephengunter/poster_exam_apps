@@ -3,17 +3,6 @@ import { API_URL } from '@/config';
 
 const source = `${API_URL}/auth`;
 
-const AuthService = {
-   refreshToken(credentials){
-      let url = `${source}/RefreshToken`;
-      let method = 'post';
-      return BaseService.submit(method, url, credentials);
-   },
-   login(credentials) {
-      let url = `${source}/login`;
-      let method = 'post';
-      return BaseService.submit(method, url, credentials);
-   },
-};
+const refreshToken = (credentials) => BaseService.post(`${source}/RefreshToken`, credentials);
 
-export default AuthService;
+export default { refreshToken };

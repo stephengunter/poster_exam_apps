@@ -1,17 +1,17 @@
-import PasswordService from '@/services/password.service';
+import SubjectsService from '@/services/subjects.service';
 import { resolveErrorData } from '@/utils';
 
 import {
-   FETCH_PASSWORDS, CREATE_PASSWORD, STORE_PASSWORD, 
-   EDIT_PASSWORD, UPDATE_PASSWORD, DELETE_PASSWORD
+   FETCH_SUBJECTS, CREATE_SUBJECT, STORE_SUBJECT, 
+   EDIT_SUBJECT, UPDATE_SUBJECT, DELETE_SUBJECT
 } from '@/store/actions.type';
 
-import { SET_PASSWORD_INDEX_MODEL, SET_PASSWORDS, SET_PASSWORD_CATEGORIES, SET_LOADING } from '@/store/mutations.type';
+import { SET_SUBJECTS, SET_LOADING } from '@/store/mutations.type';
 
 
 
 const initialState = {
-   indexModel: null
+   list: []
 };
 
 export const state = { ...initialState };
@@ -22,13 +22,13 @@ const getters = {
 
 
 const actions = {
-   [FETCH_PASSWORDS](context, params) {
+   [FETCH_SUBJECTS](context, params) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         PasswordService.fetch(params)
-            .then(model => {
-               context.commit(SET_PASSWORD_INDEX_MODEL, model);
-               resolve(model);
+         SubjectsService.fetch(params)
+            .then(subjects => {
+               context.commit(SET_SUBJECTS, subjects);
+               resolve(subjects);
             })
             .catch(error => {
                reject(error);
@@ -38,11 +38,10 @@ const actions = {
             });
       });
    },
-   [CREATE_PASSWORD](context) {
+   [CREATE_SUBJECT](context) {
       return new Promise((resolve, reject) => {
-         PasswordService.create()
+         SubjectsService.create()
             .then(model => {
-               context.commit(SET_REGIONS, model.regions);
                resolve(model);
             })
             .catch(error => {
@@ -53,12 +52,12 @@ const actions = {
             });
       });
    },
-   [STORE_PASSWORD](context, model) {
+   [STORE_SUBJECT](context, model) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         PasswordService.store(model)
-            .then(PASSWORD => {
-               resolve(PASSWORD);
+         SubjectsService.store(model)
+            .then(SUBJECT => {
+               resolve(SUBJECT);
             })
             .catch(error => {
                reject(resolveErrorData(error)); 
@@ -68,11 +67,10 @@ const actions = {
             });
       });
    },
-   [EDIT_PASSWORD](context, id) {
+   [EDIT_SUBJECT](context, id) {
       return new Promise((resolve, reject) => {
-         PasswordService.edit(id)
+         SubjectsService.edit(id)
             .then(model => {
-               context.commit(SET_REGIONS, model.regions);
                resolve(model);
             })
             .catch(error => {
@@ -83,10 +81,10 @@ const actions = {
             });
       });
    },
-   [UPDATE_PASSWORD](context, model) {
+   [UPDATE_SUBJECT](context, model) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         PasswordService.update(model)
+         SubjectsService.update(model.id, model)
             .then(() => {
                resolve(true);
             })
@@ -98,10 +96,10 @@ const actions = {
             });
       });
    },
-   [DELETE_PASSWORD](context, id) {
+   [DELETE_SUBJECT](context, id) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         PasswordService.remove(id)
+         SubjectsService.remove(id)
             .then(() => {
                resolve(true);
             })
@@ -119,8 +117,8 @@ const actions = {
 
 
 const mutations = {
-   [SET_PASSWORD_INDEX_MODEL](state, model) {
-      state.indexModel = model;
+   [SET_SUBJECTS](state, subjects) {
+      state.list = subjects;
    }
 };
 
