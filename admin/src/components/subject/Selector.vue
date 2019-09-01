@@ -1,10 +1,9 @@
 <template>
-	<!-- <v-layout row wrap> -->
    <v-layout row wrap>   
       <v-flex v-for="(item, index) in models" :key="index" :class="colStyle">
          <v-select
             :items="models[index].options"  :label="getLabel(index)"
-            v-model="models[index].id" @change="onChanged(index)"
+            v-model="models[index].id" @change="onChanged(index, models[index].id)"
          />
       </v-flex>
       
@@ -49,12 +48,13 @@ export default {
    },
 	methods: {
       init(){
-         this.loadOptions(this.items);
+         this.loadOptions(this.items, this.selected);
       },
 		loadOptions(subjects, id){
          let options = subjects.map(item => {
             return { value: item.id, text: item.title }
          });
+         let items = subjects.slice(0);
 
          let model = null;
          if(id) model = subjects.find(item => item.id === id);
@@ -64,12 +64,12 @@ export default {
          } 
 
          this.models.push({
-            model, options, id
+            model, items, options, id
          });
          
 
          if(model.subItems && model.subItems.length) this.loadOptions(model.subItems);
-         else this.onChanged(this.lastIndex);
+         else this.onOptionsLoaded();
 
       },
       getLabel(index){
@@ -79,10 +79,13 @@ export default {
       getSelectedId(){
          return this.models[this.lastIndex].id;
       },
-      onChanged(index){
-         if(index === this.lastIndex){
-            this.$emit('selected', this.getSelectedId());
-         }
+      onOptionsLoaded(){
+         this.$emit('selected', this.getSelectedId());
+      },
+      onChanged(index, id){
+         let items = this.models[index].items.slice(0);
+         this.models.splice(index);
+         this.loadOptions(items, id);   
       }
 	}
 }

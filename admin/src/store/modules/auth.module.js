@@ -132,15 +132,17 @@ const actions = {
    [REFRESH_TOKEN](context) {
       return new Promise((resolve) => {
          let accessToken = JwtService.getToken();
+         console.log('accessToken:',accessToken);
          let refreshToken = JwtService.getRefreshToken();
-         if (accessToken && refreshToken) {
+         console.log('refreshToken:',refreshToken);
+         if(accessToken && refreshToken) {
             context.commit(SET_LOADING, true);
             AuthService.refreshToken({ accessToken, refreshToken })
             .then(model => {
                context.commit(SET_AUTH, {
                   token: model.accessToken.token,
                   refreshToken: model.refreshToken
-            });
+               });
                context.commit(SET_LOADING, false);
                resolve(true);
             })
@@ -149,7 +151,7 @@ const actions = {
                context.commit(PURGE_AUTH);
                resolve(false);           
             })
-         } else {
+         }else {
             context.commit(PURGE_AUTH);
             resolve(false);
          }

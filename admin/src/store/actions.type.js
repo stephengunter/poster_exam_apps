@@ -25,23 +25,10 @@ export const UPDATE_TERM = 'updateTerm';
 export const DELETE_TERM = 'deleteTerm';
 export const ORDER_TERMS = 'orderTerms';
 
-export const FETCH_PASSWORDS = 'fetchPasswords';
-export const CREATE_PASSWORD = 'createPassword';
-export const STORE_PASSWORD = 'storePassword';
-export const EDIT_PASSWORD = 'editPassword';
-export const UPDATE_PASSWORD = 'updatePassword';
-export const DELETE_PASSWORD = 'deletePassword';
-export const ORDER_PASSWORDS = 'orderPasswords';
-
-export const FETCH_CATEGORIES = 'fetchCategories';
-export const CREATE_CATEGORY = 'createCategory';
-export const STORE_CATEGORY = 'storeCategory';
-export const EDIT_CATEGORY = 'editCategory';
-export const UPDATE_CATEGORY = 'updateCategory';
-export const DELETE_CATEGORY = 'deleteCategory';
-export const ORDER_CATEGORIES = 'orderCategories';
-
-export const FETCH_REQUESTLOGS = 'fetchRequestLogs';
-export const GET_REQUESTLOG = 'getRequestLog';
-export const DELETE_REQUESTLOG = 'deleteRequestLog';
-export const ORDER_REQUESTLOGS = 'orderRequestLogs';
+export const FETCH_QUESTIONS = 'fetchQuestions';
+export const CREATE_QUESTION = 'createQuestion';
+export const STORE_QUESTION = 'storeQuestion';
+export const EDIT_QUESTION = 'editQuestion';
+export const UPDATE_QUESTION = 'updateQuestion';
+export const DELETE_QUESTION = 'deleteQuestion';
+export const ORDER_QUESTIONS = 'orderQuestions';

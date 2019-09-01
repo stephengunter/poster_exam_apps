@@ -13,7 +13,7 @@
                      <a href="#" @click.prevent="select(props.item.id)"  slot="activator" icon>
                      {{ props.item.title }}
                      </a>
-                     <span>{{ tooltip }}</span>
+                     <span>編輯</span>
                   </v-tooltip>
                   <br>
                   <span v-html="props.item.text"></span>
@@ -29,7 +29,7 @@
                      <a href="#" @click.prevent="select(subItem.id)"  slot="activator" icon>
                         {{ subItem.title }}
                      </a>
-                     <span>{{ tooltip }}</span>
+                     <span>編輯</span>
                   </v-tooltip>
                   <br>
                   <span v-html="subItem.text"></span>
@@ -43,16 +43,12 @@
 <script>
 
 export default {
-   name: 'TermsTable',
+   name: 'QuestionsTable',
    props: {
 		list: {
          type: Array,
          default: null
-      },
-      tooltip: {
-         type: String,
-         default: '選取'
-      },
+		}
    },
    data () {
 		return {

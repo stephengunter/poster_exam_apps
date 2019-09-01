@@ -4,47 +4,36 @@
 			<v-card-title>
 				<span class="headline">{{ title }}</span>
 				<v-spacer />
-				<a href="#" @click.prevent="cancel">
-					<v-icon>mdi-window-close</v-icon>
-				</a>
+				<v-tooltip top content-class="top">
+					<a href="#" @click.prevent="cancel" slot="activator">
+						<v-icon>mdi-window-close</v-icon>
+					</a>
+					<span>取消</span>
+				</v-tooltip>
 			</v-card-title>
 			<v-card-text>
 				<v-container grid-list-md>
 					<term-selector ref="term_selector"  v-show="selector.term.ready"
+						:show_last="true"
 						:items="selector.term.items" 
-						:selected="selector.term.selected"
-						@selected="onParentSelected"
+						:selected_ids="selector.term.selectedIds"
+						@selected="onTermSelected"
 					/>
 					<v-layout wrap>
 						
-						<v-flex xs12 sm6 md4>
-							<v-text-field v-model="model.order" label="順序"
-							v-validate="'required|numeric'"
-							:error-messages="getErrMsg('order')"
-							name="order"
-							required
-							/>
-						</v-flex>
-						<v-flex xs12 sm6 md8>
-							<ValidationProvider
-							rules="required|email"
-							v-slot="{ errors }"
-							>
-							<input v-model="model.title" type="text">
-							<span>{{ errors[0] }}</span>
-							</ValidationProvider>
-							<v-text-field v-model="model.title" label="標題"
+						<v-flex xs12>
+							<v-textarea name="title" v-model="model.title" label="標題" outlined auto-grow
 							v-validate="'required'"
 							:error-messages="getErrMsg('title')"
-							name="title"
-							required
+							rows="5"
+							row-height="15"
 							/>
 						</v-flex>
 						<v-flex xs12>
-							<v-textarea v-model="model.text" label="內容" outlined auto-grow
+							<v-textarea name="optionsText" v-model="model.optionsText" label="選項" outlined auto-grow
 							v-validate="'required'"
-							:error-messages="getErrMsg('text')"
-							rows="5"
+							:error-messages="getErrMsg('optionsText')"
+							rows="10"
 							row-height="15"
 							/>
 						</v-flex>
@@ -66,13 +55,13 @@
 <script>
 
 export default {
-	name: 'TermEdit',
+	name: 'QuestionEdit',
 	props: {
 		model: {
          type: Object,
          default: null
 		},
-		parents: {
+		terms: {
          type: Array,
          default: null
 		}
@@ -82,7 +71,7 @@ export default {
 			selector: {
 				term: {
 					items: [],
-					selected: 0,
+					selectedIds: [],
 					ready: false
 				}
 			},	
@@ -94,8 +83,7 @@ export default {
 			return 'create';
 		},
 		title(){
-			let text = '章節';
-			if(this.model.parentId) text = '條文';
+			let text = '問題';
 
 			if(this.mode === 'edit') return `編輯${text}`;
 			return `新增${text}`;	
@@ -105,25 +93,28 @@ export default {
 		}
 	},
 	beforeMount(){
-		this.selector.term.selected = this.model.parentId;
-		this.selector.term.items = this.parents.slice(0);
+		this.selector.term.items = this.terms.slice(0);
+
+		if(this.model.term && this.model.term.parentIds){
+			this.selector.term.selectedIds = this.model.term.parentIds.slice(0);
+		}
+		this.selector.term.selectedIds.push(this.model.termId);
 	},
 	mounted(){
 		this.$refs.term_selector.init();
 	},
 	methods: {
-		onParentSelected(id){
-			if(id !== this.selector.term.selected){
-				this.selector.term.selected = id;
-			}
+		onTermSelected(id){
+			console.log(id);
+			//this.selector.term.selected = id;
 			this.selector.term.ready = true;
-			this.model.parentId = id;
+			//this.model.termId = id;
 		},
 		getErrMsg(key){
 			let err = this.errors.collect(key);
 			if(err && err.length){
 				let msg = err[0];
-				return msg.replace('title', '標題').replace('order', '順序').replace('text', '內容');
+				return msg.replace('title', '標題').replace('optionsText', '選項');
 			}
 			return '';
 		},

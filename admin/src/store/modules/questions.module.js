@@ -1,17 +1,17 @@
-import TermsService from '@/services/terms.service';
+import QuestionsService from '@/services/questions.service';
 import { resolveErrorData } from '@/utils';
 
 import {
-   FETCH_TERMS, CREATE_TERM, STORE_TERM, 
-   EDIT_TERM, UPDATE_TERM, DELETE_TERM
+   FETCH_QUESTIONS, CREATE_QUESTION, STORE_QUESTION, 
+   EDIT_QUESTION, UPDATE_QUESTION, DELETE_QUESTION
 } from '@/store/actions.type';
 
-import { SET_TERMS, SET_LOADING } from '@/store/mutations.type';
+import { SET_QUESTIONS, SET_LOADING } from '@/store/mutations.type';
 
 
 
 const initialState = {
-   list: []
+   
 };
 
 export const state = { ...initialState };
@@ -22,13 +22,12 @@ const getters = {
 
 
 const actions = {
-   [FETCH_TERMS](context, params) {
+   [FETCH_QUESTIONS](context, params) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         TermsService.fetch(params)
-            .then(terms => {
-               context.commit(SET_TERMS, terms);
-               resolve(terms);
+         QuestionsService.fetch(params)
+            .then(questions => {
+               resolve(questions);
             })
             .catch(error => {
                reject(error);
@@ -38,9 +37,9 @@ const actions = {
             });
       });
    },
-   [CREATE_TERM](context, params) {
+   [CREATE_QUESTION](context, params) {
       return new Promise((resolve, reject) => {
-         TermsService.create(params)
+         QuestionsService.create(params)
             .then(model => {
                resolve(model);
             })
@@ -52,12 +51,12 @@ const actions = {
             });
       });
    },
-   [STORE_TERM](context, model) {
+   [STORE_QUESTION](context, model) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         TermsService.store(model)
-            .then(TERM => {
-               resolve(TERM);
+         QuestionsService.store(model)
+            .then(QUESTION => {
+               resolve(QUESTION);
             })
             .catch(error => {
                reject(resolveErrorData(error)); 
@@ -67,9 +66,9 @@ const actions = {
             });
       });
    },
-   [EDIT_TERM](context, id) {
+   [EDIT_QUESTION](context, id) {
       return new Promise((resolve, reject) => {
-         TermsService.edit(id)
+         QuestionsService.edit(id)
             .then(model => {
                resolve(model);
             })
@@ -81,10 +80,10 @@ const actions = {
             });
       });
    },
-   [UPDATE_TERM](context, model) {
+   [UPDATE_QUESTION](context, model) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         TermsService.update(model.id, model)
+         QuestionsService.update(model.id, model)
             .then(() => {
                resolve(true);
             })
@@ -96,10 +95,10 @@ const actions = {
             });
       });
    },
-   [DELETE_TERM](context, id) {
+   [DELETE_QUESTION](context, id) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         TermsService.remove(id)
+         QuestionsService.remove(id)
             .then(() => {
                resolve(true);
             })
@@ -117,9 +116,7 @@ const actions = {
 
 
 const mutations = {
-   [SET_TERMS](state, terms) {
-      state.list = terms;
-   }
+   
 };
 
 export default {

@@ -16,9 +16,9 @@
 						</v-tooltip>
 					</subject-selector>
 					<term-selector ref="term_selector"  v-show="selector.term.ready"
-						:items="selector.term.items" 
-						:selected="params.parent"
-						@selected="onParentSelected"
+						:show_last="true"
+						:items="selector.term.items"
+						@selected="onTermSelected"
 					/>
 					
 					<v-layout row wrap>
@@ -29,11 +29,10 @@
 				</material-card>
 			</v-flex>
      </v-layout>
-	  <v-dialog v-model="editting" persistent max-width="960px">
-			<term-edit v-if="editting" :model="model"
-			:subjects="selector.subject.items"
-			:parents="selector.term.items"
-			@submit="submit" @cancel="cancelEdit" @remove="remove"
+	   <v-dialog v-model="editting" persistent max-width="960px">
+			<question-edit v-if="editting" :model="model"
+				:terms="selector.term.items"
+				@submit="submit" @cancel="cancelEdit" @remove="remove"
 			/>
 		</v-dialog>
 		<v-dialog v-model="deleting" width="480px">
@@ -45,20 +44,21 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import { CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
 
-import { FETCH_SUBJECTS, FETCH_TERMS, CREATE_TERM, STORE_TERM,
-EDIT_TERM, UPDATE_TERM, DELETE_TERM } from '@/store/actions.type';
+import { FETCH_SUBJECTS, FETCH_TERMS, FETCH_QUESTIONS, CREATE_QUESTION, STORE_QUESTION,
+EDIT_QUESTION, UPDATE_QUESTION, DELETE_QUESTION } from '@/store/actions.type';
 
 import { onError } from '@/utils';
 
 export default {
-	name: 'TermsView',
+	name: 'QuestionsView',
 	data () {
 		return {
 			params: {
 				subject: 0,
-				parent: 0
+				term: 0
 			},
 			selector: {
 				subject: {					
@@ -79,6 +79,15 @@ export default {
 		}
 	},
 	computed: {
+		...mapState({
+			subjects: state => state.subjects.list,
+			terms: state => state.terms.list,
+		}),
+		indexMode(){
+			if(this.editting) return false;
+			if(this.deleting) return false;
+			return true;
+		},
 		canCreate(){
 			return !this.editting && !this.deleting;
 		},
@@ -90,25 +99,21 @@ export default {
 			return this.subSubject.id;
 		},
 		selectedParentId(){
-			return this.parentTerm.id;
+			return this.parentQuestion.id;
 		}
 	},
 	beforeMount(){
 		this.$store.dispatch(FETCH_SUBJECTS)
-				.then(subjects => {
-					this.init(subjects);
-				})
-				.catch(error => {
-					onError(error);
-				})
+		.then(() => {
+			this.selector.subject.items = this.subjects.slice(0);
+			this.initSubjectSelector();
+		})
+		.catch(error => {
+			onError(error);
+		})
 	},
 	methods: {
-		init(subjects){
-			if(subjects){
-				this.selector.subject.items = subjects;
-				this.initSubjectSelector();
-			}
-
+		init(){
 			this.editting = false;
 			this.deleting = false;
 			this.model = null;
@@ -123,44 +128,41 @@ export default {
 				this.$refs.term_selector.init();
 			}, 500);
 		},
-		clearCategories(){
-			this.selector.term.items = [];
-		},
 		onSubjectSelected(id){
-			this.clearCategories();
-
 			this.params.subject = id;
-			this.fetchData();
 			this.selector.subject.ready = true;
+
+			this.fetchTerms();			
 		},
-		onParentSelected(id){
-			if(id !== this.params.parent){
-				this.params.parent = id;
-				this.fetchData();
-			}
-			
+		fetchTerms(){
+			this.$store.dispatch(FETCH_TERMS, this.params)
+			.then(() => {
+				this.selector.term.items = this.terms.slice(0);
+				this.initTermSelector();		
+			})
+			.catch(error => {
+				onError(error);
+			})
+		},
+		onTermSelected(id){
+			console.log(id);
+			this.params.term = id;
+			this.fetchData();
 			this.selector.term.ready = true;
 		},
 		fetchData(){
 			this.$store.commit(CLEAR_ERROR);
-			this.$store.dispatch(FETCH_TERMS, this.params)
-				.then(terms => {	
-					this.loadTerms(terms);		
+			this.$store.dispatch(FETCH_QUESTIONS, this.params)
+				.then(questions => {	
+					
 				})
 				.catch(error => {
 					onError(error);
 				})
 		},
-		loadTerms(terms){
-			this.list = terms;
-			if(!this.selector.term.items.length){
-				this.selector.term.items = terms.slice(0);
-				this.initTermSelector();
-			}			
-		},
 		create(){
 			this.$store.commit(CLEAR_ERROR);
-			this.$store.dispatch(CREATE_TERM, this.params)
+			this.$store.dispatch(CREATE_QUESTION, this.params)
 				.then(model => {
 					this.model = model;
 					this.editting = true;
@@ -168,11 +170,10 @@ export default {
 				.catch(error => {
 					Bus.$emit('errors');
 				})
-			
 		},
 		edit(id){
 			this.$store.commit(CLEAR_ERROR);
-			this.$store.dispatch(EDIT_TERM, id)
+			this.$store.dispatch(EDIT_QUESTION, id)
 				.then(model => {
 					this.model = model;
 					this.editting = true;
@@ -191,7 +192,7 @@ export default {
 		submitDelete(){
 			this.$store.commit(CLEAR_ERROR);
 			let id = this.model.id;
-			this.$store.dispatch(DELETE_TERM, id)
+			this.$store.dispatch(DELETE_QUESTION, id)
 				.then(() => {
 					this.init();
 					this.fetchData();
@@ -205,7 +206,7 @@ export default {
 		},
       submit(){
 			this.$store.commit(CLEAR_ERROR);
-			let action = this.model.id ? UPDATE_TERM : STORE_TERM;
+			let action = this.model.id ? UPDATE_QUESTION : STORE_QUESTION;
          this.$store.dispatch(action, this.model)
 				.then(() => {
 					this.init();

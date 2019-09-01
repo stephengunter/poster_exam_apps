@@ -28,8 +28,8 @@
 					</v-layout>
 				</material-card>
 			</v-flex>
-     </v-layout>
-	  <v-dialog v-model="editting" persistent max-width="960px">
+      </v-layout>
+	   <v-dialog v-model="editting" persistent max-width="960px">
 			<term-edit v-if="editting" :model="model"
 			:subjects="selector.subject.items"
 			:parents="selector.term.items"
@@ -95,12 +95,12 @@ export default {
 	},
 	beforeMount(){
 		this.$store.dispatch(FETCH_SUBJECTS)
-				.then(subjects => {
-					this.init(subjects);
-				})
-				.catch(error => {
-					onError(error);
-				})
+		.then(subjects => {
+			this.init(subjects);
+		})
+		.catch(error => {
+			onError(error);
+		})
 	},
 	methods: {
 		init(subjects){
