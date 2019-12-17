@@ -6,35 +6,23 @@
          </span>
       </template>
       <template slot="items" slot-scope="props">
-         <td class="term-display" style="min-width: 200px">
-            <ul>
-               <li style="padding-top: 1em;">
-                  <v-tooltip top  content-class="top">
-                     <a href="#" @click.prevent="select(props.item.id)"  slot="activator" icon>
-                     {{ props.item.title }}
-                     </a>
-                     <span>編輯</span>
-                  </v-tooltip>
-                  <br>
-                  <span v-html="props.item.text"></span>
-               </li>
-            </ul>
-            
-            
+         <td style="vertical-align: text-top;">
+            <v-tooltip top  content-class="top">
+               <a href="#" @click.prevent="select(props.item.id)"  slot="activator" icon>
+               {{ props.item.title }}
+               </a>
+               <span>編輯</span>
+            </v-tooltip>
          </td>
-         <td class="term-display">
-            <ul v-if="props.item.subItems.length">
-               <li v-for="subItem in props.item.subItems" :key="subItem.id" style="padding-top: 1em;">
-                  <v-tooltip top  content-class="top">
-                     <a href="#" @click.prevent="select(subItem.id)"  slot="activator" icon>
-                        {{ subItem.title }}
-                     </a>
-                     <span>編輯</span>
-                  </v-tooltip>
-                  <br>
-                  <span v-html="subItem.text"></span>
+         <td style="vertical-align: text-top;">
+            <ul>
+               <li v-for="(option,index) in props.item.options" :key="option.id" :class="{ 'option-display': index > 0, 'correct-option': option.correct }" >
+                  {{ option.title }}
                </li>
             </ul>
+         </td>
+         <td>
+            {{ props.item.recruitsText }}
          </td>
       </template>
    </v-data-table>
@@ -55,14 +43,20 @@ export default {
 			headers: [
 				{
 					sortable: false,
-					text: '',
-					value: ''
+					text: '標題',
+               value: '',
+               width: '50%'
 				},
 				{
 					sortable: false,
-					text: '',
+					text: '選項',
 					value: ''
-				}
+            },
+            {
+					sortable: false,
+					text: '考古題',
+               width: '15%'
+				},
 			]	
 		}
 	},
@@ -78,8 +72,10 @@ export default {
 </script>
 
 <style scoped>
-.term-display {
-   vertical-align: text-top;
-   
+.option-display {
+   padding-top: 1em;
+}
+.correct-option {
+   color:#1867c0
 }
 </style>

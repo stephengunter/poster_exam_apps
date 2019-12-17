@@ -16,23 +16,29 @@
 						</v-tooltip>
 					</subject-selector>
 					<term-selector ref="term_selector"  v-show="selector.term.ready"
-						:show_last="true"
+						:show_last="true" :empty_text="'全部'"
 						:items="selector.term.items"
 						@selected="onTermSelected"
 					/>
 					
-					<v-layout row wrap>
+					<v-layout row wrap v-if="pageList">
 						<v-flex sm12>
-							<term-table :list="list" @selected="edit"/>
+							<question-table :list="questions" @selected="edit"/>
 						</v-flex>
+						<v-flex sm12>
+							<core-table-pager :model="pageList" :responsive="responsive" v-show="questions.length > 0" 
+								@pageChanged="onPageChanged" @sizeChanged="onPageSizeChanged"
+							/>
+						</v-flex>	
 					</v-layout>
 				</material-card>
 			</v-flex>
      </v-layout>
-	   <v-dialog v-model="editting" persistent max-width="960px">
-			<question-edit v-if="editting" :model="model"
+	   <v-dialog v-model="editing" persistent max-width="960px">
+			<question-edit v-if="editing" :model="model"
 				:terms="selector.term.items"
-				@submit="submit" @cancel="cancelEdit" @remove="remove"
+				:recruits="recruits"
+				@submit="onSubmit" @cancel="cancelEdit" @remove="remove"
 			/>
 		</v-dialog>
 		<v-dialog v-model="deleting" width="480px">
@@ -47,7 +53,7 @@
 import { mapState } from 'vuex';
 import { CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
 
-import { FETCH_SUBJECTS, FETCH_TERMS, FETCH_QUESTIONS, CREATE_QUESTION, STORE_QUESTION,
+import { FETCH_SUBJECTS, FETCH_RECRUITS, FETCH_TERMS, FETCH_QUESTIONS, CREATE_QUESTION, STORE_QUESTION,
 EDIT_QUESTION, UPDATE_QUESTION, DELETE_QUESTION } from '@/store/actions.type';
 
 import { onError } from '@/utils';
@@ -58,7 +64,10 @@ export default {
 		return {
 			params: {
 				subject: 0,
-				term: 0
+				terms: '',
+				keyword: '',
+				page: 1,
+				pageSize: 10
 			},
 			selector: {
 				subject: {					
@@ -70,9 +79,8 @@ export default {
 					ready: false
 				}
 			},
-			list: [],
 
-			editting: false,
+			editing: false,
 			deleting: false,
 			model: null,
 			
@@ -80,20 +88,30 @@ export default {
 	},
 	computed: {
 		...mapState({
+			responsive: state => state.app.responsive,
 			subjects: state => state.subjects.list,
 			terms: state => state.terms.list,
+			recruits: state => state.recruits.list,
+			pageList: state => state.questions.pageList,
 		}),
+		questions(){
+			if(this.pageList){
+				return this.pageList.viewList
+			}else {
+				return [];
+			}
+		},
 		indexMode(){
-			if(this.editting) return false;
+			if(this.editing) return false;
 			if(this.deleting) return false;
 			return true;
 		},
 		canCreate(){
-			return !this.editting && !this.deleting;
+			return !this.editing && !this.deleting;
 		},
 		canEdit(){
 			if(!this.selectedParentId) return false;
-			return !this.editting && !this.deleting;
+			return !this.editing && !this.deleting;
 		},
 		selectedSubjectId(){
 			return this.subSubject.id;
@@ -103,6 +121,8 @@ export default {
 		}
 	},
 	beforeMount(){
+		this.$store.dispatch(FETCH_RECRUITS);
+
 		this.$store.dispatch(FETCH_SUBJECTS)
 		.then(() => {
 			this.selector.subject.items = this.subjects.slice(0);
@@ -114,7 +134,7 @@ export default {
 	},
 	methods: {
 		init(){
-			this.editting = false;
+			this.editing = false;
 			this.deleting = false;
 			this.model = null;
 		},
@@ -132,10 +152,10 @@ export default {
 			this.params.subject = id;
 			this.selector.subject.ready = true;
 
-			this.fetchTerms();			
+			this.fetchTerms(id);			
 		},
-		fetchTerms(){
-			this.$store.dispatch(FETCH_TERMS, this.params)
+		fetchTerms(subject){
+			this.$store.dispatch(FETCH_TERMS, { subject })
 			.then(() => {
 				this.selector.term.items = this.terms.slice(0);
 				this.initTermSelector();		
@@ -144,18 +164,22 @@ export default {
 				onError(error);
 			})
 		},
-		onTermSelected(id){
-			console.log(id);
-			this.params.term = id;
-			this.fetchData();
+		onTermSelected(ids){
+			this.params.terms = ids.join();
 			this.selector.term.ready = true;
+			this.fetchData();			
+		},
+		onPageChanged(page){
+			this.params.page = page;
+			this.fetchData();
+		},
+		onPageSizeChanged(size){
+			this.params.pageSize = size;
+			this.fetchData();
 		},
 		fetchData(){
 			this.$store.commit(CLEAR_ERROR);
 			this.$store.dispatch(FETCH_QUESTIONS, this.params)
-				.then(questions => {	
-					
-				})
 				.catch(error => {
 					onError(error);
 				})
@@ -165,7 +189,7 @@ export default {
 			this.$store.dispatch(CREATE_QUESTION, this.params)
 				.then(model => {
 					this.model = model;
-					this.editting = true;
+					this.editing = true;
 				})
 				.catch(error => {
 					Bus.$emit('errors');
@@ -176,7 +200,7 @@ export default {
 			this.$store.dispatch(EDIT_QUESTION, id)
 				.then(model => {
 					this.model = model;
-					this.editting = true;
+					this.editing = true;
 				})
 				.catch(error => {
 					Bus.$emit('errors');
@@ -184,7 +208,7 @@ export default {
 		},
       cancelEdit(){
 			this.model = null;  
-         this.editting = false;
+         this.editing = false;
 		},
 		remove(){
 			this.deleting = true;
@@ -203,6 +227,13 @@ export default {
 		},
 		cancelDelete(){
 			this.deleting = false;
+		},
+		onSubmit(){
+			let correctIndex = this.model.options.findIndex(item => item.correct);
+			if(correctIndex < 0){
+				let error = { options: ['必須要有一個正確選項'] };
+				this.$store.commit(SET_ERROR, error);
+			}else this.submit();
 		},
       submit(){
 			this.$store.commit(CLEAR_ERROR);

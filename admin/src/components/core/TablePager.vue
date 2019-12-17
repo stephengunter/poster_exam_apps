@@ -2,7 +2,7 @@
    <v-layout v-if="model" row>
       <v-flex v-if="canPage" sm12>
          <div v-if="responsive" class="text-xs-center pt-2">
-            <v-select class="d-inline-flex" style="width:80px"
+            <v-select class="d-inline-flex" style="width:100px"
                label="Rows per page"
                :items="[10,25,50]" v-model="size" 
                @change="onPageSizeChanged"
@@ -20,7 +20,7 @@
             </v-btn>
          </div>
          <div v-else class="text-xs-center pt-2">
-            <v-select class="d-inline-flex" style="width:80px"
+            <v-select class="d-inline-flex" style="width:100px"
                label="Rows per page"
                :items="[10,25,50]" v-model="size" 
                @change="onPageSizeChanged"

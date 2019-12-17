@@ -11,8 +11,8 @@
 			<v-card-text>
 				<v-container grid-list-md>
 					<term-selector ref="term_selector"  v-show="selector.term.ready"
-						:items="selector.term.items" 
-						:selected="selector.term.selected"
+						:items="selector.term.items"  :want_array="false"
+						:selected_ids="selector.term.selectedIds"
 						@selected="onParentSelected"
 					/>
 					<v-layout wrap>
@@ -26,13 +26,6 @@
 							/>
 						</v-flex>
 						<v-flex xs12 sm6 md8>
-							<ValidationProvider
-							rules="required|email"
-							v-slot="{ errors }"
-							>
-							<input v-model="model.title" type="text">
-							<span>{{ errors[0] }}</span>
-							</ValidationProvider>
 							<v-text-field v-model="model.title" label="標題"
 							v-validate="'required'"
 							:error-messages="getErrMsg('title')"
@@ -83,6 +76,7 @@ export default {
 				term: {
 					items: [],
 					selected: 0,
+					selectedIds: [],
 					ready: false
 				}
 			},	
@@ -105,17 +99,17 @@ export default {
 		}
 	},
 	beforeMount(){
-		this.selector.term.selected = this.model.parentId;
+		this.selector.term.selectedIds = [3];//this.model.selectedIds;
 		this.selector.term.items = this.parents.slice(0);
+
+		console.log('model', this.model);
 	},
 	mounted(){
 		this.$refs.term_selector.init();
 	},
 	methods: {
 		onParentSelected(id){
-			if(id !== this.selector.term.selected){
-				this.selector.term.selected = id;
-			}
+			this.selector.term.selected = id;
 			this.selector.term.ready = true;
 			this.model.parentId = id;
 		},

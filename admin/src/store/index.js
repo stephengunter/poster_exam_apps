@@ -5,7 +5,7 @@ import app from './modules/app.module';
 import auth from './modules/auth.module';
 import subjects from './modules/subjects.module';
 import terms from './modules/terms.module';
-import questions from './modules/questions.module';
+import recruits from './modules/recruits.module';
 
 Vue.use(Vuex);
 
@@ -15,6 +15,6 @@ export default new Vuex.Store({
       auth,
       subjects,
       terms,
-      questions
+      recruits
    }
 });

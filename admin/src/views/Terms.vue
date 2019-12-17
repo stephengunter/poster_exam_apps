@@ -16,8 +16,7 @@
 						</v-tooltip>
 					</subject-selector>
 					<term-selector ref="term_selector"  v-show="selector.term.ready"
-						:items="selector.term.items" 
-						:selected="params.parent"
+						:items="selector.term.items" :want_array="false"
 						@selected="onParentSelected"
 					/>
 					
@@ -125,6 +124,7 @@ export default {
 		},
 		clearCategories(){
 			this.selector.term.items = [];
+			this.selector.term.ready = false;
 		},
 		onSubjectSelected(id){
 			this.clearCategories();
@@ -153,7 +153,7 @@ export default {
 		},
 		loadTerms(terms){
 			this.list = terms;
-			if(!this.selector.term.items.length){
+			if(!this.selector.term.ready){
 				this.selector.term.items = terms.slice(0);
 				this.initTermSelector();
 			}			
@@ -173,13 +173,13 @@ export default {
 		edit(id){
 			this.$store.commit(CLEAR_ERROR);
 			this.$store.dispatch(EDIT_TERM, id)
-				.then(model => {
-					this.model = model;
-					this.editting = true;
-				})
-				.catch(error => {
-					Bus.$emit('errors');
-				})
+			.then(model => {
+				this.model = model;
+				this.editting = true;
+			})
+			.catch(error => {
+				Bus.$emit('errors');
+			})
 		},
       cancelEdit(){
 			this.model = null;  

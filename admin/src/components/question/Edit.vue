@@ -14,13 +14,12 @@
 			<v-card-text>
 				<v-container grid-list-md>
 					<term-selector ref="term_selector"  v-show="selector.term.ready"
-						:show_last="true"
+						:show_last="true" :want_array="false"
 						:items="selector.term.items" 
 						:selected_ids="selector.term.selectedIds"
 						@selected="onTermSelected"
 					/>
-					<v-layout wrap>
-						
+					<v-layout row>
 						<v-flex xs12>
 							<v-textarea name="title" v-model="model.title" label="標題" outlined auto-grow
 							v-validate="'required'"
@@ -29,15 +28,18 @@
 							row-height="15"
 							/>
 						</v-flex>
-						<v-flex xs12>
-							<v-textarea name="optionsText" v-model="model.optionsText" label="選項" outlined auto-grow
-							v-validate="'required'"
-							:error-messages="getErrMsg('optionsText')"
-							rows="10"
-							row-height="15"
-							/>
+					</v-layout>
+					<v-layout row>
+						<v-flex xs4>
+							<div @click.prevent="beginEditingRecruits">
+								<v-checkbox :label="recruitsText" v-model="hasRecruits" readonly />
+							</div>
 						</v-flex>
 					</v-layout>
+					<option-edit ref="option_editor" :init_models="model.options"
+						:question_id="model.id"
+						@submit="onOptionSubmit"
+					/>	
 					<core-error-list  />
 				</v-container>
 			</v-card-text>
@@ -48,6 +50,13 @@
 				<v-btn type="submit" @click.prevent="onSubmit" color="primary">存檔</v-btn>
 			</v-card-actions>
 		</v-card>
+		<v-dialog v-model="recruitSelector.show" width="480px">
+			<recruit-selector v-if="recruitSelector.show" :model="recruitSelector.model" 
+				:options="recruitSelector.options" 
+				@submit="onRecruitSelected"
+				@cancel="recruitSelector.show = false"
+			/>
+		</v-dialog>
 	</form>	
 </template>
 
@@ -64,6 +73,10 @@ export default {
 		terms: {
          type: Array,
          default: null
+		},
+		recruits: {
+         type: Array,
+         default: null
 		}
 	},
 	data () {
@@ -74,7 +87,16 @@ export default {
 					selectedIds: [],
 					ready: false
 				}
-			},	
+			},
+
+			recruitSelector: {
+				model: [],
+				show: false,
+				options: []
+			},
+
+			hasRecruits: false,
+			recruitsText: '考古題'
 		}
 	},
 	computed: {
@@ -99,16 +121,24 @@ export default {
 			this.selector.term.selectedIds = this.model.term.parentIds.slice(0);
 		}
 		this.selector.term.selectedIds.push(this.model.termId);
+
+		this.setRecruits(this.model.recruits);
+		
 	},
 	mounted(){
 		this.$refs.term_selector.init();
 	},
 	methods: {
+		beginEditingRecruits(){
+			this.recruitSelector.options = this.recruits.map(item => {
+				return { value: item.id, text: item.title }
+			});
+			this.recruitSelector.model = this.model.recruits.map(item => item.id);
+			this.recruitSelector.show = true;
+		},
 		onTermSelected(id){
-			console.log(id);
-			//this.selector.term.selected = id;
 			this.selector.term.ready = true;
-			//this.model.termId = id;
+			this.model.termId = id;
 		},
 		getErrMsg(key){
 			let err = this.errors.collect(key);
@@ -118,6 +148,9 @@ export default {
 			}
 			return '';
 		},
+		addOption(){
+
+		},
 		remove(){
 			this.$emit('remove');
 		},
@@ -126,8 +159,31 @@ export default {
 		},
 		onSubmit() {
          this.$validator.validate().then(valid => {
-            if(valid) this.$emit('submit');
-         });         
+				if(valid) this.$refs.option_editor.submit();
+         });       
+		},
+		setRecruits(recruits){
+			this.model.recruits = recruits;
+			this.hasRecruits = recruits.length > 0;
+
+			if(recruits.length){
+				let titles = recruits.map(item => item.title);
+				this.recruitsText = `考古題 (${titles.join()})`;
+			}else this.recruitsText = '考古題';
+			
+		},
+		onRecruitSelected(ids){
+			let recruits = [];
+			if(ids.length) recruits = this.recruits.filter(item => ids.includes(item.id));
+
+			this.setRecruits(recruits);
+
+			this.recruitSelector.show = false;			
+		},
+		onOptionSubmit(options){
+			this.model.options = options.slice(0);
+			this.$emit('submit');
+			
 		}
 	}
 }

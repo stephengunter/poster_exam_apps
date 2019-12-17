@@ -11,7 +11,7 @@
          <v-btn v-if="selectedItem && selectedItem.model" flat  @click.prevent="launchSelecteTable" color="primary">
             {{ selectedItem.model.title }}
          </v-btn>
-         <v-btn v-if="selectedItem && selectedItem.id" @click.prevent="removeSelect" flat icon>
+         <v-btn v-if="selectedItem && selectedItem.id" @click.prevent="onTableSelected(0)" flat icon>
             <v-icon>mdi-close</v-icon>
          </v-btn>
       </v-flex>
@@ -54,6 +54,14 @@ export default {
       show_last: {
          type: Boolean,
          default: false
+      },
+      want_array: {
+         type: Boolean,
+         default: true
+      },
+      empty_text: {
+         type: String,
+         default: '-----------'
       }
    },
 	data () {
@@ -94,7 +102,7 @@ export default {
          let options = terms.map(item => {
             return { value: item.id, text: item.fullText }
          });
-         options.splice(0, 0, { value: 0, text: '全部'  });
+         options.splice(0, 0, { value: 0, text: this.empty_text  });
 
          let items = terms.slice(0);
 
@@ -102,7 +110,7 @@ export default {
          if(id) model = terms.find(item => item.id === id);
          if(!model){
             id = 0;
-            model = { title: '全部' };
+            model = { title: this.empty_text };
          }
 
          if(this.models[index]){
@@ -122,7 +130,8 @@ export default {
          this.setParent();
          this.setDisplayModels();
 
-         this.$emit('selected', this.getSelectedId());
+         if(this.want_array) this.$emit('selected', this.getSelectedIds());
+         else this.$emit('selected', this.getSelectedId());
       },
       setSelectedItem(){
          this.selectedItem = this.models[this.lastIndex] ? this.models[this.lastIndex] : null;
@@ -158,18 +167,10 @@ export default {
          this.selectTable.show = true;         
       },
       onTableSelected(id){
-         let model = this.models[this.lastIndex];
-         model.id = id;
-         model.model = model.items.find(item => item.id === id);
-         
-         this.$emit('selected', this.getSelectedId());
+         this.models[this.lastIndex].id = id;
+         this.onChanged(this.lastIndex, id);
+
          this.selectTable.show = false;
-      },
-      removeSelect(){
-         this.models[this.lastIndex].id = 0;
-         this.models[this.lastIndex].model = { title: '全部' };
-         
-         this.$emit('selected', this.getSelectedId());
       }
 	}
 }

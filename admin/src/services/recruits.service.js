@@ -1,12 +1,11 @@
 import BaseService from '@/common/baseService';
 import { SITE_URL } from '@/config';
 
-//const source =`${SITE_URL}/api/admin/terms`;
-const source =`${SITE_URL}/api/admin/test`;
+const source =`${SITE_URL}/api/admin/recruits`;
 
 const fetch = (params) => BaseService.fetch(source, params);
 
-const create = (params) => BaseService.fetch(`${source}/create`, params);
+const create = () => BaseService.fetch(`${source}/create`);
 
 const store = (model) => BaseService.post(source, model);
 

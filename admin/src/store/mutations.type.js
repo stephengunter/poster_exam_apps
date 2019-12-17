@@ -17,6 +17,8 @@ export const SET_SUBJECTS = 'setSubjects';
 
 export const SET_TERMS = 'setTerms';
 
+export const SET_RECRUITS = 'setRecruits';
+
 export const SET_QUESTIONS = 'setQuestions';
 
 export const SET_CATEGORIES = 'setCategories';

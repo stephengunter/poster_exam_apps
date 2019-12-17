@@ -1,17 +1,17 @@
-import QuestionsService from '@/services/questions.service';
+import RecruitsService from '@/services/recruits.service';
 import { resolveErrorData } from '@/utils';
 
 import {
-   FETCH_QUESTIONS, CREATE_QUESTION, STORE_QUESTION, 
-   EDIT_QUESTION, UPDATE_QUESTION, DELETE_QUESTION
+   FETCH_RECRUITS, CREATE_RECRUIT, STORE_RECRUIT, 
+   EDIT_RECRUIT, UPDATE_RECRUIT, DELETE_RECRUIT
 } from '@/store/actions.type';
 
-import { SET_QUESTIONS, SET_LOADING } from '@/store/mutations.type';
+import { SET_RECRUITS, SET_LOADING } from '@/store/mutations.type';
 
 
 
 const initialState = {
-   pageList: null
+   list: []
 };
 
 export const state = { ...initialState };
@@ -22,13 +22,13 @@ const getters = {
 
 
 const actions = {
-   [FETCH_QUESTIONS](context, params) {
+   [FETCH_RECRUITS](context, params) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         QuestionsService.fetch(params)
-            .then(questions => {
-               context.commit(SET_QUESTIONS, questions);
-               resolve(questions);
+         RecruitsService.fetch(params)
+            .then(recruits => {
+               context.commit(SET_RECRUITS, recruits);
+               resolve(recruits);
             })
             .catch(error => {
                reject(error);
@@ -38,9 +38,9 @@ const actions = {
             });
       });
    },
-   [CREATE_QUESTION](context, params) {
+   [CREATE_RECRUIT](context) {
       return new Promise((resolve, reject) => {
-         QuestionsService.create(params)
+         RecruitsService.create()
             .then(model => {
                resolve(model);
             })
@@ -52,12 +52,12 @@ const actions = {
             });
       });
    },
-   [STORE_QUESTION](context, model) {
+   [STORE_RECRUIT](context, model) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         QuestionsService.store(model)
-            .then(question => {
-               resolve(question);
+         RecruitsService.store(model)
+            .then(recruit => {
+               resolve(recruit);
             })
             .catch(error => {
                reject(resolveErrorData(error)); 
@@ -67,9 +67,9 @@ const actions = {
             });
       });
    },
-   [EDIT_QUESTION](context, id) {
+   [EDIT_RECRUIT](context, id) {
       return new Promise((resolve, reject) => {
-         QuestionsService.edit(id)
+         RecruitsService.edit(id)
             .then(model => {
                resolve(model);
             })
@@ -81,10 +81,10 @@ const actions = {
             });
       });
    },
-   [UPDATE_QUESTION](context, model) {
+   [UPDATE_RECRUIT](context, model) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         QuestionsService.update(model.id, model)
+         RecruitsService.update(model.id, model)
             .then(() => {
                resolve(true);
             })
@@ -96,10 +96,10 @@ const actions = {
             });
       });
    },
-   [DELETE_QUESTION](context, id) {
+   [DELETE_RECRUIT](context, id) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         QuestionsService.remove(id)
+         RecruitsService.remove(id)
             .then(() => {
                resolve(true);
             })
@@ -117,8 +117,8 @@ const actions = {
 
 
 const mutations = {
-   [SET_QUESTIONS](state, model) {
-      state.pageList = model;
+   [SET_RECRUITS](state, recruits) {
+      state.list = recruits;
    }
 };
 

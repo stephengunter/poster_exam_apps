@@ -125,9 +125,9 @@ export default {
 		fetchData(){
 			this.$store.commit(CLEAR_ERROR);
 			this.$store.dispatch(FETCH_SUBJECTS, this.params)
-				.catch(error => {
-					Bus.$emit('errors');
-				})
+			.catch(error => {
+				Bus.$emit('errors');
+			})
 		},
 		search(){
 			this.fetchData();
@@ -180,14 +180,14 @@ export default {
 			this.$store.commit(CLEAR_ERROR);
 			let action = this.model.id ? UPDATE_SUBJECT : STORE_SUBJECT;
          this.$store.dispatch(action, this.model)
-				.then(() => {
-					this.init();
-					Bus.$emit('success');
-				})
-				.catch(error => {
-					if(!error)  Bus.$emit('errors');
-					else this.$store.commit(SET_ERROR, error);
-				})
+			.then(() => {
+				this.init();
+				Bus.$emit('success');
+			})
+			.catch(error => {
+				if(!error)  Bus.$emit('errors');
+				else this.$store.commit(SET_ERROR, error);
+			})
 		}
 	}
 }

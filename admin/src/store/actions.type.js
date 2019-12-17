@@ -25,6 +25,14 @@ export const UPDATE_TERM = 'updateTerm';
 export const DELETE_TERM = 'deleteTerm';
 export const ORDER_TERMS = 'orderTerms';
 
+export const FETCH_RECRUITS = 'fetchRecruits';
+export const CREATE_RECRUIT = 'createRecruit';
+export const STORE_RECRUIT = 'storeRecruit';
+export const EDIT_RECRUIT = 'editRecruit';
+export const UPDATE_RECRUIT = 'updateRecruit';
+export const DELETE_RECRUIT = 'deleteRecruit';
+export const ORDER_RECRUITS = 'orderRecruits';
+
 export const FETCH_QUESTIONS = 'fetchQuestions';
 export const CREATE_QUESTION = 'createQuestion';
 export const STORE_QUESTION = 'storeQuestion';
