@@ -1,10 +1,12 @@
 import Errors from '@/common/errors';
 import { SET_LOADING, SET_ERROR, CLEAR_ERROR, 
-   SET_DRAWER, SET_MENUS,
+   SET_DRAWER, SET_MENUS, SET_WINDOW_WIDTH,
    SET_RESPONSIVE, TOGGLE_DRAWER } from '@/store/mutations.type';
 
 const initialState = {
    loading: false,
+   sideBarWidth: 260,
+   windowWidth: 991,
    responsive: false,
    drawer: null,
    menus: [],
@@ -21,10 +23,20 @@ const getters = {
       return state.loading;
    },
    menus(state) {
-     return state.menus;
+      return state.menus;
+   },
+   windowWidth(state) {
+      return state.windowWidth;
+   },
+   contentMaxWidth(state) {
+      if(state.responsive) return state.windowWidth * 0.9;
+      return (state.windowWidth - state.sideBarWidth) * 0.9;
+   },
+   responsive(state) {
+      return state.responsive;
    },
    errorList(state) {
-     return state.errorList;
+      return state.errorList;
    }
 };
 
@@ -33,6 +45,9 @@ const getters = {
 const mutations = {
    [SET_LOADING](state, loading) {
       state.loading = loading;
+   },
+   [SET_WINDOW_WIDTH](state, val) {
+      state.windowWidth = val;
    },
    [SET_RESPONSIVE](state, val) {
       state.responsive = val;

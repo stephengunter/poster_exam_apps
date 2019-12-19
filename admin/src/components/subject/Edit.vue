@@ -10,16 +10,13 @@
 			</v-card-title>
 			<v-card-text>
 				<v-container>
+					<core-category-selector ref="categorySelector" title="主科目"
+					:all_items="all_items" :select_default="false"
+					:selected_id="model.parentId"
+					@select-changed="onCategorySelected"
+					/>
 					<v-layout row>
-						<v-flex xs12>
-							<v-select
-								:items="parentOptions"  label="主科目"
-								v-model="model.parentId"
-							/>
-						</v-flex>
-					</v-layout>
-					<v-layout row>
-						<v-text-field v-model="model.title" label=""
+						<v-text-field v-model="model.title" label="標題"
 							v-validate="{ required: true }"
 							:error-messages="getErrMsg('title')"
 							name="title"
@@ -50,17 +47,18 @@ export default {
 		model: {
          type: Object,
          default: null
-      },
+		},
+		all_items: {
+         type: Array,
+         default: null
+      }
 	},
 	data () {
 		return {
-			parentOptions: []
+			
 		}
 	},
 	computed: {
-		...mapState({
-			subjects: state => state.subjects.list,
-		}),
 		mode(){
 			if(this.model && this.model.id) return 'edit';
 			return 'create';
@@ -73,13 +71,16 @@ export default {
 			return this.mode === 'edit';
 		}
 	},
-	beforeMount(){
-		this.parentOptions.push({ value: 0, text: '------------' });
-		this.subjects.forEach(item => {
-			this.parentOptions.push({ value: item.id, text: item.title });
-		});
+	beforeMount() {
+		setTimeout(() => {
+			this.$refs.categorySelector.init();
+		}, 500);
 	},
 	methods: {
+		onCategorySelected(item) {
+			if(item) this.model.parentId = item.id;
+			else this.model.parentId = 0;
+		},
 		getErrMsg(key){
 			let err = this.errors.collect(key);
 			if(err && err.length){
@@ -95,9 +96,12 @@ export default {
 			this.$emit('cancel');
 		},
 		onSubmit() {
+			let parent = this.$refs.categorySelector.getSelectedItem();
+			this.onCategorySelected(parent);
+
          this.$validator.validate().then(valid => {
-            if(valid) this.$emit('submit');
-         });         
+				if(valid) this.$emit('submit');
+			});   
 		}
 	}
 }

@@ -1,9 +1,9 @@
 <template>
    <v-layout v-if="ready" row wrap>
       <v-flex v-for="(item, index) in models" :key="index" xs12 sm3 md3 >
-         <v-select
+         <v-select style="margin-right:10px" :label="index < 1 ? title : ''"
             :items="models[index].options" v-model="models[index].selectedId"
-            @change="onChanged(index)"
+            @change="onChanged(index)" v-show="index <= selected.index + 1"
          />
       </v-flex>
    </v-layout>
@@ -13,13 +13,21 @@
 export default {
    name: 'CategorySelector',
    props: {
+      title: {
+         type: String,
+         default: ''
+      },
 		allow_empty: {
          type: Boolean,
          default: true
       },
       empty_text: {
          type: String,
-         default: '全部'
+         default: '--------'
+      },
+      select_default: {
+         type: Boolean,
+         default: true
       },
       all_items: {
          type: Array,
@@ -28,14 +36,14 @@ export default {
       selected_id: {
          type: Number,
          default: 0
-      },
+      }
    },
    data () {
 		return {
          ready: false,
-         rootItems: [],
          models: [],
          selected: {
+            index: 0,
             item: null,
             idList: []
          }
@@ -44,78 +52,135 @@ export default {
    computed: {
       
    },
+   beforeMount(){
+		
+	},
    methods: {
       init() {
-         this.rootItems = this.getRootItems();
-         let selectedItem = this.getSelectedItem(this.selected_id);
-         
+         let selectedItem = this.getItemById(this.selected_id);
          if(selectedItem) {
-            this.selected.item = selectedItem;
-            let parentList = this.getParentList(selectedItem);
+            
+            let parentId = selectedItem.parentId;
+            let parentModels = this.getParentModelList(selectedItem);
 
-            let models = this.getModels(selectedItem.id, -1);
-            this.setModels(models);
+            let startIndex = parentModels.length;
+            if(parentModels.length) parentId = parentModels[parentModels.length - 1].selectedId;
+            else parentId = 0;
 
+            let selectedIds = [selectedItem.id];
+            let models = this.getModels(startIndex , parentId, selectedIds);
+
+            this.setModels(parentModels.concat(models));
+
+            // startIndex 等於 selected index
+            this.setSelectedItem(selectedItem, startIndex);
+            this.setSelectedIdList();
             this.ready = true;
          }else {
-            this.selected.item = this.rootItems.length ? this.rootItems[0] : null;
-
-            let models = this.getModels(this.selected_id, -1);
+           
+         
+            let models = this.getModels();
             this.setModels(models);
 
+            if(this.select_default) {
+               selectedItem = models.length ? models[0].items[0] : null;
+               this.models[0].selectedId = selectedItem.id;
+               this.setSelectedItem(selectedItem, 0);
+            }else {
+               this.setSelectedItem(null, -1);
+            }
+
+             this.setSelectedIdList();
             this.ready = true;
          }
 
-         
+         this.$emit('select-changed', selectedItem);
 
-         //this.selected.idList = this.getSelectedIdList();
       },
-      getRootItems() {
-         if(this.all_items) return this.all_items.filter(item => item.isRootItem);
-         return [];
-      },
-		getSelectedItem(id) {
-         if(id) return this.all_items.find(item => item.id === id);
-         return null;
-      },
-      getModels(selectedId , idx) {
-         //從前到後
-         let models = [];
-         let items = idx < 0 ? this.rootItems.slice(0) : this.getSubItems(selectedId);
+      getSelectedListText(splitText = ' > ') {
+         let ids = this.selected.idList;
+         if(!ids) return '';
 
-         while (items && items.length) {
-            
-            selectedId = items[0].id;
-            models.push({
-               selectedId, items
-            });
-
-            items = this.getSubItems(selectedId);
+         let text = '';
+         for(let i = 0; i < ids.length; i++) {
+            if(i > 0) text += splitText;
+            let item = this.getItemById(ids[i]);
+            text += item.title;
          }
+         return text;
+      },
+      getSelectedItem() {
+         return this.selected.item;
+      },
+      setSelectedItem(item, index) {
+         this.selected.item = item;
+         this.selected.index = index;
+      },
+      setSelectedIdList() {
+         let ids = [];
+         for(let i = 0; i < this.models.length; i++) {
+            let selectedId = this.models[i].selectedId;
+            if(selectedId) ids.push(selectedId);
+         }
+         this.selected.idList = ids;
+      },
+      getModels(startIndex = 0, parentId = 0, selectedIds = []) {
+         //從前到後
+         let i = 0;
+         let models = [];
+         let hasSubItems = true;
+
+         do {
+            let items = this.getSubItems(parentId);
+
+            if(items && items.length) hasSubItems = true;
+            else hasSubItems = false;
+            
+            let selectedId = 0;
+            if(selectedIds[i]) selectedId = selectedIds[i];
+
+            if(selectedId) parentId = selectedId;
+            else parentId = hasSubItems ? items[0].id : 0;
+
+            if(hasSubItems) {
+               models.push({
+                  selectedId, items
+               });
+            }
+
+            i++;
+         } while (hasSubItems);
 
          return models;
       },
-      // loadModels(parentId) {
-      //    //從後到前
-      //    let models = [];
-      //    while (parentId) {
-      //       let parent = this.getParent(parentId);
-      //       let selectedId = parent.id;
+      loadModels(parentId) {
+         //從後到前
+         let models = [];
+         while (parentId) {
+            let parent = this.getItemById(parentId);
+            let selectedId = parent.id;
 
-      //       parentId = parent.parentId;
-      //       let items = this.getSubItems(parent.parentId);
+            parentId = parent.parentId;
+            let items = this.getSubItems(parent.parentId);
 
-      //       models.push({
-      //          selectedId, items
-      //       });
-      //    }
-      //    return models;
-      // },
+            models.push({
+               selectedId, items
+            });
+         }
+         return models;
+      },
       setModels(models, idx = 0) {
          for(let i = 0; i < models.length; i++) {
             models[i].options = models[i].items.map(item => {
                return { value: item.id, text: item.title }
             })
+
+            if(this.allow_empty) {
+               models[i].options.unshift({
+                  value: 0, text: this.empty_text
+               });
+            }
+            
          }
 
          if(idx === 0) this.models = models;
@@ -151,26 +216,50 @@ export default {
          return this.all_items.filter(item => item.parentId === parentId);
       },
       getItemById(id) {
-         return this.all_items.find(item => item.id === id);
+         if(id) return this.all_items.find(item => item.id === id);
+         return null;
       },
-      getParentList(selectedItem) {
-         let parentList = [];
+      getParentModelList(selectedItem) {
+         let models = [];
          let parentItem = this.getItemById(selectedItem.parentId);
          while (parentItem) {
-
-            parentList.push(parentItem);
+            let selectedId = parentItem.id;
+            let items = this.getSubItems(parentItem.parentId);
+            models.push({
+               selectedId, items
+            });
             parentItem = this.getItemById(parentItem.parentId);
          }
 
-         return parentList.length ? parentList.reverse() : [];
+         return models.length ? models.reverse() : [];
       },
       onChanged(index){
+        
+         let selectedItem = null;
          let selectedId = this.models[index].selectedId;
-         let models = this.getModels(selectedId, index);
+         if(!selectedId) {
+            //往上層找, 直到選的不是0
+            for(let i = index; i >= 0; i--) {
+               if(this.models[i].selectedId) {
+                  selectedId = this.models[i].selectedId;
+                  index = i;
+                  break;
+               }
+            }
+         }
+           
+         if(!selectedId) index = -1; //沒有一個選中
+
+         selectedItem = this.getItemById(selectedId);
+         this.setSelectedItem(selectedItem, index);
+
+        
+         let models = this.getModels(index, selectedId);
          this.setModels(models, index + 1);
 
-         let model = this.models[this.models.length - 1];
-         this.$emit('select-changed', model.selectedId);
+         this.setSelectedIdList();         
+        
+         this.$emit('select-changed', selectedItem);
       },
 
    }

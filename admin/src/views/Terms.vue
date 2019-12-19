@@ -1,41 +1,56 @@
 <template>
 	<v-container fluid grid-list-xl fill-height>
-     <v-layout justify-center  align-center>
+      <v-layout justify-center  align-center>
 			<v-flex xs12>
 				<material-card>
-					<subject-selector ref="subject_selector" v-show="selector.subject.ready"
-						:items="selector.subject.items" 
-						:selected="params.subject"
-						@selected="onSubjectSelected"
-					>
-						<v-tooltip top content-class="top">
-							<v-btn @click.prevent="create" class="mx-2" fab small color="info" slot="activator">
-								<v-icon>mdi-plus</v-icon>
-							</v-btn>
-							<span>新增</span>
-						</v-tooltip>
-					</subject-selector>
-					<term-selector ref="term_selector"  v-show="selector.term.ready"
-						:items="selector.term.items" :want_array="false"
-						@selected="onParentSelected"
-					/>
-					
-					<v-layout row wrap>
-						<v-flex sm12>
-							<term-table :list="list" @selected="edit"/>
+					<v-layout row v-show="!subject.selecting">
+						<v-flex xs12 sm6 md6>
+							<a href="#" @click.prevent="selectSubject"> 科目： {{ subject.fullText }} </a>
+						</v-flex>
+						<v-flex xs12 sm6 md6 text-xs-right>
+							<v-tooltip top content-class="top">
+								<v-btn :disabled="!canCreate" @click.prevent="create" class="mx-2" fab small color="info" slot="activator">
+									<v-icon>mdi-plus</v-icon>
+								</v-btn>
+								<span>新增</span>
+							</v-tooltip>
 						</v-flex>
 					</v-layout>
+					<v-layout row wrap>
+						<v-flex xs12>
+							<v-treeview v-if="ready" :items="termList" item-children="subItems" item-text="fullText"
+							open-all activatable hoverable  active-class="primary--text"
+							:active.sync="tree.active"
+							>
+								<template v-slot:label="{ item }">
+									<term-tree-item :item="item" :max_width="treeMaxWidth" />
+								</template>
+							</v-treeview>
+						</v-flex>
+					</v-layout>
+						
 				</material-card>
 			</v-flex>
       </v-layout>
-	   <v-dialog v-model="editting" persistent max-width="960px">
-			<term-edit v-if="editting" :model="model"
-			:subjects="selector.subject.items"
-			:parents="selector.term.items"
+		<v-dialog v-model="subject.selecting" :max-width="subject.maxWidth">
+			<v-card>
+				<v-card-text>
+					<v-container>
+						<core-category-selector ref="categorySelector" title="科目"
+						:all_items="subjectList" :selected_id="params.subject"
+						@select-changed="onSubjectSelected"
+						/>
+					</v-container>
+				</v-card-text>
+			</v-card>
+		</v-dialog>
+		<v-dialog v-model="editor.active" persistent :max-width="editor.maxWidth">
+			<term-edit v-if="editor.active" :model="editor.model" :all_items="editor.allItems"
+			:subjects="editor.subjects"
 			@submit="submit" @cancel="cancelEdit" @remove="remove"
 			/>
 		</v-dialog>
-		<v-dialog v-model="deleting" width="480px">
+		<v-dialog v-model="deletion.active" :max-width="deletion.maxWidth">
 			<core-confirm @ok="submitDelete" @cancel="cancelDelete" />
 		</v-dialog>
 	</v-container>
@@ -44,6 +59,7 @@
 </template>
 
 <script>
+import { mapState, mapGetters } from 'vuex';
 import { CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
 
 import { FETCH_SUBJECTS, FETCH_TERMS, CREATE_TERM, STORE_TERM,
@@ -55,168 +71,202 @@ export default {
 	name: 'TermsView',
 	data () {
 		return {
+			ready: false,
 			params: {
 				subject: 0,
 				parent: 0
 			},
-			selector: {
-				subject: {					
-					items: [],
-					ready: false
-				},
-				term: {
-					items: [],
-					ready: false
-				}
+			subject: {
+				selecting: false,
+				maxWidth: 800,
+				fullText: ''
 			},
-			list: [],
 
-			editting: false,
-			deleting: false,
-			model: null,
+			editor: {
+				active: false,
+				maxWidth: 800,
+				model: null,
+				subjects: [],
+				allItems: []
+			},
+
+			deletion: {
+				id: 0,
+				active: false,
+				maxWidth: 480
+			},
+
+			tree: {
+				active: []
+			}
 			
 		}
 	},
 	computed: {
+		...mapGetters(['responsive','contentMaxWidth']),
+      ...mapState({
+			subjectList: state => state.subjects.list,
+			termList: state => state.terms.list,
+		}),
 		canCreate(){
-			return !this.editting && !this.deleting;
+			return !this.editor.active && !this.deletion.active;
 		},
-		canEdit(){
-			if(!this.selectedParentId) return false;
-			return !this.editting && !this.deleting;
+		selectId() {
+			if(this.tree.active.length) return this.tree.active[0];
+			return 0;
 		},
-		selectedSubjectId(){
-			return this.subSubject.id;
-		},
-		selectedParentId(){
-			return this.parentTerm.id;
+		treeMaxWidth() {
+			return this.contentMaxWidth - 65;
 		}
 	},
+	watch: {
+      selectId: 'onSelectIdChanged'
+   },
 	beforeMount(){
-		this.$store.dispatch(FETCH_SUBJECTS)
+		this.init();
+
+		this.$store.dispatch(FETCH_SUBJECTS, { subItems: false })
 		.then(subjects => {
-			this.init(subjects);
+			setTimeout(() => {
+				this.$refs.categorySelector.init();
+			}, 500)
 		})
 		.catch(error => {
 			onError(error);
 		})
 	},
 	methods: {
-		init(subjects){
-			if(subjects){
-				this.selector.subject.items = subjects;
-				this.initSubjectSelector();
-			}
-
-			this.editting = false;
-			this.deleting = false;
-			this.model = null;
+		init(){
+			this.ready = false;
+			this.editor.active = false;
+			this.deletion.active = false;
+			this.setEditModel(null);
+			this.clearSelect();
+			
 		},
-		initSubjectSelector(){
-			window.setTimeout(() => {
-				this.$refs.subject_selector.init();
-			}, 500);
+		selectSubject(target) {
+			if(this.contentMaxWidth) this.subject.maxWidth = this.contentMaxWidth;
+			this.subject.selecting = true;
 		},
-		initTermSelector(){
-			window.setTimeout(() => {
-				this.$refs.term_selector.init();
-			}, 500);
+		onSelectIdChanged() {
+			let id = this.selectId;
+			if(id) this.edit(id);
 		},
-		clearCategories(){
-			this.selector.term.items = [];
-			this.selector.term.ready = false;
+		clearSelect() {
+			this.tree.active = [];
 		},
-		onSubjectSelected(id){
-			this.clearCategories();
+		onSubjectSelected(item){
+			let id = 0;
+			if(item) id = item.id;
 
 			this.params.subject = id;
+
 			this.fetchData();
-			this.selector.subject.ready = true;
-		},
-		onParentSelected(id){
-			if(id !== this.params.parent){
-				this.params.parent = id;
-				this.fetchData();
-			}
+			this.subject.fullText = this.$refs.categorySelector.getSelectedListText();
+			this.subject.selecting = false;
 			
-			this.selector.term.ready = true;
 		},
 		fetchData(){
+			this.ready = false;
+			this.clearSelect();
+
 			this.$store.commit(CLEAR_ERROR);
 			this.$store.dispatch(FETCH_TERMS, this.params)
-				.then(terms => {	
-					this.loadTerms(terms);		
-				})
-				.catch(error => {
-					onError(error);
-				})
-		},
-		loadTerms(terms){
-			this.list = terms;
-			if(!this.selector.term.ready){
-				this.selector.term.items = terms.slice(0);
-				this.initTermSelector();
-			}			
+			.then(terms => {
+				this.ready = true;		
+			})
+			.catch(error => {
+				onError(error);
+			})
 		},
 		create(){
+			this.clearSelect();
+
 			this.$store.commit(CLEAR_ERROR);
 			this.$store.dispatch(CREATE_TERM, this.params)
-				.then(model => {
-					this.model = model;
-					this.editting = true;
-				})
-				.catch(error => {
-					Bus.$emit('errors');
-				})
-			
+			.then(model => {
+				this.setEditModel(model);
+			})
+			.catch(error => {
+				onError(error);
+			})
 		},
 		edit(id){
 			this.$store.commit(CLEAR_ERROR);
 			this.$store.dispatch(EDIT_TERM, id)
 			.then(model => {
-				this.model = model;
-				this.editting = true;
+				this.setEditModel(model);
+			})
+			.catch(error => {
+				onError(error);
+			})
+		},
+		setEditModel(model) {
+			if(model) {
+				this.editor.subjects = this.subjectList;
+
+				this.editor.model = model.term;
+				this.editor.allItems = model.parents;
+
+				if(this.contentMaxWidth) this.editor.maxWidth = this.contentMaxWidth;
+				this.editor.active = true;
+			}else {
+				this.editor.model = null;
+				this.editor.allItems = [];
+				this.editor.active = false;
+			}
+		},
+      cancelEdit(){
+			this.clearSelect();
+			this.setEditModel(null);
+		},
+		remove(){
+			if(this.contentMaxWidth) {
+				if(this.responsive)  this.deletion.maxWidth = this.contentMaxWidth; 
+				else this.deletion.maxWidth = this.contentMaxWidth * 0.6;
+			}
+			this.deletion.id = this.editor.model.id;
+			this.deletion.active = true;
+		},
+		submitDelete(){
+			this.$store.commit(CLEAR_ERROR);
+			let id = this.deletion.id;
+			this.$store.dispatch(DELETE_TERM, id)
+			.then(() => {
+				this.init();
+				this.fetchData();
 			})
 			.catch(error => {
 				Bus.$emit('errors');
 			})
 		},
-      cancelEdit(){
-			this.model = null;  
-         this.editting = false;
-		},
-		remove(){
-			this.deleting = true;
-		},
-		submitDelete(){
-			this.$store.commit(CLEAR_ERROR);
-			let id = this.model.id;
-			this.$store.dispatch(DELETE_TERM, id)
-				.then(() => {
-					this.init();
-					this.fetchData();
-				})
-				.catch(error => {
-					Bus.$emit('errors');
-				})
-		},
 		cancelDelete(){
-			this.deleting = false;
+			this.deletion.active = false;
+			this.deletion.id = 0;
 		},
       submit(){
+			let model = this.editor.model;
+
 			this.$store.commit(CLEAR_ERROR);
-			let action = this.model.id ? UPDATE_TERM : STORE_TERM;
-         this.$store.dispatch(action, this.model)
-				.then(() => {
-					this.init();
-					this.fetchData();
-					Bus.$emit('success');
-				})
-				.catch(error => {
-					if(!error)  Bus.$emit('errors');
-					else this.$store.commit(SET_ERROR, error);
-				})
+			let action = model.id ? UPDATE_TERM : STORE_TERM;
+         this.$store.dispatch(action, model)
+			.then(() => {
+				this.init();
+				this.fetchData();
+				Bus.$emit('success');
+			})
+			.catch(error => {
+				if(!error)  Bus.$emit('errors');
+				else this.$store.commit(SET_ERROR, error);
+			})
 		}
 	}
 }
 </script>
+
+
+<style scoped>
+br::before {
+  content:"Look at this orange box.";
+}
+</style>

@@ -22,7 +22,7 @@ export default {
    data() {
       return {
          allItems: [],
-         category: 12
+         category: 0
       }
    },
    computed: {
@@ -41,8 +41,8 @@ export default {
 		})
    },
    methods: {
-      onCategoryChanged(id) {
-         console.log('onCategoryChanged', id);
+      onCategoryChanged(item) {
+         console.log('onCategoryChanged', item);
       }
    }
    

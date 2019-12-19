@@ -7,7 +7,7 @@
 						<v-flex xs12 sm6 md6>
 							
 						</v-flex>
-						<v-flex xs12 sm6 md6 class="text-lg-right">
+						<v-flex xs12 sm6 md6 text-xs-right>
 							<v-tooltip top content-class="top">
 								<v-btn :disabled="!canCreate" @click.prevent="create" class="mx-2" fab small color="info" slot="activator">
 									<v-icon>mdi-plus</v-icon>
@@ -16,59 +16,31 @@
 							</v-tooltip>
 						</v-flex>
 					</v-layout>
-					
 					<v-layout row wrap>
-						<v-flex sm12>
-							<v-data-table :items="list" :headers="headers"  hide-actions item-key="id">
-								<template slot="headerCell" slot-scope="{ header }">
-									<span class="subheading font-weight-light text-success text--darken-3">
-										{{ header.text }}
-									</span>
-								</template>
-								<template slot="items" slot-scope="props">
-									<td>
-										<v-tooltip top  content-class="top">
-											<a href="#" @click.prevent="edit(props.item.id)"  slot="activator" icon>
-												{{ props.item.title }}
-											</a>
-											<span>編輯</span>
-										</v-tooltip>
-									</td>
-									<td>
-										<ul v-if="props.item.subItems.length">
-											<li v-for="subItem in props.item.subItems" :key="subItem.id">
-												<v-tooltip top  content-class="top">
-													<a href="#" @click.prevent="edit(subItem.id)"  slot="activator" icon>
-														{{ subItem.title }}
-													</a>
-													<span>編輯</span>
-												</v-tooltip>
-											</li>
-										</ul>
-									</td>
-								</template>
-							</v-data-table>
-							
+						<v-flex xs12>
+							<v-treeview v-if="ready" :items="subjectList" item-children="subItems" item-text="title"
+							open-all activatable hoverable  active-class="primary--text"
+							:active.sync="tree.active"
+							>
+							</v-treeview>
 						</v-flex>
 					</v-layout>
 				</material-card>
 			</v-flex>
      </v-layout>
-	  <v-dialog v-model="editting" persistent max-width="500px">
-			<subject-edit v-if="editting" :model="model" 
+	  <v-dialog v-model="editor.active" persistent :max-width="editor.maxWidth">
+			<subject-edit v-if="editor.active" :model="editor.model" :all_items="editor.allItems"
 			@submit="submit" @cancel="cancelEdit" @remove="remove"
 			/>
 		</v-dialog>
-		<v-dialog v-model="deleting" width="480px">
+		<v-dialog v-model="deletion.active" :max-width="deletion.maxWidth">
 			<core-confirm @ok="submitDelete" @cancel="cancelDelete" />
 		</v-dialog>
 	</v-container>
-    
-	
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import { CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
 
 import { FETCH_SUBJECTS, CREATE_SUBJECT, STORE_SUBJECT,
@@ -80,106 +52,152 @@ export default {
 	name: 'SubjectsView',
 	data () {
 		return {
+			ready: false,
 			params: {
 				
 			},
-			headers: [
-				{
-					sortable: false,
-					text: '',
-					value: ''
-				},
-				{
-					sortable: false,
-					text: '',
-					value: ''
-				}
-			],
 
-			
-			editting: false,
-			deleting: false,
-			model: null,
+			editor: {
+				active: false,
+				maxWidth: 800,
+				model: null,
+				allItems: []
+			},
+
+			deletion: {
+				id: 0,
+				active: false,
+				maxWidth: 480
+			},
+
+			tree: {
+				active: []
+			}
 			
 		}
 	},
 	computed: {
+		...mapGetters(['responsive','contentMaxWidth']),
       ...mapState({
-			list: state => state.subjects.list,
+			subjectList: state => state.subjects.list,
 		}),
 		canCreate(){
-			return !this.editting && !this.deleting;
+			return !this.editor.active && !this.deletion.active;
+		},
+		selectId() {
+			if(this.tree.active.length) return this.tree.active[0];
+			return 0;
 		}
+		
 	},
+	watch: {
+      selectId: 'onSelectIdChanged'
+   },
 	beforeMount(){
 		this.init();
 	},
 	methods: {
 		init(){
-			this.editting = false;
-			this.deleting = false;
-			this.model = null;
+			this.ready = false;
+			this.editor.active = false;
+			this.deletion.active = false;
+			this.setEditModel(null);
+			this.clearSelect();
 
 			this.fetchData();
 		},
 		fetchData(){
+			this.ready = false;
+			this.clearSelect();
+
 			this.$store.commit(CLEAR_ERROR);
 			this.$store.dispatch(FETCH_SUBJECTS, this.params)
-			.catch(error => {
-				Bus.$emit('errors');
+			.then(subjects => {
+				this.ready = true;
 			})
+			.catch(error => {
+				onError(error);
+			})
+		},
+		onSelectIdChanged() {
+			let id = this.selectId;
+			if(id) {
+				this.edit(id);
+			}
+		},
+		clearSelect() {
+			this.tree.active = [];
 		},
 		search(){
 			this.fetchData();
 		},
 		create(){
+			this.clearSelect();
+			
 			this.$store.commit(CLEAR_ERROR);
 			this.$store.dispatch(CREATE_SUBJECT)
-				.then(model => {
-					this.model = model;  
-					this.editting = true;
-				})
-				.catch(error => {
-					Bus.$emit('errors');
-				})
-			
+			.then(model => {
+				this.setEditModel(model);
+			})
+			.catch(error => {
+				onError(error);
+			})
 		},
 		edit(id){
 			this.$store.commit(CLEAR_ERROR);
 			this.$store.dispatch(EDIT_SUBJECT, id)
-				.then(model => {
-					this.model = model;  
-					this.editting = true;
-				})
-				.catch(error => {
-					Bus.$emit('errors');
-				})
+			.then(model => {
+				this.setEditModel(model);
+			})
+			.catch(error => {
+				onError(error);
+			})
+		},
+		setEditModel(model) {
+			if(model) {
+				this.editor.model = model.subject;
+				this.editor.allItems = model.parents;
+				if(this.contentMaxWidth) this.editor.maxWidth = this.contentMaxWidth;
+				this.editor.active = true;
+			}else {
+				this.editor.model = null;
+				this.editor.allItems = [];
+				this.editor.active = false;
+			}
 		},
       cancelEdit(){
-			this.model = null;  
-         this.editting = false;
+			this.clearSelect();
+			this.setEditModel(null);
 		},
 		remove(){
-			this.deleting = true;
+			if(this.contentMaxWidth) {
+				if(this.responsive)  this.deletion.maxWidth = this.contentMaxWidth; 
+				else this.deletion.maxWidth = this.contentMaxWidth * 0.6;
+			}
+			this.deletion.id = this.editor.model.id;
+			this.deletion.active = true;
 		},
 		submitDelete(){
 			this.$store.commit(CLEAR_ERROR);
-			let id = this.model.id;
+			let id = this.editor.model.id;
 			this.$store.dispatch(DELETE_SUBJECT, id)
-				.then(() => {
-					this.init();
-				})
-				.catch(error => {
-					Bus.$emit('errors');
-				})
+			.then(() => {
+				this.init();
+			})
+			.catch(error => {
+				onError(error);
+			})
 		},
 		cancelDelete(){
-			this.deleting = false;
+			this.deletion.active = false;
+			this.deletion.id = 0;
 		},
       submit(){
+			let model = this.editor.model;
+
 			this.$store.commit(CLEAR_ERROR);
-			let action = this.model.id ? UPDATE_SUBJECT : STORE_SUBJECT;
-         this.$store.dispatch(action, this.model)
+			let action = model.id ? UPDATE_SUBJECT : STORE_SUBJECT;
+         this.$store.dispatch(action, model)
 			.then(() => {
 				this.init();
 				Bus.$emit('success');

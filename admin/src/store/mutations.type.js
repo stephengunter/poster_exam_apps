@@ -1,4 +1,5 @@
 export const SET_LOADING = 'setLoading';
+export const SET_WINDOW_WIDTH = 'setWindowWidth';
 export const SET_RESPONSIVE = 'setResponsive';
 
 export const SET_THEME_IMAGE = 'setThemeImage';

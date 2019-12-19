@@ -38,7 +38,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { SET_RESPONSIVE } from '@/store/mutations.type';
+import { SET_WINDOW_WIDTH, SET_RESPONSIVE } from '@/store/mutations.type';
 
 export default {
 	name:'App',
@@ -76,6 +76,8 @@ export default {
 		Bus.$on('success', this.onSuccess);
 	},
 	mounted(){
+		if(window.innerWidth) this.$store.commit(SET_WINDOW_WIDTH, window.innerWidth);
+
       this.onResponsiveInverted()
       window.addEventListener('resize', this.onResponsiveInverted)
 	},
@@ -105,9 +107,11 @@ export default {
 			this.success.msg = msg ? msg : 'Save successfully';
 		},
 		onResponsiveInverted () {
-         if (window.innerWidth < 991) {
+			if(window.innerWidth) this.$store.commit(SET_WINDOW_WIDTH, window.innerWidth);
+			
+         if(window.innerWidth < 991) {
             this.$store.commit(SET_RESPONSIVE, true);
-         } else {
+         }else {
             this.$store.commit(SET_RESPONSIVE, false);
          }
       },

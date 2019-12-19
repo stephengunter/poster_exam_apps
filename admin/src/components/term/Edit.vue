@@ -1,4 +1,5 @@
 <template>
+<div>
 	<form @submit.prevent="onSubmit">
 		<v-card>
 			<v-card-title>
@@ -10,10 +11,15 @@
 			</v-card-title>
 			<v-card-text>
 				<v-container grid-list-md>
-					<term-selector ref="term_selector"  v-show="selector.term.ready"
-						:items="selector.term.items"  :want_array="false"
-						:selected_ids="selector.term.selectedIds"
-						@selected="onParentSelected"
+					<v-layout row v-show="!subject.selecting">
+						<v-flex xs12>
+							<a href="#" @click.prevent="selectSubject"> 科目：  {{ subject.fullText }} </a>
+						</v-flex>
+					</v-layout>
+					<core-category-selector ref="categorySelector" title="主條文"
+					:all_items="allItems" :select_default="false"
+					:selected_id="model.parentId"
+					@select-changed="onCategorySelected"
 					/>
 					<v-layout wrap>
 						
@@ -37,6 +43,7 @@
 							<v-textarea v-model="model.text" label="內容" outlined auto-grow
 							v-validate="'required'"
 							:error-messages="getErrMsg('text')"
+							name="text"
 							rows="5"
 							row-height="15"
 							/>
@@ -52,11 +59,27 @@
 				<v-btn type="submit" @click.prevent="onSubmit" color="primary">存檔</v-btn>
 			</v-card-actions>
 		</v-card>
-	</form>	
+	</form>
+	<v-dialog v-model="subject.selecting" :max-width="subject.maxWidth">
+		<v-card>
+			<v-card-text>
+				<v-container>
+					<core-category-selector ref="subjectSelector" title="科目"
+					:all_items="subjects" :selected_id="model.subjectId"
+					@select-changed="onSubjectSelected"
+					/>
+				</v-container>
+			</v-card-text>
+		</v-card>
+	</v-dialog>
+</div>	
 </template>
 
 
 <script>
+import { mapState, mapGetters } from 'vuex';
+import { SET_LOADING } from '@/store/mutations.type';
+
 
 export default {
 	name: 'TermEdit',
@@ -65,24 +88,27 @@ export default {
          type: Object,
          default: null
 		},
-		parents: {
+		all_items: {
          type: Array,
          default: null
-		}
+		},
+		subjects: {
+         type: Array,
+         default: null
+		},
 	},
 	data () {
 		return {
-			selector: {
-				term: {
-					items: [],
-					selected: 0,
-					selectedIds: [],
-					ready: false
-				}
-			},	
+			allItems: [],
+			subject: {
+				selecting: false,
+				maxWidth: 800,
+				fullText: ''
+			}
 		}
 	},
 	computed: {
+		...mapGetters(['responsive','contentMaxWidth']),
 		mode(){
 			if(this.model && this.model.id) return 'edit';
 			return 'create';
@@ -99,21 +125,52 @@ export default {
 		}
 	},
 	beforeMount(){
-		this.selector.term.selectedIds = [3];//this.model.selectedIds;
-		this.selector.term.items = this.parents.slice(0);
-
-		console.log('model', this.model);
-	},
-	mounted(){
-		this.$refs.term_selector.init();
+		this.$store.commit(SET_LOADING, true);
+		setTimeout(() => {
+			this.$refs.subjectSelector.init();
+		}, 500);
 	},
 	methods: {
-		onParentSelected(id){
-			this.selector.term.selected = id;
-			this.selector.term.ready = true;
-			this.model.parentId = id;
+		init(){
+
+		},
+		selectSubject() {
+			if(this.contentMaxWidth) this.subject.maxWidth = this.contentMaxWidth;
+			this.subject.selecting = true;
+		},
+		onSubjectSelected(item){
+			this.$store.commit(SET_LOADING, true);
+
+			let subjectId = 0;
+			if(item) subjectId = item.id;
+			this.model.subjectId = subjectId;
+
+			this.allItems = this.all_items.filter(item => item.subjectId === subjectId);
+			setTimeout(() => {
+				this.$refs.categorySelector.init();
+			}, 500);
+
+			this.subject.fullText = this.$refs.subjectSelector.getSelectedListText();
+			this.subject.selecting = false;		
+		},
+		onCategorySelected(item) {
+			let parentId = 0;
+			if(item) parentId = item.id;
+
+			this.model.parentId = parentId;
+
+			if(this.mode === 'create') this.getMaxOrder(parentId);
+			
+			this.$store.commit(SET_LOADING, false);
+		},
+		getMaxOrder(parentId) {
+			let subjectId = this.model.subjectId;
+			let terms = this.all_items.filter(item => item.subjectId === subjectId && item.parentId === parentId);
+			if(terms.length) this.model.order = terms[terms.length - 1].order + 1;
+			else this.model.order = 0;
 		},
 		getErrMsg(key){
+			
 			let err = this.errors.collect(key);
 			if(err && err.length){
 				let msg = err[0];
@@ -128,8 +185,11 @@ export default {
 			this.$emit('cancel');
 		},
 		onSubmit() {
+			let parent = this.$refs.categorySelector.getSelectedItem();
+			this.onCategorySelected(parent);
+
          this.$validator.validate().then(valid => {
-            if(valid) this.$emit('submit');
+				if(valid) this.$emit('submit');
          });         
 		}
 	}
