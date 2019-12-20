@@ -23,6 +23,7 @@ const getters = {
 
 const actions = {
    [FETCH_QUESTIONS](context, params) {
+      console.log(FETCH_QUESTIONS, params);
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          QuestionsService.fetch(params)

@@ -77,20 +77,22 @@ export default {
             this.setSelectedIdList();
             this.ready = true;
          }else {
-           
-         
             let models = this.getModels();
             this.setModels(models);
 
             if(this.select_default) {
                selectedItem = models.length ? models[0].items[0] : null;
-               this.models[0].selectedId = selectedItem.id;
-               this.setSelectedItem(selectedItem, 0);
+
+               if(selectedItem) {
+                  this.models[0].selectedId = selectedItem.id;
+                  this.setSelectedItem(selectedItem, 0);
+               }else this.setSelectedItem(null, -1);           
+               
             }else {
                this.setSelectedItem(null, -1);
             }
 
-             this.setSelectedIdList();
+            this.setSelectedIdList();
             this.ready = true;
          }
 
@@ -115,6 +117,16 @@ export default {
       setSelectedItem(item, index) {
          this.selected.item = item;
          this.selected.index = index;
+      },
+      getSelectedItemList() {
+         let ids = this.selected.idList;
+         let items = [];
+         for(let i = 0; i < ids.length; i++) {
+            let id = this.selected.idList[i];
+            let item = this.getItemById(id);
+            items.push(item);
+         }
+         return items;
       },
       setSelectedIdList() {
          let ids = [];
@@ -208,9 +220,6 @@ export default {
                
             }
          }
-      },
-      getSelectedIdList() {
-         return this.models.map(item => item.selectedId);
       },
       getSubItems(parentId) {
          return this.all_items.filter(item => item.parentId === parentId);

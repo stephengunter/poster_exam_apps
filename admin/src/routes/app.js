@@ -54,7 +54,7 @@ const adminlinks = [
       parent: '',
       meta: {
          order: 0,
-         icon: 'mdi-view-dashboard',
+         icon: 'mdi-view-list',
          title: '科目',
          type: ADMIN_ONLY,
          menu: true
@@ -67,7 +67,7 @@ const adminlinks = [
       parent: 'Subjects',
       meta: {
          order: 0,
-         icon: 'mdi-city-variant-outline',
+         icon: 'mdi-file-document-box-outline',
          title: '條文內容',
          type: ADMIN_ONLY,
          menu: true
@@ -80,12 +80,25 @@ const adminlinks = [
       parent: '',
       meta: {
          order: 0,
-         icon: 'mdi-city-variant-outline',
+         icon: 'mdi-database-check',
          title: '題庫',
          type: ADMIN_ONLY,
          menu: true
       } 
    },
+   {
+      name: 'Recruits',
+      path: '/recruits',
+      view: 'Recruits',
+      parent: 'Questions',
+      meta: {
+         order: 0,
+         icon: 'mdi-file-document-edit-outline',
+         title: '招考',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
+   }
       
 ];
 

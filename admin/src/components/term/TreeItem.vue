@@ -1,5 +1,5 @@
 <template>
-   <div class="term-text" :style="{ 'max-width': `${max_width}px` }" v-html="item.fullText">
+   <div class="term-text" :style="{ 'max-width': `${max_width}px` }" v-html="getContent()">
    </div>
 </template>
 
@@ -16,6 +16,12 @@ export default {
          type: Number,
          default: 800
       },
+   },
+   methods: {
+      getContent() {
+         if(!this.item) return '';
+         return this.item.fullText.replace(/<br>/g, `<br><span style="padding-left:15px"></span>`);
+      }
    }
 }
 </script>

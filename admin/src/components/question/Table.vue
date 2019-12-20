@@ -6,17 +6,20 @@
          </span>
       </template>
       <template slot="items" slot-scope="props">
-         <td style="vertical-align: text-top;">
-            <v-tooltip top  content-class="top">
-               <a href="#" @click.prevent="select(props.item.id)"  slot="activator" icon>
-               {{ props.item.title }}
-               </a>
-               <span>編輯</span>
-            </v-tooltip>
+         <td>
+            <v-btn @click.prevent="edit(props.item.id)" flat icon color="success">
+              <v-icon small>mdi-pencil</v-icon>
+            </v-btn>
          </td>
-         <td style="vertical-align: text-top;">
-            <ul>
+         <td>
+             {{ props.item.title }}
+         </td>
+         <td>
+            <ul class="options">
                <li v-for="(option,index) in props.item.options" :key="option.id" :class="{ 'option-display': index > 0, 'correct-option': option.correct }" >
+                  <v-icon v-if="option.correct" color="success">
+                     mdi-check-circle
+                  </v-icon>
                   {{ option.title }}
                </li>
             </ul>
@@ -41,6 +44,12 @@ export default {
    data () {
 		return {
 			headers: [
+            {
+					sortable: false,
+					text: '',
+               value: '',
+               width: '45px'
+				},
 				{
 					sortable: false,
 					text: '標題',
@@ -61,8 +70,8 @@ export default {
 		}
 	},
    methods: {
-      select(id){
-         this.$emit('selected', id);
+      edit(id){
+         this.$emit('edit', id);
       }
    }
 
@@ -72,10 +81,18 @@ export default {
 </script>
 
 <style scoped>
+td {
+   vertical-align: text-top;
+}
+.options {
+   padding-left : 0px;
+   list-style-type : none;
+}
 .option-display {
-   padding-top: 1em;
+   padding-top: 0.2em;
 }
 .correct-option {
-   color:#1867c0
+   color:#1867c0;
+   font-size : 1.6em; 
 }
 </style>
