@@ -47,3 +47,5 @@ export const buildQuery = (url, params) => {
    }
    return url.substr(0, url.length - 1);
 }
+
+export const toRocYear = (val) => val - 1911;

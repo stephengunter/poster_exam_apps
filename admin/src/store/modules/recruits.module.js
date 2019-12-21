@@ -3,7 +3,7 @@ import { resolveErrorData } from '@/utils';
 
 import {
    FETCH_RECRUITS, CREATE_RECRUIT, STORE_RECRUIT, 
-   EDIT_RECRUIT, UPDATE_RECRUIT, DELETE_RECRUIT
+   EDIT_RECRUIT, UPDATE_RECRUIT, ORDER_RECRUITS, DELETE_RECRUIT
 } from '@/store/actions.type';
 
 import { SET_RECRUITS, SET_LOADING } from '@/store/mutations.type';
@@ -90,6 +90,21 @@ const actions = {
             })
             .catch(error => {
                reject(resolveErrorData(error)); 
+            })
+            .finally(() => { 
+               context.commit(SET_LOADING, false);
+            });
+      });
+   },
+   [ORDER_RECRUITS](context, model) {
+      context.commit(SET_LOADING, true);
+      return new Promise((resolve, reject) => {
+         RecruitsService.order(model)
+            .then(() => {
+               resolve(true);
+            })
+            .catch(error => {
+               reject(resolveErrorData(error));
             })
             .finally(() => { 
                context.commit(SET_LOADING, false);

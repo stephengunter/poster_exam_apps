@@ -10,4 +10,14 @@ export const onError = (error) => {
    Bus.$emit('errors');
 }
 
+export const activeOptions = () => {
+   return [{
+      value: true,
+      text: '上架中'
+   },{
+      value: false,
+      text: '已下架'
+   }];
+}
+
 export * from './helper';

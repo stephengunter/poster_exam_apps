@@ -8,6 +8,7 @@ export const LOGOUT = 'logout';
 
 export const GET_MENUS = 'getMenus';
 
+//Subjects
 export const FETCH_SUBJECTS = 'fetchSubjects';
 export const CREATE_SUBJECT = 'createSubject';
 export const STORE_SUBJECT = 'storeSubject';
@@ -16,7 +17,7 @@ export const UPDATE_SUBJECT = 'updateSubject';
 export const DELETE_SUBJECT = 'deleteSubject';
 export const ORDER_SUBJECTS = 'orderSubjects';
 
-
+//Terms
 export const FETCH_TERMS = 'fetchTerms';
 export const CREATE_TERM = 'createTerm';
 export const STORE_TERM = 'storeTerm';
@@ -25,6 +26,8 @@ export const UPDATE_TERM = 'updateTerm';
 export const DELETE_TERM = 'deleteTerm';
 export const ORDER_TERMS = 'orderTerms';
 
+
+//Recruits
 export const FETCH_RECRUITS = 'fetchRecruits';
 export const CREATE_RECRUIT = 'createRecruit';
 export const STORE_RECRUIT = 'storeRecruit';

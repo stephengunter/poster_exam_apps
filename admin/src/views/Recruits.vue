@@ -3,11 +3,22 @@
       <v-layout justify-center  align-center>
 			<v-flex xs12>
 				<material-card>
-					<v-layout row>
-						<v-flex xs12 sm6 md6>
-							
+					<v-layout row wrap>
+						<v-flex xs12 sm4 md4>
+							<v-radio-group v-model="params.active" row>
+								<v-radio v-for="(item, index) in activeOptions" :key="index"
+								:label="item.text" :value="item.value" 
+								@change="onActiveChanged"
+								/>
+							</v-radio-group>
 						</v-flex>
-						<v-flex xs12 sm6 md6 text-xs-right>
+						<v-flex xs12 sm4 md4>
+							<v-select label="年度"
+								:items="yearOptions" v-model="params.year"
+								@change="onYearChanged"
+							/>
+						</v-flex>
+						<v-flex xs12 sm4 md4 text-xs-right>
 							<v-tooltip top content-class="top">
 								<v-btn :disabled="!canCreate" @click.prevent="create" class="mx-2" fab small color="info" slot="activator">
 									<v-icon>mdi-plus</v-icon>
@@ -18,14 +29,17 @@
 					</v-layout>
 					<v-layout row wrap>
 						<v-flex xs12>
-							List
+							<recruit-table :list="recruitList" @edit="edit"
+							:allow_drag ="table.allow_drag"
+							@order-changed="onOrderChanged"
+							/>
 						</v-flex>
 					</v-layout>
 				</material-card>
 			</v-flex>
      </v-layout>
 	  <v-dialog v-model="editor.active" persistent :max-width="editor.maxWidth">
-			<subject-edit v-if="editor.active" :model="editor.model" :all_items="editor.allItems"
+			<recruit-edit v-if="editor.active" :model="editor.model" :year_options="editor.yearOptions"
 			@submit="submit" @cancel="cancelEdit" @remove="remove"
 			/>
 		</v-dialog>
@@ -40,18 +54,28 @@ import { mapState, mapGetters } from 'vuex';
 import { CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
 import {
    FETCH_RECRUITS, CREATE_RECRUIT, STORE_RECRUIT, 
-   EDIT_RECRUIT, UPDATE_RECRUIT, DELETE_RECRUIT
+   EDIT_RECRUIT, UPDATE_RECRUIT, ORDER_RECRUITS, DELETE_RECRUIT
 } from '@/store/actions.type';
+
+import { activeOptions, toRocYear } from '@/utils';
 
 export default {
    name: 'RecruitsView',
    data () {
 		return {
 			params: {
-				
+				year: 0,
+				active: true
+			},
+			activeOptions: [],
+			yearOptions: [{ value: 0, text: '全部年度' }],
+
+			table: {
+				allow_drag: false
 			},
 
 			editor: {
+				yearOptions: [],
 				active: false,
 				maxWidth: 800,
 				model: null,
@@ -62,52 +86,71 @@ export default {
 				id: 0,
 				active: false,
 				maxWidth: 480
-			},
-
-			tree: {
-				active: []
 			}
 			
 		}
    },
    computed: {
 		...mapGetters(['responsive','contentMaxWidth']),
-      ...mapState({
-			subjectList: state => state.subjects.list,
+		...mapState({
+			recruitList: state => state.recruits.list
 		}),
 		canCreate(){
 			return !this.editor.active && !this.deletion.active;
 		}
-		
    },
    beforeMount(){
+		this.activeOptions = activeOptions();
+
+		let yearOptions = [];
+		let thisYear = new Date().getFullYear();
+		let min = thisYear - 10;
+		let max = thisYear + 1;
+		for(let i = max; i >= min; i--) {
+			let year = toRocYear(i);
+			yearOptions.push({
+				value: year, text: year
+			});
+		}
+
+		this.editor.yearOptions = yearOptions.slice(0);
+		this.yearOptions = this.yearOptions.concat(yearOptions);
+
 		this.init();
    },
    methods: {
 		init(){
-			this.ready = false;
 			this.editor.active = false;
 			this.deletion.active = false;
 			this.setEditModel(null);
 
-			this.fetchData();
+			this.fetchData(this.params);
 		},
-		fetchData(){
-			this.ready = false;
-			this.clearSelect();
+		onActiveChanged(val) {
+			this.params.active = val;
+			this.fetchData(this.params);
+		},
+		onYearChanged(val) {
+			this.params.year = val;
+			this.fetchData(this.params);
+		},
+		fetchData(params){
+			this.table.allow_drag = !this.table.allow_drag;
 
 			this.$store.commit(CLEAR_ERROR);
-			this.$store.dispatch(FETCH_RECRUITS, this.params)
+			this.$store.dispatch(FETCH_RECRUITS, params)
+			.then(() => {
+				this.table.allow_drag = params.year > 0;
+			})
 			.catch(error => {
 				onError(error);
 			})
 		},
 		create(){
-			this.clearSelect();
-			
 			this.$store.commit(CLEAR_ERROR);
-			this.$store.dispatch(CREATE_SUBJECT)
+			this.$store.dispatch(CREATE_RECRUIT)
 			.then(model => {
+				model.year = this.editor.yearOptions[0].value;
 				this.setEditModel(model);
 			})
 			.catch(error => {
@@ -116,7 +159,7 @@ export default {
 		},
 		edit(id){
 			this.$store.commit(CLEAR_ERROR);
-			this.$store.dispatch(EDIT_SUBJECT, id)
+			this.$store.dispatch(EDIT_RECRUIT, id)
 			.then(model => {
 				this.setEditModel(model);
 			})
@@ -126,13 +169,11 @@ export default {
 		},
 		setEditModel(model) {
 			if(model) {
-				this.editor.model = model.subject;
-				this.editor.allItems = model.parents;
+				this.editor.model = model;
 				if(this.contentMaxWidth) this.editor.maxWidth = this.contentMaxWidth;
 				this.editor.active = true;
 			}else {
 				this.editor.model = null;
-				this.editor.allItems = [];
 				this.editor.active = false;
 			}
 		},
@@ -148,9 +189,10 @@ export default {
 			this.deletion.active = true;
 		},
 		submitDelete(){
-			this.$store.commit(CLEAR_ERROR);
 			let id = this.editor.model.id;
-			this.$store.dispatch(DELETE_SUBJECT, id)
+
+			this.$store.commit(CLEAR_ERROR);
+			this.$store.dispatch(DELETE_RECRUIT, id)
 			.then(() => {
 				this.init();
 			})
@@ -166,8 +208,29 @@ export default {
 			let model = this.editor.model;
 
 			this.$store.commit(CLEAR_ERROR);
-			let action = model.id ? UPDATE_SUBJECT : STORE_SUBJECT;
+			let action = model.id ? UPDATE_RECRUIT : STORE_RECRUIT;
          this.$store.dispatch(action, model)
+			.then(() => {
+				this.init();
+				Bus.$emit('success');
+			})
+			.catch(error => {
+				if(!error)  Bus.$emit('errors');
+				else this.$store.commit(SET_ERROR, error);
+			})
+		},
+		//處理Sortable onDragEnd事件
+		onOrderChanged({ oldIndex, newIndex }) {
+
+			if(!this.table.allow_drag) return;
+			if(oldIndex === newIndex) return;
+
+			let up = oldIndex > newIndex;
+
+			let targetId = this.recruitList[oldIndex].id;
+			let replaceId = this.recruitList[newIndex].id;
+
+			this.$store.dispatch(ORDER_RECRUITS, { targetId, replaceId, up })
 			.then(() => {
 				this.init();
 				Bus.$emit('success');

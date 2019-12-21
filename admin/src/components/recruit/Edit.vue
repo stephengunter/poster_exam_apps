@@ -10,18 +10,13 @@
 			</v-card-title>
 			<v-card-text>
 				<v-container grid-list-md>
-					<v-layout row>
-						<v-flex xs12>
-							<v-text-field v-model="model.year" label="年度"
-							v-validate="'required|numeric'"
-							:error-messages="getErrMsg('year')"
-							name="year"
-							required
+					<v-layout wrap>
+						<v-flex xs12 sm6>
+							<v-select label="年度"
+								:items="year_options" v-model="model.year"
 							/>
 						</v-flex>
-					</v-layout>
-					<v-layout row>
-						<v-flex xs12>
+						<v-flex xs12 sm6>
 							<v-text-field v-model="model.title" label="名稱"
 							v-validate="'required'"
 							:error-messages="getErrMsg('title')"
@@ -29,7 +24,36 @@
 							required
 							/>
 						</v-flex>
+						<v-flex xs12 sm6>
+							<v-menu full-width max-width="290"
+							v-model="date.active"
+							:close-on-content-click="false"
+							>
+								<template v-slot:activator="{ on }">
+									<v-text-field clearable label="日期" readonly
+									:value="model.dateText" v-on="on"
+									/>
+								</template>
+								<v-date-picker locale="zh-cn"
+									v-model="model.dateText"
+									@input="onDateChanged" 
+								/>
+							</v-menu>
+						</v-flex>
+						<v-flex xs12 sm6>
+							<v-switch
+							v-model="model.done"
+							label="已結束"
+							/>
+						</v-flex>
+						<v-flex xs12 sm6>
+							<v-switch
+							v-model="model.active"
+							label="上架中"
+							/>
+						</v-flex>
 					</v-layout>
+					
 					<core-error-list  />
 				</v-container>
 			</v-card-text>
@@ -52,11 +76,18 @@ export default {
 		model: {
          type: Object,
          default: null
+		},
+		year_options: {
+         type: Array,
+         default: null
 		}
 	},
 	data () {
 		return {
-			
+			date: {
+				active: false,
+				val: ''
+			}
 		}
 	},
 	computed: {
@@ -71,20 +102,21 @@ export default {
 			return `新增${text}`;	
 		},
 		canRemove(){
-			return this.mode === 'edit';
+			return this.mode === 'edit' && !this.model.active;
 		}
 	},
 	beforeMount(){
 		
-		
 	},
 	methods: {
+		onDateChanged(val) {
+			this.date.active = false;
+		},
 		getErrMsg(key){
-			
 			let err = this.errors.collect(key);
 			if(err && err.length){
 				let msg = err[0];
-				return msg.replace('title', '標題').replace('order', '順序').replace('text', '內容');
+				return msg.replace('title', '名稱').replace('order', '順序').replace('text', '內容');
 			}
 			return '';
 		},
@@ -95,9 +127,6 @@ export default {
 			this.$emit('cancel');
 		},
 		onSubmit() {
-			let parent = this.$refs.categorySelector.getSelectedItem();
-			this.onCategorySelected(parent);
-
          this.$validator.validate().then(valid => {
 				if(valid) this.$emit('submit');
          });         
