@@ -2,7 +2,7 @@
    <v-layout row wrap>
       <v-flex xs12>
          <span class="title">選項</span>
-         <v-btn @click.prevent="add" small  fab icon color="info" slot="activator">
+         <v-btn @click.prevent="add" small  fab icon color="info">
             <v-icon>mdi-plus</v-icon>
          </v-btn>
       </v-flex>
@@ -22,7 +22,7 @@
                   />
                </td>
                <td>
-                  <v-checkbox label="正確" v-model="props.item.correct"
+                  <v-checkbox label="正確" v-model="props.item.correct" @change="onCorrectChanged(props.index)"
                   />
                </td>
                <td>
@@ -46,6 +46,10 @@ export default {
 		question_id: {
          type: Number,
          default: 0
+      },
+      multi_answers: {
+         type: Boolean,
+         default: false
       },
       init_models: {
          type: Array,
@@ -79,6 +83,9 @@ export default {
 		if(this.init_models) this.models = this.init_models.slice(0);
 	},
 	methods: {
+      getCorrectItems() {
+         return this.models.filter(item => item.correct);
+      },
       getErrMsg(keys){
          let err = this.errors.collect(keys[1]);
 			if(err && err.length){
@@ -89,15 +96,30 @@ export default {
 			return '';
       },
       add(){
+         let correctItems = this.getCorrectItems();
+
          this.models.push({
             id: 0,
             questionId: this.question_id,
             title: '',
-            correct: false
-         })
+            correct: correctItems.length > 0 ? false : true
+         });
       },
 		remove(index){
          this.models.splice(index, 1);
+      },
+      onCorrectChanged(index) {
+         if(this.multi_answers) {
+
+         }else {
+            let item = this.models[index];
+            let correctItems = this.getCorrectItems();
+            if(correctItems.length > 1) {
+               for(let i = 0; i < this.models.length; i++) {
+                  if(i !== index) this.models[i].correct = false;
+               }
+            }
+         }
       },
       submit(){
          this.$validator.validate().then(valid => {

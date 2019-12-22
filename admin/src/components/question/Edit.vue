@@ -13,34 +13,29 @@
 			</v-card-title>
 			<v-card-text>
 				<v-container grid-list-md>
-					<term-selector ref="term_selector"  v-show="selector.term.ready"
-						:show_last="true" :want_array="false"
-						:items="selector.term.items" 
-						:selected_ids="selector.term.selectedIds"
-						@selected="onTermSelected"
+					<question-header ref="questionEditHeader" :allow_create="false" :params="params"
+					@params-changed="onParamsChanged"
 					/>
-					<v-layout row>
+					<v-layout wrap>
 						<v-flex xs12>
-							<v-textarea name="title" v-model="model.title" label="標題" outlined auto-grow
+							<v-textarea v-model="model.title" label="標題" outlined auto-grow
 							v-validate="'required'"
 							:error-messages="getErrMsg('title')"
+							name="title"
 							rows="5"
 							row-height="15"
 							/>
 						</v-flex>
-					</v-layout>
-					<v-layout row>
-						<v-flex xs4>
-							<div @click.prevent="beginEditingRecruits">
-								<v-checkbox :label="recruitsText" v-model="hasRecruits" readonly />
-							</div>
+						<v-flex xs12>
+							<v-checkbox v-model="model.multiAnswers" label="複選" 
+							/>
 						</v-flex>
 					</v-layout>
-					<option-edit ref="option_editor" :init_models="model.options"
-						:question_id="model.id"
+					<option-edit ref="optionEditor" :init_models="model.options"
+						:question_id="model.id" :multi_answers="model.multiAnswers"
 						@submit="onOptionSubmit"
 					/>	
-					<core-error-list  />
+					<core-error-list />
 				</v-container>
 			</v-card-text>
 
@@ -50,53 +45,29 @@
 				<v-btn type="submit" @click.prevent="onSubmit" color="primary">存檔</v-btn>
 			</v-card-actions>
 		</v-card>
-		<v-dialog v-model="recruitSelector.show" width="480px">
-			<recruit-selector v-if="recruitSelector.show" :model="recruitSelector.model" 
-				:options="recruitSelector.options" 
-				@submit="onRecruitSelected"
-				@cancel="recruitSelector.show = false"
-			/>
-		</v-dialog>
 	</form>	
 </template>
 
 
 <script>
-
+import { SET_ERROR } from '@/store/mutations.type';
 export default {
 	name: 'QuestionEdit',
 	props: {
 		model: {
          type: Object,
          default: null
-		},
-		terms: {
-         type: Array,
-         default: null
-		},
-		recruits: {
-         type: Array,
-         default: null
 		}
 	},
 	data () {
 		return {
-			selector: {
-				term: {
-					items: [],
-					selectedIds: [],
-					ready: false
-				}
+			params: {
+				subject: 0,
+				term: 0,
+				recruits: ''
 			},
 
-			recruitSelector: {
-				model: [],
-				show: false,
-				options: []
-			},
-
-			hasRecruits: false,
-			recruitsText: '考古題'
+			paramsChanges: 0
 		}
 	},
 	computed: {
@@ -115,20 +86,40 @@ export default {
 		}
 	},
 	beforeMount(){
-		this.selector.term.items = this.terms.slice(0);
-
-		if(this.model.term && this.model.term.parentIds){
-			this.selector.term.selectedIds = this.model.term.parentIds.slice(0);
-		}
-		this.selector.term.selectedIds.push(this.model.termId);
-
-		this.setRecruits(this.model.recruits);
-		
+		this.init();		
 	},
 	mounted(){
-		this.$refs.term_selector.init();
+		
 	},
 	methods: {
+		init() {
+			this.params.subject = this.model.subjectId;
+			this.params.term = this.model.termId;
+			if(this.model.recruits.length) {
+				let recruitIds = this.model.recruits.map(item => item.id);
+				this.params.recruits = recruitIds.join();
+			}
+		},
+		onParamsChanged() {
+			if(this.paramsChanges > 0){
+				this.model.subjectId = this.params.subject;
+				this.model.termId = this.params.term;
+
+				if(this.params.recruits) {
+					this.model.recruits = this.$refs.questionEditHeader.getSelectedRecruits();
+					// this.model.recruits = this.params.recruits.split(',').map(id => {
+					// 	return { id:  parseInt(id) };
+					// });
+				}else {
+					this.model.recruits = [];
+				}
+				console.log('onParamsChanged')
+				console.log('recruits', this.params.recruits)
+				console.log('model', this.model)
+			}
+
+			this.paramsChanges += 1;
+		},
 		beginEditingRecruits(){
 			this.recruitSelector.options = this.recruits.map(item => {
 				return { value: item.id, text: item.title }
@@ -148,9 +139,6 @@ export default {
 			}
 			return '';
 		},
-		addOption(){
-
-		},
 		remove(){
 			this.$emit('remove');
 		},
@@ -159,7 +147,7 @@ export default {
 		},
 		onSubmit() {
          this.$validator.validate().then(valid => {
-				if(valid) this.$refs.option_editor.submit();
+				if(valid) this.$refs.optionEditor.submit();
          });       
 		},
 		setRecruits(recruits){
@@ -180,7 +168,30 @@ export default {
 
 			this.recruitSelector.show = false;			
 		},
+		checkOptions(options) {
+			if(!options.length) return '必須要有選項';
+			let msg = '';
+			let correctCount = 0;
+			for(let i = 0; i < options.length; i++) {
+            if(options[i].correct) correctCount += 1;
+			}
+			if(correctCount === 0) return '必須要有正確的選項';
+
+			if(this.model.multiAnswers) {
+				
+			}else {
+				if(correctCount > 1) msg = '單選題只能有一個正確選項';
+			}
+
+			return msg;
+		},
 		onOptionSubmit(options){
+			let msg = this.checkOptions(options);
+			if(msg) {
+				this.$store.commit(SET_ERROR, { 'options' : [msg] });
+				return;
+			}
+
 			this.model.options = options.slice(0);
 			this.$emit('submit');
 			

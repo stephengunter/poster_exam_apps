@@ -108,15 +108,15 @@ export default {
 			subjectList: state => state.subjects.list,
 			termList: state => state.terms.list,
 		}),
-		canCreate(){
-			return !this.editor.active && !this.deletion.active;
-		},
 		selectId() {
 			if(this.tree.active.length) return this.tree.active[0];
 			return 0;
 		},
 		treeMaxWidth() {
 			return this.contentMaxWidth - 65;
+		},
+		canCreate(){
+			return !this.editor.active && !this.deletion.active;
 		}
 	},
 	watch: {

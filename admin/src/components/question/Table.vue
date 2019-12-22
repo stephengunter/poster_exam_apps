@@ -1,7 +1,7 @@
 <template>
    <v-data-table :items="list" :headers="headers"  hide-actions item-key="id">
       <template slot="headerCell" slot-scope="{ header }">
-         <span class="subheading font-weight-light text-success text--darken-3">
+         <span class="subheading font-weight-light text--darken-3">
             {{ header.text }}
          </span>
       </template>
