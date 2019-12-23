@@ -139,6 +139,7 @@ export default {
 		init(){
 			this.ready = false;
 			this.editor.active = false;
+			this.deletion.id = 0;
 			this.deletion.active = false;
 			this.setEditModel(null);
 			this.clearSelect();

@@ -85,6 +85,7 @@ export default {
 	methods: {
 		init(){
 			this.editor.active = false;
+			this.deletion.id = 0;
 			this.deletion.active = false;
 			this.setEditModel(null);
 		},
@@ -150,11 +151,16 @@ export default {
 			this.setEditModel(null);
 		},
 		remove(){
-			this.deleting = true;
+			if(this.contentMaxWidth) {
+				if(this.responsive)  this.deletion.maxWidth = this.contentMaxWidth; 
+				else this.deletion.maxWidth = this.contentMaxWidth * 0.6;
+			}
+			this.deletion.id = this.editor.model.id;
+			this.deletion.active = true;
 		},
 		submitDelete(){
 			this.$store.commit(CLEAR_ERROR);
-			let id = this.model.id;
+			let id = this.deletion.id;
 			this.$store.dispatch(DELETE_QUESTION, id)
 				.then(() => {
 					this.init();
@@ -165,7 +171,8 @@ export default {
 				})
 		},
 		cancelDelete(){
-			this.deleting = false;
+			this.deletion.active = false;
+			this.deletion.id = 0;
 		},
 		onSubmit(){
 			this.submit(this.editor.model);

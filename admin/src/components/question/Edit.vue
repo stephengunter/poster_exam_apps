@@ -107,9 +107,6 @@ export default {
 
 				if(this.params.recruits) {
 					this.model.recruits = this.$refs.questionEditHeader.getSelectedRecruits();
-					// this.model.recruits = this.params.recruits.split(',').map(id => {
-					// 	return { id:  parseInt(id) };
-					// });
 				}else {
 					this.model.recruits = [];
 				}
