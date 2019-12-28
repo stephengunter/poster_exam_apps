@@ -4,12 +4,9 @@
 			<v-card-title>
 				<span class="headline">{{ title }}</span>
 				<v-spacer />
-				<v-tooltip top content-class="top">
-					<a href="#" @click.prevent="cancel" slot="activator">
-						<v-icon>mdi-window-close</v-icon>
-					</a>
-					<span>取消</span>
-				</v-tooltip>
+				<a href="#" @click.prevent="cancel">
+					<v-icon>mdi-window-close</v-icon>
+				</a>
 			</v-card-title>
 			<v-card-text>
 				<v-container grid-list-md>
@@ -110,9 +107,6 @@ export default {
 				}else {
 					this.model.recruits = [];
 				}
-				console.log('onParamsChanged')
-				console.log('recruits', this.params.recruits)
-				console.log('model', this.model)
 			}
 
 			this.paramsChanges += 1;

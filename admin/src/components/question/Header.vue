@@ -19,6 +19,9 @@
    <v-layout row>
       <v-flex xs12 sm6 md6>
          <a href="#" class="text-truncate" @click.prevent="selectTerm"> {{ term.title }}： {{ term.fullText }} </a>
+			<!-- <v-btn class="ml-2" fab small color="info">
+				<v-icon>mdi-plus</v-icon>
+			</v-btn> -->
       </v-flex>
       <v-flex xs12 sm6 md6>
 			<a href="#" @click.prevent="selectRecruits"> 考古題： {{ this.recruits.fullText }}</a>

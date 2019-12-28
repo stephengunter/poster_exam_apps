@@ -1,17 +1,10 @@
 <template>
 <div>
-   <core-category-selector ref="categorySelector" :all_items="allItems"
-   :selected_id="category"
-   @select-changed="onCategoryChanged"
-   />
+   Dashboard
 </div>   
 </template>
 
 <script>
-import {
-   FETCH_TERMS
-} from '@/store/actions.type';
-import { LOGIN, REFRESH_TOKEN } from '@/store/actions.type';
 export default {
    name: 'Dashboard',
    methods: {
@@ -29,16 +22,7 @@ export default {
 
    },
    beforeMount() {
-      this.$store.dispatch(FETCH_TERMS)
-		.then(terms => {
-         this.allItems = terms;
-         setTimeout(() => {
-            this.$refs.categorySelector.init();
-         }, 500)
-		})
-		.catch(error => {
-			console.error(error);
-		})
+      
    },
    methods: {
       onCategoryChanged(item) {

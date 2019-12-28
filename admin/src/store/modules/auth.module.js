@@ -132,9 +132,7 @@ const actions = {
    [REFRESH_TOKEN](context) {
       return new Promise((resolve) => {
          let accessToken = JwtService.getToken();
-         console.log('accessToken:',accessToken);
          let refreshToken = JwtService.getRefreshToken();
-         console.log('refreshToken:',refreshToken);
          if(accessToken && refreshToken) {
             context.commit(SET_LOADING, true);
             AuthService.refreshToken({ accessToken, refreshToken })
