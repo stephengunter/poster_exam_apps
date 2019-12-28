@@ -7,26 +7,10 @@ const applinks = [{
    parent: '',
    meta: {
       type: FOR_ALL,
-      menu: false
+      menu: true,
+      icon: 'mdi-home',
+      title: '首頁'
    } 
-},{
-   name: 'Auth',
-   path: '/auth',
-   view: 'Auth',
-   parent: '',
-   meta: {
-      type: FOR_ALL,
-      menu: false
-   } 
-},{
-   name: 'Forbidden',
-   path: '/forbidden',
-   view: 'Forbidden',
-   parent: '',
-   meta: {
-      type: FOR_ALL,
-      menu: false
-   }
 }];
 
 const userLinks = [{
@@ -36,7 +20,9 @@ const userLinks = [{
    parent: '',
    meta: {
       type: USER_ONLY,
-      menu: true
+      menu: true,
+      icon: 'mdi-file-document-edit-outline',
+      title: '模擬測驗'
    } 
 }];
 
@@ -45,10 +31,9 @@ const guestLinks = [{
    name: 'Login',
    path: '/login',
    view: 'Login',
-   parent: 'Dashboard',
    meta: {
-      icon: 'mdi-cloud-outline',
-      title: 'Login',
+      icon: 'mdi-login-variant',
+      title: '登入',
       type: GUEST_ONLY,
       menu: true
    } 

@@ -26,7 +26,7 @@ import { SET_AUTH, PURGE_AUTH, SET_USER,
  
 const state = {
    errors: new Errors(),
-   user: {},
+   user: null,
    isAuthenticated: !!JwtService.getToken()
 };
 
@@ -74,7 +74,7 @@ const actions = {
          })
          .catch(err => {
             reject(err);
-         })    
+         })
       });
        
    },
@@ -111,18 +111,12 @@ const actions = {
          if (token) {
             BaseService.setHeader(token);
             let claims = jwtDecode(token);
-            if(hasAdminRole(claims)){
-               context.commit(SET_USER, {
-                  id: claims.id,
-                  email: claims.sub
-               }); 
-               resolve(true);
-            }else{
-               //有token沒權限,保留token
-               let destroyToken = false;
-               context.commit(PURGE_AUTH, destroyToken);
-               resolve(false);
-            }            
+            context.commit(SET_USER, {
+               id: claims.id,
+               email: claims.sub,
+               picture: claims.picture
+            }); 
+            resolve(true);           
          }else {
             context.commit(PURGE_AUTH);
             resolve(false);
@@ -132,9 +126,7 @@ const actions = {
    [REFRESH_TOKEN](context) {
       return new Promise((resolve) => {
          let accessToken = JwtService.getToken();
-         console.log('accessToken:',accessToken);
          let refreshToken = JwtService.getRefreshToken();
-         console.log('refreshToken:',refreshToken);
          if(accessToken && refreshToken) {
             context.commit(SET_LOADING, true);
             AuthService.refreshToken({ accessToken, refreshToken })
@@ -168,7 +160,8 @@ const mutations = {
       state.errors.clear();   
    },
    [SET_USER](state, user) {
-      state.user = user;
+      if(user) state.user = user;
+      else state.user = null;
    },
    [SET_AUTH](state, model) {
       
@@ -177,7 +170,8 @@ const mutations = {
       let claims = jwtDecode(model.token);
       state.user = {
          id: claims.id,
-         name: claims.sub
+         email: claims.sub,
+         picture: claims.picture
       };
 
       state.isAuthenticated = true;
@@ -186,7 +180,7 @@ const mutations = {
    },
    [PURGE_AUTH](state) {
       state.isAuthenticated = false;
-      state.user = {};
+      state.user = null;
     
       state.errors = new Errors();
       JwtService.destroyToken();

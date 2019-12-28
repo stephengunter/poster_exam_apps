@@ -5,25 +5,13 @@
             <img :src="require('@/assets/logo.png')">
          </v-avatar>
       </div>
-      
-      
-
       <v-list dense>
-         
-         <v-list-item link>
+         <v-list-item link v-for="(item, index) in menus" :key="index" :to="item.path">
             <v-list-item-action>
-               <v-icon>mdi-home</v-icon>
+               <v-icon>{{ item.meta.icon }}</v-icon>
             </v-list-item-action>
             <v-list-item-content>
-               <v-list-item-title>Home</v-list-item-title>
-            </v-list-item-content>
-         </v-list-item>
-         <v-list-item link>
-            <v-list-item-action>
-               <v-icon>mdi-contact-mail</v-icon>
-            </v-list-item-action>
-            <v-list-item-content>
-               <v-list-item-title>Contact</v-list-item-title>
+               <v-list-item-title>{{ item.meta.title }}</v-list-item-title>
             </v-list-item-content>
          </v-list-item>
       </v-list>
@@ -31,8 +19,9 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import { SITE_TITLE, LOGO_SRC } from '@/config';
+import Menu from '@/common/menu';
 import { SET_DRAWER, TOGGLE_DRAWER } from '@/store/mutations.type';
 
 export default {
@@ -43,7 +32,7 @@ export default {
 		}
    },
    computed: {
-		...mapGetters(['isAuthenticated', 'responsive']), 
+		...mapGetters(['isAuthenticated', 'responsive', 'menus']),
     	drawer: {
          get() {
             return this.$store.state.app.drawer
@@ -52,6 +41,10 @@ export default {
             this.setDrawer(val)
          }
 		}
+   },
+   beforeMount() {
+     
+      
    },
    methods:{
       setDrawer(val) {

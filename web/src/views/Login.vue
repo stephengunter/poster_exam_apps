@@ -1,0 +1,53 @@
+<template>
+   <v-row align="center" justify="center">
+		<v-col cols="12" sm="8" md="4">
+			<v-card class="elevation-12">
+				<v-toolbar  flat>
+               <v-toolbar-title>登入</v-toolbar-title>
+				</v-toolbar>
+				<v-card-text>
+					<v-row>
+						<v-col>
+							<GoogleLogin 
+							@success="onGoogleLoginSuccess" 
+							@failed="oAuthLoginFailed"
+							/>
+						</v-col>
+					</v-row>
+				</v-card-text>
+			</v-card>
+		</v-col>
+	</v-row>
+</template>
+
+<script>
+import { LOGIN } from '@/store/actions.type';
+import GoogleLogin from '@/components/login/Google';
+export default {
+	name: 'LoginView',
+	components: {
+      GoogleLogin
+	},
+	methods: {
+      oAuthLoginFailed(){
+         Bus.$emit('errors', { msg: '登入失敗' });
+      },
+      onGoogleLoginSuccess(token){
+         this.$store.dispatch(LOGIN, token)
+			.then(() => {
+				this.onSuccess();          
+			}).catch(error => {
+				this.oAuthLoginFailed();
+			})
+      },
+      onSuccess(){
+         if(this.returnUrl) this.$router.push({ path: this.returnUrl });
+         else this.$router.push({ path: '/' });         
+      }
+   }
+}
+</script>
+
+<style>
+
+</style>

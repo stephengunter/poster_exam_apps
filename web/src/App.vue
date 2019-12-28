@@ -3,6 +3,30 @@
 	   <TheDrawer />
 		<TheHeader />
 		<TheContainer />
+
+		<v-overlay :value="loading">
+			<v-progress-circular indeterminate size="48"></v-progress-circular>
+		</v-overlay>
+		<v-snackbar :timeout="success.timeout" top right dark
+			:color="success.color" v-model="success.show"
+		>
+			<v-icon color="white" class="mr-3">
+			mdi-check-circle
+			</v-icon>
+			<span class="successText cn">
+				{{ success.msg  }}
+			</span>
+		</v-snackbar>
+		<v-dialog v-model="err.show" width="480">
+         <v-card-title class="headline red lighten-1" >
+				<v-icon color="white" class="mr-3">
+					mdi-alert-circle
+				</v-icon>
+				<span class="errText">
+					{{ err.msg  }}
+				</span>
+         </v-card-title>
+      </v-dialog>
 	</v-app>
 </template>
 
@@ -26,15 +50,26 @@ export default {
 			title: '',
 			err: {
 				show: false,
-				msg: 'Server no response. Please try later.'
+				msg: '伺服器暫時無回應，請稍候再試.'
 			},
 			success: {
-				color: 'success',
+				color: 'info',
 				show: false,
 				timeout: 1500,
-				msg: 'Save successfully'
+				msg: '存檔成功'
 			}
 		}
+	},
+	computed:{
+		...mapGetters(['currentUser']),
+      ...mapState({
+			loading: state => state.app.loading,
+			responsive: state => state.app.responsive
+      })
+	},
+	created(){
+		Bus.$on('errors', this.onError);
+		Bus.$on('success', this.onSuccess);
 	},
 	mounted(){
 		if(window.innerWidth) this.$store.commit(SET_WINDOW_WIDTH, window.innerWidth);
@@ -47,17 +82,19 @@ export default {
 	},
 	methods:{
 		onError(error){
+			console.log('onError');
+			let defaultMsg = '伺服器暫時無回應，請稍候再試.';
 			if(!error){
-				this.err.msg = 'Server no response. Please try later.';
+				this.err.msg = defaultMsg;
 				this.err.show = true;
 				return;
 			}
 			if(!error.status){
-				this.err.msg = error.msg ? error.msg : 'Server no response. Please try later.';
+				this.err.msg = error.msg ? error.msg : defaultMsg;
 				this.err.show = true;
 			}
 			if(error.status === 500){
-				this.err.msg = 'Server no response. Please try later.';
+				this.err.msg = defaultMsg;
 				this.err.show = true;
 			}else if(error.status === 401){
 				this.$router.push({ name: 'login' })
@@ -65,7 +102,7 @@ export default {
 		},
 		onSuccess(msg){
 			this.success.show = true;
-			this.success.msg = msg ? msg : 'Save successfully';
+			this.success.msg = msg ? msg : '存檔成功';
 		},
 		onResponsiveInverted () {
 			if(window.innerWidth) this.$store.commit(SET_WINDOW_WIDTH, window.innerWidth);
@@ -84,5 +121,13 @@ export default {
 <style lang="scss">
 * :not(.v-icon) {
   font-family: "微軟正黑體",sans-serif!important;
+}
+
+.errText{
+	color: #fff;
+}
+.successText{
+	font-size: 1.2rem;
+	color: #fff;
 }
 </style>

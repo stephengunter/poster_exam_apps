@@ -1,5 +1,6 @@
 import jwtDecode from 'jwt-decode';
 import moment from 'moment';
+import { getRandomInt } from '@/utils';
 
 const ID_TOKEN_KEY = 'id_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
@@ -23,6 +24,7 @@ const tokenStatus = () => {
 
    let claims = jwtDecode(token);
    let exp = moment.unix(claims.exp);
+
    let now = moment.utc();
    let diff = exp.diff(now, 'minutes');
 

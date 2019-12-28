@@ -49,3 +49,5 @@ export const buildQuery = (url, params) => {
 }
 
 export const toRocYear = (val) => val - 1911;
+
+export const getRandomInt = (max) => Math.floor(Math.random() * Math.floor(max));

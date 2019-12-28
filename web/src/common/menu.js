@@ -1,8 +1,13 @@
-import { FOR_ALL, GUEST_ONLY, USER_ONLY, ADMIN_ONLY } from '@/routes/route.type';
+import { FOR_ALL, GUEST_ONLY, USER_ONLY } from '@/routes/route.type';
 
-const forAllRoute = (route) => route.meta.type === FOR_ALL;
-
-const getMainMenus = (routes, currentRoute) => {
+const getMainMenus = (appRoutes, currentRoute, auth) => {
+   let routes = [];
+   if(auth) {
+      routes = appRoutes.filter(item => item.meta.type !== GUEST_ONLY);
+   }else {
+      routes = appRoutes.filter(item => item.meta.type !== USER_ONLY);
+   }
+   
    let mainLinks = getMainLinks(routes);
    mainLinks.forEach(item => {
       item.active =  (item.name === currentRoute.name);

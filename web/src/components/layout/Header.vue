@@ -2,26 +2,66 @@
    <v-app-bar app color="success" dark>
       <v-app-bar-nav-icon @click.prevent="toggleDrawer" />
       <v-toolbar-title class="site-title">{{ title }}</v-toolbar-title>
+      
+      
       <v-spacer></v-spacer>
-
-      <v-menu left bottom >
+      
+      <v-menu offset-y>
          <template v-slot:activator="{ on }">
             <v-btn icon v-on="on">
-               <v-avatar color="orange">
-                  <span class="white--text headline">62</span>
+               <v-icon>mdi-dots-vertical</v-icon>
+            </v-btn>
+         </template>
+         <v-card class="mx-auto" max-width="300" tile >
+            <v-list>
+               <v-list-item @click.prevent="logout">
+                  <v-list-item-icon>
+                        <v-icon>mdi-logout-variant</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                     <v-list-item-title>登出</v-list-item-title>
+                  </v-list-item-content>
+               </v-list-item>
+               <v-list-item @click.prevent="logout">
+                  <v-list-item-icon>
+                        <v-icon>mdi-logout-variant</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                     <v-list-item-title>登出登出登出登出</v-list-item-title>
+                  </v-list-item-content>
+               </v-list-item>
+            </v-list>
+         </v-card>
+      </v-menu>
+      <v-menu v-if="currentUser" offset-y>
+         <template v-slot:activator="{ on }">
+            <v-btn icon v-on="on">
+               <v-avatar size="36">
+                  <img :src="currentUser.picture">
                </v-avatar>
             </v-btn>
          </template>
-         <v-list>
-            <v-list-item>
-               <v-list-item-title>登出</v-list-item-title>
-            </v-list-item>
-         </v-list>
+         <v-card class="mx-auto" max-width="300" tile >
+            <v-list>
+               <v-list-item @click.prevent="logout">
+                  <v-list-item-icon>
+                        <v-icon>mdi-logout-variant</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                     <v-list-item-title>登出</v-list-item-title>
+                  </v-list-item-content>
+               </v-list-item>
+            </v-list>
+         </v-card>
       </v-menu>
+      
+      
    </v-app-bar>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+import { LOGOUT } from '@/store/actions.type';
 import { TOGGLE_DRAWER } from '@/store/mutations.type';
 import { SITE_TITLE } from '@/config';
 export default {
@@ -31,8 +71,8 @@ export default {
          title: SITE_TITLE
       }
    },
-   beforeMount() {
-      
+   computed:{
+		...mapGetters(['currentUser'])
    },
    methods:{
       toggleDrawer(){
