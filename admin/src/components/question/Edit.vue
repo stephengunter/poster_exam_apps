@@ -11,7 +11,7 @@
 			<v-card-text>
 				<v-container grid-list-md>
 					<question-header ref="questionEditHeader" :allow_create="false" :params="params"
-					@params-changed="onParamsChanged"
+					:multi_terms="true"					
 					/>
 					<v-layout wrap>
 						<v-flex xs12>
@@ -60,11 +60,10 @@ export default {
 		return {
 			params: {
 				subject: 0,
-				term: 0,
+				terms: [],
 				recruits: ''
-			},
-
-			paramsChanges: 0
+			}
+			
 		}
 	},
 	computed: {
@@ -91,25 +90,19 @@ export default {
 	methods: {
 		init() {
 			this.params.subject = this.model.subjectId;
-			this.params.term = this.model.termId;
+			if(this.model.termIds) {
+				let terms = this.model.termIds.split(',');
+				this.params.terms = terms.map(id => parseInt(id));
+				this.params.term = this.params.terms[0];
+			}else {
+				this.params.terms = [];
+				this.params.term = 0;
+			}
+		
 			if(this.model.recruits.length) {
 				let recruitIds = this.model.recruits.map(item => item.id);
 				this.params.recruits = recruitIds.join();
 			}
-		},
-		onParamsChanged() {
-			if(this.paramsChanges > 0){
-				this.model.subjectId = this.params.subject;
-				this.model.termId = this.params.term;
-
-				if(this.params.recruits) {
-					this.model.recruits = this.$refs.questionEditHeader.getSelectedRecruits();
-				}else {
-					this.model.recruits = [];
-				}
-			}
-
-			this.paramsChanges += 1;
 		},
 		beginEditingRecruits(){
 			this.recruitSelector.options = this.recruits.map(item => {
@@ -137,6 +130,15 @@ export default {
 			this.$emit('cancel');
 		},
 		onSubmit() {
+			this.model.subjectId = this.params.subject;
+			this.model.termIds = this.params.terms.join();
+
+			if(this.params.recruits) {
+				this.model.recruits = this.$refs.questionEditHeader.getSelectedRecruits();
+			}else {
+				this.model.recruits = [];
+			}
+
          this.$validator.validate().then(valid => {
 				if(valid) this.$refs.optionEditor.submit();
          });       

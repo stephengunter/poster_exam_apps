@@ -98,7 +98,6 @@ export default {
 			this.onParamsChanged();
 		},
 		onParamsChanged() {
-			console.log('params',this.params);
 			this.fetchData(this.params);
 		},
 		fetchData(params){

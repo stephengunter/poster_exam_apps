@@ -17,11 +17,27 @@
       </v-flex>
    </v-layout>
    <v-layout row>
-      <v-flex xs12 sm6 md6>
-         <a href="#" class="text-truncate" @click.prevent="selectTerm"> {{ term.title }}： {{ term.fullText }} </a>
-			<!-- <v-btn class="ml-2" fab small color="info">
-				<v-icon>mdi-plus</v-icon>
-			</v-btn> -->
+		<v-flex v-if="multi_terms" xs12 sm6 md6>
+			<v-layout row  v-for="(item, index) in term.models" :key="index" >
+				<v-flex>
+					<a href="#" class="text-truncate" @click.prevent="selectTerm(index)"> 
+						{{ term.title }}： {{ term.fullTextList[index] }} 
+					</a>
+					<a class="ml-3" href="#" @click.prevent="removeTerm(index)">
+						<v-icon>mdi-window-close</v-icon>
+					</a>
+				</v-flex> 
+			</v-layout>
+			<v-layout row>
+				<v-flex>
+					<a href="#" class="text-truncate" @click.prevent="selectTerm(-1)">
+						{{ term.title }}：
+					</a>
+				</v-flex> 
+			</v-layout>
+		</v-flex>
+      <v-flex v-else xs12 sm6 md6>
+			 <a href="#" class="text-truncate" @click.prevent="selectTerm"> {{ term.title }}： {{ term.fullText }} </a>
       </v-flex>
       <v-flex xs12 sm6 md6>
 			<a href="#" @click.prevent="selectRecruits"> 考古題： {{ this.recruits.fullText }}</a>
@@ -121,6 +137,10 @@ export default {
 		can_create: {
 			type: Boolean,
 			default: false
+		},
+		multi_terms: {
+			type: Boolean,
+			default: false
       },
       params: {
 			type: Object,
@@ -147,9 +167,12 @@ export default {
 				title: '條文',
 				id: 0,
 				selecting: false,
+				selectingIndex: 0,
 				maxWidth: 800,
 				fullText: '',
-				model: null
+				model: null,
+				models: [],
+				fullTextList: []
 			},
 			recruits: {
 				title: '考古題',
@@ -176,6 +199,7 @@ export default {
 		.catch(error => {
 			onError(error);
 		})
+		
 
 		this.$store.commit(CLEAR_ERROR);
 		this.$store.dispatch(FETCH_RECRUITS)
@@ -230,33 +254,89 @@ export default {
 				onError(error);
 			})
 		},
-		selectTerm() {
+		selectTerm(index = 0) {
+			this.term.selectingIndex = index;
+
 			if(this.contentMaxWidth) this.term.maxWidth = this.contentMaxWidth;
 			this.term.selecting = true;
+
+			if(this.multi_terms) {
+				let selectedModel = this.term.models[index];
+				if(selectedModel) this.params.term = selectedModel.id;
+				setTimeout(() => {
+					this.$refs.termSelector.init(false);
+				}, 500);
+			}
+			
 		},
-		onTermSelected(item){
+		removeTerm(index) {
+			this.setSelectedTerm(null, '', index);
+			this.onSubmitTerm();
+		},
+		onTermSelected(item, fullText){
 			this.$store.commit(SET_LOADING, false);
 
-			this.setSelectedTerm(item);
+			let selectingIndex = this.term.selectingIndex;
+			this.setSelectedTerm(item, fullText, selectingIndex);
 
 			if(this.term.selecting) {
 				
 			}else {
-				this.onSubmitTerm();
+				//初次自動載入
+				if(this.multi_terms) {
+					if(this.params.terms.length > selectingIndex + 1) {
+						this.params.term = this.params.terms[selectingIndex + 1];
+						setTimeout(() => {
+							this.$refs.termSelector.init();
+						}, 500);
+						this.term.selectingIndex += 1;
+					}
+					
+				}else {
+					this.onSubmitTerm();
+				}
 			}
 		},
-		setSelectedTerm(item) {
-			if(item) this.term.model = item;
-			else this.term.model = null;
+		setSelectedTerm(item, fullText, selectingIndex) {
+			if(selectingIndex < 0) {
+				//新增
+				if(!item) return;
+				let existIndex = this.term.models.findIndex(x => x.id === item.id);
+				if(existIndex >= 0) return;
+
+				this.term.models.push(item);
+				this.term.fullTextList.push(fullText);
+			}else {
+				if(item) {
+					let existIndex = this.term.models.findIndex(x => x.id === item.id);
+					if(existIndex >= 0) return;
+					this.term.models.splice(selectingIndex, 1, item);
+					this.term.fullTextList.splice(selectingIndex, 1, fullText);
+				} 
+				else {
+					this.term.models.splice(selectingIndex, 1);
+					this.term.fullTextList.splice(selectingIndex, 1);
+				} 
+			}
 		},
 		onSubmitTerm() {
-			if(this.term.model) this.params.term = this.term.model.id;
-         else this.params.term = 0;
+			if(this.multi_terms) {
+				let models = this.term.models;
+				this.params.terms = models.map(item => item.id); 
+			}else {
+				this.params.term = 0;
+				this.term.fullText = '';
+				if(this.term.models.length) {
+					let model = this.term.models[0];
+					if(model) this.params.term = model.id;
+					this.term.fullText = this.$refs.termSelector.getSelectedListText();
+				}
+			}
          
          this.$emit('params-changed');
 
 			this.term.selecting = false;
-			this.term.fullText = this.$refs.termSelector.getSelectedListText();
+			
 		},
 		selectRecruits() {
 			if(this.contentMaxWidth) this.recruits.maxWidth = this.contentMaxWidth;

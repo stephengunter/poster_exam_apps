@@ -56,7 +56,7 @@ export default {
 		
 	},
    methods: {
-      init() {
+      init(fire = true) {
          let selectedItem = this.getItemById(this.selected_id);
          if(selectedItem) {
             
@@ -96,8 +96,12 @@ export default {
             this.ready = true;
          }
 
-         this.$emit('select-changed', selectedItem);
+         if(fire) this.onSelectChanged(selectedItem);
 
+      },
+      onSelectChanged(selectedItem) {
+         let fullText = this.getSelectedListText();
+         this.$emit('select-changed', selectedItem, fullText);
       },
       getSelectedListText(splitText = ' > ') {
          let ids = this.selected.idList;
@@ -267,8 +271,8 @@ export default {
          this.setModels(models, index + 1);
 
          this.setSelectedIdList();         
-        
-         this.$emit('select-changed', selectedItem);
+         
+         this.onSelectChanged(selectedItem);
       },
 
    }
