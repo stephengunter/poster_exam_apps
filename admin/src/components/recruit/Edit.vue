@@ -53,7 +53,10 @@
 							/>
 						</v-flex>
 					</v-layout>
-					
+					<recruit-sub-item-edit ref="subItemsEditor" :init_models="model.subItems"
+						:parent_id="model.id" :subject_options="subject_options" 
+						@submit="onSubItemsSubmit"
+					/>
 					<core-error-list  />
 				</v-container>
 			</v-card-text>
@@ -78,6 +81,10 @@ export default {
          default: null
 		},
 		year_options: {
+         type: Array,
+         default: null
+		},
+		subject_options: {
          type: Array,
          default: null
 		}
@@ -125,6 +132,9 @@ export default {
 		},
 		cancel(){
 			this.$emit('cancel');
+		},
+		onSubItemsSubmit() {
+			console.log('onSubItemsSubmit');
 		},
 		onSubmit() {
          this.$validator.validate().then(valid => {

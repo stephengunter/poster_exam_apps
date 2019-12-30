@@ -48,6 +48,19 @@ const adminlinks = [
       } 
    },
    {
+      name: 'Recruits',
+      path: '/recruits',
+      view: 'Recruits',
+      parent: '',
+      meta: {
+         order: 0,
+         icon: 'mdi-file-document-edit-outline',
+         title: '招考',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
+   },
+   {
       name: 'Subjects',
       path: '/subjects',
       view: 'Subjects',
@@ -73,6 +86,7 @@ const adminlinks = [
          menu: true
       } 
    },
+   
    {
       name: 'Questions',
       path: '/questions',
@@ -86,19 +100,7 @@ const adminlinks = [
          menu: true
       } 
    },
-   {
-      name: 'Recruits',
-      path: '/recruits',
-      view: 'Recruits',
-      parent: 'Questions',
-      meta: {
-         order: 0,
-         icon: 'mdi-file-document-edit-outline',
-         title: '招考',
-         type: ADMIN_ONLY,
-         menu: true
-      } 
-   }
+   
       
 ];
 

@@ -39,7 +39,8 @@
 			</v-flex>
      </v-layout>
 	  <v-dialog v-model="editor.active" persistent :max-width="editor.maxWidth">
-			<recruit-edit v-if="editor.active" :model="editor.model" :year_options="editor.yearOptions"
+			<recruit-edit v-if="editor.active" :model="editor.model"
+			:subject_options="editor.subjectOptions" :year_options="editor.yearOptions"
 			@submit="submit" @cancel="cancelEdit" @remove="remove"
 			/>
 		</v-dialog>
@@ -75,6 +76,7 @@ export default {
 			},
 
 			editor: {
+				subjectOptions: [],
 				yearOptions: [],
 				active: false,
 				maxWidth: 800,
@@ -169,7 +171,9 @@ export default {
 		},
 		setEditModel(model) {
 			if(model) {
-				this.editor.model = model;
+				this.editor.model = model.recruit;
+				this.editor.subjectOptions = model.subjectOptions;
+
 				if(this.contentMaxWidth) this.editor.maxWidth = this.contentMaxWidth;
 				this.editor.active = true;
 			}else {
