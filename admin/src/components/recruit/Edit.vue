@@ -72,7 +72,8 @@
 
 
 <script>
-
+import uniq from 'lodash/uniq';
+import { SET_ERROR, CLEAR_ERROR } from '@/store/mutations.type';
 export default {
 	name: 'RecruitEdit',
 	props: {
@@ -133,13 +134,32 @@ export default {
 		cancel(){
 			this.$emit('cancel');
 		},
-		onSubItemsSubmit() {
-			console.log('onSubItemsSubmit');
+		onSubItemsSubmit(items) {
+			let msg = this.checkSubItems(items);
+			if(msg) {
+				this.$store.commit(SET_ERROR, { 'subItems' : [msg] });
+				return;
+			}
+
+			this.model.subItems = items.slice(0);
+			this.$emit('submit');
+		},
+		checkSubItems(items) {
+			if(!items.length) return '必須要有筆試項目';
+
+			let subjectIds = items.map(item => item.subjectId);
+			if(subjectIds.length !==  uniq(subjectIds).length) {
+				return '筆試科目重複了';
+			}
+		
+			return '';
 		},
 		onSubmit() {
-         this.$validator.validate().then(valid => {
-				if(valid) this.$emit('submit');
-         });         
+			this.$store.commit(CLEAR_ERROR);
+			this.$validator.validate().then(valid => {
+				if(valid) this.$refs.subItemsEditor.submit();
+			});
+			      
 		}
 	}
 }

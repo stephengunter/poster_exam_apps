@@ -23,7 +23,14 @@
                </td>
                <td>
                   <v-select label="科目"
-                     :items="subject.options[props.index]" v-model="props.item.subjectId"
+                  :items="subject.options[props.index]" v-model="props.item.subjectId"
+                  v-validate="'required'"
+                  :data-vv-name="`subitem_subjectId_${props.index}`"
+                  :error-messages="getErrMsg(['subjectId',`subitem_subjectId_${props.index}`])"
+                  />
+               </td>
+               <td>
+                  <v-text-field v-model="props.item.ps"
                   />
                </td>
                <td>
@@ -65,12 +72,18 @@ export default {
 					sortable: false,
 					text: '標題',
                value: '',
-               width: '50%'
+               width: '35%'
             },
             {
 					sortable: false,
 					text: '科目',
 					value: ''
+            },
+            {
+					sortable: false,
+					text: '備註',
+               value: '',
+               width: '35%'
             },
             {
                width: '50px',
@@ -89,6 +102,11 @@ export default {
 	},
 	beforeMount(){
       if(this.init_models) this.models = this.init_models.slice(0);
+
+      this.models.forEach(model => {
+         this.subject.options.push(this.subject_options.slice(0));
+      });
+
       this.setSubjectOptions();
 	},
 	methods: {
@@ -108,6 +126,7 @@ export default {
 			if(err && err.length){
             let msg = err[0];
             if(keys[0] === 'title') return msg.replace(keys[1], '標題');
+            else if(keys[0] === 'subjectId') return msg.replace(keys[1], '科目');
 				return msg;
 			}
 			return '';

@@ -7,6 +7,7 @@ import subjects from './modules/subjects.module';
 import terms from './modules/terms.module';
 import questions from './modules/questions.module';
 import recruits from './modules/recruits.module';
+import recruitQuestions from './modules/recruit-questions.module';
 
 Vue.use(Vuex);
 
@@ -17,6 +18,7 @@ export default new Vuex.Store({
       subjects,
       terms,
       questions,
-      recruits
+      recruits,
+      recruitQuestions
    }
 });

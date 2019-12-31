@@ -19,6 +19,13 @@
                {{ props.item.title }}
             </td>
             <td>
+               <ul v-show="props.item.subItems">
+                  <li v-for="(subItem, index) in props.item.subItems" :key="index">
+                     {{ subItem.title }}
+                  </li>
+               </ul>
+            </td>
+            <td>
                {{ props.item.dateText }}
             </td>
             <td :class="{ 'is-active': props.item.active }">
@@ -65,7 +72,13 @@ export default {
 					sortable: false,
 					text: '名稱',
                value: '',
-               width: '40%'
+               width: '15%'
+            },
+            {
+					sortable: false,
+					text: '筆試科目',
+               value: '',
+               width: '35%'
             },
             {
 					sortable: false,

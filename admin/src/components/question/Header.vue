@@ -89,7 +89,7 @@
       </v-card>
    </v-dialog>
 	<v-dialog v-model="recruits.selecting" :max-width="recruits.maxWidth">
-      <v-card>
+      <v-card v-if="recruits.selecting">
          <v-card-title>
             <span class="headline">{{ '選擇' + recruits.title }}</span>
             <v-spacer />
@@ -100,9 +100,9 @@
          <v-card-text>
             <v-container>
                <v-layout row wrap>
-                  <v-flex xs6 sm4 md4 v-for="item in recruitList" :key="item.id">
-                     <v-checkbox @change="onRecruitChanged(item.id)"
-							:label="item.title" :value="item.id" 
+                  <v-flex xs6 sm4 md4 v-for="item in recruitOptions" :key="item.value">
+                     <v-checkbox @change="onRecruitChanged(item.value)"
+							:label="item.text" :value="item.value" 
 							v-model="recruits.ids"
 							/>
                   </v-flex>
@@ -153,9 +153,8 @@ export default {
 			subjectList: [],
 			termList: [],
 
-			recruitList:[{
-				id: 0, title: '-------' , year: 0
-			}],
+			recruitList:[],
+			recruitOptions: [],
 
 			subject: {
 				title: '科目',
@@ -202,14 +201,16 @@ export default {
 		
 
 		this.$store.commit(CLEAR_ERROR);
-		this.$store.dispatch(FETCH_RECRUITS)
+		this.$store.dispatch(FETCH_RECRUITS, { parent: -1 })
 		.then(recruits => {
-			this.recruitList = this.recruitList.concat(recruits);
+			this.recruitList = recruits;
 
 			if(this.params.recruits) {
 				this.recruits.ids = this.params.recruits.split(',').map(id => parseInt(id));
 			}else this.recruits.ids = [0];
-
+			
+			this.loadRecruitOptions();
+			
 			this.onSubmitRecruits();
 		})
 		.catch(error => {
@@ -339,19 +340,42 @@ export default {
 			
 		},
 		selectRecruits() {
+			this.loadRecruitOptions();
+
 			if(this.contentMaxWidth) this.recruits.maxWidth = this.contentMaxWidth;
 			this.recruits.selecting = true;
 		},
+		loadRecruitOptions () {
+			let allRecruits = this.recruitList;
+			let subjectId = this.params.subject;
+			let options = [{ value: 0, text: '-------' }];
+			for(let i = 0; i < allRecruits.length; i++) {
+				let item = allRecruits[i];
+				if(item.parentId > 0 && item.subjectId === subjectId) {
+					let parent = allRecruits.find(x => x.id === item.parentId);
+					options.push({
+						value: item.id, text: parent.title
+					});
+				}
+			}
+
+			this.recruitOptions = options;
+		},
 		onSubmitRecruits() {
+			console.log('onSubmitRecruits');
+			console.log('recruitOptions', this.recruitOptions);
+
 			let ids = this.recruits.ids;
 			if(ids.includes(0)) this.params.recruits = '';
 			else this.params.recruits = ids.join();
 
 			let text = '';
          for(let i = 0; i < ids.length; i++) {
+				if(ids[i] === 0) continue;
 				if(i > 0) text += ' , ';
-				let item = this.recruitList.find(item => item.id === ids[i]);
-            text += item.title;
+				
+				let item = this.recruitOptions.find(item => item.value === ids[i]);
+            text += item.text;
 			}
 
 			this.recruits.fullText = text;

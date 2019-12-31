@@ -1,28 +1,10 @@
 import { FOR_ALL, GUEST_ONLY, USER_ONLY, ADMIN_ONLY } from './route.type';
 
-const applinks = [{
-   name: 'Auth',
-   path: '/auth',
-   view: 'Auth',
-   parent: '',
-   meta: {
-      type: FOR_ALL,
-      menu: false
-   } 
-},{
-   name: 'Forbidden',
-   path: '/forbidden',
-   view: 'Forbidden',
-   parent: '',
-   meta: {
-      type: FOR_ALL,
-      menu: false
-   }
-}];
+const applinks = [];
 
 const adminlinks = [
    {
-      name: 'Dashboard',
+      name: 'dashboard',
       path: '/dashboard',
       view: 'Dashboard',
       parent: '',
@@ -35,10 +17,10 @@ const adminlinks = [
       } 
    },
    {
-      name: 'SubDashboard',
+      name: 'subDashboard',
       path: '/subdashboard',
       view: 'SubDashboard',
-      parent: 'Dashboard',
+      parent: 'dashboard',
       meta: {
          order: 0,
          icon: 'mdi-city-variant-outline',
@@ -48,7 +30,7 @@ const adminlinks = [
       } 
    },
    {
-      name: 'Recruits',
+      name: 'recruits',
       path: '/recruits',
       view: 'Recruits',
       parent: '',
@@ -61,7 +43,7 @@ const adminlinks = [
       } 
    },
    {
-      name: 'Subjects',
+      name: 'subjects',
       path: '/subjects',
       view: 'Subjects',
       parent: '',
@@ -74,10 +56,10 @@ const adminlinks = [
       } 
    },
    {
-      name: 'Terms',
+      name: 'terms',
       path: '/terms',
       view: 'Terms',
-      parent: 'Subjects',
+      parent: 'subjects',
       meta: {
          order: 0,
          icon: 'mdi-file-document-box-outline',
@@ -86,9 +68,8 @@ const adminlinks = [
          menu: true
       } 
    },
-   
    {
-      name: 'Questions',
+      name: 'questions',
       path: '/questions',
       view: 'Questions',
       parent: '',
@@ -96,6 +77,19 @@ const adminlinks = [
          order: 0,
          icon: 'mdi-database-check',
          title: '題庫',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
+   },
+   {
+      name: 'recruitQuestions',
+      path: '/recruit-questions',
+      view: 'RecruitQuestions',
+      parent: 'questions',
+      meta: {
+         order: 0,
+         icon: '',
+         title: '歷屆試題',
          type: ADMIN_ONLY,
          menu: true
       } 

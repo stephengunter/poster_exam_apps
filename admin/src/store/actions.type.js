@@ -26,7 +26,6 @@ export const UPDATE_TERM = 'updateTerm';
 export const DELETE_TERM = 'deleteTerm';
 export const ORDER_TERMS = 'orderTerms';
 
-
 //Recruits
 export const FETCH_RECRUITS = 'fetchRecruits';
 export const CREATE_RECRUIT = 'createRecruit';
@@ -36,6 +35,7 @@ export const UPDATE_RECRUIT = 'updateRecruit';
 export const DELETE_RECRUIT = 'deleteRecruit';
 export const ORDER_RECRUITS = 'orderRecruits';
 
+//Questions
 export const FETCH_QUESTIONS = 'fetchQuestions';
 export const CREATE_QUESTION = 'createQuestion';
 export const STORE_QUESTION = 'storeQuestion';
@@ -43,3 +43,6 @@ export const EDIT_QUESTION = 'editQuestion';
 export const UPDATE_QUESTION = 'updateQuestion';
 export const DELETE_QUESTION = 'deleteQuestion';
 export const ORDER_QUESTIONS = 'orderQuestions';
+
+//RecruitQuestions
+export const FETCH_RECRUIT_QUESTIONS = 'fetchRecruitQuestions';

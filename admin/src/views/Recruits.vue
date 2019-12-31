@@ -3,30 +3,11 @@
       <v-layout justify-center  align-center>
 			<v-flex xs12>
 				<material-card>
-					<v-layout row wrap>
-						<v-flex xs12 sm4 md4>
-							<v-radio-group v-model="params.active" row>
-								<v-radio v-for="(item, index) in activeOptions" :key="index"
-								:label="item.text" :value="item.value" 
-								@change="onActiveChanged"
-								/>
-							</v-radio-group>
-						</v-flex>
-						<v-flex xs12 sm4 md4>
-							<v-select label="年度"
-								:items="yearOptions" v-model="params.year"
-								@change="onYearChanged"
-							/>
-						</v-flex>
-						<v-flex xs12 sm4 md4 text-xs-right>
-							<v-tooltip top content-class="top">
-								<v-btn :disabled="!canCreate" @click.prevent="create" class="mx-2" fab small color="info" slot="activator">
-									<v-icon>mdi-plus</v-icon>
-								</v-btn>
-								<span>新增</span>
-							</v-tooltip>
-						</v-flex>
-					</v-layout>
+					<recruit-header :params="params"
+					:active_options="activeOptions" :year_options="yearOptions"
+					:can_create="canCreate"
+					@create="create" @params-changed="onParamsChanged"
+					/>
 					<v-layout row wrap>
 						<v-flex xs12>
 							<recruit-table :list="recruitList" @edit="edit"
@@ -128,12 +109,7 @@ export default {
 
 			this.fetchData(this.params);
 		},
-		onActiveChanged(val) {
-			this.params.active = val;
-			this.fetchData(this.params);
-		},
-		onYearChanged(val) {
-			this.params.year = val;
+		onParamsChanged() {
 			this.fetchData(this.params);
 		},
 		fetchData(params){
