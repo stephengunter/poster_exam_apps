@@ -7,9 +7,13 @@
 					:params="params" :can_create="canCreate" 
 					@params-changed="onParamsChanged" @create="create"
 					/>
-					<v-layout row wrap>
+					<v-layout row wrap v-if="pageList">
+						<v-flex sm12 v-show="pageList.viewList.length">
+							共 {{ pageList.totalItems }} 題
+						</v-flex>
 						<v-flex sm12>
-							<question-table :list="list" @edit="edit"/>
+							<question-table :list="pageList.viewList" :show_recruits="false"
+							@edit="edit"/>
 						</v-flex>
 					</v-layout>
 				</material-card>
@@ -29,7 +33,9 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { SET_LOADING, CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
-import { FETCH_RECRUIT_QUESTIONS } from '@/store/actions.type';
+import { FETCH_RECRUIT_QUESTIONS, CREATE_QUESTION, STORE_QUESTION,
+	EDIT_QUESTION, UPDATE_QUESTION, DELETE_QUESTION 
+} from '@/store/actions.type';
 
 export default {
 	name: 'RecruitQuestionsView',
@@ -38,6 +44,8 @@ export default {
 			params: {
 				recruit: 0
 			},
+			selectedRecruit: null,
+
 			editor: {
 				active: false,
 				maxWidth: 800,
@@ -54,13 +62,33 @@ export default {
 	computed: {
 		...mapGetters(['responsive','contentMaxWidth']),
 		...mapState({
-			list: state => state.questions.list,
+			pageList: state => state.questions.pageList
 		}),
 		canCreate(){
+			if(!this.selectedRecruit) return false;
 			return !this.editor.active && !this.deletion.active;
 		},
 	},
 	beforeMount(){
+		let recruits = [];
+		let test = [{
+			id: 3 , subItems:[
+				{ id: 5, text: 'jijiji'},
+				{ id: 6, text: 'grgr'}
+			]
+		},{
+			id: 99 , subItems:[
+				{ id: 555, text: 'csdwfd'},
+				{ id: 666, text: 'fefe'}
+			]
+		}];
+
+		test.forEach(item => {
+			recruits= recruits.concat(item.subItems);
+		});
+
+		
+		console.log('recruits', recruits)
 		this.init();
 	},
 	methods: {
@@ -71,7 +99,13 @@ export default {
 			this.setEditModel(null);
 		},
 		onParamsChanged() {
+			this.setSelectedRecruit();
 			this.fetchData(this.params);
+		},
+		setSelectedRecruit() {
+			let selectedRecruit = this.$refs.questionHeader.getSelectedRecruit();
+			if(selectedRecruit.subjectId) this.selectedRecruit = selectedRecruit;
+			else this.selectedRecruit = null;
 		},
 		fetchData(params){
 			this.$store.commit(CLEAR_ERROR);
@@ -81,17 +115,14 @@ export default {
 			})
 		},
 		create(){
+			let recruit = this.selectedRecruit;
+			if(!recruit) return;
+
 			this.$store.commit(CLEAR_ERROR);
-			this.$store.dispatch(CREATE_QUESTION, this.params)
+			this.$store.dispatch(CREATE_QUESTION)
 				.then(model => {
-					model.subjectId = this.params.subject;
-					model.termId = this.params.term;
-					if(this.params.recruits) {
-						let recruitIds = this.$refs.questionHeader.getRecruitIds();
-						model.recruits = recruitIds.map(id => {
-							return { id };
-						});
-					}
+					model.subjectId = recruit.subjectId;
+					model.recruits = [{ ... recruit }]
 					this.setEditModel(model);
 				})
 				.catch(error => {

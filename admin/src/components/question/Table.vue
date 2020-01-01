@@ -24,7 +24,7 @@
                </li>
             </ul>
          </td>
-         <td>
+         <td v-if="show_recruits">
             {{ props.item.recruitsText }}
          </td>
       </template>
@@ -39,7 +39,11 @@ export default {
 		list: {
          type: Array,
          default: null
-		}
+		},
+      show_recruits: {
+         type: Boolean,
+         default: true
+      }
    },
    data () {
 		return {
@@ -60,15 +64,17 @@ export default {
 					sortable: false,
 					text: '選項',
 					value: ''
-            },
-            {
-					sortable: false,
-					text: '考古題',
-               width: '15%'
-				},
+            }
 			]	
 		}
-	},
+   },
+   beforeMount() {
+      if(this.show_recruits) this.headers.push({
+         sortable: false,
+         text: '考古題',
+         width: '15%'
+      });
+   },
    methods: {
       edit(id){
          this.$emit('edit', id);

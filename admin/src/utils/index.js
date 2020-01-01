@@ -20,4 +20,6 @@ export const activeOptions = () => {
    }];
 }
 
+export const hasIntersection = (arrA, arrB) => arrA.some((val) => arrB.indexOf(val) !== -1);
+
 export * from './helper';

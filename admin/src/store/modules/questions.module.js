@@ -11,7 +11,6 @@ import { SET_QUESTIONS, SET_LOADING } from '@/store/mutations.type';
 
 
 const initialState = {
-   list: [],
    pageList: null
 };
 
@@ -39,9 +38,9 @@ const actions = {
             });
       });
    },
-   [CREATE_QUESTION](context, params) {
+   [CREATE_QUESTION](context) {
       return new Promise((resolve, reject) => {
-         QuestionsService.create(params)
+         QuestionsService.create()
             .then(model => {
                resolve(model);
             })
@@ -118,9 +117,8 @@ const actions = {
 
 
 const mutations = {
-   [SET_QUESTIONS](state, data) {
-      if(Array.isArray(data))  state.list = data;
-      else state.pageList = data;
+   [SET_QUESTIONS](state, model) {
+      state.pageList = model;
    }
 };
 

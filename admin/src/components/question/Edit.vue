@@ -111,10 +111,6 @@ export default {
 			this.recruitSelector.model = this.model.recruits.map(item => item.id);
 			this.recruitSelector.show = true;
 		},
-		onTermSelected(id){
-			this.selector.term.ready = true;
-			this.model.termId = id;
-		},
 		getErrMsg(key){
 			let err = this.errors.collect(key);
 			if(err && err.length){

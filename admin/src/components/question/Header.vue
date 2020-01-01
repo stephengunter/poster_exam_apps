@@ -5,12 +5,9 @@
          <a href="#" @click.prevent="selectSubject"> {{ subject.title }}： {{ subject.fullText }} </a>
       </v-flex>
       <v-flex v-if="allow_create" xs12 sm6 md6 text-xs-right>
-         <v-tooltip top content-class="top">
-            <v-btn :disabled="!can_create" @click.prevent="create" class="mx-2" fab small color="info" slot="activator">
-               <v-icon>mdi-plus</v-icon>
-            </v-btn>
-            <span>新增</span>
-         </v-tooltip>
+			<v-btn :disabled="!can_create" @click.prevent="create" class="mx-2" fab small color="info">
+				<v-icon>mdi-plus</v-icon>
+			</v-btn>
       </v-flex>
 		<v-flex v-else xs12 sm6 md6 text-xs-right>
          
@@ -124,8 +121,7 @@ import { mapState, mapGetters } from 'vuex';
 import { SET_LOADING, CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
 
 import { FETCH_SUBJECTS, FETCH_RECRUITS, FETCH_TERMS } from '@/store/actions.type';
-
-import { onError } from '@/utils';
+import { hasIntersection, onError } from '@/utils';
 
 export default {
    name: 'QuestionHeader',
@@ -158,6 +154,7 @@ export default {
 
 			subject: {
 				title: '科目',
+				model: null,
 				selecting: false,
 				maxWidth: 800,
 				fullText: ''
@@ -187,7 +184,7 @@ export default {
       ...mapGetters(['responsive','contentMaxWidth']),
    },
    beforeMount(){
-		this.$store.dispatch(FETCH_SUBJECTS, { subItems: false })
+		this.$store.dispatch(FETCH_SUBJECTS)
 		.then(subjects => {
 			this.subjectList = subjects;
 			this.$store.commit(SET_LOADING, true);
@@ -201,17 +198,13 @@ export default {
 		
 
 		this.$store.commit(CLEAR_ERROR);
-		this.$store.dispatch(FETCH_RECRUITS, { parent: -1 })
+		this.$store.dispatch(FETCH_RECRUITS)
 		.then(recruits => {
 			this.recruitList = recruits;
 
 			if(this.params.recruits) {
 				this.recruits.ids = this.params.recruits.split(',').map(id => parseInt(id));
 			}else this.recruits.ids = [0];
-			
-			this.loadRecruitOptions();
-			
-			this.onSubmitRecruits();
 		})
 		.catch(error => {
 			onError(error);
@@ -229,13 +222,17 @@ export default {
 			if(item) subjectId = item.id;
 			if(!subjectId) return;
 
+			this.setSelectedSubject(item);
 			this.fetchTerms(subjectId);
-
-			this.params.subject = subjectId;
 			
+			this.loadRecruitOptions();
+
+			if(this.subject.selecting) this.subject.selecting = false;
+		},
+		setSelectedSubject(item) {
+			this.params.subject = item.id;
+			this.subject.model = item;
 			this.subject.fullText = this.$refs.subjectSelector.getSelectedListText();
-			this.subject.selecting = false;
-					
 		},
 		fetchTerms(subject){
 			let parent = -1;
@@ -346,25 +343,39 @@ export default {
 			this.recruits.selecting = true;
 		},
 		loadRecruitOptions () {
-			let allRecruits = this.recruitList;
-			let subjectId = this.params.subject;
 			let options = [{ value: 0, text: '-------' }];
+			let subject = this.subject.model;
+			if(!subject) {
+				this.recruitOptions = options;
+				return;
+			} 
+
+			let allRecruits = this.recruitList;
+			let subjectIds = [subject.id].concat(subject.subIds);
+			let recruitIds = [];
 			for(let i = 0; i < allRecruits.length; i++) {
-				let item = allRecruits[i];
-				if(item.parentId > 0 && item.subjectId === subjectId) {
-					let parent = allRecruits.find(x => x.id === item.parentId);
-					options.push({
-						value: item.id, text: parent.title
+				let recruit = allRecruits[i];
+				if(hasIntersection(subjectIds, recruit.subjectIds)) {
+					recruit.subItems.forEach(item => {
+						if(hasIntersection(subjectIds, item.subjectIds)){
+							recruitIds.push(item.id);
+							options.push({
+								value: item.id, text: recruit.title
+							});
+						}
 					});
 				}
 			}
 
+			
+			if(!hasIntersection(recruitIds, this.recruits.ids)) {
+				this.recruits.ids = [0];
+			}
+
 			this.recruitOptions = options;
+			this.onSubmitRecruits();
 		},
 		onSubmitRecruits() {
-			console.log('onSubmitRecruits');
-			console.log('recruitOptions', this.recruitOptions);
-
 			let ids = this.recruits.ids;
 			if(ids.includes(0)) this.params.recruits = '';
 			else this.params.recruits = ids.join();
@@ -374,8 +385,8 @@ export default {
 				if(ids[i] === 0) continue;
 				if(i > 0) text += ' , ';
 				
-				let item = this.recruitOptions.find(item => item.value === ids[i]);
-            text += item.text;
+				let item =  this.recruitOptions.find(item => item.value === ids[i]);
+				if(item) text += item.text;
 			}
 
 			this.recruits.fullText = text;
@@ -398,9 +409,14 @@ export default {
 			return this.recruits.ids;
 		},
 		getSelectedRecruits() {
+			
 			let ids = this.recruits.ids;
 			if(ids.length) {
-				return this.recruitList.filter(item => ids.includes(item.id));
+				let recruits = [];
+				this.recruitList.forEach(item => {
+					recruits = recruits.concat(item.subItems);
+				});
+				return recruits.filter(item => ids.includes(item.id));
 			}else return [];
 		},
       create(){

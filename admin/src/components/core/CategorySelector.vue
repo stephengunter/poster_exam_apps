@@ -1,7 +1,7 @@
 <template>
    <v-layout v-if="ready" row wrap>
-      <v-flex v-for="(item, index) in models" :key="index" xs12 sm3 md3 >
-         <v-select style="margin-right:10px" :style="item_style" :label="index < 1 ? title : ''"
+      <v-flex v-for="(item, index) in models" :key="index" xs12 sm3 md3>
+         <v-select style="margin-right:10px" :label="index < 1 ? title : ''"
             :items="models[index].options" v-model="models[index].selectedId"
             @change="onChanged(index)" v-show="index <= selected.index + 1"
          />
@@ -39,11 +39,7 @@ export default {
       selected_id: {
          type: Number,
          default: 0
-      },
-      item_style: {
-         type: Object,
-         default: null
-      },
+      }
    },
    data () {
 		return {
@@ -280,8 +276,7 @@ export default {
          this.setSelectedIdList();         
          
          this.onSelectChanged(selectedItem);
-      },
-
+      }
    }
    
 }

@@ -38,7 +38,8 @@ import { mapState, mapGetters } from 'vuex';
 import { SET_LOADING, CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
 
 import { FETCH_QUESTIONS, CREATE_QUESTION, STORE_QUESTION,
-EDIT_QUESTION, UPDATE_QUESTION, DELETE_QUESTION } from '@/store/actions.type';
+	EDIT_QUESTION, UPDATE_QUESTION, DELETE_QUESTION 
+} from '@/store/actions.type';
 
 import { onError } from '@/utils';
 
@@ -109,7 +110,7 @@ export default {
 		},
 		create(){
 			this.$store.commit(CLEAR_ERROR);
-			this.$store.dispatch(CREATE_QUESTION, this.params)
+			this.$store.dispatch(CREATE_QUESTION)
 				.then(model => {
 					model.subjectId = this.params.subject;
 					model.termId = this.params.term;

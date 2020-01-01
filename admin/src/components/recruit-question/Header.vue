@@ -1,15 +1,12 @@
 <template>
-	<core-category-selector ref="recruitSelector" :item_style="{ 'font-size': '14px' }"
+	<core-category-selector ref="recruitSelector"
 	:all_items="recruitList" :selected_id="params.recruit"
 	@select-changed="onRecruitSelected" 
 	>
 		<v-flex text-xs-right>
-         <v-tooltip top content-class="top">
-            <v-btn :disabled="!can_create" @click.prevent="create" class="mx-2" fab small color="info" slot="activator">
-               <v-icon>mdi-plus</v-icon>
-            </v-btn>
-            <span>新增</span>
-         </v-tooltip>
+			<v-btn :disabled="!can_create" @click.prevent="create" class="mx-2" fab small color="info">
+				<v-icon>mdi-plus</v-icon>
+			</v-btn>
       </v-flex>
 	</core-category-selector>
 </template>
@@ -36,7 +33,8 @@ export default {
 	},
    data () {
 		return {
-			recruitList:[]
+			recruitList: [],
+			selectedRecruit: null
 		}
    },
    beforeMount(){
@@ -53,19 +51,13 @@ export default {
 		 
    },
    methods: {
-		onRecruitSelected(item){
+		onRecruitSelected(item) {
+			this.selectedRecruit = item;
 			this.params.recruit = item.id;
-			this.$emit('params-changed');
-			// this.$store.commit(SET_LOADING, false);
-			// let subjectId = 0;
-			// if(item) subjectId = item.id;
-			// if(!subjectId) return;
-
-			// this.params.subject = subjectId;
-			
-			// this.subject.fullText = this.$refs.subjectSelector.getSelectedListText();
-			// this.subject.selecting = false;
-					
+			this.$emit('params-changed');					
+		},
+		getSelectedRecruit() {
+			return this.selectedRecruit;
 		},
       create(){
          this.$emit('create');
