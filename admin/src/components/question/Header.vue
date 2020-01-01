@@ -272,6 +272,9 @@ export default {
 			this.onSubmitTerm();
 		},
 		onTermSelected(item, fullText){
+			console.log('onTermSelected');
+			console.log('item', item);
+			console.log('fullText', fullText);
 			this.$store.commit(SET_LOADING, false);
 
 			let selectingIndex = this.term.selectingIndex;
@@ -296,6 +299,7 @@ export default {
 			}
 		},
 		setSelectedTerm(item, fullText, selectingIndex) {
+			this.term.model = item;
 			if(selectingIndex < 0) {
 				//新增
 				if(!item) return;

@@ -12,7 +12,8 @@
 							共 {{ pageList.totalItems }} 題
 						</v-flex>
 						<v-flex sm12>
-							<question-table :list="pageList.viewList" :show_recruits="false"
+							<question-table :list="pageList.viewList" 
+							:show_terms="true" :show_recruits="false"
 							@edit="edit"/>
 						</v-flex>
 					</v-layout>
@@ -70,25 +71,6 @@ export default {
 		},
 	},
 	beforeMount(){
-		let recruits = [];
-		let test = [{
-			id: 3 , subItems:[
-				{ id: 5, text: 'jijiji'},
-				{ id: 6, text: 'grgr'}
-			]
-		},{
-			id: 99 , subItems:[
-				{ id: 555, text: 'csdwfd'},
-				{ id: 666, text: 'fefe'}
-			]
-		}];
-
-		test.forEach(item => {
-			recruits= recruits.concat(item.subItems);
-		});
-
-		
-		console.log('recruits', recruits)
 		this.init();
 	},
 	methods: {

@@ -24,6 +24,9 @@
                </li>
             </ul>
          </td>
+         <td v-if="show_terms" v-text="termsText(props.item)">
+          
+         </td>
          <td v-if="show_recruits">
             {{ props.item.recruitsText }}
          </td>
@@ -43,6 +46,10 @@ export default {
       show_recruits: {
          type: Boolean,
          default: true
+      },
+      show_terms: {
+         type: Boolean,
+         default: false
       }
    },
    data () {
@@ -69,6 +76,11 @@ export default {
 		}
    },
    beforeMount() {
+      if(this.show_terms) this.headers.push({
+         sortable: false,
+         text: '條文',
+         width: '15%'
+      });
       if(this.show_recruits) this.headers.push({
          sortable: false,
          text: '考古題',
@@ -76,6 +88,10 @@ export default {
       });
    },
    methods: {
+      termsText(question) {
+         let titles = question.terms.map(item => item.title);
+         return titles.join();
+      },
       edit(id){
          this.$emit('edit', id);
       }
