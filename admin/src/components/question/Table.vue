@@ -24,8 +24,12 @@
                </li>
             </ul>
          </td>
-         <td v-if="show_terms" v-text="termsText(props.item)">
-          
+         <td v-if="show_terms" >
+            <ul style="list-style-type:none;">
+               <li v-for="(term, index) in props.item.terms" :key="index">
+                  <a href="#" @click.prevent="showTerm(term)" v-text="term.title"></a>
+               </li>
+            </ul>
          </td>
          <td v-if="show_recruits">
             {{ props.item.recruitsText }}
@@ -91,6 +95,9 @@ export default {
       termsText(question) {
          let titles = question.terms.map(item => item.title);
          return titles.join();
+      },
+      showTerm(term) {
+         this.$emit('show-term', term);
       },
       edit(id){
          this.$emit('edit', id);

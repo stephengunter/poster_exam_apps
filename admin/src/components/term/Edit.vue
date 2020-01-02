@@ -104,7 +104,9 @@ export default {
 				selecting: false,
 				maxWidth: 800,
 				fullText: ''
-			}
+			},
+
+			categorySelectedCount: 0
 		}
 	},
 	computed: {
@@ -154,12 +156,16 @@ export default {
 			this.subject.selecting = false;		
 		},
 		onCategorySelected(item) {
+			this.categorySelectedCount += 1;
+
 			let parentId = 0;
 			if(item) parentId = item.id;
 
 			this.model.parentId = parentId;
 
-			if(this.mode === 'create') this.getMaxOrder(parentId);
+			if(this.mode === 'create') {
+				if(this.categorySelectedCount > 1) this.getMaxOrder(parentId);
+			} 
 			
 			this.$store.commit(SET_LOADING, false);
 		},
@@ -186,7 +192,10 @@ export default {
 		},
 		onSubmit() {
 			let parent = this.$refs.categorySelector.getSelectedItem();
-			this.onCategorySelected(parent);
+			
+			if(parent) this.model.parentId = parent.id;
+			else  this.model.parentId = 0;
+
 
          this.$validator.validate().then(valid => {
 				if(valid) this.$emit('submit');

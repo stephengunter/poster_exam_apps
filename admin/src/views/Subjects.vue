@@ -54,7 +54,7 @@ export default {
 		return {
 			ready: false,
 			params: {
-				
+				parent: 0
 			},
 
 			editor: {

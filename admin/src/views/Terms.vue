@@ -3,11 +3,17 @@
       <v-layout justify-center  align-center>
 			<v-flex xs12>
 				<material-card>
-					<v-layout row v-show="!subject.selecting">
-						<v-flex xs12 sm6 md6>
+					<v-layout row wrap v-show="!subject.selecting">
+						<v-flex xs6 sm6 md6>
 							<a href="#" @click.prevent="selectSubject"> 科目： {{ subject.fullText }} </a>
 						</v-flex>
-						<v-flex xs12 sm6 md6 text-xs-right>
+						<v-flex xs6 sm6 md6 text-xs-right>
+							<v-tooltip top content-class="top">
+								<v-btn v-show="!searching" @click.prevent="searching = true" fab small color="warning" slot="activator">
+									<v-icon>mdi-magnify</v-icon>
+								</v-btn>
+								<span>搜尋</span>
+							</v-tooltip>
 							<v-tooltip top content-class="top">
 								<v-btn :disabled="!canCreate" @click.prevent="create" class="mx-2" fab small color="info" slot="activator">
 									<v-icon>mdi-plus</v-icon>
@@ -15,7 +21,29 @@
 								<span>新增</span>
 							</v-tooltip>
 						</v-flex>
+						<v-flex xs12 sm6 md6>
+							
+						</v-flex>
+						
 					</v-layout>
+					<v-layout row wrap v-show="searching">
+						<v-flex xs12 sm6 md6>
+							<form @submit.prevent="search">
+								<v-text-field label="Search" single-line hide-details
+								v-model="params.keyword"
+								>
+									<template v-slot:prepend>
+										<v-icon>mdi-magnify</v-icon>
+									</template>
+									<template v-slot:append>
+										<a href="#" @click.prevent="clearSearch">
+											<v-icon>mdi-close</v-icon>
+										</a>
+									</template>
+								</v-text-field>
+							</form>
+						</v-flex>
+					</v-layout>	
 					<v-layout row wrap>
 						<v-flex xs12>
 							<v-treeview v-if="ready" :items="termList" item-children="subItems" item-text="fullText"
@@ -74,8 +102,11 @@ export default {
 			ready: false,
 			params: {
 				subject: 0,
-				parent: 0
+				parent: 0,
+				keyword: ''
 			},
+			searching: false,
+
 			subject: {
 				selecting: false,
 				maxWidth: 800,
@@ -86,6 +117,7 @@ export default {
 				active: false,
 				maxWidth: 800,
 				model: null,
+				lastModel: null,
 				subjects: [],
 				allItems: []
 			},
@@ -137,7 +169,7 @@ export default {
 	},
 	methods: {
 		init(){
-			this.ready = false;
+			this.ready = false;			
 			this.editor.active = false;
 			this.deletion.id = 0;
 			this.deletion.active = false;
@@ -167,7 +199,21 @@ export default {
 			this.subject.selecting = false;
 			
 		},
+		search() {
+			this.fetchData();
+		},
+		clearSearch() {
+			this.searching = false;
+			this.params.keyword = '';
+			this.onParamsChanged();
+		},
+		onParamsChanged() {
+			this.fetchData();
+		},
 		fetchData(){
+			if(this.params.keyword) this.params.parent = -1;
+			else this.params.parent = 0;
+
 			this.ready = false;
 			this.clearSelect();
 
@@ -183,8 +229,11 @@ export default {
 		create(){
 			this.clearSelect();
 
+			let subject = this.editor.lastModel ? this.editor.lastModel.subjectId : this.params.subject;
+			let parent = this.editor.lastModel ? this.editor.lastModel.parentId : this.params.parent;
+
 			this.$store.commit(CLEAR_ERROR);
-			this.$store.dispatch(CREATE_TERM, this.params)
+			this.$store.dispatch(CREATE_TERM, { subject, parent })
 			.then(model => {
 				this.setEditModel(model);
 			})
@@ -252,6 +301,8 @@ export default {
 			let action = model.id ? UPDATE_TERM : STORE_TERM;
          this.$store.dispatch(action, model)
 			.then(() => {
+				this.editor.lastModel = model;
+
 				this.init();
 				this.fetchData();
 				Bus.$emit('success');
@@ -264,10 +315,3 @@ export default {
 	}
 }
 </script>
-
-
-<style scoped>
-br::before {
-  content:"Look at this orange box.";
-}
-</style>

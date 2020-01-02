@@ -14,7 +14,7 @@
 						<v-flex sm12>
 							<question-table :list="pageList.viewList" 
 							:show_terms="true" :show_recruits="false"
-							@edit="edit"/>
+							@edit="edit" @show-term="onShowTerm" />
 						</v-flex>
 					</v-layout>
 				</material-card>
@@ -27,6 +27,13 @@
 		</v-dialog>
 		<v-dialog v-model="deletion.active" :max-width="deletion.maxWidth">
 			<core-confirm @ok="submitDelete" @cancel="cancelDelete" />
+		</v-dialog>
+		<v-dialog v-model="showTerm.active" :max-width="showTerm.maxWidth">
+			<v-card>
+				<v-card-text>
+					<term-tree-item :item="showTerm.model" :max_width="showTerm.maxWidth" />
+				</v-card-text>
+      	</v-card>
 		</v-dialog>
 	</v-container>
 </template>
@@ -50,13 +57,20 @@ export default {
 			editor: {
 				active: false,
 				maxWidth: 800,
-				model: null
+				model: null,
+				lastModel: null
 			},
 			deletion: {
 				id: 0,
 				active: false,
 				maxWidth: 480
 			},
+
+			showTerm: {
+				active: false,
+				model: null,
+				maxWidth: 480
+			}
 			
 		}
 	},
@@ -96,6 +110,10 @@ export default {
 				onError(error);
 			})
 		},
+		onShowTerm(item) {
+			this.showTerm.model = item;
+			this.showTerm.active = true;
+		},
 		create(){
 			let recruit = this.selectedRecruit;
 			if(!recruit) return;
@@ -103,8 +121,12 @@ export default {
 			this.$store.commit(CLEAR_ERROR);
 			this.$store.dispatch(CREATE_QUESTION)
 				.then(model => {
-					model.subjectId = recruit.subjectId;
-					model.recruits = [{ ... recruit }]
+					if(this.editor.lastModel) {
+						model.subjectId = this.editor.lastModel.subjectId;
+					}else {
+						model.subjectId = recruit.subjectId;
+					}
+					model.recruits = [{ ... recruit }];
 					this.setEditModel(model);
 				})
 				.catch(error => {
@@ -163,10 +185,13 @@ export default {
 			this.submit(this.editor.model);
 		},
       submit(model){
+
 			this.$store.commit(CLEAR_ERROR);
 			let action = model.id ? UPDATE_QUESTION : STORE_QUESTION;
          this.$store.dispatch(action, model)
 			.then(() => {
+				this.editor.lastModel = model;
+
 				this.init();
 				this.fetchData(this.params);
 				Bus.$emit('success');
