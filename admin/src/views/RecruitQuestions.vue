@@ -14,7 +14,8 @@
 						<v-flex sm12>
 							<question-table :list="pageList.viewList" 
 							:show_terms="true" :show_recruits="false"
-							@edit="edit" @show-term="onShowTerm" />
+							@edit="edit" @show-term="onShowTerm" 
+							/>
 						</v-flex>
 					</v-layout>
 				</material-card>
@@ -29,9 +30,12 @@
 			<core-confirm @ok="submitDelete" @cancel="cancelDelete" />
 		</v-dialog>
 		<v-dialog v-model="showTerm.active" :max-width="showTerm.maxWidth">
-			<v-card>
+			<v-card v-if="showTerm.model">
 				<v-card-text>
-					<term-tree-item :item="showTerm.model" :max_width="showTerm.maxWidth" />
+					<h3 v-if="showTerm.model.subject" style="margin-top: 5px;">{{ showTerm.model.subject.title }}  {{ showTerm.model.title }}</h3>
+					<term-tree-item :item="showTerm.model" 
+					:show_title="false" :max_width="showTerm.maxWidth" 
+					/>
 				</v-card-text>
       	</v-card>
 		</v-dialog>
@@ -126,6 +130,7 @@ export default {
 					}else {
 						model.subjectId = recruit.subjectId;
 					}
+					
 					model.recruits = [{ ... recruit }];
 					this.setEditModel(model);
 				})

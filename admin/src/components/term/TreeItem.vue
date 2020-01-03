@@ -12,6 +12,10 @@ export default {
          type: Object,
          default: null
       },
+      show_title: {
+         type: Boolean,
+         default: true
+      },
 		max_width: {
          type: Number,
          default: 800
@@ -20,7 +24,8 @@ export default {
    methods: {
       getContent() {
          if(!this.item) return '';
-         return this.item.fullText.replace(/<br>/g, `<br><span style="padding-left:15px"></span>`);
+         let content = this.show_title ? this.item.fullText : this.item.text;
+         return content.replace(/<br>/g, `<br><span style="padding-left:15px"></span>`);
       }
    }
 }

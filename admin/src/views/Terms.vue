@@ -93,7 +93,7 @@ import { CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
 import { FETCH_SUBJECTS, FETCH_TERMS, CREATE_TERM, STORE_TERM,
 EDIT_TERM, UPDATE_TERM, DELETE_TERM } from '@/store/actions.type';
 
-import { onError } from '@/utils';
+import { onError, toCnNumber } from '@/utils';
 
 export default {
 	name: 'TermsView',
@@ -235,6 +235,9 @@ export default {
 			this.$store.commit(CLEAR_ERROR);
 			this.$store.dispatch(CREATE_TERM, { subject, parent })
 			.then(model => {
+				let cnOrder = toCnNumber(model.term.order);
+				if(cnOrder) model.term.title = `第${cnOrder}條`;
+				
 				this.setEditModel(model);
 			})
 			.catch(error => {

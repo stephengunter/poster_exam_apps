@@ -27,7 +27,7 @@
          <td v-if="show_terms" >
             <ul style="list-style-type:none;">
                <li v-for="(term, index) in props.item.terms" :key="index">
-                  <a href="#" @click.prevent="showTerm(term)" v-text="term.title"></a>
+                  <a href="#" @click.prevent="showTerm(term)" v-text="termText(term)"></a>
                </li>
             </ul>
          </td>
@@ -69,7 +69,7 @@ export default {
 					sortable: false,
 					text: '標題',
                value: '',
-               width: '50%'
+               width: '40%'
 				},
 				{
 					sortable: false,
@@ -83,7 +83,7 @@ export default {
       if(this.show_terms) this.headers.push({
          sortable: false,
          text: '條文',
-         width: '15%'
+         width: '20%'
       });
       if(this.show_recruits) this.headers.push({
          sortable: false,
@@ -92,9 +92,9 @@ export default {
       });
    },
    methods: {
-      termsText(question) {
-         let titles = question.terms.map(item => item.title);
-         return titles.join();
+      termText(term) {
+         if(term.subject) return `${term.subject.title} ${term.title}`;
+         return term.title;
       },
       showTerm(term) {
          this.$emit('show-term', term);
