@@ -86,32 +86,10 @@
       </v-card>
    </v-dialog>
 	<v-dialog v-model="recruits.selecting" :max-width="recruits.maxWidth">
-      <v-card v-if="recruits.selecting">
-         <v-card-title>
-            <span class="headline">{{ '選擇' + recruits.title }}</span>
-            <v-spacer />
-            <a href="#" @click.prevent="recruits.selecting = false">
-               <v-icon>mdi-window-close</v-icon>
-            </a>
-         </v-card-title>
-         <v-card-text>
-            <v-container>
-               <v-layout row wrap>
-                  <v-flex xs6 sm4 md4 v-for="item in recruitOptions" :key="item.value">
-                     <v-checkbox @change="onRecruitChanged(item.value)"
-							:label="item.text" :value="item.value" 
-							v-model="recruits.ids"
-							/>
-                  </v-flex>
-               </v-layout>
-            </v-container>
-            
-         </v-card-text>
-         <v-card-actions>
-            <v-spacer />
-            <v-btn @click.prevent="onSubmitRecruits" color="primary">確定</v-btn>
-         </v-card-actions>
-      </v-card>
+		<recruit-selector v-if="recruits.selecting"
+		:options="recruitOptions" :title="`選擇${recruits.title}`"
+		:model="recruits.ids" @cancel="recruits.selecting = false" @submit="onSubmitRecruits"
+		/>
    </v-dialog>
 </div>
 </template>
@@ -184,6 +162,8 @@ export default {
       ...mapGetters(['responsive','contentMaxWidth']),
    },
    beforeMount(){
+		console.log('params', this.params);
+
 		this.$store.dispatch(FETCH_SUBJECTS)
 		.then(subjects => {
 			this.subjectList = subjects;
@@ -350,8 +330,9 @@ export default {
 				this.recruitOptions = options;
 				return;
 			} 
-
+			console.log('has subject');
 			let allRecruits = this.recruitList;
+			console.log('allRecruits', allRecruits);
 			let subjectIds = [subject.id].concat(subject.subIds);
 			let recruitIds = [];
 			for(let i = 0; i < allRecruits.length; i++) {
@@ -367,8 +348,9 @@ export default {
 					});
 				}
 			}
-
-			
+			console.log('options', options);
+			console.log('recruitIds', recruitIds);
+			console.log('this.recruits.ids', this.recruits.ids);
 			if(!hasIntersection(recruitIds, this.recruits.ids)) {
 				this.recruits.ids = [0];
 			}

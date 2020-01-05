@@ -21,7 +21,7 @@
             <td>
                <ul v-show="props.item.subItems">
                   <li v-for="(subItem, index) in props.item.subItems" :key="index">
-                     {{ subItem.title }}
+                     <a href="#" @click.prevent="editSubItem(subItem.id)">{{ subItem.title }}</a>
                   </li>
                </ul>
             </td>
@@ -124,6 +124,10 @@ export default {
       },
       edit(id){
          this.$emit('edit', id);
+      },
+      editSubItem(id) {
+         this.$emit('edit', id);
+         //this.$emit('edit-subItem', id);
       }
    }
 

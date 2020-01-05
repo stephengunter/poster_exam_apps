@@ -89,6 +89,7 @@ export default {
 	},
 	methods: {
 		init() {
+			console.log('init', this.model);
 			this.params.subject = this.model.subjectId;
 			if(this.model.termIds) {
 				let terms = this.model.termIds.split(',');
@@ -101,7 +102,9 @@ export default {
 		
 			if(this.model.recruits.length) {
 				let recruitIds = this.model.recruits.map(item => item.id);
+				console.log('recruitIds', recruitIds);
 				this.params.recruits = recruitIds.join();
+				console.log('this.params', this.params);
 			}
 		},
 		beginEditingRecruits(){

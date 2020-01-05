@@ -8,7 +8,7 @@
 					<v-icon>mdi-window-close</v-icon>
 				</a>
 			</v-card-title>
-			<v-card-text>
+			<v-card-text v-if="model.parentId === 0">
 				<v-container grid-list-md>
 					<v-layout wrap>
 						<v-flex xs12 sm6>
@@ -60,6 +60,15 @@
 					<core-error-list  />
 				</v-container>
 			</v-card-text>
+			<v-card-text v-else>
+				<v-container grid-list-md>
+					<recruit-part-edit ref="partsEditor" :init_models="model.subItems"
+						:parent_id="model.id" 
+						@submit="onPartsSubmit"
+					/>
+					<core-error-list  />
+				</v-container>
+			</v-card-text>
 
 			<v-card-actions>
 				<v-btn v-if="canRemove" @click.prevent="remove" color="error darken-1">刪除</v-btn>
@@ -104,6 +113,8 @@ export default {
 			return 'create';
 		},
 		title(){
+			if(this.model.parentId > 0) return `筆試項目：${this.model.parent.title} ${this.model.title}`;
+
 			let text = '招考';
 
 			if(this.mode === 'edit') return `編輯${text}`;
@@ -144,6 +155,16 @@ export default {
 			this.model.subItems = items.slice(0);
 			this.$emit('submit');
 		},
+		onPartsSubmit(items) {
+			let msg = this.checkParts(items);
+			if(msg) {
+				this.$store.commit(SET_ERROR, { 'subItems' : [msg] });
+				return;
+			}
+
+			this.model.subItems = items.slice(0);
+			this.$emit('submit');
+		},
 		checkSubItems(items) {
 			if(!items.length) return '必須要有筆試項目';
 
@@ -154,12 +175,28 @@ export default {
 		
 			return '';
 		},
+		checkParts(items) {
+			if(!items.length) return '';
+
+			let points = items.map(item => Number(item.points));
+			console.log('points', points);
+			if(points.includes(0))  return '分數錯誤';
+
+			let total = points.reduce((a, b) => a + b);
+				console.log('total', total);
+			if(total !== 100) return '分數錯誤';
+
+			return '';
+		},
 		onSubmit() {
 			this.$store.commit(CLEAR_ERROR);
-			this.$validator.validate().then(valid => {
-				if(valid) this.$refs.subItemsEditor.submit();
-			});
-			      
+			if(this.model.parentId) {
+				this.$refs.partsEditor.submit();
+			}else {
+				this.$validator.validate().then(valid => {
+					if(valid) this.$refs.subItemsEditor.submit();
+				});
+			}      
 		}
 	}
 }

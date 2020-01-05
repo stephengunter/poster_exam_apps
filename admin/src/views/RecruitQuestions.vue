@@ -104,7 +104,7 @@ export default {
 		},
 		setSelectedRecruit() {
 			let selectedRecruit = this.$refs.questionHeader.getSelectedRecruit();
-			if(selectedRecruit.subjectId) this.selectedRecruit = selectedRecruit;
+			if(selectedRecruit.parentId) this.selectedRecruit = selectedRecruit;
 			else this.selectedRecruit = null;
 		},
 		fetchData(params){
@@ -120,6 +120,7 @@ export default {
 		},
 		create(){
 			let recruit = this.selectedRecruit;
+			console.log('recruit', recruit);
 			if(!recruit) return;
 
 			this.$store.commit(CLEAR_ERROR);
@@ -128,7 +129,10 @@ export default {
 					if(this.editor.lastModel) {
 						model.subjectId = this.editor.lastModel.subjectId;
 					}else {
-						model.subjectId = recruit.subjectId;
+						if(recruit.subjectId) model.subjectId = recruit.subjectId;
+						else {
+							model.subjectId = recruit.parent.subjectId;
+						}
 					}
 					
 					model.recruits = [{ ... recruit }];
@@ -149,6 +153,7 @@ export default {
 			})
 		},
 		setEditModel(model) {
+			console.log('setEditModel', model);
 			if(model) {
 				this.editor.model = model;
 

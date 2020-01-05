@@ -11,6 +11,7 @@
 					<v-layout row wrap>
 						<v-flex xs12>
 							<recruit-table :list="recruitList" @edit="edit"
+							@edit-subItem="editSubItem"
 							:allow_drag ="table.allow_drag"
 							@order-changed="onOrderChanged"
 							/>
@@ -139,6 +140,7 @@ export default {
 			this.$store.commit(CLEAR_ERROR);
 			this.$store.dispatch(EDIT_RECRUIT, id)
 			.then(model => {
+				console.log('model', model);
 				this.setEditModel(model);
 			})
 			.catch(error => {
@@ -148,7 +150,8 @@ export default {
 		setEditModel(model) {
 			if(model) {
 				this.editor.model = model.recruit;
-				this.editor.subjectOptions = model.subjectOptions;
+				if(model.subjectOptions) this.editor.subjectOptions = model.subjectOptions;
+				
 
 				if(this.contentMaxWidth) this.editor.maxWidth = this.contentMaxWidth;
 				this.editor.active = true;
@@ -219,6 +222,9 @@ export default {
 				if(!error)  Bus.$emit('errors');
 				else this.$store.commit(SET_ERROR, error);
 			})
+		},
+		editSubItem(id) {
+			alert(id);
 		}
 	}
 }
