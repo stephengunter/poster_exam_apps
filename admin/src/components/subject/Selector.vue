@@ -1,92 +1,117 @@
 <template>
-   <v-layout row wrap>   
-      <v-flex v-for="(item, index) in models" :key="index" :class="colStyle">
-         <v-select
-            :items="models[index].options"  :label="getLabel(index)"
-            v-model="models[index].id" @change="onChanged(index, models[index].id)"
-         />
+<div>
+   <v-layout row wrap>
+      <v-flex xs12 sm6 md6>
+         <a href="#" @click.prevent="launchSelect"> {{ title }}：{{ selected.fullText }}</a>
       </v-flex>
-      
-      <v-flex :class="btnColStyle">
-         <slot></slot>
-      </v-flex>
+      <slot>
+
+      </slot>
    </v-layout>
+
+   <v-dialog v-model="select.active" :max-width="select.maxWidth">
+      <v-card>
+         <v-card-title>
+            <span class="headline">選擇{{ title }}</span>
+            <v-spacer />
+            <a href="#" @click.prevent="closeSelect">
+               <v-icon>mdi-window-close</v-icon>
+            </a>
+         </v-card-title>
+         <v-card-text>
+            <v-container>
+               <core-category-selector ref="categorySelector" :title="title"
+               :all_items="subjectList" :selected_id="selected.id"
+               @select-changed="onSelected"
+               />
+            </v-container>
+         </v-card-text>
+      </v-card>
+   </v-dialog>
     
-	
+</div>	
 </template>
 
 <script>
-
+import { mapState, mapGetters } from 'vuex';
+import { FETCH_SUBJECTS } from '@/store/actions.type';
+import { onError } from '@/utils';
 export default {
    name: 'SubjectSelector',
    props: {
-		items: {
-         type: Array,
-         default: null
+      title: {
+         type: String,
+         default: '科目'
       },
-      selected: {
+      selected_id: {
          type: Number,
          default: 0
       }
    },
 	data () {
 		return {
-         models: []
+         modes: [],
+
+         subjectList: [],
+
+         select: {
+            active: false,
+            maxWidth: 480
+         },
+
+         selected: {
+            id: 0,
+            item: null,
+            fullText: ''
+         }
 		}
    },
+   beforeMount() {
+
+      this.selected.id = this.selected_id;
+
+      this.$store.dispatch(FETCH_SUBJECTS)
+		.then(subjects => {
+         this.subjectList = subjects;
+         setTimeout(() => {
+				this.init();
+			}, 500)
+         
+		})
+		.catch(error => {
+			onError(error);
+      })
+      
+   },
    computed: {
-      lastIndex(){
-         return this.models.length - 1;
-      },
-      colStyle(){
-         if(this.models.length < 3) return 'xs12 sm4 md4';
-         return 'xs12 sm3 md3';
-      },
-      btnColStyle(){
-         return `text-lg-right ${this.colStyle}`;
-      }
+      ...mapGetters(['responsive','contentMaxWidth']),
    },
 	methods: {
       init(){
-         this.loadOptions(this.items, this.selected);
+         this.$refs.categorySelector.init();
       },
-		loadOptions(subjects, id){
-         let options = subjects.map(item => {
-            return { value: item.id, text: item.title }
-         });
-         let items = subjects.slice(0);
+      launchSelect() {
+         if(this.contentMaxWidth) this.select.maxWidth = this.contentMaxWidth;
+         this.select.active = true;
+      },
+      closeSelect() {
+         this.select.active = false;
+      },
+      onSelected(item) {
+         this.setSelectedItem(item);
+         this.submit();
 
-         let model = null;
-         if(id) model = subjects.find(item => item.id === id);
-         else{
-            model = subjects[0];
-            id = model.id;
-         } 
-
-         this.models.push({
-            model, items, options, id
-         });
-         
-
-         if(model.subItems && model.subItems.length) this.loadOptions(model.subItems);
-         else this.onOptionsLoaded();
-
+         this.closeSelect();
       },
-      getLabel(index){
-         if(index) return '';
-         return '科目';         
+      setSelectedItem(item) {
+			this.selected.id = item.id;
+			this.selected.item = { ...item };
+			this.selected.fullText = this.$refs.categorySelector.getSelectedListText();
       },
-      getSelectedId(){
-         return this.models[this.lastIndex].id;
-      },
-      onOptionsLoaded(){
-         this.$emit('selected', this.getSelectedId());
-      },
-      onChanged(index, id){
-         let items = this.models[index].items.slice(0);
-         this.models.splice(index);
-         this.loadOptions(items, id);   
+      submit(){
+         this.$emit('submit', this.selected);
       }
+      
 	}
 }
 </script>

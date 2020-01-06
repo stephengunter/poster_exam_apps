@@ -4,6 +4,7 @@
 			<v-flex xs12>
 				<material-card>
 					<question-header ref="questionHeader" 
+					:multi_recruits="false"
 					:params="params" :can_create="canCreate" 
 					@params-changed="onParamsChanged" @create="create"
 					/>
@@ -113,13 +114,9 @@ export default {
 			this.$store.dispatch(CREATE_QUESTION)
 				.then(model => {
 					model.subjectId = this.params.subject;
-					model.termId = this.params.term;
-					if(this.params.recruits) {
-						let recruitIds = this.$refs.questionHeader.getRecruitIds();
-						model.recruits = recruitIds.map(id => {
-							return { id };
-						});
-					}
+					let recruits = this.$refs.questionHeader.recruit.recruits;
+					if(recruits && recruits.length) model.recruits = recruits.slice(0);
+
 					this.setEditModel(model);
 				})
 				.catch(error => {

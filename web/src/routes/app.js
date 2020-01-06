@@ -11,6 +11,17 @@ const applinks = [{
       icon: 'mdi-home',
       title: '首頁'
    } 
+},{
+   name: 'Test',
+   path: '/test',
+   view: 'Test',
+   parent: '',
+   meta: {
+      type: FOR_ALL,
+      menu: false,
+      icon: 'mdi-home',
+      title: 'Test'
+   } 
 }];
 
 const userLinks = [{
@@ -23,6 +34,17 @@ const userLinks = [{
       menu: true,
       icon: 'mdi-file-document-edit-outline',
       title: '模擬測驗'
+   } 
+},{
+   name: 'RQs',
+   path: '/rqs',
+   view: 'RQs',
+   parent: '',
+   meta: {
+      type: USER_ONLY,
+      menu: true,
+      icon: 'mdi-database',
+      title: '歷屆試題'
    } 
 }];
 
