@@ -1,5 +1,16 @@
 <template>
-	<core-category-selector ref="recruitSelector"
+	<recruit-selector ref="recruitSelector"
+	:selected_ids="recruit.ids" :multi="false"
+	:recruits="recruitList"
+	@submit="onRecruitSelected"
+	>
+		<v-flex xs12 sm6 md6 text-xs-right>
+			<v-btn :disabled="!can_create" click.prevent="create" class="mx-2" fab small color="info">
+				<v-icon>mdi-plus</v-icon>
+			</v-btn>
+		</v-flex>
+	</recruit-selector>
+	<!-- <core-category-selector ref="recruitSelector"
 	:all_items="recruitList" :selected_id="params.recruit"
 	@select-changed="onRecruitSelected" 
 	>
@@ -8,7 +19,7 @@
 				<v-icon>mdi-plus</v-icon>
 			</v-btn>
       </v-flex>
-	</core-category-selector>
+	</core-category-selector> -->
 </template>
 
 <script>
@@ -34,30 +45,37 @@ export default {
    data () {
 		return {
 			recruitList: [],
-			selectedRecruit: null
+			recruit: {
+				ids: [],
+				changes: 0
+			}
 		}
    },
    beforeMount(){
-		this.$store.dispatch(FETCH_RECRUITS, { parent: -1 })
+		this.$store.dispatch(FETCH_RECRUITS)
 		.then(recruits => {
 			this.recruitList = recruits;
-			setTimeout(() => {
-				this.$refs.recruitSelector.init();
-			}, 500)
 		})
 		.catch(error => {
 			onError(error);
 		})
+
+		this.init();
 		 
    },
    methods: {
-		onRecruitSelected(item) {
-			this.selectedRecruit = item;
-			this.params.recruit = item.id;
-			this.$emit('params-changed');					
+		init() {
+			let selectedIds = [];
+			if(this.params.recruits) {
+				selectedIds = this.params.recruits.split(',').map(id => parseInt(id));
+			}
+			this.recruit.ids = selectedIds;
 		},
-		getSelectedRecruit() {
-			return this.selectedRecruit;
+		onRecruitSelected({ recruits, ids, idsText }) {
+			this.recruit.ids = ids;
+			this.recruit.changes += 1;
+
+			this.setParams('recruits', idsText);
 		},
       create(){
          this.$emit('create');

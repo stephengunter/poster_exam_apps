@@ -4,6 +4,7 @@
 			<v-flex xs12>
 				<material-card>
 					<question-header ref="questionHeader" 
+					:multi_recruits="false"
 					:params="params" :can_create="canCreate" 
 					@params-changed="onParamsChanged" @create="create"
 					/>

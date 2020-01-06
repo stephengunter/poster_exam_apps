@@ -1,4 +1,5 @@
 <template>
+<div>
    <v-layout row>
 		<v-flex xs12 sm6 md6>
 			<v-layout row  v-for="(item, index) in selected.recruits" :key="index" >
@@ -6,12 +7,12 @@
 					<a href="#" class="text-truncate" @click.prevent="onSelected(index)"> 
 						{{ title }}：{{ item.fullText }} 
 					</a>
-					<a class="ml-3" href="#" @click.prevent="onRemove(index)">
+					<a v-show="item" class="ml-3" href="#" @click.prevent="onRemove(index)">
 						<v-icon>mdi-window-close</v-icon>
 					</a>
 				</v-flex> 
 			</v-layout>
-			<v-layout row>
+			<v-layout row v-show="canCreate">
 				<v-flex>
 					<a href="#" class="text-truncate" @click.prevent="onAdd">
 						{{ title }}：
@@ -19,43 +20,49 @@
 				</v-flex> 
 			</v-layout>
 		</v-flex>
-      <v-dialog v-model="select.active" :max-width="select.maxWidth">
-         <v-card>
-            <v-card-title>
-               <span class="headline">選擇{{ title }}</span>
-               <v-spacer />
-               <a href="#" @click.prevent="closeSelect">
-                  <v-icon>mdi-window-close</v-icon>
-               </a>
-            </v-card-title>
-            <v-card-text>
-				<v-container>
-					<v-treeview v-if="select.active" :items="recruitList" item-children="subItems" item-text="title"
+     
+   </v-layout>
+    <v-dialog v-model="select.active" :max-width="select.maxWidth">
+      <v-card>
+         <v-card-title>
+            <span class="headline">選擇{{ title }}</span>
+            <v-spacer />
+            <a href="#" @click.prevent="closeSelect">
+               <v-icon>mdi-window-close</v-icon>
+            </a>
+         </v-card-title>
+         <v-card-text>
+            <v-container>
+               <v-treeview v-if="select.active" :items="recruitList" item-children="subItems" item-text="title"
                open-all activatable hoverable  active-class="primary--text"
                :active.sync="select.ids"
                >
                </v-treeview>
-				</v-container>
-			</v-card-text>
-         </v-card>
-      </v-dialog>
-   </v-layout>
+            </v-container>
+         </v-card-text>
+      </v-card>
+   </v-dialog>
+</div>   
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { hasIntersection } from '@/utils';
+import { hasIntersection, onError } from '@/utils';
 
 export default {
 	name: 'RecruitSelector',
 	props: {
       title: {
          type: String,
-         default: ''
+         default: '考古題'
       },
       selected_ids: {
          type: Array,
          default: null
+      },
+      multi: {
+         type: Boolean,
+         default: true
       },
 		recruits: {
          type: Array,
@@ -92,6 +99,10 @@ export default {
    },
    computed: {
       ...mapGetters(['responsive','contentMaxWidth']),
+      canCreate() {
+         if(this.selected.ids.length) return this.multi;
+         return true;
+      },
       selectId() {
 			if(this.select.ids.length) return this.select.ids[0];
 			return 0;
@@ -102,10 +113,10 @@ export default {
    },
 	methods: {
       init() {
-        
+         console.log('init');
          if(this.selected_ids) this.selected.ids = this.selected_ids.slice(0);
          
-         this.loadEntities('selectedIds', this.selected.ids);
+         this.loadEntities();
         
          this.selected.recruits = this.selected.ids.map(id => {
             return this.findRecruit(id);
@@ -214,9 +225,9 @@ export default {
          this.launchSelect(-1);
       },
       onRemove(index) {
-         let selectingIndex = this.select.index;
-         this.selected.ids.splice(selectingIndex, 1);
-         this.selected.recruits.splice(selectingIndex, 1);
+
+         this.selected.ids.splice(index, 1);
+         this.selected.recruits.splice(index, 1);
 
          this.submit();
       },

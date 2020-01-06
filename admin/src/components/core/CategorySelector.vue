@@ -60,7 +60,13 @@ export default {
 	},
    methods: {
       init(fire = true) {
-         let selectedItem = this.getItemById(this.selected_id);
+         let selectedItem = this.loadSelectedItem(this.selected_id)
+         this.ready = true;
+
+         if(fire) this.onSelectChanged(selectedItem);
+      },
+      loadSelectedItem(selectedId) {
+         let selectedItem = this.getItemById(selectedId);
          if(selectedItem) {
             
             let parentId = selectedItem.parentId;
@@ -77,12 +83,11 @@ export default {
 
             // startIndex 等於 selected index
             this.setSelectedItem(selectedItem, startIndex);
-            this.setSelectedIdList();
-            this.ready = true;
+
          }else {
             let models = this.getModels();
             this.setModels(models);
-
+            
             if(this.select_default) {
                selectedItem = models.length ? models[0].items[0] : null;
 
@@ -94,13 +99,10 @@ export default {
             }else {
                this.setSelectedItem(null, -1);
             }
-
-            this.setSelectedIdList();
-            this.ready = true;
          }
 
-         if(fire) this.onSelectChanged(selectedItem);
-
+         this.setSelectedIdList();
+         return selectedItem;
       },
       onSelectChanged(selectedItem) {
          let fullText = this.getSelectedListText();

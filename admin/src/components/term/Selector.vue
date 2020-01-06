@@ -1,176 +1,220 @@
 <template>
-	<v-layout row wrap>
-      <v-flex v-for="(item, index) in displayModels" :key="index" xs12 sm3 md3 >
-         <v-select
-            :items="models[index].options"  :label="getLabel(index)"
-            v-model="models[index].id" @change="onChanged(index)"
-         />
-      </v-flex>
-     
-      <v-flex v-if="show_last" v-show="parent" xs12 sm3 md3>
-         <v-btn v-if="selectedItem && selectedItem.model" flat  @click.prevent="launchSelecteTable" color="primary">
-            {{ selectedItem.model.title }}
-         </v-btn>
-         <v-btn v-if="selectedItem && selectedItem.id" @click.prevent="onTableSelected(0)" flat icon>
-            <v-icon>mdi-close</v-icon>
-         </v-btn>
-      </v-flex>
-      <v-dialog v-model="selectTable.show" max-width="600px">
-         <term-table :list="selectTable.list" @selected="onTableSelected"/>
-      </v-dialog>
-     
+<div>
+   <v-layout row>
+		<v-flex xs12 sm6 md6>
+			<v-layout row  v-for="(item, index) in selected.terms" :key="index" >
+				<v-flex>
+					<a href="#" class="text-truncate" @click.prevent="onSelected(index)"> 
+						{{ title }}：{{ selected.textList[index] }} 
+					</a>
+					<a v-if="multi" v-show="item" class="ml-3" href="#" @click.prevent="onRemove(index)">
+						<v-icon>mdi-window-close</v-icon>
+					</a>
+				</v-flex> 
+			</v-layout>
+			<v-layout row v-show="canCreate">
+				<v-flex>
+					<a href="#" class="text-truncate" @click.prevent="onAdd">
+						{{ title }}：
+					</a>
+				</v-flex> 
+			</v-layout>
+		</v-flex>
+      <slot>
+
+      </slot>
    </v-layout>
-    
-	
+
+   <v-dialog v-model="select.active" :max-width="select.maxWidth">
+      <v-card>
+         <v-card-title>
+            <span class="headline">選擇{{ title }}</span>
+            <v-spacer />
+            <a href="#" @click.prevent="closeSelect">
+               <v-icon>mdi-window-close</v-icon>
+            </a>
+         </v-card-title>
+         <v-card-text>
+            <v-container>
+               <core-category-selector ref="categorySelector" :title="title"
+               :all_items="termList" :selected_id="select.id"
+               :select_default="select_default"
+               @select-changed="onTermChanged"
+               />
+               <v-layout v-if="select.model" row wrap>
+                  <v-flex sm12>
+                     <div v-html="select.model.fullText">
+
+                     </div>
+                     
+                  </v-flex>
+               </v-layout>
+            </v-container>
+         </v-card-text>
+         <v-card-actions>
+            <v-spacer />
+            <v-btn @click.prevent="onTermSelected" color="primary">確定</v-btn>
+            
+         </v-card-actions>
+      </v-card>
+   </v-dialog>
+</div>
 </template>
 
 <script>
-
-const findSelectedId = (selectedIds, index) => {
-   if(!selectedIds) return 0;
-   if(!selectedIds[index]) return 0;
-   return selectedIds[index];
-}
-const getSubItems = (model) => {
-   if(model && model.subItems && model.subItems.length) return model.subItems;
-   return [];
-}
-
+import { mapState, mapGetters } from 'vuex';
+import { FETCH_TERMS } from '@/store/actions.type';
+import { onError } from '@/utils';
 export default {
-   name: 'TermSelector',
-   props: {
-		items: {
-         type: Array,
-         default: null
+	name: 'TermSelector',
+	props: {
+      title: {
+         type: String,
+         default: '條文'
       },
       selected_ids: {
          type: Array,
          default: null
       },
-      allow_empty: {
+      subject_id: {
+         type: Number,
+         default: 0
+      },
+      multi: {
          type: Boolean,
          default: false
       },
-      show_last: {
+      select_default: {
          type: Boolean,
          default: false
       },
-      want_array: {
-         type: Boolean,
-         default: true
-      },
-      empty_text: {
-         type: String,
-         default: '-----------'
-      }
-   },
+	},
 	data () {
 		return {
-         models: [],        
-         selectTable:{
-            show: false,
-            list: []
+         termList: [],
+
+         select: {
+            active: false,
+            id: 0,
+            index: 0,
+            model: null,
+            maxWidth: 480
          },
 
-         displayModels:[],
-         parent: null,
-         selectedItem: null
+         selected: {
+            terms: [],
+            textList: [],
+            ids: [],
+            idsText: ''
+         }
 		}
    },
    computed: {
-      lastIndex(){
-         return this.models.length >= 1 ? this.models.length - 1 : 0;
+      ...mapGetters(['responsive','contentMaxWidth']),
+      canCreate() {
+         if(this.selected.ids.length) return this.multi;
+         return true;
       }
    },
 	methods: {
-      init(){
-         this.models = [],
-         this.selectTable.show = false;
-         this.selectTable.list = [];
-
-         if(this.selected_ids){
-            for(let i = 0; i < this.selected_ids.length; i++){
-               this.models.push({ id: this.selected_ids[i] });
-            }
-         }
-
-         this.loadOptions(this.items, this.selected_ids);
+      init() {
+         if(this.selected_ids) this.fetchTerms(this.selected_ids);
+         else this.fetchTerms([0]);
       },
-      loadOptions(terms, selectedIds, index = 0){
-         let id = findSelectedId(selectedIds, index);
+      fetchTerms(selectedIds){
+         let subject = this.subject_id;
+			let parent = -1;
+			let subItems = false;
+			
+			this.$store.dispatch(FETCH_TERMS, { subject, parent, subItems })
+			.then(terms => {
+            this.termList = terms;
+            this.$nextTick(() => {
+               selectedIds.forEach(id => {
+                  let item = this.$refs.categorySelector.loadSelectedItem(id);
+                  let text = this.$refs.categorySelector.getSelectedListText();
+                  this.select.index = -1;
+                  this.setSelectedItem({ item, text });
+               })
+
+               this.submit();
+            })
+			})
+			.catch(error => {
+				onError(error);
+			})
+		},
+		submit(){
+         this.selected.idsText = this.selected.ids ? this.selected.ids.join() : '';
+
+         this.$emit('submit', this.selected);
+
+         // if(this.multi) this.$emit('submit', this.selected.ids);
+         // else this.$emit('submit', this.selected.ids[0]);
          
-         let options = terms.map(item => {
-            return { value: item.id, text: item.fullText }
-         });
-         options.splice(0, 0, { value: 0, text: this.empty_text  });
+      },
+      onSelected(index) {
+         this.select.id = this.selected.ids[index];
+         this.$nextTick(() => {
+            this.$refs.categorySelector.init();
+            this.launchSelect(index);
+         })
+      },
+      launchSelect(index) {
+         if(this.contentMaxWidth) this.select.maxWidth = this.contentMaxWidth;
+         this.select.index = index;
+         this.select.model = null;
+         this.select.active = true;
+      },
+      closeSelect() {
+         this.select.id = 0;
+         this.select.active = false;
+         this.select.model = null;
+      },
+      onAdd() {
+         this.select.id = 0;   
+         this.$refs.categorySelector.init();
+         this.launchSelect(-1);
+      },
+      onRemove(index) {
+         this.selected.ids.splice(index, 1);
+         this.selected.terms.splice(index, 1);
+         this.selected.textList.splice(index, 1);
 
-         let items = terms.slice(0);
+         this.submit();
+      },
+      setSelectedItem({ item, text }) {
+         let selectingIndex = this.select.index;
 
-         let model = null;
-         if(id) model = terms.find(item => item.id === id);
-         if(!model){
-            id = 0;
-            model = { title: this.empty_text };
+			if(selectingIndex < 0) {
+				//新增
+            if(!item) return;
+            if(this.selected.ids.includes(item.id)) return;
+
+            this.selected.terms.push(item);
+            this.selected.ids.push(item.id);
+            this.selected.textList.push(text);
+            
+			}else {
+            if(!item) return;
+            if(this.selected.ids.includes(item.id)) return;
+            
+            this.selected.terms.splice(selectingIndex, 1, item);
+            this.selected.ids.splice(selectingIndex, 1, item.id);
+            this.selected.textList.splice(selectingIndex, 1, text);
+
          }
+      },
+      onTermChanged(item) {
+         this.select.model = item;
+      },
+      onTermSelected() {
+         let item = { ...this.select.model };
+         let text = this.$refs.categorySelector.getSelectedListText();
+         this.setSelectedItem({ item, text });
 
-         if(this.models[index]){
-            this.models[index] = { model, items, options, id };
-         }else{
-            this.models.push({ model, items, options, id });
-         }
-
-         index ++;
-
-         let subItems = getSubItems(model);
-         if(subItems.length) this.loadOptions(subItems, this.getSelectedIds(), index);      
-         else this.onOptionsLoaded();
-      },
-      onOptionsLoaded(){
-         this.setSelectedItem();
-         this.setParent();
-         this.setDisplayModels();
-
-         if(this.want_array) this.$emit('selected', this.getSelectedIds());
-         else this.$emit('selected', this.getSelectedId());
-      },
-      setSelectedItem(){
-         this.selectedItem = this.models[this.lastIndex] ? this.models[this.lastIndex] : null;
-      },
-      setParent(){
-         this.parent = this.models.length ? this.models[this.lastIndex - 1] : null;
-      },
-      setDisplayModels(){
-         this.displayModels = this.models.length > 1 ? this.models.slice(0, this.lastIndex) : this.models.slice(0);
-      },
-      getSelectedId(){
-         if(this.selectedItem && this.selectedItem.id) return this.selectedItem.id;
-         if(this.parent && this.parent.id) return this.parent.id;
-         return 0;
-      },
-      getSelectedIds(){
-         return this.models.map(item => item.id);
-      },
-      getLabel(index){
-         if(index) return '';
-         return '章節';
-      },
-      onChanged(index, id){
-         let selectedIds = this.getSelectedIds();
-         let items = this.models[index].items.slice(0);
-         this.models.splice(index);
-         
-         this.loadOptions(items, selectedIds, index);   
-      },
-      launchSelecteTable(){
-         let items = this.selectedItem.items.slice(0);
-         this.selectTable.list = items;
-         this.selectTable.show = true;         
-      },
-      onTableSelected(id){
-         this.models[this.lastIndex].id = id;
-         this.onChanged(this.lastIndex, id);
-
-         this.selectTable.show = false;
+         this.submit();
+         this.closeSelect();
       }
 	}
 }
