@@ -10,8 +10,9 @@
 			</v-card-title>
 			<v-card-text>
 				<v-container grid-list-md>
-					<question-header ref="questionEditHeader" :allow_create="false" :params="params"
-					:multi_terms="true"					
+					<question-header ref="questionEditHeader"  
+					:multi_terms="true" :allow_create="false"
+					:params="params"				
 					/>
 					<v-layout wrap>
 						<v-flex xs12>
@@ -60,7 +61,7 @@ export default {
 		return {
 			params: {
 				subject: 0,
-				terms: [],
+				terms: '',
 				recruits: ''
 			}
 			
@@ -89,30 +90,13 @@ export default {
 	},
 	methods: {
 		init() {
-			console.log('init', this.model);
 			this.params.subject = this.model.subjectId;
-			if(this.model.termIds) {
-				let terms = this.model.termIds.split(',');
-				this.params.terms = terms.map(id => parseInt(id));
-				this.params.term = this.params.terms[0];
-			}else {
-				this.params.terms = [];
-				this.params.term = 0;
-			}
+			this.params.terms = this.model.termIds ? this.model.termIds : '';
 		
 			if(this.model.recruits.length) {
 				let recruitIds = this.model.recruits.map(item => item.id);
-				console.log('recruitIds', recruitIds);
 				this.params.recruits = recruitIds.join();
-				console.log('this.params', this.params);
 			}
-		},
-		beginEditingRecruits(){
-			this.recruitSelector.options = this.recruits.map(item => {
-				return { value: item.id, text: item.title }
-			});
-			this.recruitSelector.model = this.model.recruits.map(item => item.id);
-			this.recruitSelector.show = true;
 		},
 		getErrMsg(key){
 			let err = this.errors.collect(key);
@@ -129,36 +113,17 @@ export default {
 			this.$emit('cancel');
 		},
 		onSubmit() {
+			
 			this.model.subjectId = this.params.subject;
-			this.model.termIds = this.params.terms.join();
+			this.model.termIds = this.params.terms;
 
-			if(this.params.recruits) {
-				this.model.recruits = this.$refs.questionEditHeader.getSelectedRecruits();
-			}else {
-				this.model.recruits = [];
-			}
+			let recruits = this.$refs.questionEditHeader.recruit.recruits;
+			if(recruits && recruits.length) this.model.recruits = recruits.slice(0);
+			else this.model.recruits = [];
 
          this.$validator.validate().then(valid => {
 				if(valid) this.$refs.optionEditor.submit();
          });       
-		},
-		setRecruits(recruits){
-			this.model.recruits = recruits;
-			this.hasRecruits = recruits.length > 0;
-
-			if(recruits.length){
-				let titles = recruits.map(item => item.title);
-				this.recruitsText = `考古題 (${titles.join()})`;
-			}else this.recruitsText = '考古題';
-			
-		},
-		onRecruitSelected(ids){
-			let recruits = [];
-			if(ids.length) recruits = this.recruits.filter(item => ids.includes(item.id));
-
-			this.setRecruits(recruits);
-
-			this.recruitSelector.show = false;			
 		},
 		checkOptions(options) {
 			if(!options.length) return '必須要有選項';

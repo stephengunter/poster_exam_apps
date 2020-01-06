@@ -148,9 +148,6 @@ export default {
          this.selected.idsText = this.selected.ids ? this.selected.ids.join() : '';
 
          this.$emit('submit', this.selected);
-
-         // if(this.multi) this.$emit('submit', this.selected.ids);
-         // else this.$emit('submit', this.selected.ids[0]);
          
       },
       onSelected(index) {

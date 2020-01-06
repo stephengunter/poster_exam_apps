@@ -113,7 +113,6 @@ export default {
    },
 	methods: {
       init() {
-         console.log('init');
          if(this.selected_ids) this.selected.ids = this.selected_ids.slice(0);
          
          this.loadEntities();

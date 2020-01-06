@@ -1,19 +1,13 @@
 <template>
 <div>
+<term-selector ref="termSelector" 
+	:subject_id="params.subject" :selected_ids="term.ids"
+	@submit="onTermSelected"
+	>
+		
+	</term-selector>
 
-
-   <v-container fluid grid-list-xl fill-height>
-      <v-layout justify-center  align-center>
-			<v-flex xs12>
-				<material-card>
-					<question-header ref="questionHeader" 
-					:params="params" :multi_recruits="false"
-					@params-changed="onParamsChanged" @create="create"
-					/>
-				</material-card>
-			</v-flex>
-      </v-layout>
-	</v-container>
+   
 </div>
 </template>
 
@@ -23,26 +17,29 @@ export default {
    data() {
       return {
          params: {
-            subject: 0,
-				term: 0,
+            subject: 3,
+				term: '37,38',
 				recruits: ''
          },
+
+         term: {
+            ids: [37,38]
+         }
       }
    },
    beforeMount() {
       
-      
    },
    mounted() {
-     
+      this.$refs.termSelector.init();
    },
    methods: {
       create() {
 
       },
-      onParamsChanged() {
-          console.log('onParamsChanged');
-           console.log('params', this.params);
+      onTermSelected(model) {
+          console.log('onTermSelected', model);
+          
       }
    }
 }

@@ -5,12 +5,12 @@
 	@submit="onSubjectSelected"
 	>
 		<v-flex xs12 sm6 md6 text-xs-right>
-			<v-btn :disabled="!can_create" @click.prevent="create" class="mx-2" fab small color="info">
+			<v-btn v-if="allow_create" :disabled="!can_create" @click.prevent="create" class="mx-2" fab small color="info">
 				<v-icon>mdi-plus</v-icon>
 			</v-btn>
 		</v-flex>
 	</subject-selector>
-	<term-selector ref="termSelector" 
+	<term-selector ref="termSelector" :multi="multi_terms"
 	:subject_id="params.subject" :selected_ids="term.ids"
 	@submit="onTermSelected"
 	>
@@ -69,10 +69,12 @@ export default {
 
 			term: {
 				ids: [],
+				terms:[],
 				changes: 0
 			},
 			recruit: {
 				ids: [],
+				recruits: [],
 				changes: 0
 			}
 			
@@ -100,7 +102,7 @@ export default {
 			if(this.multi_terms) {
 				//複選
 				let idsText = this.params.terms;
-				if(idsText) this.term.ids = idsText.split(',').map(id => parseInt(id));;
+				if(idsText) this.term.ids = idsText.split(',').map(id => parseInt(id));
 
 			}else {
 				if(this.params.term) this.term.ids = [this.params.term];
@@ -113,7 +115,7 @@ export default {
 			this.recruit.ids = selectedIds;
 		},
       create() {
-
+			this.$emit('create');
       },
       onSubjectSelected({ id, item, fullText }) {
 			this.params.subject = id;
@@ -131,10 +133,11 @@ export default {
 		onTermSelected({ terms, textList, ids, idsText }) {
 			this.term.changes += 1;
 			this.term.ids = ids;
+			this.term.terms = terms;
 
 			if(this.multi_terms) {
 				//複選
-				alert('onTermSelected multi');
+				this.setParams('terms', idsText);
 
 			}else {
 				if(ids && ids[0]) this.setParams('term', ids[0]);
@@ -154,9 +157,20 @@ export default {
 		},
 		onRecruitSelected({ recruits, ids, idsText }) {
 			this.recruit.ids = ids;
+			this.recruit.recruits = recruits;
 			this.recruit.changes += 1;
 
 			this.setParams('recruits', idsText);
+		},
+		//public getters
+		getRecruit() {
+			return this.recruit;
+		},
+		getTerm() {
+			return this.term;
+		},
+		getSubject() {
+			return this.subject;
 		}
    }
 }

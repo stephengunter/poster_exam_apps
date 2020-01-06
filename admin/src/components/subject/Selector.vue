@@ -43,10 +43,6 @@ export default {
          type: String,
          default: '科目'
       },
-      allow_modes: {
-         type: Array,
-         default: null
-      },
       selected_id: {
          type: Number,
          default: 0
@@ -71,8 +67,8 @@ export default {
 		}
    },
    beforeMount() {
-      if(this.allow_modes) this.modes = this.allow_modes;
-      else this.modes = ['edit', 'read'];
+
+      this.selected.id = this.selected_id;
 
       this.$store.dispatch(FETCH_SUBJECTS)
 		.then(subjects => {
@@ -85,7 +81,6 @@ export default {
 		.catch(error => {
 			onError(error);
       })
-      
       
    },
    computed: {
