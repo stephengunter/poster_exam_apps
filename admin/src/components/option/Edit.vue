@@ -15,6 +15,19 @@
             </template>
             <template slot="items" slot-scope="props">
                <td>
+                  <v-img v-if="props.item.medias[0]" :src="props.item.medias[0].thumb.data" max-width="100" aspect-ratio="1">
+                     <v-btn color="success" style="margin:0;position:absolute;top:0;right:0;width:30px;height:30px;" flat icon
+                     @click="removeMedia(props.index)">
+                        <v-icon>mdi-close-circle-outline</v-icon>
+                     </v-btn>
+                  </v-img>
+                  <v-btn v-else v-show="medias.index === -1 || medias.index === props.index"
+                  @click="launchUpload(props.index)" :loading="medias.loading" :disabled="medias.loading"
+                  >
+                     附圖<v-icon right dark>mdi-image</v-icon>
+                  </v-btn>
+               </td>
+               <td>
                   <v-text-field v-model="props.item.title"
                   v-validate="'required'"
                   :data-vv-name="`option_title_${props.index}`"
@@ -32,6 +45,9 @@
                </td>
             </template>
          </v-data-table>
+         <core-upload-button v-show="false" ref="uploadButton" :multiple="false"
+         @file-added="onFileAdded" @loading="medias.loading = true"
+         />
       </v-flex>
    </v-layout>
    
@@ -60,6 +76,12 @@ export default {
 		return {
          models: [],
 			headers: [
+            {
+               width: '120px',
+					sortable: false,
+					text: '',
+					value: ''
+            },
 				{
 					sortable: false,
 					text: '',
@@ -76,9 +98,19 @@ export default {
 					text: '',
 					value: ''
 				}
-			]
+         ],
+         
+         medias: {
+            index: -1,
+            loading: false
+         }
 		}
-	},
+   },
+   provide() {
+      return {
+         $validator: this.$validator,
+      }
+   },
 	beforeMount(){
 		if(this.init_models) this.models = this.init_models.slice(0);
 	},
@@ -102,11 +134,32 @@ export default {
             id: 0,
             questionId: this.question_id,
             title: '',
+            medias: [],
             correct: correctItems.length > 0 ? false : true
          });
       },
 		remove(index){
          this.models.splice(index, 1);
+      },
+      launchUpload(index) {
+         this.medias.index = index;
+         this.$refs.uploadButton.launch();
+      },
+      onFileAdded({ files, thumbs }) {
+         let idx = this.medias.index;
+         let file = files[0];
+         let thumb = thumbs[0];
+
+         this.models[idx].medias = [{ file, thumb }];
+
+         this.medias.index = -1;
+         this.medias.loading = false;
+
+         console.log('models', this.models);
+      },
+      removeMedia(index){
+         this.models[index].medias = [];
+         console.log('models', this.models);
       },
       onCorrectChanged(index) {
          if(this.multi_answers) {
@@ -123,6 +176,8 @@ export default {
       },
       submit(){
          this.$validator.validate().then(valid => {
+            console.log('valid', valid);
+            return;
             if(valid) this.$emit('submit', this.models);
          });
       }

@@ -1,17 +1,23 @@
 <template>
 <div>
-   <recruit-selector ref="recruitSelector"
-		:title="recruit.title" :selected_ids="recruit.ids"
-      :recruits="recruitList" :subject="subject"
-		@cancel="recruits.selecting = false" @submit="onSubmitRecruits"
-	/>
+<v-layout row wrap>
+   <v-flex xs6>
+        <core-upload-button ref="uploadButton" @file-added="onFileAdded"/>
+   </v-flex>
+   <v-flex xs6>
+      <v-img  v-if="thumb"
+      :src="thumb.data" max-width="100"
+      aspect-ratio="1"
+      class="grey lighten-2"
+      />
+   </v-flex>
+</v-layout>
+
 
 </div>
 </template>
 
 <script>
-import { FETCH_SUBJECTS, FETCH_RECRUITS } from '@/store/actions.type';
-import { hasIntersection, onError } from '@/utils';
 export default {
    name: 'Dashboard',
    methods: {
@@ -21,94 +27,63 @@ export default {
    },
    data() {
       return {
-         params: {
-            subjectId: 1,
-            recruits: '24'
-         },
-
-         subject: null,
-
-         recruitList: [],
-
-         recruit: {
-            ids: [],
-            title: '考古題'
-         },
-         
+         photo: null,
+         thumb: null
       }
    },
    computed: {
 
    },
    beforeMount() {
-      this.$store.dispatch(FETCH_SUBJECTS)
-		.then(subjects => {
-         let subjectId = this.params.subjectId;
-         this.subject = subjects.find(item => item.id === subjectId);
-         
-         setTimeout(() => {
-				this.initRecruits();
-			}, 500)
-			
-		})
-		.catch(error => {
-			onError(error);
-      })
-      
       
    },
    methods: {
-      initRecruits() {
-         console.log('subject', this.subject);
-         this.$store.dispatch(FETCH_RECRUITS)
-         .then(recruits => {
-            this.recruitList = recruits;
-            
-            console.log('recruitList', recruits);
-            
-            let selectedIds = [];
-
-            if(this.params.recruits) {
-               selectedIds = this.params.recruits.split(',').map(id => parseInt(id));
+      onFileAdded({ files, thumbs }) {
+         this.thumb = thumbs[0];
+            console.log('thumbs',thumbs);
+            return;
+         for (let i=0; i<thumbs.length; i++) {
+            let name=thumbs[i].name;
+            if(!this.fileExist(name)){
+               let media={
+                  id:0,
+                  order:this.findMinOrder() - 1,
+                  title:name.split('.')[0],
+                  name:name,
+                  thumb:thumbs[i].data,
+                  type:thumbs[i].type,
+                  path:''
+               };
+               this.addMedia(media);
             }
             
-            console.log('selectedIds', selectedIds);
-            this.recruit.ids = selectedIds;
-
-            setTimeout(() => {
-               this.$refs.recruitSelector.init();
-            }, 500)
-            
-         })
-         .catch(error => {
-            onError(error);
-         })
+         }
       },
-      onSubmitRecruits(model) {
-         console.log('onSubmitRecruits', model);
-      },
-      onRecruitSelected(index) {
-         this.recruit.selectingIndex = index;
-         this.recruit.selecting = true;
+      submit: function (files) {
+         let vm = this;
+         let form = new FormData();
+         form.append('postId', 3);
+         form.append('memberId', 32);
 
-         let models = this.recruit.models;
-         let selectedModel = models[index];
+         for (let i = 0; i < files.length; i++) {
+               form.append('files', files[i]);
+         }
+
+         console.log('form', form);
          
 
+         $.ajax({
+               url: uploadUrl,
+               data: form,
+               processData: false,
+               contentType: false,
+               type: 'POST',
+               success: function(data){
+                  alert(data);
+               }
+         });
 
       },
-      selectRecruit(index = 0) {
-			this.onRecruitSelected(index);
-         
-         let models = this.recruit.models;
-
-			let selectedModel = models[index];
-         if(selectedModel) this.params.term = selectedModel.id;
-         setTimeout(() => {
-            this.$refs.termSelector.init(false);
-         }, 500);
-			
-		},
    }
    
 }

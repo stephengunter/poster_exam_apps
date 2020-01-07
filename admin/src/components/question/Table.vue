@@ -32,7 +32,11 @@
             </ul>
          </td>
          <td v-if="show_recruits">
-            {{ props.item.recruitsText }}
+            <ul style="list-style-type:none;">
+               <li v-for="(item, index) in props.item.recruits" :key="index">
+                  <a href="#" v-text="recruitText(item)"></a>
+               </li>
+            </ul>
          </td>
       </template>
    </v-data-table>
@@ -98,6 +102,9 @@ export default {
       },
       showTerm(term) {
          this.$emit('show-term', term);
+      },
+      recruitText(item) {
+         return item.parents[0].title;
       },
       edit(id){
          this.$emit('edit', id);
