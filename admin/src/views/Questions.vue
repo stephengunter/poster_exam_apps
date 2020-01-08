@@ -39,7 +39,8 @@ import { mapState, mapGetters } from 'vuex';
 import { SET_LOADING, CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
 
 import { FETCH_QUESTIONS, CREATE_QUESTION, STORE_QUESTION,
-	EDIT_QUESTION, UPDATE_QUESTION, DELETE_QUESTION 
+	EDIT_QUESTION, UPDATE_QUESTION, DELETE_QUESTION,
+	STORE_ATTACHMENT, STORE_OPTIONS 
 } from '@/store/actions.type';
 
 import { onError } from '@/utils';
@@ -59,7 +60,10 @@ export default {
 			editor: {
 				active: false,
 				maxWidth: 800,
-				model: null
+				model: null,
+
+				questionId: 0,
+				options: []
 			},
 
 			deletion: {
@@ -142,6 +146,8 @@ export default {
 			}else {
 				this.editor.model = null;
 				this.editor.active = false;
+				this.editor.questionId = 0;
+				this.editor.options = [];
 			}
 		},
       cancelEdit(){
@@ -172,7 +178,83 @@ export default {
 			this.deletion.id = 0;
 		},
 		onSubmit(){
-			this.submit(this.editor.model);
+			let model = this.editor.model;
+			let hasMedia = (model.options.findIndex(item => item.medias.length > 0)) > -1;
+
+			if(hasMedia) {
+				let medias = [];
+				for(let i = 0; i < model.options.length; i++) {
+					let option = model.options[i];
+					for(let j = 0; j < option.medias.length; j++) {
+						medias.push({
+							id: option.medias[j].id ? option.medias[j].id : 0,
+							postType: 'Option',
+							postId: option.id,
+							files: [option.medias[j].file]
+						})
+					}
+				}
+
+				this.editor.options = model.options.map(item => {
+					return { ...item, medias: [] }
+				});
+
+				model.options = [];
+				this.$store.commit(CLEAR_ERROR);
+				this.$store.dispatch(STORE_QUESTION, model)
+				.then(id => {
+					this.editor.questionId = id;
+					this.uploadAttachments(medias);
+				})
+				.catch(error => {
+					if(!error)  Bus.$emit('errors');
+					else this.$store.commit(SET_ERROR, error);
+				})
+
+			}else {
+				this.submit(model);
+			}
+			
+			
+		},
+		uploadAttachments(medias, entities = null) {
+			if(!entities) entities = [];
+			let media  = medias.shift();
+			let vm = this;
+			setTimeout(() => {
+				vm.$store.dispatch(STORE_ATTACHMENT, media)
+					.then(attachments => {
+						entities.push(attachments);
+						if(medias.length) vm.uploadAttachments(medias, entities);
+						else vm.onAttachmentsUploaded(entities);
+					})
+					.catch(error => {
+						Bus.$emit('errors');
+					})
+			}, 250);
+		},
+		onAttachmentsUploaded(attachmentsList) {
+			
+			let options = this.editor.options;
+			for(let i = 0; i < options.length; i++) {
+				options[i].medias = attachmentsList[i];
+			}
+			let model = { ...this.editor.model } ;
+			model.id = this.editor.questionId;
+			model.options = options;
+
+			//create options
+			this.$store.dispatch(STORE_OPTIONS, model)
+			.then(() => {
+				this.init();
+				this.fetchData(this.params);
+				Bus.$emit('success');
+			})
+			.catch(error => {
+				if(!error)  Bus.$emit('errors');
+				else this.$store.commit(SET_ERROR, error);
+			})
+
 		},
       submit(model){
 			this.$store.commit(CLEAR_ERROR);

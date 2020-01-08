@@ -28,9 +28,13 @@
                   </v-btn>
                </td>
                <td>
-                  <v-text-field v-model="props.item.title"
+                  <!-- <v-text-field v-model="props.item.title"
                   v-validate="'required'"
                   :data-vv-name="`option_title_${props.index}`"
+                  :error-messages="getErrMsg(['title',`option_title_${props.index}`])"
+                  /> -->
+
+                  <v-text-field v-model="props.item.title"
                   :error-messages="getErrMsg(['title',`option_title_${props.index}`])"
                   />
                </td>
@@ -176,9 +180,21 @@ export default {
       },
       submit(){
          this.$validator.validate().then(valid => {
-            console.log('valid', valid);
-            return;
-            if(valid) this.$emit('submit', this.models);
+            if(valid) {
+               let checkTitles = true;
+               for(let i = 0; i < this.models.length; i++) {
+                  if(this.models[i].medias.length) continue;
+                  if(!this.models[i].title) {
+                     checkTitles = false;
+                     this.errors.add({
+                        field: `option_title_${i}`,
+                        msg: '請輸入標題'
+                     });
+                  }
+               }
+
+               if(checkTitles) this.$emit('submit', this.models);
+            }
          });
       }
 	}

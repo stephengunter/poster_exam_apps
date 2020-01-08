@@ -150,6 +150,7 @@ export default {
 			}
 
 			this.model.options = options.slice(0);
+
 			this.$emit('submit');
 			
 		}

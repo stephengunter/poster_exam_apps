@@ -56,8 +56,8 @@ const actions = {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          TermsService.store(model)
-            .then(TERM => {
-               resolve(TERM);
+            .then(term => {
+               resolve(term);
             })
             .catch(error => {
                reject(resolveErrorData(error)); 

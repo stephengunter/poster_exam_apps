@@ -44,5 +44,11 @@ export const UPDATE_QUESTION = 'updateQuestion';
 export const DELETE_QUESTION = 'deleteQuestion';
 export const ORDER_QUESTIONS = 'orderQuestions';
 
+//Options
+export const STORE_OPTIONS = 'storeOptions';
+
 //RecruitQuestions
 export const FETCH_RECRUIT_QUESTIONS = 'fetchRecruitQuestions';
+
+//Attachments
+export const STORE_ATTACHMENT = 'storeAttachment';
