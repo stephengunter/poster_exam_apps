@@ -179,8 +179,8 @@ export default {
 		},
 		onSubmit(){
 			let model = this.editor.model;
-			let hasMedia = (model.options.findIndex(item => item.medias.length > 0)) > -1;
 
+			let hasMedia = (model.options.findIndex(item => item.medias.length > 0)) > -1;
 			if(hasMedia) {
 				let medias = [];
 				for(let i = 0; i < model.options.length; i++) {
@@ -195,80 +195,89 @@ export default {
 					}
 				}
 
-				this.editor.options = model.options.map(item => {
-					return { ...item, medias: [] }
-				});
-
-				model.options = [];
-				this.$store.commit(CLEAR_ERROR);
-				this.$store.dispatch(STORE_QUESTION, model)
-				.then(id => {
-					this.editor.questionId = id;
-					this.uploadAttachments(medias);
-				})
-				.catch(error => {
-					if(!error)  Bus.$emit('errors');
-					else this.$store.commit(SET_ERROR, error);
-				})
+				this.submit(model, medias);
 
 			}else {
-				this.submit(model);
+				//this.submit(model);
 			}
 			
 			
 		},
-		uploadAttachments(medias, entities = null) {
-			if(!entities) entities = [];
+		submit(model, medias) {
+			if(model.id) this.update(model, medias);
+			else this.store(model, medias);
+		},
+		uploadAttachments(medias) {
+			console.log('uploadAttachments', medias);
 			let media  = medias.shift();
 			let vm = this;
-			setTimeout(() => {
-				vm.$store.dispatch(STORE_ATTACHMENT, media)
-					.then(attachments => {
-						entities.push(attachments);
-						if(medias.length) vm.uploadAttachments(medias, entities);
-						else vm.onAttachmentsUploaded(entities);
-					})
-					.catch(error => {
-						Bus.$emit('errors');
-					})
-			}, 250);
+			vm.$store.dispatch(STORE_ATTACHMENT, media)
+			.then(() => {
+				if(medias.length) vm.uploadAttachments(medias);
+				else vm.onSaved();
+			})
+			.catch(error => {
+				Bus.$emit('errors');
+			})
 		},
 		onAttachmentsUploaded(attachmentsList) {
-			
-			let options = this.editor.options;
-			for(let i = 0; i < options.length; i++) {
-				options[i].medias = attachmentsList[i];
-			}
-			let model = { ...this.editor.model } ;
-			model.id = this.editor.questionId;
-			model.options = options;
+			console.log('onAttachmentsUploaded', attachmentsList);
+			// let options = this.editor.options;
+			// for(let i = 0; i < options.length; i++) {
+			// 	options[i].medias = attachmentsList[i];
+			// }
+			// let model = { ...this.editor.model } ;
+			// model.id = this.editor.questionId;
+			// model.options = options;
 
-			//create options
-			this.$store.dispatch(STORE_OPTIONS, model)
-			.then(() => {
-				this.init();
-				this.fetchData(this.params);
-				Bus.$emit('success');
-			})
-			.catch(error => {
-				if(!error)  Bus.$emit('errors');
-				else this.$store.commit(SET_ERROR, error);
-			})
+			// //create options
+			// this.$store.dispatch(STORE_OPTIONS, model)
+			// .then(() => {
+			// 	this.init();
+			// 	this.fetchData(this.params);
+			// 	Bus.$emit('success');
+			// })
+			// .catch(error => {
+			// 	if(!error)  Bus.$emit('errors');
+			// 	else this.$store.commit(SET_ERROR, error);
+			// })
 
 		},
-      submit(model){
+		store(model, medias) {
 			this.$store.commit(CLEAR_ERROR);
-			let action = model.id ? UPDATE_QUESTION : STORE_QUESTION;
-         this.$store.dispatch(action, model)
-			.then(() => {
-				this.init();
-				this.fetchData(this.params);
-				Bus.$emit('success');
+         this.$store.dispatch(STORE_QUESTION, model)
+			.then(question => {
+				question.options.forEach(option => {
+					for(let i = 0; i < option.attachments.length; i++) {
+						let attachment = option.attachments[i];
+						let media = medias.find(item => item.files[0].name === attachment.name);
+						media.postId = attachment.postId;
+						media.postType = attachment.postType;
+					}	
+				});
+				this.uploadAttachments(medias);
 			})
 			.catch(error => {
 				if(!error)  Bus.$emit('errors');
 				else this.$store.commit(SET_ERROR, error);
 			})
+		},
+      update(model){
+			this.$store.commit(CLEAR_ERROR);
+         this.$store.dispatch(UPDATE_QUESTION, model)
+			.then(() => {
+				
+				this.onSaved();
+			})
+			.catch(error => {
+				if(!error)  Bus.$emit('errors');
+				else this.$store.commit(SET_ERROR, error);
+			})
+		},
+		onSaved() {
+			this.init();
+			this.fetchData(this.params);
+			Bus.$emit('success');
 		}
 	}
 }

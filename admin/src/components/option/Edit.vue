@@ -106,7 +106,8 @@ export default {
          
          medias: {
             index: -1,
-            loading: false
+            loading: false,
+            fileNames: []
          }
 		}
    },
@@ -149,16 +150,26 @@ export default {
          this.medias.index = index;
          this.$refs.uploadButton.launch();
       },
+      fileExist(filename) {
+         let idx = this.medias.fileNames.findIndex(name => name === filename);
+         console.log('idx', idx);
+         return idx > -1;
+      },
       onFileAdded({ files, thumbs }) {
          let idx = this.medias.index;
          let file = files[0];
-         let thumb = thumbs[0];
-
-         this.models[idx].medias = [{ file, thumb }];
-
+         if(this.fileExist(file.name)) {
+            Bus.$emit('warning', '圖片重複');
+         }
+         else {
+            this.medias.fileNames.push(file.name);
+            
+            let thumb = thumbs[0];
+            this.models[idx].medias = [{ file, thumb }];
+         }
+         
          this.medias.index = -1;
          this.medias.loading = false;
-
          console.log('models', this.models);
       },
       removeMedia(index){

@@ -148,9 +148,16 @@ export default {
 				this.$store.commit(SET_ERROR, { 'options' : [msg] });
 				return;
 			}
-
+			
 			this.model.options = options.slice(0);
-
+			this.model.options.forEach(option => {
+				option.attachments = option.medias.map(item => {
+					return {
+						name: item.file.name
+					}
+				})
+			});
+			
 			this.$emit('submit');
 			
 		}

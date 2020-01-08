@@ -16,7 +16,7 @@
 			dark
 		>
 			<v-icon color="white" class="mr-3">
-			mdi-check-circle
+			{{ success.icon }}
 			</v-icon>
 			<span class="successText cn">
 				{{ success.msg  }}
@@ -50,6 +50,7 @@ export default {
 				msg: 'Server no response. Please try later.'
 			},
 			success: {
+				icon: 'mdi-check-circle',
 				color: 'success',
 				show: false,
 				timeout: 1500,
@@ -74,6 +75,7 @@ export default {
 	created(){
 		Bus.$on('errors', this.onError);
 		Bus.$on('success', this.onSuccess);
+		Bus.$on('warning', this.onWarning);
 	},
 	mounted(){
 		if(window.innerWidth) this.$store.commit(SET_WINDOW_WIDTH, window.innerWidth);
@@ -102,9 +104,19 @@ export default {
 				this.$router.push({ name: 'login' })
 			}
 		},
+		onWarning(msg){
+			if(msg) {
+				this.success.icon = 'mdi-alert-circle';
+				this.success.color = 'warning';
+				this.success.msg = msg;
+				this.success.show = true;
+			}
+		},
 		onSuccess(msg){
-			this.success.show = true;
+			this.success.icon = 'mdi-check-circle';
+			this.success.color = 'success';
 			this.success.msg = msg ? msg : 'Save successfully';
+			this.success.show = true;
 		},
 		onResponsiveInverted () {
 			if(window.innerWidth) this.$store.commit(SET_WINDOW_WIDTH, window.innerWidth);
