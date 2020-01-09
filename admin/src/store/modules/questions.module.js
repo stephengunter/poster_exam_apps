@@ -85,8 +85,8 @@ const actions = {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          QuestionsService.update(model.id, model)
-            .then(() => {
-               resolve(true);
+            .then(question => {
+               resolve(question);
             })
             .catch(error => {
                reject(resolveErrorData(error)); 

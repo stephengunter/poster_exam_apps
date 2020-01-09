@@ -1,19 +1,25 @@
 <template>
 <div>
-<v-layout row wrap>
-   <v-flex xs6>
-        <core-upload-button ref="uploadButton" @file-added="onFileAdded"/>
-   </v-flex>
-   <v-flex xs6>
-      <v-img  v-if="thumb"
-      :src="thumb.data" max-width="100"
-      aspect-ratio="1"
-      class="grey lighten-2"
-      />
-   </v-flex>
-</v-layout>
-
-
+   <ul class="services-list">
+   <li>
+   <a href="https://www.google.com" class="image">
+      <img src="http://cdn3.iconfinder.com/data/icons/free-social-icons/67/facebook_square-24.png" alt="Facebook Icon" />
+   </a>
+   <div class="content">
+      <h3>Header</h3>
+      <p>text goes here</p>
+   </div>
+   </li>
+   <li>
+   <a href="https://www.google.com" class="image">
+      <img src="http://cdn1.iconfinder.com/data/icons/socialmediaicons_v120/24/facebook.png" alt="Facebook Icon" />
+   </a>
+   <div class="content">
+   <h3>Header</h3>
+   <p>text goes here</p>
+   </div>
+   </li>
+   </ul>
 </div>
 </template>
 
@@ -38,53 +44,28 @@ export default {
       
    },
    methods: {
-      onFileAdded({ files, thumbs }) {
-         this.thumb = thumbs[0];
-            console.log('thumbs',thumbs);
-            return;
-         for (let i=0; i<thumbs.length; i++) {
-            let name=thumbs[i].name;
-            if(!this.fileExist(name)){
-               let media={
-                  id:0,
-                  order:this.findMinOrder() - 1,
-                  title:name.split('.')[0],
-                  name:name,
-                  thumb:thumbs[i].data,
-                  type:thumbs[i].type,
-                  path:''
-               };
-               this.addMedia(media);
-            }
-            
-         }
-      },
-      submit: function (files) {
-         let vm = this;
-         let form = new FormData();
-         form.append('postId', 3);
-         form.append('memberId', 32);
-
-         for (let i = 0; i < files.length; i++) {
-               form.append('files', files[i]);
-         }
-
-         console.log('form', form);
-         
-
-         $.ajax({
-               url: uploadUrl,
-               data: form,
-               processData: false,
-               contentType: false,
-               type: 'POST',
-               success: function(data){
-                  alert(data);
-               }
-         });
-
-      },
+      
    }
    
 }
 </script>
+
+<style scoped>
+.service-list {
+list-style-type: none;
+margin-left:0px;
+padding-left:0px;
+display: inline-block;
+}
+
+.service-list img
+{
+float:left;
+}
+
+.service-list p,h3 {
+text-align: right; 
+display:inline-block;
+padding: 0;
+}
+</style>

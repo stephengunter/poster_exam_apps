@@ -5,8 +5,11 @@ import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
 Vue.component('loading', Loading);
 
+
+
 import '@/components';
 import '@/plugins';
+import '@/filters';
 import router from '@/routes';
 import store from '@/store';
 import { sync } from 'vuex-router-sync';

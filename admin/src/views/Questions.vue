@@ -63,7 +63,7 @@ export default {
 				model: null,
 
 				questionId: 0,
-				options: []
+				lastModel: null
 			},
 
 			deletion: {
@@ -121,6 +121,19 @@ export default {
 					let recruits = this.$refs.questionHeader.recruit.recruits;
 					if(recruits && recruits.length) model.recruits = recruits.slice(0);
 
+					if(this.editor.lastModel) {
+						for(let i = 0; i < this.editor.lastModel.options.length; i++) {
+							model.options.push({
+								id: 0,
+								questionId: 0,
+								title: '',
+								medias: [],
+								attachments: [],
+								correct: i === 0
+							})
+						}
+					}
+
 					this.setEditModel(model);
 				})
 				.catch(error => {
@@ -147,7 +160,6 @@ export default {
 				this.editor.model = null;
 				this.editor.active = false;
 				this.editor.questionId = 0;
-				this.editor.options = [];
 			}
 		},
       cancelEdit(){
@@ -179,7 +191,6 @@ export default {
 		},
 		onSubmit(){
 			let model = this.editor.model;
-
 			let hasMedia = (model.options.findIndex(item => item.medias.length > 0)) > -1;
 			if(hasMedia) {
 				let medias = [];
@@ -197,18 +208,13 @@ export default {
 
 				this.submit(model, medias);
 
-			}else {
-				//this.submit(model);
-			}
-			
-			
+			}else this.submit(model);
 		},
-		submit(model, medias) {
+		submit(model, medias = []) {
 			if(model.id) this.update(model, medias);
 			else this.store(model, medias);
 		},
 		uploadAttachments(medias) {
-			console.log('uploadAttachments', medias);
 			let media  = medias.shift();
 			let vm = this;
 			vm.$store.dispatch(STORE_ATTACHMENT, media)
@@ -220,64 +226,59 @@ export default {
 				Bus.$emit('errors');
 			})
 		},
-		onAttachmentsUploaded(attachmentsList) {
-			console.log('onAttachmentsUploaded', attachmentsList);
-			// let options = this.editor.options;
-			// for(let i = 0; i < options.length; i++) {
-			// 	options[i].medias = attachmentsList[i];
-			// }
-			// let model = { ...this.editor.model } ;
-			// model.id = this.editor.questionId;
-			// model.options = options;
-
-			// //create options
-			// this.$store.dispatch(STORE_OPTIONS, model)
-			// .then(() => {
-			// 	this.init();
-			// 	this.fetchData(this.params);
-			// 	Bus.$emit('success');
-			// })
-			// .catch(error => {
-			// 	if(!error)  Bus.$emit('errors');
-			// 	else this.$store.commit(SET_ERROR, error);
-			// })
-
-		},
 		store(model, medias) {
 			this.$store.commit(CLEAR_ERROR);
          this.$store.dispatch(STORE_QUESTION, model)
 			.then(question => {
-				question.options.forEach(option => {
-					for(let i = 0; i < option.attachments.length; i++) {
-						let attachment = option.attachments[i];
-						let media = medias.find(item => item.files[0].name === attachment.name);
-						media.postId = attachment.postId;
-						media.postType = attachment.postType;
-					}	
-				});
-				this.uploadAttachments(medias);
+				if(medias && medias.length) {
+					question.options.forEach(option => {
+						for(let i = 0; i < option.attachments.length; i++) {
+							let attachment = option.attachments[i];
+							let media = medias.find(item => item.files[0].name === attachment.name);
+							if(media) {
+								media.postId = attachment.postId;
+								media.postType = attachment.postType;
+							}
+						}	
+					});
+					this.uploadAttachments(medias);
+				}else this.onSaved(model);
 			})
 			.catch(error => {
 				if(!error)  Bus.$emit('errors');
 				else this.$store.commit(SET_ERROR, error);
 			})
 		},
-      update(model){
+      update(model, medias){
 			this.$store.commit(CLEAR_ERROR);
          this.$store.dispatch(UPDATE_QUESTION, model)
-			.then(() => {
+			.then(question => {
+				if(medias && medias.length) {
+					question.options.forEach(option => {
+						for(let i = 0; i < option.attachments.length; i++) {
+							let attachment = option.attachments[i];
+							let media = medias.find(item => item.files[0].name === attachment.name);
+							if(media) {
+								media.postId = attachment.postId;
+								media.postType = attachment.postType;
+							}
+						}	
+					});
+					this.uploadAttachments(medias);
+				}else this.onSaved();
 				
-				this.onSaved();
 			})
 			.catch(error => {
 				if(!error)  Bus.$emit('errors');
 				else this.$store.commit(SET_ERROR, error);
 			})
 		},
-		onSaved() {
+		onSaved(model) {
 			this.init();
 			this.fetchData(this.params);
 			Bus.$emit('success');
+
+			if(model) this.editor.lastModel = model;
 		}
 	}
 }

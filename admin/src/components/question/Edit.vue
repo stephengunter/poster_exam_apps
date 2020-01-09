@@ -151,11 +151,13 @@ export default {
 			
 			this.model.options = options.slice(0);
 			this.model.options.forEach(option => {
-				option.attachments = option.medias.map(item => {
-					return {
-						name: item.file.name
-					}
-				})
+				if(option.medias.length) {
+					option.attachments = option.medias.map(item => {
+						return {
+							name: item.file.name
+						}
+					})
+				}
 			});
 			
 			this.$emit('submit');

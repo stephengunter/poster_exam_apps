@@ -12,15 +12,22 @@
             </v-btn>
          </td>
          <td>
-             {{ props.item.title }}
+            {{ props.item.title }}
          </td>
          <td>
             <ul class="options">
                <li v-for="(option,index) in props.item.options" :key="option.id" :class="{ 'option-display': index > 0, 'correct-option': option.correct }" >
-                  <v-icon v-if="option.correct" color="success">
+
+                  <div style="display:inline;"> 
+                     <v-icon v-if="option.correct" color="success">
                      mdi-check-circle
-                  </v-icon>
-                  {{ option.title }}
+                     </v-icon>
+                     <img v-if="option.attachments.length" style="vertical-align:middle" 
+                     :src="option.attachments[0].previewPath | photoNameUrl(50)"
+                     >
+                     {{ option.title }}
+                  </div>
+                  
                </li>
             </ul>
          </td>
@@ -62,6 +69,12 @@ export default {
    },
    data () {
 		return {
+         items: [
+          { icon: true, title: 'Jason Oner', avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg' },
+          { title: 'Travis Howard', avatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg' },
+          { title: 'Ali Connors', avatar: 'https://cdn.vuetifyjs.com/images/lists/3.jpg' },
+          { title: 'Cindy Baker', avatar: 'https://cdn.vuetifyjs.com/images/lists/4.jpg' }
+        ],
 			headers: [
             {
 					sortable: false,
@@ -131,4 +144,9 @@ td {
    color:#1867c0;
    font-size : 1.6em; 
 }
+
+
+
+
+
 </style>

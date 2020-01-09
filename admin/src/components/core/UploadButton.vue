@@ -5,7 +5,7 @@
       {{ text }}
       <v-icon right dark>mdi-cloud-upload</v-icon>
       <input ref="inputUpload" style="display: none;" type="file" 
-      :multiple="multiple" :accept="accept" 
+      :multiple="multiple" :accept="accept" @click="charge"
       @change="onFileChange" 
       >
    </v-btn>
@@ -46,6 +46,18 @@ export default {
          this.files = [];
          this.thumbnails = [];
          this.$refs.inputUpload.click();
+      },
+      charge() {
+         let vm = this;
+         document.body.onfocus = () => { setTimeout(vm.checkOnCancel, 100); };
+      },
+      checkOnCancel() {
+         if(this.$refs.inputUpload.value.length === 0) {
+            console.log();
+            this.setLoading(true);
+            this.$emit('cancel');
+         }
+         document.body.onfocus = null;
       },
       setLoading(val) {
          this.loading = val;

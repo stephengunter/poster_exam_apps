@@ -14,7 +14,15 @@
                </span>
             </template>
             <template slot="items" slot-scope="props">
-               <td>
+               <td v-if="props.item.attachments.length && props.item.attachments[0].id">
+                  <v-img :src="props.item.attachments[0].previewPath | photoNameUrl(100)" max-width="100" aspect-ratio="1">
+                     <v-btn color="success" style="margin:0;position:absolute;top:0;right:0;width:30px;height:30px;" flat icon
+                     @click="removeaAtachments(props.index)">
+                        <v-icon>mdi-close-circle-outline</v-icon>
+                     </v-btn>
+                  </v-img>
+               </td>
+               <td v-else>
                   <v-img v-if="props.item.medias[0]" :src="props.item.medias[0].thumb.data" max-width="100" aspect-ratio="1">
                      <v-btn color="success" style="margin:0;position:absolute;top:0;right:0;width:30px;height:30px;" flat icon
                      @click="removeMedia(props.index)">
@@ -28,11 +36,6 @@
                   </v-btn>
                </td>
                <td>
-                  <!-- <v-text-field v-model="props.item.title"
-                  v-validate="'required'"
-                  :data-vv-name="`option_title_${props.index}`"
-                  :error-messages="getErrMsg(['title',`option_title_${props.index}`])"
-                  /> -->
 
                   <v-text-field v-model="props.item.title"
                   :error-messages="getErrMsg(['title',`option_title_${props.index}`])"
@@ -51,6 +54,7 @@
          </v-data-table>
          <core-upload-button v-show="false" ref="uploadButton" :multiple="false"
          @file-added="onFileAdded" @loading="medias.loading = true"
+         @cancel="hideUpload"
          />
       </v-flex>
    </v-layout>
@@ -117,7 +121,13 @@ export default {
       }
    },
 	beforeMount(){
-		if(this.init_models) this.models = this.init_models.slice(0);
+      if(this.init_models) {
+         this.models = this.init_models.map(item => {
+            return {
+               ...item, medias:[]
+            }
+         });
+      } 
 	},
 	methods: {
       getCorrectItems() {
@@ -140,6 +150,7 @@ export default {
             questionId: this.question_id,
             title: '',
             medias: [],
+            attachments: [],
             correct: correctItems.length > 0 ? false : true
          });
       },
@@ -150,9 +161,12 @@ export default {
          this.medias.index = index;
          this.$refs.uploadButton.launch();
       },
+      hideUpload() {
+         this.medias.loading = false;
+         this.medias.index = -1;
+      },
       fileExist(filename) {
          let idx = this.medias.fileNames.findIndex(name => name === filename);
-         console.log('idx', idx);
          return idx > -1;
       },
       onFileAdded({ files, thumbs }) {
@@ -168,13 +182,13 @@ export default {
             this.models[idx].medias = [{ file, thumb }];
          }
          
-         this.medias.index = -1;
-         this.medias.loading = false;
-         console.log('models', this.models);
+         this.hideUpload();
       },
       removeMedia(index){
          this.models[index].medias = [];
-         console.log('models', this.models);
+      },
+      removeaAtachments(index){
+         this.models[index].attachments = [];
       },
       onCorrectChanged(index) {
          if(this.multi_answers) {
@@ -194,8 +208,10 @@ export default {
             if(valid) {
                let checkTitles = true;
                for(let i = 0; i < this.models.length; i++) {
-                  if(this.models[i].medias.length) continue;
-                  if(!this.models[i].title) {
+                  let model = this.models[i];
+                  if(model.medias.length || model.attachments.length) continue;
+
+                  if(!model.title) {
                      checkTitles = false;
                      this.errors.add({
                         field: `option_title_${i}`,
@@ -203,8 +219,8 @@ export default {
                      });
                   }
                }
-
-               if(checkTitles) this.$emit('submit', this.models);
+            
+               if(checkTitles)  this.$emit('submit', this.models);
             }
          });
       }
