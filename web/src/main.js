@@ -1,10 +1,13 @@
 import Vue from 'vue';
 window.Bus = new Vue({});
 
+
+
 import App from './App.vue';
 import router from './routes';
 import store from './store';
 import vuetify from './plugins/vuetify';
+import '@/filters';
 import JwtService from '@/services/jwt.service';
 
 import { CHECK_AUTH, REFRESH_TOKEN } from '@/store/actions.type';

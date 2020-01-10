@@ -11,7 +11,6 @@
 		<v-snackbar :timeout="success.timeout"
 			:color="success.color"
 			:top="true"
-			:right="true"
 			v-model="success.show"
 			dark
 		>
@@ -88,6 +87,7 @@ export default {
    },
 	methods:{
 		onError(error){
+			
 			if(!error){
 				this.err.msg = 'Server no response. Please try later.';
 				this.err.show = true;
@@ -151,6 +151,12 @@ export default {
 	color: #fff;
 }
 .cn {
-    font-family: "微軟正黑體", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+   font-family: "微軟正黑體", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.img-center {
+	display: block;
+	margin-left: auto;
+	margin-right: auto
 }
 </style>

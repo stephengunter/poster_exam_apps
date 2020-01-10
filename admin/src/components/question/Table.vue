@@ -22,9 +22,12 @@
                      <v-icon v-if="option.correct" color="success">
                      mdi-check-circle
                      </v-icon>
-                     <img v-if="option.attachments.length" style="vertical-align:middle" 
-                     :src="option.attachments[0].previewPath | photoNameUrl(50)"
-                     >
+                     <a href="#" v-if="option.attachments.length" @click.prevent="showPhoto(option.attachments[0])">
+                        <img  style="vertical-align:middle" 
+                        :src="option.attachments[0].previewPath | photoNameUrl(50)"
+                        >
+                     </a>
+                     
                      {{ option.title }}
                   </div>
                   
@@ -115,6 +118,9 @@ export default {
       },
       showTerm(term) {
          this.$emit('show-term', term);
+      },
+      showPhoto(photo){
+         this.$emit('show-photo', photo);
       },
       recruitText(item) {
          return item.parents[0].title;

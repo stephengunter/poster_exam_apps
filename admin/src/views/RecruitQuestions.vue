@@ -14,13 +14,13 @@
 						<v-flex sm12>
 							<question-table :list="pageList.viewList" 
 							:show_terms="true" :show_recruits="false"
-							@edit="edit" @show-term="onShowTerm" 
+							@edit="edit" @show-term="onShowTerm"  @show-photo="onShowPhoto"
 							/>
 						</v-flex>
 					</v-layout>
 				</material-card>
 			</v-flex>
-     </v-layout>
+      </v-layout>
 	   <v-dialog v-model="editor.active" persistent :max-width="editor.maxWidth">
 			<question-edit v-if="editor.active" :model="editor.model"
 			@submit="onSubmit" @cancel="cancelEdit" @remove="remove"
@@ -39,6 +39,15 @@
 				</v-card-text>
       	</v-card>
 		</v-dialog>
+		<v-dialog v-model="showPhoto.active" :max-width="showPhoto.maxWidth">
+			<v-card v-if="showPhoto.model">
+				<v-card-text>
+					<v-img class="img-center" :src="showPhoto.model.id | photoIdUrl"
+					 :max-width="showPhoto.model.width"
+					/>
+				</v-card-text>
+      	</v-card>
+		</v-dialog>
 	</v-container>
 </template>
 
@@ -46,8 +55,11 @@
 import { mapState, mapGetters } from 'vuex';
 import { SET_LOADING, CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
 import { FETCH_RECRUIT_QUESTIONS, CREATE_QUESTION, STORE_QUESTION,
-	EDIT_QUESTION, UPDATE_QUESTION, DELETE_QUESTION 
+	EDIT_QUESTION, UPDATE_QUESTION, DELETE_QUESTION,
+	STORE_ATTACHMENT, STORE_OPTIONS 
 } from '@/store/actions.type';
+
+import { onError } from '@/utils';
 
 export default {
 	name: 'RecruitQuestionsView',
@@ -62,6 +74,8 @@ export default {
 				active: false,
 				maxWidth: 800,
 				model: null,
+
+				questionId: 0,
 				lastModel: null
 			},
 			deletion: {
@@ -71,6 +85,12 @@ export default {
 			},
 
 			showTerm: {
+				active: false,
+				model: null,
+				maxWidth: 480
+			},
+
+			showPhoto: {
 				active: false,
 				model: null,
 				maxWidth: 480
@@ -118,9 +138,12 @@ export default {
 			this.showTerm.model = item;
 			this.showTerm.active = true;
 		},
+		onShowPhoto(photo) {
+			this.showPhoto.model = photo;
+			this.showPhoto.active = true;
+		},
 		create(){
 			let recruit = this.selectedRecruit;
-			console.log('recruit', recruit);
 			if(!recruit) return;
 
 			this.$store.commit(CLEAR_ERROR);
@@ -128,6 +151,16 @@ export default {
 				.then(model => {
 					if(this.editor.lastModel) {
 						model.subjectId = this.editor.lastModel.subjectId;
+						for(let i = 0; i < this.editor.lastModel.options.length; i++) {
+							model.options.push({
+								id: 0,
+								questionId: 0,
+								title: '',
+								medias: [],
+								attachments: [],
+								correct: i === 0
+							})
+						}
 					}else {
 						if(recruit.subjectId) model.subjectId = recruit.subjectId;
 						else {
@@ -153,7 +186,6 @@ export default {
 			})
 		},
 		setEditModel(model) {
-			console.log('setEditModel', model);
 			if(model) {
 				this.editor.model = model;
 
@@ -162,6 +194,7 @@ export default {
 			}else {
 				this.editor.model = null;
 				this.editor.active = false;
+				this.editor.questionId = 0;
 			}
 		},
       cancelEdit(){
@@ -192,24 +225,95 @@ export default {
 			this.deletion.id = 0;
 		},
 		onSubmit(){
-			this.submit(this.editor.model);
+			let model = this.editor.model;
+			let hasMedia = (model.options.findIndex(item => item.medias.length > 0)) > -1;
+			if(hasMedia) {
+				let medias = [];
+				for(let i = 0; i < model.options.length; i++) {
+					let option = model.options[i];
+					for(let j = 0; j < option.medias.length; j++) {
+						medias.push({
+							id: option.medias[j].id ? option.medias[j].id : 0,
+							postType: 'Option',
+							postId: option.id,
+							files: [option.medias[j].file]
+						})
+					}
+				}
+
+				this.submit(model, medias);
+
+			}else this.submit(model);
 		},
-      submit(model){
-
-			this.$store.commit(CLEAR_ERROR);
-			let action = model.id ? UPDATE_QUESTION : STORE_QUESTION;
-         this.$store.dispatch(action, model)
+      submit(model, medias = []) {
+			if(model.id) this.update(model, medias);
+			else this.store(model, medias);
+		},
+		uploadAttachments(medias) {
+			let media  = medias.shift();
+			let vm = this;
+			vm.$store.dispatch(STORE_ATTACHMENT, media)
 			.then(() => {
-				this.editor.lastModel = model;
-
-				this.init();
-				this.fetchData(this.params);
-				Bus.$emit('success');
+				if(medias.length) vm.uploadAttachments(medias);
+				else vm.onSaved();
+			})
+			.catch(error => {
+				Bus.$emit('errors');
+			})
+		},
+		store(model, medias) {
+			this.$store.commit(CLEAR_ERROR);
+         this.$store.dispatch(STORE_QUESTION, model)
+			.then(question => {
+				if(medias && medias.length) {
+					question.options.forEach(option => {
+						for(let i = 0; i < option.attachments.length; i++) {
+							let attachment = option.attachments[i];
+							let media = medias.find(item => item.files[0].name === attachment.name);
+							if(media) {
+								media.postId = attachment.postId;
+								media.postType = attachment.postType;
+							}
+						}	
+					});
+					this.uploadAttachments(medias);
+				}else this.onSaved(model);
 			})
 			.catch(error => {
 				if(!error)  Bus.$emit('errors');
 				else this.$store.commit(SET_ERROR, error);
 			})
+		},
+      update(model, medias){
+			this.$store.commit(CLEAR_ERROR);
+         this.$store.dispatch(UPDATE_QUESTION, model)
+			.then(question => {
+				if(medias && medias.length) {
+					question.options.forEach(option => {
+						for(let i = 0; i < option.attachments.length; i++) {
+							let attachment = option.attachments[i];
+							let media = medias.find(item => item.files[0].name === attachment.name);
+							if(media) {
+								media.postId = attachment.postId;
+								media.postType = attachment.postType;
+							}
+						}	
+					});
+					this.uploadAttachments(medias);
+				}else this.onSaved();
+				
+			})
+			.catch(error => {
+				if(!error)  Bus.$emit('errors');
+				else this.$store.commit(SET_ERROR, error);
+			})
+		},
+		onSaved(model) {
+			this.init();
+			this.fetchData(this.params);
+			Bus.$emit('success');
+
+			if(model) this.editor.lastModel = model;
 		}
 	}
 }

@@ -14,21 +14,11 @@ export const PURGE_AUTH = 'logOut';
 export const SET_AUTH = 'setAuth';
 export const SET_USER = 'setUser';
 
-export const SET_SUBJECTS = 'setSubjects';
-
-export const SET_TERMS = 'setTerms';
-
-export const SET_RECRUITS = 'setRecruits';
-
-export const SET_QUESTIONS = 'setQuestions';
-
-export const SET_CATEGORIES = 'setCategories';
-export const SET_CATEGORY_TYPES = 'setCategoryTypes';
-
-
-export const SET_USERS = 'setUsers';
-
-
-
 export const SET_ERROR = 'setError';
 export const CLEAR_ERROR = 'clearError';
+
+export const SET_RQS = 'setRQs';
+
+
+
+

@@ -28,6 +28,16 @@ export default {
 	components: {
       GoogleLogin
 	},
+	data(){
+		return {
+			returnUrl: ''
+		}
+	},
+	beforeMount() {
+		if(this.$route.query) {
+			this.returnUrl = this.$route.query.returnUrl ?  this.$route.query.returnUrl : '';
+		}
+	},
 	methods: {
       oAuthLoginFailed(){
          Bus.$emit('errors', { msg: '登入失敗' });

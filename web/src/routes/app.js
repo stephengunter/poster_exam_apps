@@ -1,7 +1,7 @@
 import { FOR_ALL, GUEST_ONLY, USER_ONLY } from './route.type';
 
 const applinks = [{
-   name: 'Home',
+   name: 'home',
    path: '/',
    view: 'Home',
    parent: '',
@@ -12,7 +12,7 @@ const applinks = [{
       title: '首頁'
    } 
 },{
-   name: 'Test',
+   name: 'test',
    path: '/test',
    view: 'Test',
    parent: '',
@@ -22,10 +22,21 @@ const applinks = [{
       icon: 'mdi-home',
       title: 'Test'
    } 
+},{
+   name: 'rqs',
+   path: '/rqs',
+   view: 'RQs',
+   parent: '',
+   meta: {
+      type: FOR_ALL,
+      menu: true,
+      icon: 'mdi-database',
+      title: '歷屆試題'
+   } 
 }];
 
 const userLinks = [{
-   name: 'Exam',
+   name: 'exam',
    path: '/exam',
    view: 'Exam',
    parent: '',
@@ -35,22 +46,11 @@ const userLinks = [{
       icon: 'mdi-file-document-edit-outline',
       title: '模擬測驗'
    } 
-},{
-   name: 'RQs',
-   path: '/rqs',
-   view: 'RQs',
-   parent: '',
-   meta: {
-      type: USER_ONLY,
-      menu: true,
-      icon: 'mdi-database',
-      title: '歷屆試題'
-   } 
 }];
 
 
 const guestLinks = [{
-   name: 'Login',
+   name: 'login',
    path: '/login',
    view: 'Login',
    meta: {

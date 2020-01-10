@@ -11,12 +11,13 @@
 			:color="success.color" v-model="success.show"
 		>
 			<v-icon color="white" class="mr-3">
-			mdi-check-circle
+			{{ success.icon }}
 			</v-icon>
 			<span class="successText cn">
 				{{ success.msg  }}
 			</span>
 		</v-snackbar>
+		
 		<v-dialog v-model="err.show" width="480">
          <v-card-title class="headline red lighten-1" >
 				<v-icon color="white" class="mr-3">
@@ -70,6 +71,7 @@ export default {
 	created(){
 		Bus.$on('errors', this.onError);
 		Bus.$on('success', this.onSuccess);
+		Bus.$on('warning', this.onWarning);
 	},
 	mounted(){
 		if(window.innerWidth) this.$store.commit(SET_WINDOW_WIDTH, window.innerWidth);
@@ -81,8 +83,7 @@ export default {
       window.removeEventListener('resize', this.onResponsiveInverted)
 	},
 	methods:{
-		onError(error){
-			console.log('onError');
+		onError(error) {
 			let defaultMsg = '伺服器暫時無回應，請稍候再試.';
 			if(!error){
 				this.err.msg = defaultMsg;
@@ -97,12 +98,22 @@ export default {
 				this.err.msg = defaultMsg;
 				this.err.show = true;
 			}else if(error.status === 401){
-				this.$router.push({ name: 'login' })
+				this.$router.push({ name: 'login', query: { returnUrl: this.$route.path } })
 			}
 		},
-		onSuccess(msg){
-			this.success.show = true;
+		onSuccess(msg) {
+			this.success.icon = 'mdi-check-circle';
+			this.success.color = 'success';
 			this.success.msg = msg ? msg : '存檔成功';
+			this.success.show = true;
+		},
+		onWarning(msg){
+			if(msg) {
+				this.success.icon = 'mdi-alert-circle';
+				this.success.color = 'warning';
+				this.success.msg = msg;
+				this.success.show = true;
+			}
 		},
 		onResponsiveInverted () {
 			if(window.innerWidth) this.$store.commit(SET_WINDOW_WIDTH, window.innerWidth);
