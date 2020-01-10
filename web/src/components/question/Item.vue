@@ -3,10 +3,8 @@
 	<v-col>
 		<v-radio-group v-model="radioGroup">
 			<p>
-				<v-icon color="success" class="mr-1">mdi-check-circle</v-icon>
-				<v-icon color="error" class="mr-1">mdi-close-circle</v-icon>
-				<span v-show="index" class="mr-1">{{ index }}.</span>
-				郝贵生：共产党人的“斗争精神”当代斗争内容究竟是什么？
+				<span v-show="order" class="mr-1">{{ order }}.</span>
+				{{ model.title }}
 			</p>
 			<ul class="options">
 				<li v-for="(option,index) in model.options" :key="option.id" :class="{ 'option-display': index > 0, 'correct-option': option.correct }" >
@@ -28,7 +26,7 @@
 			</ul>
 		</v-radio-group>
 		<v-expansion-panels>
-			<v-expansion-panel v-for="(item,i) in 3" :key="i">
+			<v-expansion-panel>
       		<v-expansion-panel-header>解析</v-expansion-panel-header>
 				<v-expansion-panel-content>
 				Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
@@ -42,9 +40,9 @@
 <script>
 
 export default {
-	name: 'QuestionRead',
+	name: 'QuestionItem',
 	props: {
-		index: {
+		order: {
          type: Number,
          default: 0
 		},
@@ -57,6 +55,11 @@ export default {
       return {
          radioGroup: 1,
          panel: 0
+      }
+	},
+	methods: {
+      showPhoto(photo) {
+         this.$emit('show-photo', photo);
       }
    }
 };

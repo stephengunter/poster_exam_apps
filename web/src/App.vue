@@ -141,4 +141,13 @@ export default {
 	font-size: 1.2rem;
 	color: #fff;
 }
+.center-helper {
+	display: inline-block;
+	height: 100%;
+	vertical-align: middle;
+}
+.img-center {
+	display: block;
+	margin: auto;
+}
 </style>

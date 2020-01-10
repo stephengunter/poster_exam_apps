@@ -3,8 +3,10 @@
       <a href="#" @click.prevent="selectMode" style="text-decoration: none;" >
          {{ bread.text }}
       </a>
-      四選一單選選擇題共 50 題，每題 2 分
-      <Part v-if="false" />
+      
+      <Part v-for="(part, index) in parts" :key="index" 
+      :model="part" :start_index="getStartIndex(index)"
+      />
       <v-dialog v-model="mode.active" :max-width="mode.maxWidth">
          <RQSelector  ref="modeSelector"
          :params="params"
@@ -19,7 +21,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { FETCH_RQS } from '@/store/actions.type';
-import { resolveErrorData, getRouteTitle, getListText } from '@/utils';
+import { resolveErrorData, getRouteTitle, getListText, toCnNumber } from '@/utils';
 
 import RQSelector from '@/components/rq/Selector';
 import Part from '@/components/rq/Part';
@@ -49,18 +51,19 @@ export default {
 				maxWidth: 800
          },
 
+         questionCounts: [],
+
          bread: {
             items: [],
             text: ''
          },
-
-         parts: []
+         
 		}
    },
    computed: {
       ...mapGetters(['responsive','contentMaxWidth']),
       ...mapState({
-			questions: state => state.rqs.questions
+			parts: state => state.rqs.parts
 		}),
       firstLoad() {
          return this.params.mode < 0;
@@ -120,7 +123,7 @@ export default {
             mode: this.params.mode,
             recruit: this.params.subject
          };
-         console.log('params', params);
+         
          this.$store.dispatch(FETCH_RQS, params)
          .then(model => {
             if(this.firstLoad) {
@@ -139,21 +142,18 @@ export default {
                   this.selectMode();
                })
             }else {
-              
-               let multiParts = model.parts.length > 1;
-               for(let i = 0; i < model.parts.length; i++) {
-                  let part = model.parts[i];
-                  console.log('part', part);
-                  //part.totalItems
-               }
+               this.questionCounts = model.parts.map(part => part.questions.totalItems);
+               console.log('questionCounts',this.questionCounts);
+               
             }
          })
 			.catch(error => {
             Bus.$emit('errors', resolveErrorData(error));
 			})
       },
-      getPartTitle() {
-
+      getStartIndex(index) {
+         if(index < 1) return 1;
+         return this.questionCounts[index - 1] + 1;
       }
 	}
 }
