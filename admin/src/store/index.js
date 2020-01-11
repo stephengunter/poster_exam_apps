@@ -7,6 +7,7 @@ import subjects from './modules/subjects.module';
 import terms from './modules/terms.module';
 import questions from './modules/questions.module';
 import options from './modules/options.module';
+import resolves from './modules/resolves.module';
 import attachments from './modules/attachments.module';
 import recruits from './modules/recruits.module';
 import recruitQuestions from './modules/recruit-questions.module';
@@ -21,6 +22,7 @@ export default new Vuex.Store({
       terms,
       questions,
       options,
+      resolves,
       attachments,
       recruits,
       recruitQuestions

@@ -10,7 +10,10 @@
 					/>
 					<v-layout row wrap v-if="pageList">
 						<v-flex sm12>
-							<question-table :list="pageList.viewList" @edit="edit"/>
+							<question-table :list="pageList.viewList"
+							@edit="edit" @edit-resolves="editResolves"
+							@show-photo="onShowPhoto"
+							/>
 						</v-flex>
 						<v-flex sm12>
 							<core-table-pager :model="pageList" :responsive="responsive" v-show="pageList.viewList.length > 0" 
@@ -20,11 +23,25 @@
 					</v-layout>
 				</material-card>
 			</v-flex>
-     </v-layout>
+      </v-layout>
 	   <v-dialog v-model="editor.active" persistent :max-width="editor.maxWidth">
 			<question-edit v-if="editor.active" :model="editor.model"
 			@submit="onSubmit" @cancel="cancelEdit" @remove="remove"
 			/>
+		</v-dialog>
+		<v-dialog v-model="resolves.active" persistent :max-width="resolves.maxWidth">
+			<resolve-edit v-if="resolves.active" :question="resolves.model"
+			@saved="onResolvesSaved" @cancel="cancelEditResolves"
+			/>
+		</v-dialog>
+		<v-dialog v-model="showPhoto.active" :max-width="showPhoto.maxWidth">
+			<v-card v-if="showPhoto.model">
+				<v-card-text>
+					<v-img class="img-center" :src="showPhoto.model.id | photoIdUrl"
+					 :max-width="showPhoto.model.width"
+					/>
+				</v-card-text>
+      	</v-card>
 		</v-dialog>
 		<v-dialog v-model="deletion.active" :max-width="deletion.maxWidth">
 			<core-confirm @ok="submitDelete" @cancel="cancelDelete" />
@@ -66,11 +83,25 @@ export default {
 				lastModel: null
 			},
 
+			resolves: {
+				active: false,
+				maxWidth: 800,
+				model: null,
+
+				questionId: 0
+			},
+
+			showPhoto: {
+				active: false,
+				model: null,
+				maxWidth: 480
+			},
+
 			deletion: {
 				id: 0,
 				active: false,
 				maxWidth: 480
-			},
+			}
 			
 		}
 	},
@@ -105,6 +136,10 @@ export default {
 		},
 		onParamsChanged() {
 			this.fetchData(this.params);
+		},
+		onShowPhoto(photo) {
+			this.showPhoto.model = photo;
+			this.showPhoto.active = true;
 		},
 		fetchData(params){
 			this.$store.commit(CLEAR_ERROR);
@@ -279,7 +314,37 @@ export default {
 			Bus.$emit('success');
 
 			if(model) this.editor.lastModel = model;
-		}
+		},
+		editResolves(id){
+			this.$store.commit(CLEAR_ERROR);
+			this.$store.dispatch(EDIT_QUESTION, id)
+			.then(model => {
+				this.setResolvesModel(model);
+			})
+			.catch(error => {
+				Bus.$emit('errors');
+			})
+		},
+		setResolvesModel(model) {
+			if(model) {
+				this.resolves.model = model;
+
+				if(this.contentMaxWidth) this.resolves.maxWidth = this.contentMaxWidth;
+				this.resolves.active = true;
+			}else {
+				this.resolves.model = null;
+				this.resolves.active = false;
+				this.resolves.questionId = 0;
+			}
+		},
+      cancelEditResolves() {
+			this.setResolvesModel(null);
+		},
+		onResolvesSaved() {
+			this.onSaved();
+
+			this.setResolvesModel(null);
+		},
 	}
 }
 </script>

@@ -60,7 +60,7 @@ const actions = {
                resolve(question);
             })
             .catch(error => {
-               reject(resolveErrorData(error)); 
+               reject(resolveErrorData(error));
             })
             .finally(() => { 
                context.commit(SET_LOADING, false);

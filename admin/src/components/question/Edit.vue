@@ -32,7 +32,7 @@
 					<option-edit ref="optionEditor" :init_models="model.options"
 						:question_id="model.id" :multi_answers="model.multiAnswers"
 						@submit="onOptionSubmit"
-					/>	
+					/>
 					<core-error-list />
 				</v-container>
 			</v-card-text>

@@ -15,24 +15,12 @@
             {{ props.item.title }}
          </td>
          <td>
-            <ul class="options">
-               <li v-for="(option,index) in props.item.options" :key="option.id" :class="{ 'option-display': index > 0, 'correct-option': option.correct }" >
-
-                  <div style="display:inline;"> 
-                     <v-icon v-if="option.correct" color="success">
-                     mdi-check-circle
-                     </v-icon>
-                     <a href="#" v-if="option.attachments.length" @click.prevent="showPhoto(option.attachments[0])">
-                        <img  style="vertical-align:middle" 
-                        :src="option.attachments[0].previewPath | photoNameUrl(50)"
-                        >
-                     </a>
-                     
-                     {{ option.title }}
-                  </div>
-                  
-               </li>
-            </ul>
+            <option-list :options="props.item.options" 
+            @show-photo="showPhoto"
+            />
+         </td>
+         <td v-if="show_resolves" >
+            <a href="#" @click.prevent="editResolves(props.item.id)">解析 {{ ` (${props.item.resolves.length}) ` }}</a>
          </td>
          <td v-if="show_terms" >
             <ul style="list-style-type:none;">
@@ -60,7 +48,11 @@ export default {
 		list: {
          type: Array,
          default: null
-		},
+      },
+      show_resolves: {
+         type: Boolean,
+         default: true
+      },
       show_recruits: {
          type: Boolean,
          default: true
@@ -72,12 +64,6 @@ export default {
    },
    data () {
 		return {
-         items: [
-          { icon: true, title: 'Jason Oner', avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg' },
-          { title: 'Travis Howard', avatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg' },
-          { title: 'Ali Connors', avatar: 'https://cdn.vuetifyjs.com/images/lists/3.jpg' },
-          { title: 'Cindy Baker', avatar: 'https://cdn.vuetifyjs.com/images/lists/4.jpg' }
-        ],
 			headers: [
             {
 					sortable: false,
@@ -100,10 +86,15 @@ export default {
 		}
    },
    beforeMount() {
+      if(this.show_resolves) this.headers.push({
+         sortable: false,
+         text: '解析',
+         width: '10%'
+      });
       if(this.show_terms) this.headers.push({
          sortable: false,
          text: '條文',
-         width: '20%'
+         width: '15%'
       });
       if(this.show_recruits) this.headers.push({
          sortable: false,
@@ -127,6 +118,9 @@ export default {
       },
       edit(id){
          this.$emit('edit', id);
+      },
+      editResolves(id) {
+         this.$emit('edit-resolves', id);
       }
    }
 
@@ -139,20 +133,4 @@ export default {
 td {
    vertical-align: text-top;
 }
-.options {
-   padding-left : 0px;
-   list-style-type : none;
-}
-.option-display {
-   padding-top: 0.2em;
-}
-.correct-option {
-   color:#1867c0;
-   font-size : 1.6em; 
-}
-
-
-
-
-
 </style>

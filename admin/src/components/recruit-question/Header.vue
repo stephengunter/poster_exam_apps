@@ -38,7 +38,7 @@ export default {
 		}
    },
    beforeMount(){
-		this.$store.dispatch(FETCH_RECRUITS, { parent: -1 })
+		this.$store.dispatch(FETCH_RECRUITS, { parent: -1, active: -1 })
 		.then(recruits => {
 			this.recruitList = recruits;
 			setTimeout(() => {

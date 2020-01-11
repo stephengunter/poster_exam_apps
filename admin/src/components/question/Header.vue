@@ -85,7 +85,7 @@ export default {
       ...mapGetters(['responsive','contentMaxWidth']),
    },
    beforeMount(){		
-		this.$store.dispatch(FETCH_RECRUITS)
+		this.$store.dispatch(FETCH_RECRUITS, { parent: 0, active: -1 })
 		.then(recruits => {
 			this.recruitList = recruits;
 		})

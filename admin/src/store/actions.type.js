@@ -47,6 +47,9 @@ export const ORDER_QUESTIONS = 'orderQuestions';
 //Options
 export const STORE_OPTIONS = 'storeOptions';
 
+//Resolves
+export const STORE_RESOLVE = 'storeResolve';
+
 //RecruitQuestions
 export const FETCH_RECRUIT_QUESTIONS = 'fetchRecruitQuestions';
 
