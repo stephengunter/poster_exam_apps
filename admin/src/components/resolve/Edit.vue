@@ -38,8 +38,9 @@
                         </span>
                      </template>
                      <template slot="items" slot-scope="props">
-                        <resolve-row :model="props.item" 
-                        :enable="enable(props.item)" :edit="isEdit(props.item)"
+                        <resolve-row :model="props.item" :index="props.index"
+                        :enable="enable(props.item, props.index)" :edit="isEdit(props.item, props.index)"
+                        @selected="edit" @cancel="onRowCancel"
                         @remove="onRemove(props.item)"
                         @save="onSubmit(props.item)"
                         />
@@ -56,7 +57,7 @@
 
 
 <script>
-import { STORE_RESOLVE } from '@/store/actions.type';
+import { STORE_RESOLVE, UPDATE_RESOLVE, DELETE_RESOLVE } from '@/store/actions.type';
 import { CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
 
 export default {
@@ -93,7 +94,8 @@ export default {
 				}
          ],
 
-         selectedIndex: -1
+         selectedIndex: -1,
+         editModel: null
 		}
    },
    computed: {
@@ -134,7 +136,7 @@ export default {
       },
 		onRemove(item){
          if(item.id) {
-
+            this.remove(item.id);
          }else {
             this.question.resolves.splice(this.question.resolves.length - 1, 1);
          }
@@ -144,7 +146,15 @@ export default {
 			else this.store(model);
       },
       update(model){
-         
+         this.$store.commit(CLEAR_ERROR);
+         this.$store.dispatch(UPDATE_RESOLVE, model)
+			.then(() => {
+				this.onSaved();
+			})
+			.catch(error => {
+				if(!error)  Bus.$emit('errors');
+				else this.$store.commit(SET_ERROR, error);
+			})
       },
       store(model) {
          this.$store.commit(CLEAR_ERROR);
@@ -157,13 +167,47 @@ export default {
 				else this.$store.commit(SET_ERROR, error);
 			})
       },
-      isEdit(item) {
-         if(!item.id) return true;
-         else return false;
+      remove(id) {
+         this.$store.commit(CLEAR_ERROR);
+         this.$store.dispatch(DELETE_RESOLVE, id)
+			.then(() => {
+				this.onSaved();
+			})
+			.catch(error => {
+				if(!error)  Bus.$emit('errors');
+				else this.$store.commit(SET_ERROR, error);
+			})
       },
-      enable(item) {
-         if(item.id) return false;
-         else return true
+      isEdit(item, index) {
+         if(!item.id) return true;
+         return index === this.selectedIndex;
+      },
+      enable(item, index) {
+         if(item.id) {
+            if(this.creating)  return false;
+            else if(this.editting) return index === this.selectedIndex;
+            return true
+         }
+         return true
+      },
+      onRowCancel() {
+         if(this.editting) {
+            let index = this.selectedIndex;
+            this.selectedIndex = -1;
+
+            this.$nextTick(() => {
+               //還原未編輯前資料
+               this.question.resolves.splice(index, 1, { ...this.editModel });
+            });
+            
+         } 
+         else if(this.creating) this.question.resolves.splice(this.question.resolves.length - 1, 1);
+         
+      },
+      edit(index) {
+         this.selectedIndex = index;
+         let model = this.question.resolves[index];
+         this.editModel = { ...model };
       },
       onSaved() {
          this.$emit('saved');

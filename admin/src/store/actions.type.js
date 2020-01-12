@@ -49,6 +49,8 @@ export const STORE_OPTIONS = 'storeOptions';
 
 //Resolves
 export const STORE_RESOLVE = 'storeResolve';
+export const UPDATE_RESOLVE = 'updateResolve';
+export const DELETE_RESOLVE = 'deleteResolve';
 
 //RecruitQuestions
 export const FETCH_RECRUIT_QUESTIONS = 'fetchRecruitQuestions';

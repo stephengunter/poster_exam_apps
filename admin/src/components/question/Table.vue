@@ -20,12 +20,16 @@
             />
          </td>
          <td v-if="show_resolves" >
-            <a href="#" @click.prevent="editResolves(props.item.id)">解析 {{ ` (${props.item.resolves.length}) ` }}</a>
+            <a href="#" @click.prevent="editResolves(props.item.id)" >
+            {{ props.item.resolves | resolvesText }}
+            </a>
          </td>
          <td v-if="show_terms" >
             <ul style="list-style-type:none;">
                <li v-for="(term, index) in props.item.terms" :key="index">
-                  <a href="#" @click.prevent="showTerm(term)" v-text="termText(term)"></a>
+                  <a href="#" @click.prevent="showTerm(term)">
+                     {{ termText(term) }}
+                  </a>
                </li>
             </ul>
          </td>

@@ -26,9 +26,9 @@ const actions = {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          QuestionsService.fetch(params)
-            .then(questions => {
-               context.commit(SET_QUESTIONS, questions);
-               resolve(questions);
+            .then(model => {
+               context.commit(SET_QUESTIONS, model);
+               resolve(model);
             })
             .catch(error => {
                reject(error);

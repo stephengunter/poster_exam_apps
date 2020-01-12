@@ -142,8 +142,16 @@ export default {
 			this.showPhoto.active = true;
 		},
 		fetchData(params){
+			let model = {
+				subject: params.subject,
+				page: params.page,
+				pageSize: params.pageSize,
+			};
+			if(params.term) model['term'] = params.term;
+			if(params.recruits) model['recruit'] = Number(params.recruits);
+			if(params.keyword) model['keyword'] = params.keyword;
 			this.$store.commit(CLEAR_ERROR);
-			this.$store.dispatch(FETCH_QUESTIONS, params)
+			this.$store.dispatch(FETCH_QUESTIONS, model)
 			.catch(error => {
 				onError(error);
 			})

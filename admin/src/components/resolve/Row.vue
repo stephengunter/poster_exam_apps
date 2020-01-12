@@ -1,5 +1,5 @@
 <template>
-   <tr>
+   <tr v-if="edit">
       <td>
          <v-textarea v-model="model.text" label="內容" outlined auto-grow
          v-validate="'required'"
@@ -17,17 +17,43 @@
          />
       </td>
       <td>
-         <v-textarea v-model="model.source" label="資料來源" outlined auto-grow
+         index: {{ index }}
+         enable: {{ enable }}
+         edit: {{ edit }}
+         <!-- <v-textarea v-model="model.source" label="資料來源" outlined auto-grow
          name="text"
          rows="5"
          row-height="15"
-         />
+         /> -->
       </td>
       <td v-if="enable">
-         <v-btn v-if="edit" @click.prevent="save" small  flat icon color="success">
+         <v-btn @click.prevent="save" small  flat icon color="success">
             <v-icon>mdi-content-save</v-icon>
          </v-btn>
-         <v-btn v-else @click.prevent="select" small  flat icon color="success">
+ 
+         <v-btn @click.prevent="cancel" small flat icon >
+            <v-icon>mdi-reply</v-icon>
+         </v-btn>
+      </td>
+      <td v-else>
+         
+      </td>
+   </tr>
+   <tr v-else>
+      <td>
+         {{ model.text }}
+      </td>
+      <td>
+         {{ model.highlight }}
+      </td>
+      <td>
+          index: {{ index }}
+         enable: {{ enable }}
+         edit: {{ edit }}
+      </td>
+      <td v-if="enable">
+        
+         <v-btn @click.prevent="select" small  flat icon color="success">
             <v-icon>mdi-pencil</v-icon>
          </v-btn>
 
@@ -46,6 +72,10 @@
 export default {
    name: 'ResolveRow',
    props: {
+      index: {
+         type: Number,
+         default: 0
+      },
       model: {
          type: Object,
          default: null
@@ -74,10 +104,13 @@ export default {
 			return '';
       },
       select() {
-         this.$emit('edit');
+         this.$emit('selected', this.index);
+      },
+      cancel() {
+         this.$emit('cancel');
       },
       remove() {
-         this.$emit('remove');
+         this.$emit('remove', this.index);
       }
    }
 }
