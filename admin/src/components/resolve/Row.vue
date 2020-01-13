@@ -17,9 +17,6 @@
          />
       </td>
       <td>
-         index: {{ index }}
-         enable: {{ enable }}
-         edit: {{ edit }}
          <!-- <v-textarea v-model="model.source" label="資料來源" outlined auto-grow
          name="text"
          rows="5"
@@ -41,15 +38,17 @@
    </tr>
    <tr v-else>
       <td>
-         {{ model.text }}
+        
+         <core-highlight :queries="model.highlights" :content="model.text" />
+         
       </td>
       <td>
-         {{ model.highlight }}
+         <core-label v-for="(item, index) in model.highlights"   :key="index">
+           {{ item }}
+         </core-label>
       </td>
       <td>
-          index: {{ index }}
-         enable: {{ enable }}
-         edit: {{ edit }}
+         
       </td>
       <td v-if="enable">
         
@@ -69,6 +68,7 @@
 </template>
 
 <script>
+import { replaceBR } from '@/utils';
 export default {
    name: 'ResolveRow',
    props: {
@@ -104,7 +104,9 @@ export default {
 			return '';
       },
       select() {
-         this.$emit('selected', this.index);
+         this.$emit('selected', this.index, this.model);
+         this.model.text = replaceBR(this.model.text);
+
       },
       cancel() {
          this.$emit('cancel');
@@ -116,6 +118,3 @@ export default {
 }
 </script>
 
-<style>
-
-</style>

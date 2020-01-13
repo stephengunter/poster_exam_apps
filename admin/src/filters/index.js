@@ -27,3 +27,10 @@ Vue.filter('resolvesText', (resolves) => {
    let reviewed = resolves.filter(item => item.reviewed);
    return ` 解析 (${reviewed.length}, ${resolves.length - reviewed.length}) `
 });
+
+Vue.filter('highlight', function(words, query){
+   var iQuery = new RegExp(query, "ig");
+   return words.toString().replace(iQuery, function(matchedTxt,a,b){
+       return ('<span class=\'text__highlight\'>' + matchedTxt + '</span>');
+   });
+});

@@ -14,7 +14,8 @@
 						<v-flex sm12>
 							<question-table :list="pageList.viewList" 
 							:show_terms="true" :show_recruits="false"
-							@edit="edit" @show-term="onShowTerm"  @show-photo="onShowPhoto"
+							@edit="edit" @show-term="onShowTerm"  
+							@show-photo="onShowPhoto"  @edit-resolves="editResolves"
 							/>
 						</v-flex>
 					</v-layout>
@@ -24,6 +25,11 @@
 	   <v-dialog v-model="editor.active" persistent :max-width="editor.maxWidth">
 			<question-edit v-if="editor.active" :model="editor.model"
 			@submit="onSubmit" @cancel="cancelEdit" @remove="remove"
+			/>
+		</v-dialog>
+		<v-dialog v-model="resolves.active" persistent :max-width="resolves.maxWidth">
+			<resolve-edit v-if="resolves.active" :question="resolves.model"
+			@saved="onResolvesSaved" @cancel="cancelEditResolves"
 			/>
 		</v-dialog>
 		<v-dialog v-model="deletion.active" :max-width="deletion.maxWidth">
@@ -78,6 +84,15 @@ export default {
 				questionId: 0,
 				lastModel: null
 			},
+
+			resolves: {
+				active: false,
+				maxWidth: 800,
+				model: null,
+
+				questionId: 0
+			},
+
 			deletion: {
 				id: 0,
 				active: false,
@@ -314,6 +329,36 @@ export default {
 			Bus.$emit('success');
 
 			if(model) this.editor.lastModel = model;
+		},
+		editResolves(id){
+			this.$store.commit(CLEAR_ERROR);
+			this.$store.dispatch(EDIT_QUESTION, id)
+			.then(model => {
+				this.setResolvesModel(model);
+			})
+			.catch(error => {
+				Bus.$emit('errors');
+			})
+		},
+		setResolvesModel(model) {
+			if(model) {
+				this.resolves.model = model;
+
+				if(this.contentMaxWidth) this.resolves.maxWidth = this.contentMaxWidth;
+				this.resolves.active = true;
+			}else {
+				this.resolves.model = null;
+				this.resolves.active = false;
+				this.resolves.questionId = 0;
+			}
+		},
+      cancelEditResolves() {
+			this.setResolvesModel(null);
+		},
+		onResolvesSaved() {
+			this.onSaved();
+
+			this.setResolvesModel(null);
 		}
 	}
 }

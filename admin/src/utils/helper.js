@@ -79,3 +79,5 @@ export const toCnNumber = (num) => {
   
    return '';
 }
+
+export const replaceBR = (text) => text.replace(/<br>/g, '\n').replace(new RegExp('<br/>', 'g'), '\n');

@@ -160,4 +160,9 @@ export default {
 	margin-right: auto
 }
 
+.text__highlight {
+   background: #fc0;
+   border-radius: 3px;
+}
+
 </style>

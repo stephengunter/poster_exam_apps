@@ -48,6 +48,7 @@ export const ORDER_QUESTIONS = 'orderQuestions';
 export const STORE_OPTIONS = 'storeOptions';
 
 //Resolves
+export const FETCH_RESOLVES = 'fetchResolves';
 export const STORE_RESOLVE = 'storeResolve';
 export const UPDATE_RESOLVE = 'updateResolve';
 export const DELETE_RESOLVE = 'deleteResolve';

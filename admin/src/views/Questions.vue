@@ -11,8 +11,9 @@
 					<v-layout row wrap v-if="pageList">
 						<v-flex sm12>
 							<question-table :list="pageList.viewList"
+							:show_terms="true"
 							@edit="edit" @edit-resolves="editResolves"
-							@show-photo="onShowPhoto"
+							@show-photo="onShowPhoto" @show-term="onShowTerm" 
 							/>
 						</v-flex>
 						<v-flex sm12>
@@ -33,6 +34,16 @@
 			<resolve-edit v-if="resolves.active" :question="resolves.model"
 			@saved="onResolvesSaved" @cancel="cancelEditResolves"
 			/>
+		</v-dialog>
+		<v-dialog v-model="showTerm.active" :max-width="showTerm.maxWidth">
+			<v-card v-if="showTerm.model">
+				<v-card-text>
+					<h3 v-if="showTerm.model.subject" style="margin-top: 5px;">{{ showTerm.model.subject.title }}  {{ showTerm.model.title }}</h3>
+					<term-tree-item :item="showTerm.model" 
+					:show_title="false" :max_width="showTerm.maxWidth" 
+					/>
+				</v-card-text>
+      	</v-card>
 		</v-dialog>
 		<v-dialog v-model="showPhoto.active" :max-width="showPhoto.maxWidth">
 			<v-card v-if="showPhoto.model">
@@ -57,7 +68,7 @@ import { SET_LOADING, CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
 
 import { FETCH_QUESTIONS, CREATE_QUESTION, STORE_QUESTION,
 	EDIT_QUESTION, UPDATE_QUESTION, DELETE_QUESTION,
-	STORE_ATTACHMENT, STORE_OPTIONS 
+	STORE_ATTACHMENT, STORE_OPTIONS, FETCH_RESOLVES 
 } from '@/store/actions.type';
 
 import { onError } from '@/utils';
@@ -89,6 +100,12 @@ export default {
 				model: null,
 
 				questionId: 0
+			},
+
+			showTerm: {
+				active: false,
+				model: null,
+				maxWidth: 480
 			},
 
 			showPhoto: {
@@ -141,6 +158,10 @@ export default {
 			this.showPhoto.model = photo;
 			this.showPhoto.active = true;
 		},
+		onShowTerm(item) {
+			this.showTerm.model = item;
+			this.showTerm.active = true;
+		},
 		fetchData(params){
 			let model = {
 				subject: params.subject,
@@ -155,6 +176,9 @@ export default {
 			.catch(error => {
 				onError(error);
 			})
+		},
+		getQuestion(id) {
+			return this.pageList.viewList.find(item => item.id === id);
 		},
 		create(){
 			this.$store.commit(CLEAR_ERROR);
@@ -324,9 +348,18 @@ export default {
 			if(model) this.editor.lastModel = model;
 		},
 		editResolves(id){
+			let question = this.getQuestion(id);
+			let model = { ...question };
+
 			this.$store.commit(CLEAR_ERROR);
-			this.$store.dispatch(EDIT_QUESTION, id)
-			.then(model => {
+			this.$store.dispatch(FETCH_RESOLVES, { question: question.id })
+			.then(pageList => {
+				let resolves = pageList.viewList.slice(0);
+				resolves.forEach(item => {
+					if(item.highlights) item.highlight = item.highlights.join('\n');
+					else item.highlights = [];
+				});
+				model.resolves = resolves;
 				this.setResolvesModel(model);
 			})
 			.catch(error => {
@@ -352,7 +385,7 @@ export default {
 			this.onSaved();
 
 			this.setResolvesModel(null);
-		},
+		}
 	}
 }
 </script>

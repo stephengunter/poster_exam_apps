@@ -11,10 +11,9 @@
          <v-container grid-list-md>
             <v-layout row wrap>
                <v-flex xs12>
-                  <v-textarea v-model="question.title" label="標題" readonly
-                  outlined auto-grow rows="5"
-                  row-height="15"
-                  />
+                  <p class="title"> 
+                  {{ question.title }}
+                  </p> 
                </v-flex>
                <v-flex xs4>
                   <v-checkbox v-model="question.multiAnswers" label="複選"  readonly
@@ -23,6 +22,13 @@
                <v-flex xs8>
                   <option-list :options="question.options" 
                   />
+               </v-flex>
+               <v-flex xs12>
+                  <p> 
+                     <term-tree-item v-for="(term,index) in question.terms" :key="index" 
+                     :item="term" :show_subject="true"
+                     />
+                  </p> 
                </v-flex>
                <v-flex xs12>
                   <span class="title">解析</span>
@@ -59,7 +65,7 @@
 <script>
 import { STORE_RESOLVE, UPDATE_RESOLVE, DELETE_RESOLVE } from '@/store/actions.type';
 import { CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
-
+import { onError, replaceBR } from '@/utils';
 export default {
 	name: 'ResolveEdit',
 	props: {
@@ -74,17 +80,20 @@ export default {
 				{
 					sortable: false,
 					text: '內容',
-					value: ''
+               value: '',
+               width: '35%'
             },
             {
 					sortable: false,
 					text: '重點標記',
-					value: ''
+               value: '',
+               width: '35%'
             },
             {
 					sortable: false,
 					text: '資料來源',
-					value: ''
+               value: '',
+               width: '20%'
             },
             {
                width: '50px',
@@ -110,7 +119,7 @@ export default {
       }
 	},
 	beforeMount(){
-      
+      console.log();
 	},
 	methods: {
       cancel(){
@@ -142,6 +151,9 @@ export default {
          }
       },
       onSubmit(model) {
+         let highlight = model.highlight;
+         model.highlights = highlight.split('\n').filter(Boolean);
+
          if(model.id) this.update(model);
 			else this.store(model);
       },
@@ -193,21 +205,20 @@ export default {
       onRowCancel() {
          if(this.editting) {
             let index = this.selectedIndex;
-            this.selectedIndex = -1;
+            this.question.resolves.splice(index, 1, { ...this.editModel });
 
             this.$nextTick(() => {
-               //還原未編輯前資料
-               this.question.resolves.splice(index, 1, { ...this.editModel });
+               this.selectedIndex = -1;
             });
             
          } 
          else if(this.creating) this.question.resolves.splice(this.question.resolves.length - 1, 1);
          
       },
-      edit(index) {
+      edit(index, model) {
          this.selectedIndex = index;
-         let model = this.question.resolves[index];
-         this.editModel = { ...model };
+           //複製, 用來還原(取消編輯時)
+         this.editModel = { ...model };        
       },
       onSaved() {
          this.$emit('saved');

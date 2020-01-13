@@ -12,6 +12,10 @@ export default {
          type: Object,
          default: null
       },
+      show_subject: {
+         type: Boolean,
+         default: false
+      },
       show_title: {
          type: Boolean,
          default: true
@@ -24,7 +28,14 @@ export default {
    methods: {
       getContent() {
          if(!this.item) return '';
-         let content = this.show_title ? this.item.fullText : this.item.text;
+         let item = this.item;         
+        
+         let content = item.text;
+         if(this.show_title) {
+            let title = this.show_subject ? `${item.subject.title} ${item.title}` : item.title;
+            content = title + ' ' + content;
+         }
+          
          return content.replace(/<br>/g, `<br><span style="padding-left:15px"></span>`);
       }
    }
