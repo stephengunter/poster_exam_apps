@@ -3,7 +3,7 @@
       <li v-for="(option,index) in options" :key="option.id" :class="{ 'option-display': index > 0, 'correct-option': option.correct }" >
 
          <div style="display:inline;"> 
-            <v-icon v-if="option.correct" color="success">
+            <v-icon v-if="option.correct" color="success" style="vertical-align: baseline;">
             mdi-check-circle
             </v-icon>
             <a href="#" v-if="option.attachments.length" @click.prevent="showPhoto(option.attachments[0])">

@@ -63,9 +63,9 @@
 
 
 <script>
-import { STORE_RESOLVE, UPDATE_RESOLVE, DELETE_RESOLVE } from '@/store/actions.type';
+import { STORE_RESOLVE, UPDATE_RESOLVE, DELETE_RESOLVE, STORE_ATTACHMENT } from '@/store/actions.type';
 import { CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
-import { onError, replaceBR } from '@/utils';
+import { onError, deepClone, isValidURL } from '@/utils';
 export default {
 	name: 'ResolveEdit',
 	props: {
@@ -77,23 +77,29 @@ export default {
 	data () {
 		return {
 			headers: [
+            {
+					sortable: false,
+					text: '附圖',
+               value: '',
+               width: '15%'
+            },
 				{
 					sortable: false,
 					text: '內容',
                value: '',
-               width: '35%'
+               width: '30%'
             },
             {
 					sortable: false,
 					text: '重點標記',
                value: '',
-               width: '35%'
+               width: '30%'
             },
             {
 					sortable: false,
 					text: '資料來源',
                value: '',
-               width: '20%'
+               width: '15%'
             },
             {
                width: '50px',
@@ -118,9 +124,6 @@ export default {
          return this.question.resolves.findIndex(item => item.id === 0) > -1;
       }
 	},
-	beforeMount(){
-      console.log();
-	},
 	methods: {
       cancel(){
 			this.$emit('cancel');
@@ -140,7 +143,9 @@ export default {
             id: 0,
             questionId: this.question.id,
             highlight: '',
-            source: ''
+            source: '',
+            attachments: [],
+            medias: []
          });
       },
 		onRemove(item){
@@ -154,6 +159,19 @@ export default {
          let highlight = model.highlight;
          model.highlights = highlight.split('\n').filter(Boolean);
 
+         let source = model.source;
+         let sources = source.split('\n').filter(Boolean);
+         model.sources = sources.map(item => {
+            let parts = item.split(',');
+            return { text: parts[0], link: parts[1] ? parts[1] : '' }
+         });
+
+         model.sources.forEach(item => {
+            if(item.link) {
+               if(!isValidURL(item.link)) item.link = '';
+            }
+         })
+
          if(model.id) this.update(model);
 			else this.store(model);
       },
@@ -161,7 +179,17 @@ export default {
          this.$store.commit(CLEAR_ERROR);
          this.$store.dispatch(UPDATE_RESOLVE, model)
 			.then(() => {
-				this.onSaved();
+            console.log('medias', model.medias);
+            if(model.medias.length) {
+               let uploadForm = {
+                  postId : model.id,
+                  postType: model.attachments[0].postType,
+                  files: model.medias.map(item => item.file)
+               }
+               this.uploadAttachments(uploadForm);
+            }else {
+               this.onSaved();
+            }
 			})
 			.catch(error => {
 				if(!error)  Bus.$emit('errors');
@@ -171,14 +199,37 @@ export default {
       store(model) {
          this.$store.commit(CLEAR_ERROR);
          this.$store.dispatch(STORE_RESOLVE, model)
-			.then(() => {
-				this.onSaved();
+			.then(data => {
+            if(data.attachments.length) {
+               let uploadForm = {
+                  postId : data.id,
+                  postType: data.attachments[0].postType,
+                  files: model.medias.map(item => item.file)
+               }
+               this.uploadAttachments(uploadForm);
+               
+            }else {
+               this.onSaved();
+            }
+				
 			})
 			.catch(error => {
 				if(!error)  Bus.$emit('errors');
 				else this.$store.commit(SET_ERROR, error);
 			})
       },
+      uploadAttachments(uploadForm) {
+         console.log('uploadAttachments');
+         console.log('uploadForm', uploadForm);
+			let vm = this;
+			vm.$store.dispatch(STORE_ATTACHMENT, uploadForm)
+			.then(() => {
+				vm.onSaved();
+			})
+			.catch(error => {
+				Bus.$emit('errors');
+			})
+		},
       remove(id) {
          this.$store.commit(CLEAR_ERROR);
          this.$store.dispatch(DELETE_RESOLVE, id)
@@ -204,6 +255,7 @@ export default {
       },
       onRowCancel() {
          if(this.editting) {
+            console.log('editModel', this.editModel);
             let index = this.selectedIndex;
             this.question.resolves.splice(index, 1, { ...this.editModel });
 
@@ -218,7 +270,8 @@ export default {
       edit(index, model) {
          this.selectedIndex = index;
            //複製, 用來還原(取消編輯時)
-         this.editModel = { ...model };        
+         this.editModel = deepClone(model);
+         console.log('editModel', this.editModel);
       },
       onSaved() {
          this.$emit('saved');

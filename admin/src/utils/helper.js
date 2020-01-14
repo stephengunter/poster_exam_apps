@@ -31,22 +31,23 @@ export const isTrue = (val) => {
    if (typeof val === 'boolean') return val;
    if (typeof val === 'number') return val > 0;
    if (typeof val === 'string') {
-      if (val.toLowerCase() === 'true') return true
-      if (val === '1') return true
-      return false
+      if (val.toLowerCase() === 'true') return true;
+      if (val === '1') return true;
+      return false;
    }
-   return false
+   return false;
 }
 
-export const buildQuery = (url, params) => {
-   if(!params || isEmptyObject(params)) return url;
-   url += '?';
-   for (let field in params) {
-      let value = params[field];
-      url += `${field}=${value}&`;
-   }
-   return url.substr(0, url.length - 1);
+export const isValidURL = (str) => {
+   const pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+    '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+   return !!pattern.test(str);
 }
+
 
 export const toRocYear = (val) => val - 1911;
 

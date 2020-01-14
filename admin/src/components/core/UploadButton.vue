@@ -1,9 +1,12 @@
 <template>
-   <v-btn color="info" class="white--text"
+   <v-btn color="info" class="white--text" 
    @click="launch" :loading="loading" :disabled="loading"
    >
-      {{ text }}
-      <v-icon right dark>mdi-cloud-upload</v-icon>
+      <slot>
+         {{ text }}
+         <v-icon right dark>mdi-cloud-upload</v-icon>
+      </slot>
+      
       <input ref="inputUpload" style="display: none;" type="file" 
       :multiple="multiple" :accept="accept" @click="charge"
       @change="onFileChange" 
@@ -15,6 +18,10 @@
 export default {
    name: 'UploadButton',
    props: {
+      color: {
+         type: String,
+         default: 'info'
+      },
       text: {
          type: String,
          default: '上傳圖片'

@@ -1,13 +1,32 @@
 <template>
    <tr v-if="edit">
       <td>
+         <core-upload-button :multiple="true"
+         @file-added="onFileAdded" @loading="medias.loading = true"
+         @cancel="hideUpload"
+         >
+            附圖<v-icon right dark>mdi-image</v-icon>
+         </core-upload-button>
+
+         <div v-for="(item, index) in model.attachments" :key="index">
+            <v-img  :src="getPhotoPath(item)"  max-width="100" aspect-ratio="1">
+               <v-btn color="success" style="margin:0;position:absolute;top:0;right:0;width:30px;height:30px;" flat icon
+               @click="removeAttachment(index)"
+               >
+                  <v-icon>mdi-close-circle-outline</v-icon>
+               </v-btn>
+            </v-img>
+            <input v-model="item.title" type="text">
+         </div>
+      </td>
+      <td>
          <v-textarea v-model="model.text" label="內容" outlined auto-grow
-         v-validate="'required'"
          :error-messages="getErrMsg('text')"
          name="text"
          rows="5"
          row-height="15"
          />
+
       </td>
       <td>
          <v-textarea v-model="model.highlight" label="重點標記" outlined auto-grow
@@ -17,11 +36,11 @@
          />
       </td>
       <td>
-         <!-- <v-textarea v-model="model.source" label="資料來源" outlined auto-grow
+         <v-textarea v-model="model.source" label="資料來源" outlined auto-grow
          name="text"
          rows="5"
          row-height="15"
-         /> -->
+         />
       </td>
       <td v-if="enable">
          <v-btn @click.prevent="save" small  flat icon color="success">
@@ -38,17 +57,24 @@
    </tr>
    <tr v-else>
       <td>
-        
-         <core-highlight :queries="model.highlights" :content="model.text" />
-         
+         <div v-for="(item, index) in model.attachments" :key="index">
+            <v-img :src="item.previewPath | photoNameUrl(100)" max-width="100" aspect-ratio="1"
+            />
+            {{ item.title }}
+         </div>
       </td>
       <td>
-         <core-label v-for="(item, index) in model.highlights"   :key="index">
+         <core-highlight :queries="model.highlights" :content="model.text" />
+      </td>
+      <td>
+         <core-label v-for="(item, index) in model.highlights" :key="index">
            {{ item }}
          </core-label>
       </td>
       <td>
-         
+         <core-source v-for="(item, index) in model.sources"  :key="index" 
+         :text="item.text" :link="item.link"
+         />
       </td>
       <td v-if="enable">
         
@@ -68,7 +94,7 @@
 </template>
 
 <script>
-import { replaceBR } from '@/utils';
+import { photoNameUrl, replaceBR } from '@/utils';
 export default {
    name: 'ResolveRow',
    props: {
@@ -89,10 +115,27 @@ export default {
          default: false
       }
    },
+   data () {
+		return {
+         medias: {
+            index: -1,
+            loading: false
+         }
+		}
+   },
    methods: {
       save() {
          this.$validator.validate().then(valid => {
-				if(valid) this.$emit('save');
+				if(valid) {
+               if(!this.model.text && !this.model.attachments.length) {
+                  this.errors.add({
+                     field: 'text',
+                     msg: '請輸入內容'
+                  });
+               }else {
+                  this.$emit('save');
+               }
+            }
 			});
       },
       getErrMsg(key){
@@ -106,7 +149,60 @@ export default {
       select() {
          this.$emit('selected', this.index, this.model);
          this.model.text = replaceBR(this.model.text);
+         this.model.medias = [];
 
+         console.log('model', this.model);
+      },
+      getPhotoPath(attachment) {
+         let width = 100;
+         if(attachment.previewPath) return photoNameUrl(attachment.previewPath, width);
+         else {
+            let media = this.model.medias.find(item => item.file.name === attachment.name);
+            return media.thumb.data;
+         }
+      },
+      launchUpload(index) {
+         this.medias.index = index;
+         this.$refs.uploadButton.launch();
+      },
+      hideUpload() {
+         this.medias.loading = false;
+         this.medias.index = -1;
+      },
+      removeMedia(name) {
+         let index = this.model.medias.findIndex(item => item.file.name === name);
+         if(index > -1) this.model.medias.splice(index, 1);
+      },
+      removeAttachment(index) {
+         let attachment = this.model.attachments[index];
+         this.removeMedia(attachment.name);
+
+         this.model.attachments.splice(index, 1);
+      },
+      fileExist(filename) {
+         let fileNames = this.model.medias.map(item => item.file.name);
+         return fileNames.includes(filename);
+      },
+      onFileAdded({ files, thumbs }) {
+         
+         for(let i = 0; i < files.length; i++) {
+            let file = files[i]; 
+            if(this.fileExist(file.name)) {
+               Bus.$emit('warning', '圖片重複');
+            }else {
+               this.model.attachments.push({
+                  name: file.name,
+                  title: ''
+               });
+
+               let thumb = thumbs[i];
+               this.model.medias.push({
+                  file, thumb
+               });
+            }   
+         }
+         
+         this.hideUpload();
       },
       cancel() {
          this.$emit('cancel');

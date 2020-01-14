@@ -165,4 +165,13 @@ export default {
    border-radius: 3px;
 }
 
+.img-remove-icon {
+	margin : 0;
+	position : absolute;
+	top : 0;
+	right : 0;
+	width : 30px;
+	height : 30px;
+}
+
 </style>

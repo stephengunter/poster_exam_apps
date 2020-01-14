@@ -10,6 +10,11 @@
 					/>
 					<v-layout row wrap v-if="pageList">
 						<v-flex sm12>
+							<core-table-pager :model="pageList" :responsive="responsive" v-show="pageList.viewList.length > 0" 
+								@pageChanged="onPageChanged" @sizeChanged="onPageSizeChanged"
+							/>
+						</v-flex>
+						<v-flex sm12>
 							<question-table :list="pageList.viewList"
 							:show_terms="true"
 							@edit="edit" @edit-resolves="editResolves"
@@ -358,6 +363,11 @@ export default {
 				resolves.forEach(item => {
 					if(item.highlights) item.highlight = item.highlights.join('\n');
 					else item.highlights = [];
+
+					if(item.sources) {
+						item.source = item.sources.map(item => `${item.text},${item.link}`).join('\n');
+					}else item.sources = [];
+					
 				});
 				model.resolves = resolves;
 				this.setResolvesModel(model);

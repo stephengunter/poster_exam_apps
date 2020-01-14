@@ -17,7 +17,7 @@
                <td v-if="props.item.attachments.length && props.item.attachments[0].id">
                   <v-img :src="props.item.attachments[0].previewPath | photoNameUrl(100)" max-width="100" aspect-ratio="1">
                      <v-btn color="success" style="margin:0;position:absolute;top:0;right:0;width:30px;height:30px;" flat icon
-                     @click="removeaAtachments(props.index)">
+                     @click="removeAttachments(props.index)">
                         <v-icon>mdi-close-circle-outline</v-icon>
                      </v-btn>
                   </v-img>
@@ -187,7 +187,7 @@ export default {
       removeMedia(index){
          this.models[index].medias = [];
       },
-      removeaAtachments(index){
+      removeAttachments(index){
          this.models[index].attachments = [];
       },
       onCorrectChanged(index) {

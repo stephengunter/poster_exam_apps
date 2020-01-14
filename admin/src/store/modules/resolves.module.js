@@ -37,8 +37,8 @@ const actions = {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          ResolveService.store(model)
-         .then(id => {
-            resolve(id);
+         .then(data => {
+            resolve(data);
          })
          .catch(error => {
             reject(resolveErrorData(error));
