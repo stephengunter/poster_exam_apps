@@ -1,6 +1,6 @@
 <template>
 	<v-container fill-height fluid>
-		Home {{ num }}
+		Home 
 
 	   <a href="#" @click.prevent="test">Test</a>	
 

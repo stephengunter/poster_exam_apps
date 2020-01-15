@@ -1,3 +1,6 @@
+import { SITE_URL } from '@/config';
+import { isEmptyObject } from './helper';
+
 export const resolveErrorData = (error) => {
    console.log(error);
    if(!error) return null;
@@ -19,6 +22,38 @@ export const activeOptions = () => {
       value: false,
       text: '已下架'
    }];
+}
+
+
+
+export const buildQuery = (url, params) => {
+   if(!params || isEmptyObject(params)) return url;
+   url += '?';
+   for (let field in params) {
+      let value = params[field];
+      url += `${field}=${value}&`;
+   }
+   return url.substr(0, url.length - 1);
+}
+
+export const photoNameUrl = (name, width = 0, height = 0, type = '') => {
+   let url = `${SITE_URL}/api/photo`;
+   let params = { name };
+   if(width) params['width'] = width;
+   if(height) params['height'] = height;
+   if(type) params['type'] = type;
+  
+   return buildQuery(url, params);
+}
+
+export const photoIdUrl = (id, width = 0, height = 0, type = '') => {
+   let url = `${SITE_URL}/api/photo/${id}`;
+   let params = {};
+   if(width) params['width'] = width;
+   if(height) params['height'] = height;
+   if(type) params['type'] = type;
+  
+   return buildQuery(url, params);
 }
 
 export * from './helper';

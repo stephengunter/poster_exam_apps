@@ -25,11 +25,14 @@
 				</li>
 			</ul>
 		</v-radio-group>
-		<v-expansion-panels>
+		<v-expansion-panels v-show="model.resolves.length">
 			<v-expansion-panel>
       		<v-expansion-panel-header>解析</v-expansion-panel-header>
 				<v-expansion-panel-content>
-				Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+					<ResolveItem v-for="resolve in model.resolves" :key="resolve.id" 
+					:model="resolve"
+					@show-photo="showPhoto"
+					/>
 				</v-expansion-panel-content>
     		</v-expansion-panel>
   		</v-expansion-panels>
@@ -38,9 +41,12 @@
 </template>
 
 <script>
-
+import ResolveItem from '@/components/resolve/Item';
 export default {
 	name: 'QuestionItem',
+	components: {
+		ResolveItem
+	},
 	props: {
 		order: {
          type: Number,
@@ -56,6 +62,12 @@ export default {
          radioGroup: 1,
          panel: 0
       }
+	},
+	computed: {
+		validResolves() {
+			if(!this.model) return [];
+			return this.model.resolves.filter(item => item.reviewed);
+		}
 	},
 	methods: {
       showPhoto(photo) {

@@ -38,12 +38,6 @@ export const isTrue = (val) => {
    return false
 }
 
-export const buildQuery = (url, params) => {
-   if(!params || isEmptyObject(params)) return url;
-   let query = Object.keys(params).reduce((a,k) => { a.push( k + '=' + encodeURIComponent(params[k])); return a },[]).join('&');
-   return `${url}?${query}`;
-}
-
 export const toRocYear = (val) => val - 1911;
 
 export const getRandomInt = (max) => Math.floor(Math.random() * Math.floor(max));

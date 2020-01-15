@@ -72,9 +72,14 @@
          </core-label>
       </td>
       <td>
-         <core-source v-for="(item, index) in model.sources"  :key="index" 
-         :text="item.text" :link="item.link"
-         />
+         <ul>
+            <li v-for="(item, index) in model.sources"  :key="index">
+               <source-tag 
+               :text="item.text" :link="item.link"
+               />
+            </li>
+         </ul>
+        
       </td>
       <td v-if="enable">
         
