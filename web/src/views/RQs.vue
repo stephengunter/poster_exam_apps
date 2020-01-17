@@ -72,7 +72,8 @@ export default {
    computed: {
       ...mapGetters(['responsive','contentMaxWidth','isAuthenticated']),
       ...mapState({
-			parts: state => state.rqs.parts
+         parts: state => state.rqs.parts,
+         exam: state => state.rqs.exam
 		}),
       firstLoad() {
          return this.params.mode < 0;
@@ -80,8 +81,8 @@ export default {
       modeSelecting() {
          return this.mode.active;
       },
-      breadTitle() {
-
+      isReadMode() {
+         return this.params.mode === 0;
       }
    },
 	beforeMount() {
@@ -160,13 +161,19 @@ export default {
                   this.selectMode();
                })
             }else {
-               this.questionCounts = model.parts.map(part => part.questions.totalItems);
-               
+               if(this.isReadMode) this.loadReadData(model);
+               else this.loadExamData(model);
             }
          })
 			.catch(error => {
             Bus.$emit('errors', resolveErrorData(error));
 			})
+      },
+      loadReadData(model) {
+         this.questionCounts = model.parts.map(part => part.questions.totalItems);
+      },
+      loadExamData(model) {
+         console.log('loadExamData', model);
       },
       getStartIndex(index) {
          if(index < 1) return 1;

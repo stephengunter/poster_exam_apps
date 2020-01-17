@@ -18,6 +18,7 @@ export const SET_ERROR = 'setError';
 export const CLEAR_ERROR = 'clearError';
 
 export const SET_RQS = 'setRQs';
+export const SET_RQS_EXAM = 'setRQsExam';
 
 
 
