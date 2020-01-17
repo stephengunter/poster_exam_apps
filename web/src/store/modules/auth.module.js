@@ -99,7 +99,7 @@ const actions = {
    },
    [LOGOUT](context) {
       context.commit(PURGE_AUTH);
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
          setTimeout(() => {
             resolve(true);
          }, 500)
@@ -184,6 +184,7 @@ const mutations = {
     
       state.errors = new Errors();
       JwtService.destroyToken();
+      BaseService.setHeader(null);
    }
 };
 

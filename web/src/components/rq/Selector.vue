@@ -2,6 +2,10 @@
    <v-card>
       <v-card-title>
          <h3>{{ title }}</h3>
+         <v-spacer />
+         <a href="#" v-if="allow_cancel" @click.prevent="cancel" class="a-btn">
+            <v-icon>mdi-window-close</v-icon>
+         </a>
       </v-card-title>
       <v-card-text>
          <v-row>
@@ -61,10 +65,15 @@ export default {
       subject_options: {
          type: Array,
          default: null
-      }
+      },
+      allow_cancel: {
+         type: Boolean,
+         default: false
+      },
    },
    data() {
 		return {
+
 		}
 	},
 	beforeMount() {
@@ -73,6 +82,9 @@ export default {
 	methods: {
 		init() {
 			
+      },
+      cancel() {
+         this.$emit('cancel');
       },
       submit() {
          this.$emit('submit');

@@ -1,20 +1,22 @@
 <template>
    <v-container>
-      <a href="#" @click.prevent="selectMode" style="text-decoration: none;" >
+      <a href="#" @click.prevent="selectMode" class="a-btn" >
          {{ bread.text }}
       </a>
       
       <Part v-for="(part, index) in parts" :key="index" 
       :model="part" :start_index="getStartIndex(index)"
       />
-      <v-dialog v-model="mode.active" :max-width="mode.maxWidth">
+      
+      <v-dialog v-model="mode.active" :max-width="mode.maxWidth" persistent>
          <RQSelector  ref="modeSelector"
-         :params="params"
+         :params="params" :allow_cancel="mode.selected"
          :mode_options="modeOptions" :year_options="yearOptions"
          :subject_options="subjectOptions"
-         @submit="mode.active = false;"
+         @submit="submitSelection" @cancel="mode.active = false;"
          />
 		</v-dialog>
+      
    </v-container>
 </template>
 
@@ -47,6 +49,7 @@ export default {
          
 
          mode: {
+            selected: false,
             active: false,
 				maxWidth: 800
          },
@@ -57,11 +60,17 @@ export default {
             items: [],
             text: ''
          },
-         
+         loginConfirm: {
+				color: 'info',
+				show: false,
+				title: '需要登入',
+				text: '您目前執行的程序需要登入.',
+				returnUrl: ''
+			}
 		}
    },
    computed: {
-      ...mapGetters(['responsive','contentMaxWidth']),
+      ...mapGetters(['responsive','contentMaxWidth','isAuthenticated']),
       ...mapState({
 			parts: state => state.rqs.parts
 		}),
@@ -73,11 +82,6 @@ export default {
       },
       breadTitle() {
 
-      }
-   },
-   watch: {
-      modeSelecting(val) {
-         if(!val) this.submitSelection();
       }
    },
 	beforeMount() {
@@ -105,7 +109,21 @@ export default {
          return options;
          
       },
+      checkAuth() {
+         if(this.params.mode > 0) return this.isAuthenticated;
+         return true;
+      },
       submitSelection() {
+         let auth = this.checkAuth();
+         if(!auth) {
+            Bus.$emit('confirm-login', { returnUrl: this.$route.path });
+            return;
+         }
+        
+         let params = this.params;
+        
+         this.mode.active = false;
+         this.mode.selected = true;
          this.fetchData();
 
          this.bread.items = [this.title];
@@ -143,7 +161,6 @@ export default {
                })
             }else {
                this.questionCounts = model.parts.map(part => part.questions.totalItems);
-               console.log('questionCounts',this.questionCounts);
                
             }
          })

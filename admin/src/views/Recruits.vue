@@ -40,7 +40,7 @@ import {
    EDIT_RECRUIT, UPDATE_RECRUIT, ORDER_RECRUITS, DELETE_RECRUIT
 } from '@/store/actions.type';
 
-import { activeOptions, toRocYear } from '@/utils';
+import { toRocYear } from '@/utils';
 
 export default {
    name: 'RecruitsView',
@@ -48,9 +48,15 @@ export default {
 		return {
 			params: {
 				year: 0,
-				active: true
+				active: 1
 			},
-			activeOptions: [],
+			activeOptions: [{
+				value: 1,
+				text: '上架中'
+			},{
+				value: 0,
+				text: '已下架'
+			}],
 			yearOptions: [{ value: 0, text: '全部年度' }],
 
 			table: {
@@ -84,7 +90,6 @@ export default {
 		}
    },
    beforeMount(){
-		this.activeOptions = activeOptions();
 
 		let yearOptions = [];
 		let thisYear = new Date().getFullYear();

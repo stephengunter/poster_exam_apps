@@ -28,6 +28,21 @@
 				</span>
          </v-card-title>
       </v-dialog>
+
+		<v-dialog v-model="loginConfirm.show" max-width="480">
+         <v-card>
+            <v-card-title>{{ loginConfirm.title }}</v-card-title>
+            <v-card-text>
+               {{ loginConfirm.text }}
+            </v-card-text>
+            <v-card-actions>
+               <v-spacer></v-spacer>
+               <v-btn  color="green darken-1" text @click="loginConfirmed">
+                  OK
+               </v-btn>
+            </v-card-actions>
+         </v-card>
+      </v-dialog>
 	</v-app>
 </template>
 
@@ -58,6 +73,13 @@ export default {
 				show: false,
 				timeout: 1500,
 				msg: '存檔成功'
+			},
+			loginConfirm: {
+				color: 'info',
+				show: false,
+				title: '需要登入',
+				text: '您目前執行的程序需要登入.',
+				returnUrl: ''
 			}
 		}
 	},
@@ -72,6 +94,7 @@ export default {
 		Bus.$on('errors', this.onError);
 		Bus.$on('success', this.onSuccess);
 		Bus.$on('warning', this.onWarning);
+		Bus.$on('confirm-login', this.confirmLogin);
 	},
 	mounted(){
 		if(window.innerWidth) this.$store.commit(SET_WINDOW_WIDTH, window.innerWidth);
@@ -115,6 +138,27 @@ export default {
 				this.success.show = true;
 			}
 		},
+		confirmLogin(data) {
+			if(data) {
+				if(data.title) this.loginConfirm.title = data.title;
+				if(data.text) this.loginConfirm.text = data.text;
+				if(data.returnUrl) this.loginConfirm.returnUrl = data.returnUrl;
+			}
+
+			this.loginConfirm.show = true;
+		},
+		loginConfirmed() {
+			let returnUrl = this.loginConfirm.returnUrl;
+			this.$router.push({ path: '/login', query: { returnUrl }});
+			
+			this.loginConfirm = {
+				color: 'info',
+				show: false,
+				title: '需要登入',
+				text: '您目前執行的程序需要登入.',
+				returnUrl: ''
+			};
+		},
 		onResponsiveInverted () {
 			if(window.innerWidth) this.$store.commit(SET_WINDOW_WIDTH, window.innerWidth);
 			
@@ -133,6 +177,9 @@ export default {
 * :not(.v-icon) {
   font-family: "微軟正黑體",sans-serif!important;
 }
+html {
+  scroll-behavior: smooth;
+}
 
 .errText{
 	color: #fff;
@@ -149,5 +196,9 @@ export default {
 .img-center {
 	display: block;
 	margin: auto;
+}
+
+.a-btn {
+  text-decoration: none;
 }
 </style>

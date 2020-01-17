@@ -38,7 +38,7 @@ router.beforeEach((to, from, next) => {
 		}else{
 			//無token
 			if(to.meta.type === GUEST_ONLY) return authDone(next, to, auth);
-			else return redirect(next, { path: '/login' });
+			else return redirect(next, { path: '/login', query: { returnUrl: to.path } });
 		}
 	})
 });

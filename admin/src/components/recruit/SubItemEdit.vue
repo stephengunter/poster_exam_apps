@@ -30,7 +30,27 @@
                   />
                </td>
                <td>
-                  <v-text-field v-model="props.item.ps"
+                  <v-text-field v-model="props.item.points"
+                  v-validate="'numeric'"
+                  :data-vv-name="`subitem_points_${props.index}`"
+                  :error-messages="getErrMsg(['points',`subitem_points_${props.index}`])"
+                  />
+               </td>
+               <td>
+                  <v-select label="選項數"
+                     :items="countOptions" v-model="props.item.optionCount"
+                  />
+               </td>
+                <td>
+                  <v-checkbox v-model="props.item.multiAnswers" label="複選" 
+						/>
+               </td>
+               <td>
+                
+                  <v-textarea v-model="props.item.ps" label="備註" outlined auto-grow
+                  name="text"
+                  rows="5"
+                  row-height="15"
                   />
                </td>
                <td>
@@ -72,18 +92,36 @@ export default {
 					sortable: false,
 					text: '標題',
                value: '',
-               width: '35%'
+               width: '25%'
             },
             {
 					sortable: false,
 					text: '科目',
-					value: ''
+               value: '',
+               width: '25%'
+            },
+            {
+					sortable: false,
+					text: '分數',
+               value: '',
+               width: '10%'
+            },
+            {
+					sortable: false,
+					text: '選項數',
+               value: '',
+               width: '10%'
+            },
+            {
+					sortable: false,
+					text: '複選題',
+               value: '',
+               width: '10%'
             },
             {
 					sortable: false,
 					text: '備註',
-               value: '',
-               width: '35%'
+               value: ''
             },
             {
                width: '50px',
@@ -97,6 +135,8 @@ export default {
             options: []
          },
 
+         countOptions: [],
+
          canAdd: false
 		}
 	},
@@ -108,6 +148,12 @@ export default {
       });
 
       this.setSubjectOptions();
+
+      for(let i = 1; i <= 5; i++) {
+         this.countOptions.push({
+            value: i, text: i
+         })
+      }
 	},
 	methods: {
       setSubjectOptions() {
@@ -137,7 +183,10 @@ export default {
             id: 0,
             parentId: this.parent_id,
             title: '',
-            subjectId: options[0].value           
+            subjectId: options[0].value,
+            points: 0,
+            optionCount: 4,
+            multiAnswers: false           
          });
          this.setSubjectOptions();
       },

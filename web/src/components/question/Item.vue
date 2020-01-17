@@ -26,11 +26,13 @@
 			</ul>
 		</v-radio-group>
 		<v-expansion-panels v-show="model.resolves.length">
-			<v-expansion-panel>
-      		<v-expansion-panel-header>解析</v-expansion-panel-header>
+			<v-expansion-panel @click="showResolves" >
+      		<v-expansion-panel-header >
+					<a v-show="!expansion" href="#" @click.prevent="() => {}" style="text-decoration: none;" >解析</a>
+				</v-expansion-panel-header>
 				<v-expansion-panel-content>
 					<ResolveItem v-for="resolve in model.resolves" :key="resolve.id" 
-					:model="resolve"
+					:model="resolve" 
 					@show-photo="showPhoto"
 					/>
 				</v-expansion-panel-content>
@@ -60,7 +62,7 @@ export default {
 	data(){
       return {
          radioGroup: 1,
-         panel: 0
+         expansion: false
       }
 	},
 	computed: {
@@ -70,6 +72,9 @@ export default {
 		}
 	},
 	methods: {
+		showResolves() {
+			this.expansion = !this.expansion;
+		},
       showPhoto(photo) {
          this.$emit('show-photo', photo);
       }
