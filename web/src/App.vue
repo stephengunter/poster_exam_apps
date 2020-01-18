@@ -18,7 +18,7 @@
 			</span>
 		</v-snackbar>
 		
-		<v-dialog v-model="err.show" width="480">
+		<v-dialog v-model="err.show" :max-width="err.maxWidth">
          <v-card-title class="headline red lighten-1" >
 				<v-icon color="white" class="mr-3">
 					mdi-alert-circle
@@ -29,7 +29,7 @@
          </v-card-title>
       </v-dialog>
 
-		<v-dialog v-model="loginConfirm.show" max-width="480">
+		<v-dialog v-model="loginConfirm.show" :max-width="loginConfirm.maxWidth">
          <v-card>
             <v-card-title>{{ loginConfirm.title }}</v-card-title>
             <v-card-text>
@@ -49,6 +49,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { SET_WINDOW_WIDTH, SET_RESPONSIVE, TOGGLE_DRAWER } from '@/store/mutations.type';
+import { DIALOG_MAX_WIDTH } from '@/config';
 
 import TheHeader from './components/layout/Header';
 import TheDrawer from './components/layout/Drawer';
@@ -65,6 +66,7 @@ export default {
 		return {
 			title: '',
 			err: {
+				maxWidth: DIALOG_MAX_WIDTH,
 				show: false,
 				msg: '伺服器暫時無回應，請稍候再試.'
 			},
@@ -75,6 +77,7 @@ export default {
 				msg: '存檔成功'
 			},
 			loginConfirm: {
+				maxWidth: DIALOG_MAX_WIDTH,
 				color: 'info',
 				show: false,
 				title: '需要登入',
@@ -84,7 +87,7 @@ export default {
 		}
 	},
 	computed:{
-		...mapGetters(['currentUser']),
+		...mapGetters(['currentUser','responsive','contentMaxWidth']),
       ...mapState({
 			loading: state => state.app.loading,
 			responsive: state => state.app.responsive
@@ -107,6 +110,7 @@ export default {
 	},
 	methods:{
 		onError(error) {
+			this.err.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
 			let defaultMsg = '伺服器暫時無回應，請稍候再試.';
 			if(!error){
 				this.err.msg = defaultMsg;
@@ -144,7 +148,7 @@ export default {
 				if(data.text) this.loginConfirm.text = data.text;
 				if(data.returnUrl) this.loginConfirm.returnUrl = data.returnUrl;
 			}
-
+			this.loginConfirm.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
 			this.loginConfirm.show = true;
 		},
 		loginConfirmed() {
@@ -200,5 +204,9 @@ html {
 
 .a-btn {
   text-decoration: none;
+}
+
+.q-title {
+	font-size: 16px;
 }
 </style>

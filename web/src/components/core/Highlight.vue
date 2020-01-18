@@ -130,6 +130,7 @@ const highlightChunks = (text, queriesOrQuery, { caseSensitive = false, diacriti
    return chunks;
 }
 export default {
+   name: 'CoreHighlight',
    props: {
       queries: {
          type: Array,

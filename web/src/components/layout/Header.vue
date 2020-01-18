@@ -6,7 +6,7 @@
       
       <v-spacer></v-spacer>
       
-      <v-menu offset-y>
+      <v-menu v-if="appActions.length" offset-y>
          <template v-slot:activator="{ on }">
             <v-btn icon v-on="on">
                <v-icon>mdi-dots-vertical</v-icon>
@@ -14,20 +14,12 @@
          </template>
          <v-card class="mx-auto" max-width="300" tile >
             <v-list>
-               <v-list-item @click.prevent="logout">
-                  <v-list-item-icon>
-                        <v-icon>mdi-logout-variant</v-icon>
+               <v-list-item v-for="(item, index) in appActions" :key="index" @click.prevent="onActionSelected(item.name)">
+                  <v-list-item-icon v-if="item.icon">
+                     <v-icon>{{ item.icon }}</v-icon>
                   </v-list-item-icon>
                   <v-list-item-content>
-                     <v-list-item-title>登出</v-list-item-title>
-                  </v-list-item-content>
-               </v-list-item>
-               <v-list-item @click.prevent="logout">
-                  <v-list-item-icon>
-                        <v-icon>mdi-logout-variant</v-icon>
-                  </v-list-item-icon>
-                  <v-list-item-content>
-                     <v-list-item-title>登出登出登出登出</v-list-item-title>
+                     <v-list-item-title>{{ item.title }}</v-list-item-title>
                   </v-list-item-content>
                </v-list-item>
             </v-list>
@@ -60,7 +52,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import { LOGOUT } from '@/store/actions.type';
 import { TOGGLE_DRAWER } from '@/store/mutations.type';
 import { SITE_TITLE } from '@/config';
@@ -72,7 +64,7 @@ export default {
       }
    },
    computed:{
-		...mapGetters(['currentUser'])
+		...mapGetters(['currentUser', 'appActions'])
    },
    methods:{
       toggleDrawer(){
@@ -81,6 +73,9 @@ export default {
       logout(){
          this.$store.dispatch(LOGOUT)
          .then(() => this.$router.push({ path: '/' }))
+      },
+      onActionSelected(name) {
+         Bus.$emit('action-selected', name);
       }
    }
 };

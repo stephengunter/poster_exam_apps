@@ -6,9 +6,11 @@
       </v-col>
       <v-col cols="12" :md="hasText ? 4 : 12">
          <div v-for="(item, index) in model.attachments" :key="index">
-            <v-img :src="item.previewPath | photoNameUrl(100)" max-width="100" aspect-ratio="1"
-            @click="showPhoto(item)"
-            />
+            <a href="#" @click.prevent="showPhoto(item)">
+               <v-img :src="item.previewPath | photoNameUrl(100)" max-width="100" aspect-ratio="1"
+               @click="showPhoto(item)"
+               />
+            </a>
             {{ item.title }}
          </div>
       </v-col>

@@ -1,7 +1,8 @@
 import Errors from '@/common/errors';
 import { SET_LOADING, SET_ERROR, CLEAR_ERROR, 
    SET_DRAWER, SET_MENUS, SET_WINDOW_WIDTH,
-   SET_RESPONSIVE, TOGGLE_DRAWER } from '@/store/mutations.type';
+   SET_RESPONSIVE, TOGGLE_DRAWER, SET_APP_ACTIONS
+} from '@/store/mutations.type';
 
 const initialState = {
    loading: false,
@@ -10,6 +11,7 @@ const initialState = {
    responsive: false,
    drawer: null,
    menus: [],
+   actions: [],
    errorList: new Errors(),
 };
 
@@ -32,6 +34,9 @@ const getters = {
    },
    responsive(state) {
       return state.responsive;
+   },
+   appActions(state) {
+      return state.actions;
    },
    errorList(state) {
       return state.errorList;
@@ -58,6 +63,9 @@ const mutations = {
    },
    [SET_MENUS](state, menus) {
       state.menus = menus;
+   },
+   [SET_APP_ACTIONS](state, actions) {
+      state.actions = actions;
    },
    [SET_ERROR](state, errors) {
       state.errorList.record(errors);

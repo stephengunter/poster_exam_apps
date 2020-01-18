@@ -21,19 +21,18 @@ router.beforeEach((to, from, next) => {
 		
 		if(to.meta.type === FOR_ALL) return authDone(next, to, auth);
 	
-		if(auth){ 
-			if(to.meta.type === GUEST_ONLY) return redirect(next, { path: '/' });
-
+		if(auth){
 			let tokenStatus = JwtService.tokenStatus();
 			if(tokenStatus === -1) {
 				//token過期
 				return refreshToken(next, to);
-
 			}else if(tokenStatus === 0) {
 				//token 即將到期
 				return refreshToken(next, to);
-
-			}else return authDone(next, to, auth);
+			}else {
+				if(to.meta.type === GUEST_ONLY) return redirect(next, { path: '/' });
+				else return authDone(next, to, auth);
+			}
 			
 		}else{
 			//無token

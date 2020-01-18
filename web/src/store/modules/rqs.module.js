@@ -15,15 +15,15 @@ const getters = {
    
 };
 
-const isExamMode = (params) =>  params.mode !== 0;
+const isExamMode = (params) =>  params.mode === 1;
 
 const loadPartData = (model) => {
-   let multiParts = model.parts.length > 1;
-   for(let i = 0; i < model.parts.length; i++) {
-      let part = model.parts[i];
-      let questionCount = part.questions.totalItems;
+   let parts = model.parts;
+   let multiParts = parts.length > 1;
+   for(let i = 0; i < parts.length; i++) {
+      let part = parts[i];
+      let questionCount = part.questions.length;
       let pointsPerQuestion = questionCount ? (part.points / questionCount) : 0;
-      console.log('pointsPerQuestion', pointsPerQuestion);
       if(multiParts) {
          let title = `第${toCnNumber(i + 1)}部份 - 共 ${questionCount} 題 每題 ${pointsPerQuestion} 分`;
          part.title = title;
@@ -39,14 +39,15 @@ const actions = {
       return new Promise((resolve, reject) => {
          RQService.fetch(params)
          .then(model => {
+            loadPartData(model);
             if(isExamMode(params)) {
                context.commit(SET_RQS_EXAM, model);
-               resolve(model);
+               context.commit(SET_RQS, []);
             }else {
-               loadPartData(model);
                context.commit(SET_RQS, model.parts);
-               resolve(model);
+               context.commit(SET_RQS_EXAM, null);
             }
+            resolve(model);
          })
          .catch(error => {
             reject(error);
