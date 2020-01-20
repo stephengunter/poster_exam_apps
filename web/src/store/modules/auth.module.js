@@ -39,16 +39,6 @@ const getters = {
    }
 };
 
-const hasAdminRole = (claims) => {
-   let roles = claims.roles.split(',');
-   let adminRoles = roles.filter(role => 
-      role.toUpperCase() === 'DEV' || role.toUpperCase() === 'BOSS'
-   );
-
-   if(adminRoles && adminRoles.length) return true;
-   return false;
-}
-
 const actions = {
    [INIT_GOOGLE_SIGNIN](context) {
       context.commit(SET_LOADING, true);
@@ -124,25 +114,26 @@ const actions = {
       });
    },
    [REFRESH_TOKEN](context) {
+      context.commit(SET_LOADING, true, '重新登入中...');
       return new Promise((resolve) => {
          let accessToken = JwtService.getToken();
          let refreshToken = JwtService.getRefreshToken();
          if(accessToken && refreshToken) {
-            context.commit(SET_LOADING, true);
             AuthService.refreshToken({ accessToken, refreshToken })
             .then(model => {
                context.commit(SET_AUTH, {
                   token: model.accessToken.token,
                   refreshToken: model.refreshToken
                });
-               context.commit(SET_LOADING, false);
                resolve(true);
             })
             .catch(err => {
-               context.commit(SET_LOADING, false);
                context.commit(PURGE_AUTH);
                resolve(false);           
             })
+            .finally(() => { 
+               context.commit(SET_LOADING, false);
+            });
          }else {
             context.commit(PURGE_AUTH);
             resolve(false);

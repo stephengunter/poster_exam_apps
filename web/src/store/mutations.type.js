@@ -21,5 +21,9 @@ export const SET_RQS = 'setRQs';
 export const SET_RQS_EXAM = 'setRQsExam';
 
 
+//Exams
+export const SET_EXAMS = 'setExams';
+
+
 
 

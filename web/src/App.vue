@@ -1,12 +1,18 @@
 <template>
-  <v-app>
-	   <TheDrawer />
+   <v-app>
+  		<TheDrawer />
 		<TheHeader />
 		<TheContainer />
-
 		<v-overlay :value="loading">
-			<v-progress-circular indeterminate size="48"></v-progress-circular>
+			<div class="text-center">
+				<v-progress-circular indeterminate size="48">
+				</v-progress-circular>
+				<p v-if="loadingText" style="margin:12px">
+					{{ loadingText }}
+				</p>
+			</div>
 		</v-overlay>
+
 		<v-snackbar :timeout="success.timeout" top right dark
 			:color="success.color" v-model="success.show"
 		>
@@ -90,6 +96,7 @@ export default {
 		...mapGetters(['currentUser','responsive','contentMaxWidth']),
       ...mapState({
 			loading: state => state.app.loading,
+			loadingText: state => state.app.loadingText,
 			responsive: state => state.app.responsive
       })
 	},

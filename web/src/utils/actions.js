@@ -1,19 +1,15 @@
 import { SELECT_RQS_MODE, STORE_EXAM,
-   SAVE_EXAM, ABORT_EXAM
+   SAVE_EXAM, ABORT_EXAM, NEW_EXAM
 } from '@/store/actions.type';
 
-const actions = [{
+const actions = [
+//RQs
+   {
    views: ['rqs'],
    name: SELECT_RQS_MODE,
    icon: 'mdi-settings-outline',
    title: '選擇模式',
    description: ''
-},{
-   views: ['rqs'],
-   name: STORE_EXAM,
-   icon: 'mdi-check-circle-outline',
-   title: '交券',
-   description: '交券，計分與存檔'
 },{
    views: ['rqs'],
    name: SAVE_EXAM,
@@ -22,10 +18,24 @@ const actions = [{
    description: '存檔，保留此試券，下次繼續'
 },{
    views: ['rqs'],
+   name: STORE_EXAM,
+   icon: 'mdi-check-circle-outline',
+   title: '交券',
+   description: '交券，計分與存檔'
+},{
+   views: ['rqs'],
    name: ABORT_EXAM,
    icon:'mdi-arrow-left-circle-outline',
    title: '放棄',
    description: '放棄，不存檔'
+}
+//Exams
+,{
+   views: ['exams'],
+   name: NEW_EXAM,
+   icon:'mdi-plus-circle-outline',
+   title: '新測驗',
+   description: '開始新的模擬測驗'
 }];
 
 

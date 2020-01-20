@@ -32,7 +32,7 @@
                </v-tooltip>
                <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                     <v-btn v-on="on" @click="saveExam" color="info">存檔</v-btn>
+                     <v-btn v-on="on" @click="onSaveExam" color="info">存檔</v-btn>
                   </template>
                   <span>存檔，保留此試券，下次繼續</span>
                </v-tooltip>
@@ -69,7 +69,36 @@
          @ok="confirmOk" @cancel="hideConfirm" />
       </v-dialog>
       
-      
+      <v-dialog v-model="save.active" :max-width="save.maxWidth">
+         <v-card v-if="save.active">
+            <v-card-title>
+               測驗存檔
+               <v-spacer />
+               <a href="#" @click.prevent="save.active = false" class="a-btn">
+                  <v-icon>mdi-window-close</v-icon>
+               </a>
+            </v-card-title>
+            <v-card-text>
+            <v-container>
+               <v-row>
+                  <v-col cols="12">
+                     <v-textarea v-model="save.title" label="標題" outlined auto-grow
+                     rows="2"
+                     row-height="15"
+                     />
+                  </v-col>
+               </v-row>
+            </v-container>
+            
+            </v-card-text>
+            <v-card-actions>
+               <v-spacer></v-spacer>
+               <v-btn @click="saveExam" color="success">
+                  確定
+               </v-btn>
+            </v-card-actions>
+         </v-card>
+      </v-dialog>
    </v-container>
 </template>
 
@@ -78,7 +107,9 @@ import { mapState, mapGetters } from 'vuex';
 import { FETCH_RQS, SELECT_RQS_MODE, STORE_EXAM, SAVE_EXAM, ABORT_EXAM } from '@/store/actions.type';
 import { SET_APP_ACTIONS } from '@/store/mutations.type';
 
-import { fetchActions, resolveErrorData, getRouteTitle, toCnNumber } from '@/utils';
+import { fetchActions, resolveErrorData, getRouteTitle,
+  toCnNumber, todayString
+} from '@/utils';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
 import RQHeader from '@/components/rq/Header';
@@ -121,9 +152,26 @@ export default {
             action: '',
 				maxWidth: DIALOG_MAX_WIDTH
          },
+
+         save: {
+            title: '',
+            active: false,
+				maxWidth: DIALOG_MAX_WIDTH
+         },
          
          actions: []
 		}
+   },
+   beforeRouteLeave(to, from, next) {
+   //   alert('prevent route change');
+   //   next(false);
+
+      const answer = window.confirm('Do you really want to leave? you have unsaved changes!')
+      if (answer) {
+         next()
+      } else {
+         next(false)
+      }
    },
    computed: {
       ...mapGetters(['responsive','contentMaxWidth','isAuthenticated']),
@@ -145,13 +193,24 @@ export default {
 		Bus.$on('action-selected', this.onActionSelected);
 	},
 	beforeMount() {
-      let title = getRouteTitle(this.$route);
-      this.title = title;
-      this.fetchData();
-      
-      this.actions = fetchActions(this.$route.name);
+      this.init();
    },
 	methods: {
+      init() {
+         this.params = {
+            mode: -1,
+            year: 0,
+            subject: 0
+         };
+
+         if(this.$refs.rqHeader) this.$refs.rqHeader.init();
+
+         let title = getRouteTitle(this.$route);
+         this.title = title;
+         this.fetchData();
+         
+         this.actions = fetchActions(this.$route.name);
+      },
       onSelectionSubmit() {
          this.fetchData();
       },
@@ -169,7 +228,7 @@ export default {
                this.subjects = model.subjects;
                
                this.$nextTick(() => {
-                  this.$refs.rqHeader.init();
+                  this.$refs.rqHeader.load();
                })
             }else {
                this.setActions();
@@ -179,6 +238,10 @@ export default {
 			.catch(error => {
             Bus.$emit('errors', resolveErrorData(error));
 			})
+      },
+      getExamId() {
+         if(this.exam) return this.exam.id;
+         return 0;
       },
       setActions() {
          let types = [];
@@ -198,7 +261,7 @@ export default {
          }else if(name === STORE_EXAM) {
             this.storeExam();
          }else if(name === SAVE_EXAM) {
-            this.saveExam();
+            this.onSaveExam();
          }else if(name === ABORT_EXAM) {
             this.onAbortExam();
          }
@@ -229,14 +292,39 @@ export default {
       storeExam() {
          console.log('storeExam');
       },
+      onSaveExam() {
+         if(this.exam.title) this.saveExam();
+         else {
+            let title = `${this.$refs.rqHeader.getTitle()}_${todayString().replace(/-/g,'')}`;
+            this.save.title = title;
+            this.save.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
+            this.save.active = true;
+         }
+      },
       saveExam() {
-
+         if(!this.exam.title) this.exam.title = this.save.title;
+         this.$store.dispatch(SAVE_EXAM, this.exam)
+         .then(() => {
+            Bus.$emit('success');
+            this.save.title = '';
+            this.save.active = false;
+         })
+			.catch(error => {
+            Bus.$emit('errors');
+			})
       },
       onAbortExam() {
          this.showConfirm(ABORT_EXAM, '確定要放棄此測驗嗎?', '');         
       },
       abortExam() {
-         console.log('abortExam');
+         let id = this.getExamId();
+         this.$store.dispatch(ABORT_EXAM, id)
+         .then(() => {
+            this.init();
+         })
+			.catch(error => {
+            Bus.$emit('errors');
+			})
       },
       confirmOk() {
          let action = this.confirm.action;

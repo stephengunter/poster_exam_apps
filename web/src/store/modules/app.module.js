@@ -6,6 +6,7 @@ import { SET_LOADING, SET_ERROR, CLEAR_ERROR,
 
 const initialState = {
    loading: false,
+   loadingText: '',
    sideBarWidth: 260,
    windowWidth: 991,
    responsive: false,
@@ -46,8 +47,10 @@ const getters = {
 
 
 const mutations = {
-   [SET_LOADING](state, loading) {
+   [SET_LOADING](state, loading, text = '') {
       state.loading = loading;
+      if(loading) state.loadingText = text;
+      else state.loadingText = '';
    },
    [SET_WINDOW_WIDTH](state, val) {
       state.windowWidth = val;

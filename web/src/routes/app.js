@@ -33,20 +33,20 @@ const applinks = [{
       icon: 'mdi-database',
       title: '歷屆試題'
    } 
-}];
-
-const userLinks = [{
-   name: 'exam',
-   path: '/exam',
-   view: 'Exam',
+},{
+   name: 'exams',
+   path: '/exams',
+   view: 'Exams',
    parent: '',
    meta: {
-      type: USER_ONLY,
+      type: FOR_ALL,
       menu: true,
       icon: 'mdi-file-document-edit-outline',
       title: '模擬測驗'
    } 
 }];
+
+const userLinks = [];
 
 
 const guestLinks = [{

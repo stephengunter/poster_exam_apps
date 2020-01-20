@@ -51,6 +51,8 @@ export const getListText = (items, splitText = ' > ') => {
    return text;
 }
 
+export const todayString = () => new Date().toJSON().slice(0,10);
+
 export const cnNumbers = ['零','一','二','三','四','五','六','七','八','九','十'];
 
 export const toCnNumber = (num) => {

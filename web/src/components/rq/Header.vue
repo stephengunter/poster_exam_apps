@@ -1,7 +1,7 @@
 <template>
    <div class="mb-2">
       <a href="#" @click.prevent="selectMode" class="a-btn"  >
-         {{ bread.text }}
+         {{ bread.text ?  bread.text : title }}
       </a>
       <v-dialog v-model="mode.active" :max-width="mode.maxWidth" persistent>
          <RQSelector  ref="modeSelector"
@@ -70,6 +70,18 @@ export default {
    },
    methods: {
       init() {
+         this.subjectOptions = [];
+         this.bread = {
+            items: [],
+            text: ''
+         };
+         this.mode =  {
+            active: false,
+            maxWidth: DIALOG_MAX_WIDTH,
+            selected: false
+         };
+      },
+      load() {
          let yearOptions = this.year_options;
          let yearId = yearOptions[0].value;
          let subjectOptions = this.loadSubjectOptions(yearId, this.subjects);
@@ -132,6 +144,9 @@ export default {
 
          let subject = this.subjectOptions.find(item => item.value === this.params.subject);
          this.addBreadItem(subject.text);
+      },
+      getTitle() {
+         return this.bread.text;
       }
 
    }

@@ -15,7 +15,6 @@ import { FOR_ALL, GUEST_ONLY, USER_ONLY } from '@/routes/route.type';
 import Menu from '@/common/menu';
 import { SET_MENUS } from '@/store/mutations.type';
 
-
 router.beforeEach((to, from, next) => {
 	store.dispatch(CHECK_AUTH).then(auth => {
 		

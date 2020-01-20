@@ -5,7 +5,6 @@
       
       
       <v-spacer></v-spacer>
-      
       <v-menu v-if="appActions.length" offset-y>
          <template v-slot:activator="{ on }">
             <v-btn icon v-on="on">
@@ -83,6 +82,6 @@ export default {
 
 <style scoped>
 .site-title{
-   font-size : 2.2rem!important;
+   font-size : 1.6rem!important;
 }
 </style>

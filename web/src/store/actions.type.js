@@ -14,6 +14,9 @@ export const FETCH_RQS = 'fetchRQs';
 
 
 //Exams
+export const NEW_EXAM = 'newExam';
+export const EDIT_EXAM = 'editExam';
 export const STORE_EXAM = 'storeExam';
 export const SAVE_EXAM = 'saveExam';
 export const ABORT_EXAM = 'abortExam';
+export const FETCH_EXAMS = 'fetchExams';
