@@ -1,5 +1,5 @@
 import { SELECT_RQS_MODE, STORE_EXAM,
-   SAVE_EXAM, ABORT_EXAM, NEW_EXAM
+   SAVE_EXAM, ABORT_EXAM, NEW_EXAM, FILTER_EXAMS
 } from '@/store/actions.type';
 
 const actions = [
@@ -31,6 +31,13 @@ const actions = [
 }
 //Exams
 ,{
+   views: ['exams'],
+   name: FILTER_EXAMS,
+   icon:'mdi-filter-outline',
+   title: '篩選',
+   description: '篩選測驗紀錄'
+   
+},{
    views: ['exams'],
    name: NEW_EXAM,
    icon:'mdi-plus-circle-outline',

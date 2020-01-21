@@ -1,6 +1,6 @@
 <template>
    <v-btn v-show="ready" outlined @click="signIn">
-      <GoogleLogo />
+      <helper-google-logo />
       <span class="ml-3"> 使用 Google 登入 </span> 
    </v-btn>
 </template>
@@ -9,13 +9,9 @@
 
 <script>
 import { INIT_GOOGLE_SIGNIN, GOOGLE_SIGNIN } from '@/store/actions.type';
-import GoogleLogo from '@/components/helper/GoogleLogo';
 import { onError } from '@/utils';
 export default {
    name: 'GoogleLoginButton',
-   components: {
-      GoogleLogo
-   },
    data() {
       return {
          ready: false,

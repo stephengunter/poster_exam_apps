@@ -6,7 +6,7 @@
 				<span v-show="order" class="mr-1">{{ order }}.</span>
 				{{ model.title }}
 			</p>
-			<OptionList :options="model.options" 
+			<option-list :options="model.options" 
 			@show-photo="showPhoto" 
 			/>
 		</div>
@@ -16,7 +16,7 @@
 					<a v-show="!expansion" href="#" @click.prevent="() => {}" style="text-decoration: none;" >解析</a>
 				</v-expansion-panel-header>
 				<v-expansion-panel-content>
-					<ResolveItem v-for="resolve in model.resolves" :key="resolve.id" 
+					<resolve-item v-for="resolve in model.resolves" :key="resolve.id" 
 					:model="resolve" 
 					@show-photo="showPhoto"
 					/>
@@ -28,14 +28,8 @@
 </template>
 
 <script>
-import ResolveItem from '@/components/resolve/Item';
-import OptionList from '@/components/option/List';
 export default {
 	name: 'QuestionItem',
-	components: {
-		ResolveItem,
-		OptionList
-	},
 	props: {
 		order: {
          type: Number,

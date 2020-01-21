@@ -1,8 +1,11 @@
 <template>
    <v-card>
       <v-card-title v-if="title">{{ title }}</v-card-title>
-      <v-card-text v-if="text">
-         {{ text }}
+      <v-card-text >
+         <slot>
+             {{ text }}
+         </slot>
+        
       </v-card-text>
       <v-card-actions>
          <v-spacer></v-spacer>

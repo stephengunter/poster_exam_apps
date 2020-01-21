@@ -8,7 +8,7 @@
 				<v-card-text>
 					<v-row>
 						<v-col>
-							<GoogleLogin 
+							<login-google 
 							@success="onGoogleLoginSuccess" 
 							@failed="oAuthLoginFailed"
 							/>
@@ -22,18 +22,15 @@
 
 <script>
 import { LOGIN } from '@/store/actions.type';
-import GoogleLogin from '@/components/login/Google';
 export default {
 	name: 'LoginView',
-	components: {
-      GoogleLogin
-	},
 	data(){
 		return {
 			returnUrl: ''
 		}
 	},
 	beforeMount() {
+		console.log('login');
 		if(this.$route.query) {
 			this.returnUrl = this.$route.query.returnUrl ?  this.$route.query.returnUrl : '';
 		}

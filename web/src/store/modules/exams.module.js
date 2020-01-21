@@ -1,6 +1,8 @@
 import ExamsService from '@/services/exams.service';
 import { resolveErrorData } from '@/utils';
-import { FETCH_EXAMS, STORE_EXAM, SAVE_EXAM, ABORT_EXAM } from '@/store/actions.type';
+import { FETCH_EXAMS, CREATE_EXAM, STORE_EXAM,
+   SAVE_EXAM, ABORT_EXAM, EDIT_EXAM
+} from '@/store/actions.type';
 import { SET_LOADING, SET_EXAMS } from '@/store/mutations.type';
 
 const initialState = {
@@ -30,6 +32,21 @@ const actions = {
             });
       });
    },
+   [CREATE_EXAM](context, params) {
+      context.commit(SET_LOADING, true);
+      return new Promise((resolve, reject) => {
+         ExamsService.create(params)
+         .then(model => {
+            resolve(model);
+         })
+         .catch(error => {
+            reject(resolveErrorData(error));
+         })
+         .finally(() => { 
+            context.commit(SET_LOADING, false);
+         });
+      });
+   },
    [SAVE_EXAM](context, model) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
@@ -39,6 +56,20 @@ const actions = {
          })
          .catch(error => {
             reject(resolveErrorData(error));
+         })
+         .finally(() => { 
+            context.commit(SET_LOADING, false);
+         });
+      });
+   },
+   [EDIT_EXAM](context, id) {
+      return new Promise((resolve, reject) => {
+         ExamsService.edit(id)
+         .then(model => {
+            resolve(model);
+         })
+         .catch(error => {
+            reject(resolveErrorData(error));        
          })
          .finally(() => { 
             context.commit(SET_LOADING, false);

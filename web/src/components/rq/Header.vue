@@ -4,7 +4,7 @@
          {{ bread.text ?  bread.text : title }}
       </a>
       <v-dialog v-model="mode.active" :max-width="mode.maxWidth" persistent>
-         <RQSelector  ref="modeSelector"
+         <rq-selector  ref="modeSelector"
          :params="params" :allow_cancel="mode.selected"
          :mode_options="mode_options" :year_options="year_options"
          :subject_options="subjectOptions"
@@ -18,19 +18,15 @@
 import { mapState, mapGetters } from 'vuex';
 import { DIALOG_MAX_WIDTH } from '@/config';
 import { getListText } from '@/utils';
-import RQSelector from '@/components/rq/Selector';
 
 export default {
    name: 'RQHeader',
-   components: {
-      RQSelector
-   },
    props: {
       title: {
 			type: String,
 			default: ''
 		},
-      params: {
+      init_params: {
 			type: Object,
 			default: null
       },
@@ -50,8 +46,9 @@ export default {
    },
    data() {
 		return {
+         params: {},
+
          subjectOptions: [],
-         
 
          mode: {
             active: false,
@@ -70,6 +67,7 @@ export default {
    },
    methods: {
       init() {
+         this.params = { ...this.init_params };
          this.subjectOptions = [];
          this.bread = {
             items: [],
@@ -92,14 +90,15 @@ export default {
          this.params.year = yearId;
 
          this.$nextTick(() => {
-            this.selectMode();
+            this.selectMode(false);
          })
       },
       addBreadItem(text) {
          this.bread.items.push(text);
          this.bread.text = getListText(this.bread.items);
       },
-		selectMode() {
+		selectMode(reset = true) {
+         if(reset) this.params = { ...this.init_params };
          this.mode.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
 			this.mode.active = true;
       },
@@ -124,7 +123,7 @@ export default {
             return;
          }
 
-         this.$emit('submit');
+         this.$emit('submit', this.params);
 
          this.mode.selected = true;
          this.mode.active = false;

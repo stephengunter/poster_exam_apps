@@ -5,7 +5,7 @@
             <h3> {{ model.title }} </h3>
          </v-col>
 		</v-row>
-      <Item v-for="(question, index) in model.questions" :key="index"
+      <question-item v-for="(question, index) in model.questions" :key="index"
       :order="index + start_index" :model="question"
       @show-photo="onShowPhoto" 
       />
@@ -13,12 +13,8 @@
 </template>
 
 <script>
-import Item from '@/components/question/Item';
 export default {
    name: 'RQPart',
-   components: {
-      Item
-   },
    props: {
 		model: {
          type: Object,

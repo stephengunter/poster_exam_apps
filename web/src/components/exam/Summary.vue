@@ -1,25 +1,27 @@
 <template>
    <v-card v-if="model">
-      <close-icon-button @close="cancel" />
+      <core-close-icon-button @close="cancel" />
       <v-card-text>
-         <v-row>
-            <v-col cols="6">
-               <LabelText title="存檔名稱" :text="model.title" />
-            </v-col>
-            <v-col cols="6">
-               <LabelText title="最後更新" :text="model.lastUpdatedText" />
-            </v-col>
-         </v-row>
-         <v-row>
-            <v-col cols="12">
-               <LabelText title="科目" :text="model.subject.title" />
-            </v-col>
-         </v-row>
-         <v-row>
-            <v-col cols="12">
-               <LabelText title="狀態" :text="getStatusText(model)" :html="true" />
-            </v-col>
-         </v-row>
+         <v-container>
+            <v-row>
+               <v-col cols="6">
+                  <core-label-text title="存檔名稱" :text="model.title" />
+               </v-col>
+               <v-col cols="6">
+                  <core-label-text title="最後更新" :text="model.lastUpdatedText" />
+               </v-col>
+            </v-row>
+            <v-row>
+               <v-col cols="12">
+                  <core-label-text title="科目" :text="model.subject.title" />
+               </v-col>
+            </v-row>
+            <v-row>
+               <v-col cols="12">
+                  <core-label-text title="狀態" :text="getStatusText(model)" :html="true" />
+               </v-col>
+            </v-row>
+         </v-container>
       </v-card-text>
       <v-card-actions>
          <v-btn @click="remove" color="error">刪除</v-btn>
@@ -30,14 +32,8 @@
 </template>
 
 <script>
-import CloseIconButton from '@/components/core/CloseIconButton';
-import LabelText from '@/components/core/LabelAndText';
 export default {
    name: 'ExamSummary',
-   components: {
-      'close-icon-button' : CloseIconButton,
-		LabelText
-	},
    props: {
       model: {
 			type: Object,
@@ -57,7 +53,7 @@ export default {
          this.$emit('cancel');
       },
       edit() {
-         this.$emit('edit');
+         this.$emit('edit', this.model);
       },
       remove() {
          this.$emit('remove');

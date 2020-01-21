@@ -17,8 +17,7 @@ export const SET_USER = 'setUser';
 export const SET_ERROR = 'setError';
 export const CLEAR_ERROR = 'clearError';
 
-export const SET_RQS = 'setRQs';
-export const SET_RQS_EXAM = 'setRQsExam';
+export const SET_RQS_MODEL = 'setRQsModel';
 
 
 //Exams

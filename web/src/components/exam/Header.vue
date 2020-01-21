@@ -22,7 +22,7 @@
    </div>
 
    <v-dialog v-model="filter.active" :max-width="filter.maxWidth" persistent>
-      <ExamFilter  ref="examFilter"
+      <exam-filter  ref="examFilter"
       :params="params"
       :status_options="status_options" :subject_options="subject_options"
       @submit="submit" @cancel="filter.active = false;"
@@ -35,19 +35,15 @@
 import { mapState, mapGetters } from 'vuex';
 import { DIALOG_MAX_WIDTH } from '@/config';
 import { getListText } from '@/utils';
-import ExamFilter from '@/components/exam/Filter';
 
 export default {
    name: 'ExamHeader',
-   components: {
-      ExamFilter
-   },
    props: {
       mode: {
 			type: Object,
 			default: null
       },
-      params: {
+      init_params: {
 			type: Object,
 			default: null
 		},
@@ -66,6 +62,8 @@ export default {
    },
    data() {
 		return {
+         params: {},
+
          filter: {
             active: false,
             maxWidth: DIALOG_MAX_WIDTH,
@@ -83,6 +81,8 @@ export default {
    },
    methods: {
       init() {
+         this.params = { ...this.init_params };
+
          this.bread = {
             items: [],
             text: ''
@@ -121,12 +121,14 @@ export default {
          if(statusText) this.addBreadItem(statusText);
          if(subjectText) this.addBreadItem(subjectText);
       },
-      launchFilter() {
+      launchFilter(reset = true) {
+         if(reset) this.params = { ...this.init_params };
+         
          this.filter.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
 			this.filter.active = true;
       },
       submit() {
-         this.$emit('filter-submit');
+         this.$emit('filter-submit', this.params);
 
          this.setTitle();
          this.filter.active = false;

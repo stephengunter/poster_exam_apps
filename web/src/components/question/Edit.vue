@@ -10,7 +10,7 @@
 				<span v-show="order" class="mr-1">{{ order }}.</span>
 				{{ model.question.title }}
 			</p>
-			<deselectable-radio-group 
+			<core-deselectable-radio-group 
 			:options="options" :selected_index="selectedIndex" text_field="title"
 			@selected="onSelect" @show-photo="showPhoto"
 			/>
@@ -20,16 +20,8 @@
 </template>
 
 <script>
-import ResolveItem from '@/components/resolve/Item';
-import OptionList from '@/components/option/List';
-import DeselectableRadioGroup from '@/components/core/DeselectableRadioGroup';
 export default {
 	name: 'QuestionEdit',
-	components: {
-		ResolveItem,
-		OptionList,
-		'deselectable-radio-group': DeselectableRadioGroup
-	},
 	props: {
 		order: {
          type: Number,

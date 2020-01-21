@@ -25,14 +25,22 @@
 		</v-snackbar>
 		
 		<v-dialog v-model="err.show" :max-width="err.maxWidth">
-         <v-card-title class="headline red lighten-1" >
-				<v-icon color="white" class="mr-3">
-					mdi-alert-circle
-				</v-icon>
-				<span class="errText">
+			<v-card>
+				<v-card-title v-if="err.isError" class="headline red lighten-1 pb-5">
+					<v-icon color="white" class="mr-3">
+						mdi-alert-circle
+					</v-icon>
+					<span style="color: #fff;">
+						{{ err.msg  }}
+					</span>
+				</v-card-title>
+				<v-card-title v-else>
+					{{ err.title }}
+				</v-card-title>
+				<v-card-text v-if="!err.isError">
 					{{ err.msg  }}
-				</span>
-         </v-card-title>
+				</v-card-text>
+			</v-card>	
       </v-dialog>
 
 		<v-dialog v-model="loginConfirm.show" :max-width="loginConfirm.maxWidth">
@@ -54,6 +62,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
+import { CHECK_AUTH, REFRESH_TOKEN, TOKEN_REFRESHED } from '@/store/actions.type';
 import { SET_WINDOW_WIDTH, SET_RESPONSIVE, TOGGLE_DRAWER } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
@@ -72,9 +81,11 @@ export default {
 		return {
 			title: '',
 			err: {
+				isError: true,
 				maxWidth: DIALOG_MAX_WIDTH,
 				show: false,
-				msg: '伺服器暫時無回應，請稍候再試.'
+				title: '',
+				msg: '伺服器暫時無回應，請稍候再試.',
 			},
 			success: {
 				color: 'info',
@@ -109,15 +120,19 @@ export default {
 	mounted(){
 		if(window.innerWidth) this.$store.commit(SET_WINDOW_WIDTH, window.innerWidth);
 
-      this.onResponsiveInverted()
-      window.addEventListener('resize', this.onResponsiveInverted)
+      this.onResponsiveInverted();
+		window.addEventListener('resize', this.onResponsiveInverted);
 	},
 	beforeDestroy(){
       window.removeEventListener('resize', this.onResponsiveInverted)
 	},
 	methods:{
 		onError(error) {
+			this.err.isError = true;
+			this.err.title = '';
+			this.err.text = '';
 			this.err.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
+
 			let defaultMsg = '伺服器暫時無回應，請稍候再試.';
 			if(!error){
 				this.err.msg = defaultMsg;
@@ -132,7 +147,24 @@ export default {
 				this.err.msg = defaultMsg;
 				this.err.show = true;
 			}else if(error.status === 401){
-				this.$router.push({ name: 'login', query: { returnUrl: this.$route.path } })
+				this.$store.dispatch(CHECK_AUTH).then(auth => {
+					console.log('auth', auth);
+					if(auth){
+						this.$store.dispatch(REFRESH_TOKEN).then(token => {	
+							if(token) {
+								this.err.title = '請重新操作';
+								this.err.msg = '您的驗証剛剛刷新，請重新操作一次';
+								this.err.isError = false;
+								this.err.show = true;
+								Bus.$emit(TOKEN_REFRESHED);
+							} 
+							else this.$router.push({ name: 'login', query: { returnUrl: this.$route.path } });
+						})
+					}else {
+						//無token
+						this.$router.push({ name: 'login', query: { returnUrl: this.$route.path } });
+					}
+				})
 			}
 		},
 		onSuccess(msg) {
@@ -151,9 +183,9 @@ export default {
 		},
 		confirmLogin(data) {
 			if(data) {
-				if(data.title) this.loginConfirm.title = data.title;
-				if(data.text) this.loginConfirm.text = data.text;
-				if(data.returnUrl) this.loginConfirm.returnUrl = data.returnUrl;
+				this.loginConfirm.title = data.title ? data.title : '需要登入';
+				this.loginConfirm.text = data.text ? data.text : '您目前執行的程序需要登入';
+				this.loginConfirm.returnUrl = data.returnUrl ? data.returnUrl : '/';
 			}
 			this.loginConfirm.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
 			this.loginConfirm.show = true;
@@ -161,14 +193,8 @@ export default {
 		loginConfirmed() {
 			let returnUrl = this.loginConfirm.returnUrl;
 			this.$router.push({ path: '/login', query: { returnUrl }});
-			
-			this.loginConfirm = {
-				color: 'info',
-				show: false,
-				title: '需要登入',
-				text: '您目前執行的程序需要登入.',
-				returnUrl: ''
-			};
+
+			this.loginConfirm.show = false;
 		},
 		onResponsiveInverted () {
 			if(window.innerWidth) this.$store.commit(SET_WINDOW_WIDTH, window.innerWidth);

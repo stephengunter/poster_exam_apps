@@ -18,12 +18,8 @@
 </template>
 
 <script>
-import CoreHighlight from '@/components/core/Highlight';
 export default {
    name: 'ResolveItem',
-   components: {
-		'core-highlight' : CoreHighlight
-   },
    computed:{
       hasText() {
          if(!this.model) return false;
