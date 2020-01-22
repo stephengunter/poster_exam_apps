@@ -144,7 +144,8 @@ export default {
          this.$store.dispatch(CREATE_EXAM, { recruit: params.subject })
          .then(exam => {
             this.exam = exam;
-            this.exam.title = `${this.$refs.rqHeader.getTitle()}_${todayString().replace(/-/g,'')}`;
+            let title =  `${this.$refs.rqHeader.getTitle()}_${todayString().replace(/-/g,'')}`;
+            this.exam.title = title.replace(/\s/g,'').replace(/>/g,'_');
             this.setActions();
          })
 			.catch(error => {

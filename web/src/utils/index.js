@@ -60,3 +60,4 @@ export * from './helper';
 export * from './route';
 export * from './route';
 export * from './actions';
+export * from './exam';

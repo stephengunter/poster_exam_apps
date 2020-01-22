@@ -36,6 +36,8 @@ export default {
 		
 	},
 	beforeMount() {
+		let title='歷屆試題 > 測驗 > 108年度 > 專業科目(1)：臺灣自然及人文地理_20200121';
+		console.log(title.replace(/\s/g,'').replace(/>/g,'_'));
 		
 	},
 	methods: {

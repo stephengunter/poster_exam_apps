@@ -44,7 +44,7 @@ export default {
          type: String,
          default: '測驗紀錄'
       },
-      params: {
+      init_params: {
          type: Object,
          default: null
       },
@@ -71,14 +71,14 @@ export default {
 	},
 	methods: {
 		init() {
-			
+			let params = { ...this.init_params };
+         this.params = params;
       },
       cancel() {
-         console.log('cancel');
          this.$emit('cancel');
       },
       submit() {
-         this.$emit('submit');
+         this.$emit('submit', this.params);
       }
 	}
 }

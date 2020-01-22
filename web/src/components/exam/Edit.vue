@@ -10,11 +10,13 @@
       <v-card-actions>
          <v-tooltip top>
             <template v-slot:activator="{ on }">
-               <v-btn v-on="on" @click="onAbortExam" class="mr-2">放棄</v-btn>
+               <v-btn :color="exam.reserved ? 'error' : ''" v-on="on" @click="onAbortExam" class="mr-2">
+                  {{ exam.reserved ? '刪除' : '放棄' }}
+               </v-btn>
             </template>
-            <span>放棄，不存檔</span>
+            <span>{{ exam.reserved ? '刪除' : '放棄，不存檔' }}</span>
          </v-tooltip>
-         <v-tooltip top>
+         <v-tooltip top v-if="!exam.isComplete">
             <template v-slot:activator="{ on }">
                <v-btn v-on="on" @click="onSaveExam" color="info">存檔</v-btn>
             </template>
@@ -22,7 +24,7 @@
          </v-tooltip>
          
          <v-spacer></v-spacer>
-         <v-tooltip top>
+         <v-tooltip top v-if="!exam.isComplete">
             <template v-slot:activator="{ on }">
                <v-btn v-on="on" @click="onStoreExam" color="success">交券</v-btn>
             </template>

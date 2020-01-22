@@ -63,6 +63,7 @@ const actions = {
       });
    },
    [EDIT_EXAM](context, id) {
+      context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          ExamsService.edit(id)
          .then(model => {
