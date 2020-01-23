@@ -33,3 +33,4 @@ export const ABORT_EXAM = 'abortExam';
 export const DELETE_EXAM = 'deleteExam';
 export const FILTER_EXAMS = 'filterExams';
 export const FETCH_EXAMS = 'fetchExams';
+export const LOAD_EXAM_SUMMARY = 'loadExamSummary';

@@ -1,21 +1,20 @@
 <template>
 	<v-container>
 		<exam-header ref="examHeader"
-		:title="title" :mode="mode"
+		:title="title"
 		:fetch_params="fetchParams" :create_params="createParams" 
-		:exam="exam"
 		:type_options="examTypeOptions"  :year_options="yearOptions"
 		:recruit_type_options="recruitExamTypeOptions"
 		:status_options="statusOptions" :subject_options="subjectOptions"
 		@filter-submit="onFilterSubmit" @creator-submit="onCreatorSubmit"
 		/>
-		<div v-show="isIndexMode">
+		<div v-show="examIndexMode">
 			<exam-table v-if="pagedList" :params="fetchParams" :model="pagedList" 
 			@selected="onTableSelected"
 			/>
 		</div>
 
-		<div v-show="isEditMode">
+		<div v-show="examEditMode">
          <exam-edit ref="examEdit" :exam="exam" :actions="examActions"
 			@leave="setMode('index')"
          /> 
@@ -37,9 +36,9 @@ import { LOAD_ACTIONS, ACTION_SELECTED,
 	STORE_EXAM, SAVE_EXAM, ABORT_EXAM, CREATE_EXAM, 
 	EXAM_RECORDS, EXAM_SUMMARY, DELETE_EXAM	
 } from '@/store/actions.type';
-import { SET_APP_ACTIONS } from '@/store/mutations.type';
+import { SET_EXAM_PAGE_MODE, SET_APP_ACTIONS, SET_EXAM_TITLE } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
-import { examActions, resolveErrorData, getRouteTitle, todayString } from '@/utils';
+import { resolveErrorData, getRouteTitle, todayString } from '@/utils';
 import Exam from '@/models/exam';
 
 
@@ -48,7 +47,6 @@ export default {
 	data() {
 		return {
 			title: '',
-			mode: null,
 			modeOptions: [{
 				name: 'index',
 				text: '紀錄'
@@ -83,26 +81,18 @@ export default {
 				active: false,
 				model: null,
 				maxWidth: DIALOG_MAX_WIDTH
-			},
-			
-			exam: null,
-			examActions: []
+			}
 		}
 	},
 	computed: {
-		...mapGetters(['responsive','contentMaxWidth','isAuthenticated']),
+		...mapGetters(['exam', 'examIndexMode', 'examCreateMode', 'examEditMode', 
+		'responsive','contentMaxWidth','isAuthenticated'
+		]),
 		...mapState({
-         pagedList: state => state.exams.pagedList
-		}),
-      isIndexMode() {
-         return this.mode && this.mode.name === 'index';
-      },
-      isCreateMode() {
-         return this.mode && this.mode.name === 'create';
-		},
-		isEditMode() {
-         return this.mode && this.mode.name === 'edit';
-      }
+			mode: state => state.exams.mode,
+			pagedList: state => state.exams.pagedList,
+			examActions: state => state.exams.actions,
+		})
 	},
 	created(){
 		Bus.$on(ACTION_SELECTED, this.onActionSelected);
@@ -121,28 +111,32 @@ export default {
 			}
 		},
 		setMode(name) {
-			this.mode = this.modeOptions.find(item => item.name === name);
-			if(this.isIndexMode) {
-            this.fetchExams();
-         }else if(this.isCreateMode) {
-            
-         }
-			
-			this.setActions();
+			let mode = this.modeOptions.find(item => item.name === name);
+			this.$store.commit(SET_EXAM_PAGE_MODE, mode);
+
 			this.$nextTick(() => {
+				if(this.examIndexMode) {
+					this.fetchExams();
+				}else if(this.examCreateMode) {
+					
+				}else if(this.examEditMode) {
+					this.$refs.examEdit.init();
+				}
+
+				this.setActions();
             this.$refs.examHeader.init();
          })
 		},
 		setActions() {
 			let blocks = [];
          let types = [];
-         if(this.isIndexMode) {
+         if(this.examIndexMode) {
 				types = [FILTER_EXAMS, NEW_EXAM];
 				blocks.push(types);
-         }else if(this.isCreateMode) {
+         }else if(this.examCreateMode) {
 				types = [NEW_EXAM];
 				blocks.push(types);
-         }else if(this.isEditMode) {
+         }else if(this.examEditMode) {
 				blocks.push([EXAM_RECORDS, EXAM_SUMMARY]);
 				blocks.push(this.examActions.map(item => item.name));
 			}
@@ -150,18 +144,8 @@ export default {
 			this.$store.dispatch(LOAD_ACTIONS, blocks);
 		},
 		onActionSelected(name) {
-			if(this.isEditMode) {
+			if(this.examEditMode) {
 				this.$refs.examEdit.handleAction(name);
-				// if(name === EXAM_RECORDS) {
-				// 	if(this.exam.isComplete) {
-				// 		this.setMode('index');
-				// 	}else {
-				// 		this.$refs.examEdit.onLeaveExam();
-				// 	}
-				// }else {
-				// 	this.$refs.examEdit.handleAction(name);
-				// }
-
 				return;
 			}
 
@@ -211,43 +195,29 @@ export default {
 		},
 		createExam(params) {
 			this.setMode('create');
-			this.exam = null;
+			
          this.$store.dispatch(CREATE_EXAM, params)
          .then(exam => {
 				let bread =  this.$refs.examHeader.getBread();
 				let items = bread.items.slice(2);
 				let title = `${items.join('_')}_${todayString().replace(/-/g,'')}`;
-				exam.title = title;
 				
-				this.setExam(exam);
+				this.$store.commit(SET_EXAM_TITLE, title);
+				
+				this.setMode('edit');
          })
 			.catch(error => {
             Bus.$emit('errors', resolveErrorData(error));
 			})
-		},
-		setExam(exam) {
-			this.exam = exam ? exam : null;
-			if(exam) {
-				this.exam = exam;
-				this.examActions = examActions(exam);
-				this.setMode('edit');
-				
-				this.$nextTick(() => {
-            	this.$refs.examEdit.init();
-         	})
-			}else {
-				this.exam = null;
-			}
 		},
 		editExam(model) {
 			//繼續作答
 			this.hideSummary();
 
 			let id = model.id;
-			this.exam = null;
          this.$store.dispatch(EDIT_EXAM, id)
          .then(exam => {
-				this.setExam(exam);
+				this.setMode('edit');
          })
 			.catch(error => {
             Bus.$emit('errors', resolveErrorData(error));

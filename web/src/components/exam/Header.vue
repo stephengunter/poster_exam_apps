@@ -7,12 +7,12 @@
    </div>
    <div v-else>
       <v-row>
-			<v-col :cols="isIndexMode ? 8 : 12">
+			<v-col :cols="examIndexMode ? 8 : 12">
 				<a href="#" @click.prevent="onTitltClicked" class="a-btn"  >
 					{{ bread.text ?  bread.text : title }}
 				</a>
 			</v-col>
-			<v-col v-if="isIndexMode" cols="4" class="text-right">
+			<v-col v-if="examIndexMode" cols="4" class="text-right">
 				<v-btn color="info" outlined  @click.prevent="launchCreator">
 					<v-icon left>mdi-plus-circle-outline</v-icon>
 					新測驗
@@ -46,10 +46,6 @@ import { getListText } from '@/utils';
 export default {
    name: 'ExamHeader',
    props: {
-      mode: {
-			type: Object,
-			default: null
-      },
       fetch_params: {
 			type: Object,
 			default: null
@@ -81,11 +77,7 @@ export default {
       subject_options: {
          type: Array,
          default: null
-      },
-      exam: {
-			type: Object,
-			default: null
-      },
+      }
    },
    data() {
 		return {
@@ -112,16 +104,12 @@ export default {
 		}
    },
    computed: {
-      ...mapGetters(['responsive','contentMaxWidth','isAuthenticated']),
-      isIndexMode() {
-         return this.mode && this.mode.name === 'index';
-      },
-      isCreateMode() {
-         return this.mode && this.mode.name === 'create';
-		},
-		isEditMode() {
-         return this.mode && this.mode.name === 'edit';
-      }
+      ...mapGetters(['exam', 'examIndexMode', 'examCreateMode', 'examEditMode', 
+		'responsive','contentMaxWidth','isAuthenticated'
+      ]),
+      ...mapState({
+			mode: state => state.exams.mode
+		})
    },
    methods: {
       init() {
@@ -146,7 +134,7 @@ export default {
          this.bread.text = getListText(this.bread.items);
       },
       setTitle() {
-         if(this.isIndexMode) {
+         if(this.examIndexMode) {
             let params = this.fetchParams;
 
             let subjectText = '';
@@ -167,11 +155,11 @@ export default {
             if(statusText) this.addBreadItem(statusText);
             if(subjectText) this.addBreadItem(subjectText);
 
-         }else if(this.isEditMode) {
+         }else if(this.examEditMode) {
             this.bread.items = [this.title];
             this.addBreadItem(this.exam.title);
 
-         }else if(this.isCreateMode) {
+         }else if(this.examCreateMode) {
             this.bread.items = [this.title];
             this.addBreadItem('新測驗');
 
@@ -190,9 +178,9 @@ export default {
          return this.bread;
       },
       onTitltClicked() {
-         if(this.isIndexMode) {
+         if(this.examIndexMode) {
             this.launchFilter();
-         }else if(this.isEditMode) {
+         }else if(this.examEditMode) {
             Bus.$emit(ACTION_SELECTED,EXAM_SUMMARY);
          }
       },

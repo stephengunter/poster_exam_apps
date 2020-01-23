@@ -18,11 +18,17 @@ export const SET_USER = 'setUser';
 export const SET_ERROR = 'setError';
 export const CLEAR_ERROR = 'clearError';
 
+export const INIT_RQS_PAGE = 'initRQsPage';
+export const SET_RQS_PAGE_MODE = 'setRQsPageMode';
 export const SET_RQS_MODEL = 'setRQsModel';
 
 
 //Exams
+export const SET_EXAM_PAGE_MODE = 'setExamPageMode';
 export const SET_EXAMS = 'setExams';
+export const SET_EXAM = 'setExam';
+export const SET_EXAM_TITLE = 'setExamTitle';
+export const SET_EXAM_ACTIONS = 'setExamActions';
 
 
 

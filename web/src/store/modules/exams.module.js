@@ -1,19 +1,51 @@
 import ExamsService from '@/services/exams.service';
-import { resolveErrorData } from '@/utils';
+import { resolveErrorData, examActions } from '@/utils';
+
 import { FETCH_EXAMS, CREATE_EXAM, STORE_EXAM,
-   SAVE_EXAM, ABORT_EXAM, EDIT_EXAM
+   SAVE_EXAM, ABORT_EXAM, EDIT_EXAM, LOAD_EXAM_SUMMARY
 } from '@/store/actions.type';
-import { SET_LOADING, SET_EXAMS } from '@/store/mutations.type';
+
+import { SET_LOADING, SET_EXAM_PAGE_MODE,
+   SET_EXAMS, SET_EXAM, SET_EXAM_TITLE, SET_EXAM_ACTIONS
+} from '@/store/mutations.type';
 
 const initialState = {
-   pagedList: null
+   mode: null,
+   pagedList: null,
+   exam: null,
+   actions: [],
+   hasAnswers: [],
+   noAnswers: []
 };
 
 export const state = { ...initialState };
  
 const getters = {
-   
+   exam(state) {
+      return state.exam;
+   },
+   examIndexMode(state) {
+      return state.mode && state.mode.name === 'index';
+   },
+   examCreateMode(state) {
+      return state.mode && state.mode.name === 'create';
+   },
+   examEditMode(state) {
+      return state.mode && state.mode.name === 'edit';
+   }
 };
+
+const setExam = (context, exam) => {
+   let index = 1;
+   exam.parts.forEach(part => {
+      part.questions.forEach(question => {
+         question.index = index;
+         index += 1;
+      })
+   });
+   context.commit(SET_EXAM, exam);
+   context.commit(SET_EXAM_ACTIONS, examActions(exam));
+}
 
 const actions = {
    [FETCH_EXAMS](context, params) {
@@ -33,11 +65,15 @@ const actions = {
       });
    },
    [CREATE_EXAM](context, params) {
+      context.commit(SET_EXAM, null);
+      context.commit(SET_EXAM_ACTIONS, []);
+
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          ExamsService.create(params)
-         .then(model => {
-            resolve(model);
+         .then(exam => {
+            setExam(context, exam);
+            resolve(exam);
          })
          .catch(error => {
             reject(resolveErrorData(error));
@@ -63,11 +99,15 @@ const actions = {
       });
    },
    [EDIT_EXAM](context, id) {
+      context.commit(SET_EXAM, null);
+      context.commit(SET_EXAM_ACTIONS, []);
+
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          ExamsService.edit(id)
-         .then(model => {
-            resolve(model);
+         .then(exam => {
+            setExam(context, exam);
+            resolve(exam);
          })
          .catch(error => {
             reject(resolveErrorData(error));        
@@ -91,14 +131,42 @@ const actions = {
             context.commit(SET_LOADING, false);
          });
       });
+   },
+   [LOAD_EXAM_SUMMARY](context) {
+      let state = context.state;
+      let hasAnswers = [];
+      let noAnswers = [];
+      state.exam.parts.forEach(part => {
+         part.questions.forEach(question => {
+            if(question.userAnswerIndexes) {
+               //有答案
+               hasAnswers.push(question);
+            }else noAnswers.push(question);
+         })
+      });
+
+      state.hasAnswers = hasAnswers;
+      state.noAnswers = noAnswers;
    }
    
 };
 
 
 const mutations = {
+   [SET_EXAM_PAGE_MODE](state, mode) {
+      state.mode = mode;
+   },
    [SET_EXAMS](state, pagedList) {
       state.pagedList = pagedList;
+   },
+   [SET_EXAM](state, exam) {
+      state.exam = exam;
+   },
+   [SET_EXAM_TITLE](state, title) {
+      state.exam.title = title;
+   },
+   [SET_EXAM_ACTIONS](state, actions) {
+      state.actions = actions;
    }
 };
 

@@ -39,7 +39,6 @@ export default {
 	data(){
       return {
 			selectedIndex: -1,
-
 			selectedIndexes: [],
 
 			optionIds: [],
@@ -52,6 +51,14 @@ export default {
 	},
 	beforeMount() {
 		let model = this.model;
+
+		let userAnswerIndexes = model.userAnswerIndexes;
+	   if(userAnswerIndexes) {
+			if(this.multi_answers) {
+				this.selectedIndexes = userAnswerIndexes.split(',').map(id => Number(id));
+			}else this.selectedIndex = Number(userAnswerIndexes);
+		}
+
 		let optionIds = model.optionIds.split(',').map(id => Number(id));
 		this.optionIds = optionIds;
 		for(let i = 0; i < optionIds.length; i++){

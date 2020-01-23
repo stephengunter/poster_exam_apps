@@ -5,10 +5,10 @@
       :mode_options="modeOptions" :year_options="yearOptions"
       @submit="onSelectionSubmit"
       />
-      <div v-show="isReadMode">
+      <div v-show="rqReadMode">
          <rq-read ref="rqRead" :model="model" />
       </div>
-      <div v-show="isExamMode">
+      <div v-show="rqExamMode">
          <exam-edit ref="examEdit" :exam="exam" :actions="examActions"
          @aborted="onExamAborted"
          /> 
@@ -19,15 +19,14 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { LOAD_ACTIONS, ACTION_SELECTED, EXAM_SUMMARY,
+import {
+   LOAD_ACTIONS, ACTION_SELECTED, EXAM_SUMMARY,
    FETCH_RQS, SELECT_RQS_MODE, CREATE_EXAM,
    STORE_EXAM, SAVE_EXAM, ABORT_EXAM 
 } from '@/store/actions.type';
-import { SET_APP_ACTIONS } from '@/store/mutations.type';
+import { SET_RQS_PAGE_MODE, SET_APP_ACTIONS, SET_EXAM_TITLE } from '@/store/mutations.type';
 
-import { examActions, resolveErrorData,
-  getRouteTitle,todayString
-} from '@/utils';
+import { resolveErrorData, getRouteTitle, todayString } from '@/utils';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
 export default {
@@ -35,8 +34,6 @@ export default {
    data() {
 		return {
          title: '',
-         mode: null,
-         modeOptions: [],
 
          params: {
             mode: -1,
@@ -44,13 +41,7 @@ export default {
             subject: 0
          },
 
-         subjects: [],
-         yearOptions: [],
-
          actions: [],
-
-         exam: null,
-         examActions: [],
 
          confirm: {
             title: '',
@@ -72,18 +63,19 @@ export default {
    //    }
    // },
    computed: {
-      ...mapGetters(['responsive','contentMaxWidth','isAuthenticated']),
+      ...mapGetters(['exam', 'rqReadMode', 'rqExamMode', 
+		'responsive','contentMaxWidth','isAuthenticated'
+		]),
       ...mapState({
-         model: state => state.rqs.model
+         mode: state => state.rqs.mode,
+         modeOptions: state => state.rqs.modeOptions,
+         yearOptions: state => state.rqs.yearOptions,
+         subjects: state => state.rqs.subjects,
+         model: state => state.rqs.model,
+         examActions: state => state.exams.actions
 		}),
       firstLoad() {
          return this.params.mode < 0;
-      },
-      isReadMode() {
-         return this.mode && this.mode.value === 0;
-      },
-      isExamMode() {
-         return this.mode && this.mode.value === 1;
       }
    },
    created(){
@@ -100,9 +92,6 @@ export default {
             subject: 0
          };
 
-         this.exam = null;
-         this.setMode(this.params.mode);
-
          if(this.$refs.rqHeader) this.$refs.rqHeader.init();
 
          let title = getRouteTitle(this.$route);
@@ -111,26 +100,24 @@ export default {
          this.fetchData(this.params);
       },
       onSelectionSubmit(params) {
-         this.setMode(params.mode);
          this.params = { ... params };
-
-         if(this.isReadMode) this.fetchData(params);
-         else if(this.isExamMode) this.createExam(params);       
+         this.setMode(params.mode);         
       },
       setMode(val) {
-         this.mode = this.modeOptions.find(item => item.value === val);
-         this.setActions();
+         this.$store.commit(SET_RQS_PAGE_MODE, val);
+         this.$nextTick(() => {
+				if(this.rqReadMode) this.fetchData(this.params);
+            else if(this.rqExamMode) this.createExam(this.params);  
+
+				this.setActions();
+         })
       },
       fetchData(params) {
          this.$store.dispatch(FETCH_RQS, { mode: params.mode, recruit: params.subject })
          .then(model => {
             if(this.firstLoad) {
-               this.modeOptions = model.modeOptions;
-               this.yearOptions = model.yearOptions;
-               this.subjects = model.subjects;
+               this.$store.commit(SET_RQS_PAGE_MODE); 
 
-               this.setMode(model.modeOptions[0].value);
-               
                this.$nextTick(() => {
                   this.$refs.rqHeader.load();
                })
@@ -141,42 +128,29 @@ export default {
 			})
       },
       createExam(params) {
-         this.exam = null;
          this.$store.dispatch(CREATE_EXAM, { recruit: params.subject })
          .then(exam => {
             let bread =  this.$refs.rqHeader.getBread();
             let items = bread.items.slice(2);
             let title = `${items.join('_')}_${todayString().replace(/-/g,'')}`;
-            exam.title = title;
-            
-            this.setExam(exam);
+           
+            this.$store.commit(SET_EXAM_TITLE, title);
+            this.$nextTick(() => {
+               this.setActions();
+            	this.$refs.examEdit.init();
+         	})
          })
 			.catch(error => {
             Bus.$emit('errors', resolveErrorData(error));
 			})
       },
-      setExam(exam) {
-			this.exam = exam ? exam : null;
-			if(exam) {
-				this.exam = exam;
-            this.examActions = examActions(exam);
-
-            this.setActions();
-
-				this.$nextTick(() => {
-            	this.$refs.examEdit.init();
-         	})
-			}else {
-				this.exam = null;
-			}
-		},
       setActions() {
          let blocks = [];
          let types = [];
-         if(this.isReadMode) {
+         if(this.rqReadMode) {
             types = [SELECT_RQS_MODE];
             blocks.push(types);
-         }else if(this.isExamMode) {
+         }else if(this.rqExamMode) {
             if(!this.exam) return;
 				blocks.push([SELECT_RQS_MODE, EXAM_SUMMARY]);
 				blocks.push(this.examActions.map(item => item.name));
@@ -188,7 +162,7 @@ export default {
          if(name === SELECT_RQS_MODE) {
             this.$refs.rqHeader.selectMode();            
          }else {
-            if(this.isExamMode) {
+            if(this.rqExamMode) {
                this.$refs.examEdit.handleAction(name);
             }
          }

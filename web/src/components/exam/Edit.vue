@@ -44,7 +44,8 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { EXAM_SUMMARY, STORE_EXAM, SAVE_EXAM, 
-ABORT_EXAM, DELETE_EXAM, EXAM_RECORDS, LEAVE_EXAM 
+   ABORT_EXAM, DELETE_EXAM, EXAM_RECORDS, LEAVE_EXAM,
+   LOAD_EXAM_SUMMARY
 } from '@/store/actions.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
@@ -63,8 +64,6 @@ export default {
    data() {
 		return {
          answerChangeds: 0,
-         hasAnswers: [],
-         noAnswers: [],
 
          showPhoto: {
 				active: false,
@@ -99,6 +98,10 @@ export default {
    },
    computed: {
       ...mapGetters(['responsive','contentMaxWidth','isAuthenticated']),
+      ...mapState({
+			hasAnswers: state => state.exams.hasAnswers,
+			noAnswers: state => state.exams.noAnswers
+		}),
       parts() {
          if(this.exam) return this.exam.parts;
          return []; 
@@ -107,40 +110,20 @@ export default {
          if(this.exam) return this.exam.parts.map(item => ({ questions: item.questions }));
          return []; 
       },
-      questionCounts() {
-         return this.partQuestions.map(item => item.questions.length);
-      },
-      totalQuestions() {
-         return this.partQuestions.reduce((a, b) => a.questions.length + b.questions.length); 
-      }
+      // questionCounts() {
+      //    return this.partQuestions.map(item => item.questions.length);
+      // },
+      // totalQuestions() {
+      //    return this.partQuestions.reduce((a, b) => a.questions.length + b.questions.length); 
+      // }
    },
    methods: {
       init() {
-         let index = 1;
-         this.exam.parts.forEach(part => {
-            part.questions.forEach(question => {
-               question.index = index;
-               index += 1;
-            })
-         });
+         this.$store.dispatch(LOAD_EXAM_SUMMARY);
       },
       onAnswerChanged() {
          this.answerChangeds += 1;
-
-         let hasAnswers = [];
-         let noAnswers = [];
-         this.exam.parts.forEach(part => {
-            part.questions.forEach(question => {
-               if(question.userAnswerIndexes) {
-                  //有答案
-                  hasAnswers.push(question);
-               }else noAnswers.push(question);
-            })
-         });
-
-         this.hasAnswers = hasAnswers;
-         this.noAnswers = noAnswers;
-         
+         this.$store.dispatch(LOAD_EXAM_SUMMARY);
       },
       onShowPhoto(photo) {
          this.showPhoto.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
@@ -197,6 +180,10 @@ export default {
       storeExam() {
          console.log('storeExam');
       },
+      showSummary() {
+         this.summary.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
+         this.summary.active = true;
+      },
       showConfirm(action, title, text, ok ='確定', cancel='取消', onCancel = null) {
          this.confirm = {
             action,
@@ -245,29 +232,35 @@ export default {
                this.leaveExam();
             }
          }
-         // if(this.exam.isComplete) {
-         //    this.$emit('leaved');
-         // }
-         console.log('onLeaveExam');
       },
       leaveExam() {
          this.hideConfirm();
          this.$emit('leave');
       },
       handleAction(name) {
-         if(name === EXAM_RECORDS || name === LEAVE_EXAM) {
-            this.onLeaveExam();
-         }else if(name === DELETE_EXAM) {
-            this.onDeleteExam();
-         }else if(name === STORE_EXAM) {
-            this.onStoreExam();
-         }else if(name === SAVE_EXAM) {
-            this.onSaveExam();
-         }else if(name === ABORT_EXAM) {
-            this.onAbortExam();
-         }else if(name === EXAM_SUMMARY) {
-            this.summary.active = true;
-         }
+         switch (name) {
+            case EXAM_RECORDS:
+            case LEAVE_EXAM:
+               this.onLeaveExam();
+               break;
+            case DELETE_EXAM:
+               this.onDeleteExam();
+               break;
+            case STORE_EXAM:
+               this.onStoreExam();
+               break;
+            case SAVE_EXAM:
+               this.onSaveExam();
+               break;
+            case ABORT_EXAM:
+               this.onAbortExam();
+               break;
+            case EXAM_SUMMARY:
+               this.showSummary();
+               break;       
+            default:
+               console.log('name');
+         }//end of switch
       }
    }
 }
