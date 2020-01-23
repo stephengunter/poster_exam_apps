@@ -38,6 +38,10 @@ export default {
       cancel_text: {
          type: String,
          default: '取消'
+      },
+      on_cancel: {
+         type: Function,
+         default: null
       }
    },
    methods: {
@@ -45,7 +49,8 @@ export default {
          this.$emit('ok');
       },
       cancel() {
-         this.$emit('cancel');
+         if(this.on_cancel) this.on_cancel();
+         else this.$emit('cancel');
       }
    }
 }

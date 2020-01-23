@@ -7,8 +7,7 @@
 		</v-row>
       <question-edit v-for="(question, index) in model.questions" :key="index"
       :model="question" :multi_answers="model.multiAnswers"
-      :order="index + start_index" 
-      @show-photo="onShowPhoto" 
+      @show-photo="onShowPhoto" @answer-changed="onAnswerChanged"
       />
    </div>
 </template>
@@ -20,19 +19,15 @@ export default {
 		model: {
          type: Object,
          default: null
-      },
-      start_index: {
-         type: Number,
-         default: 0
-      },
+      }
    },
-   // mounted() {
-	// 	console.log(this.model);
-	// },
    methods: {
       onShowPhoto(photo) {
          this.$emit('show-photo', photo);
-		},
+      },
+      onAnswerChanged() {
+         this.$emit('answer-changed');
+      }
    }
 }
 </script>

@@ -7,7 +7,7 @@
             </v-icon>
             <a href="#" v-if="item.attachments.length" @click.prevent="showPhoto(item.attachments[0])">
                <img  style="vertical-align:middle" 
-               :src="item.attachments[0].previewPath | photoNameUrl(50)"
+               :src="item.attachments[0].previewPath | photoNameUrl(120)"
                >
             </a>
             {{ getText(index) }} 

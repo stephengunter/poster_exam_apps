@@ -16,7 +16,8 @@
 		</div>
 
 		<div v-show="isEditMode">
-         <exam-edit ref="examEdit" :exam="exam"
+         <exam-edit ref="examEdit" :exam="exam" :actions="examActions"
+			@leave="setMode('index')"
          /> 
       </div>
 
@@ -31,12 +32,14 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { NEW_EXAM, EDIT_EXAM, FETCH_EXAMS, FILTER_EXAMS,
-	STORE_EXAM, SAVE_EXAM, ABORT_EXAM, CREATE_EXAM
+import { LOAD_ACTIONS, ACTION_SELECTED,
+	NEW_EXAM, EDIT_EXAM, FETCH_EXAMS, FILTER_EXAMS,
+	STORE_EXAM, SAVE_EXAM, ABORT_EXAM, CREATE_EXAM, 
+	EXAM_RECORDS, EXAM_SUMMARY, DELETE_EXAM	
 } from '@/store/actions.type';
 import { SET_APP_ACTIONS } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
-import { fetchActions, resolveErrorData, getRouteTitle, todayString } from '@/utils';
+import { examActions, resolveErrorData, getRouteTitle, todayString } from '@/utils';
 import Exam from '@/models/exam';
 
 
@@ -75,7 +78,6 @@ export default {
 			yearOptions: [],
 			subjectOptions: [],
 			statusOptions: [],
-			actions: [],
 
 			summary: {
 				active: false,
@@ -84,6 +86,7 @@ export default {
 			},
 			
 			exam: null,
+			examActions: []
 		}
 	},
 	computed: {
@@ -102,7 +105,7 @@ export default {
       }
 	},
 	created(){
-		Bus.$on('action-selected', this.onActionSelected);
+		Bus.$on(ACTION_SELECTED, this.onActionSelected);
 	},
 	mounted() {
 		this.init();
@@ -110,7 +113,6 @@ export default {
 	methods: {
 		init() {
 			this.title = getRouteTitle(this.$route);
-			this.actions = fetchActions(this.$route.name);
 
 			if(this.isAuthenticated) {
 				this.setMode('index');
@@ -132,23 +134,44 @@ export default {
          })
 		},
 		setActions() {
+			let blocks = [];
          let types = [];
-         let actions = [];
          if(this.isIndexMode) {
-            types = [FILTER_EXAMS, NEW_EXAM];
+				types = [FILTER_EXAMS, NEW_EXAM];
+				blocks.push(types);
          }else if(this.isCreateMode) {
-            types = [NEW_EXAM];
-         }
-         actions = this.actions.filter(item => types.includes(item.name));
-         this.$store.commit(SET_APP_ACTIONS, actions);
-         
+				types = [NEW_EXAM];
+				blocks.push(types);
+         }else if(this.isEditMode) {
+				blocks.push([EXAM_RECORDS, EXAM_SUMMARY]);
+				blocks.push(this.examActions.map(item => item.name));
+			}
+
+			this.$store.dispatch(LOAD_ACTIONS, blocks);
 		},
 		onActionSelected(name) {
+			if(this.isEditMode) {
+				this.$refs.examEdit.handleAction(name);
+				// if(name === EXAM_RECORDS) {
+				// 	if(this.exam.isComplete) {
+				// 		this.setMode('index');
+				// 	}else {
+				// 		this.$refs.examEdit.onLeaveExam();
+				// 	}
+				// }else {
+				// 	this.$refs.examEdit.handleAction(name);
+				// }
+
+				return;
+			}
+
          if(name === FILTER_EXAMS) {
-            this.$refs.examHeader.launchFilter();           
+            this.$refs.examHeader.launchFilter();         
          }else if(name === NEW_EXAM) {
-            this.$refs.examHeader.launchCreator();           
-         }
+            this.$refs.examHeader.launchCreator();     
+         }else {
+				
+			}
       },
 		onFilterSubmit(params) {
 			this.fetchParams = { ... params };
@@ -175,7 +198,6 @@ export default {
 			this.createExam(params);
 		},
 		onTableSelected(item) {
-			console.log('onTableSelected', item);
 			this.showSummary(item);
 		},
 		showSummary(item) {
@@ -192,17 +214,30 @@ export default {
 			this.exam = null;
          this.$store.dispatch(CREATE_EXAM, params)
          .then(exam => {
-				this.exam = exam;
-				this.setMode('edit');
 				let bread =  this.$refs.examHeader.getBread();
 				let items = bread.items.slice(2);
 				let title = `${items.join('_')}_${todayString().replace(/-/g,'')}`;
-            this.exam.title = title;
+				exam.title = title;
+				
+				this.setExam(exam);
          })
 			.catch(error => {
             Bus.$emit('errors', resolveErrorData(error));
 			})
-			
+		},
+		setExam(exam) {
+			this.exam = exam ? exam : null;
+			if(exam) {
+				this.exam = exam;
+				this.examActions = examActions(exam);
+				this.setMode('edit');
+				
+				this.$nextTick(() => {
+            	this.$refs.examEdit.init();
+         	})
+			}else {
+				this.exam = null;
+			}
 		},
 		editExam(model) {
 			//繼續作答
@@ -212,8 +247,7 @@ export default {
 			this.exam = null;
          this.$store.dispatch(EDIT_EXAM, id)
          .then(exam => {
-				this.exam = exam;
-				this.setMode('edit');
+				this.setExam(exam);
          })
 			.catch(error => {
             Bus.$emit('errors', resolveErrorData(error));

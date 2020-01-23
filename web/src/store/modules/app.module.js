@@ -1,8 +1,12 @@
 import Errors from '@/common/errors';
+import { FETCH_ACTIONS, LOAD_ACTIONS } from '@/store/actions.type';
+
 import { SET_LOADING, SET_ERROR, CLEAR_ERROR, 
    SET_DRAWER, SET_MENUS, SET_WINDOW_WIDTH,
-   SET_RESPONSIVE, TOGGLE_DRAWER, SET_APP_ACTIONS
+   SET_RESPONSIVE, TOGGLE_DRAWER, SET_VIEW_ACTIONS, SET_APP_ACTIONS
 } from '@/store/mutations.type';
+
+import { fetchViewActions } from '@/utils';
 
 const initialState = {
    loading: false,
@@ -12,6 +16,7 @@ const initialState = {
    responsive: false,
    drawer: null,
    menus: [],
+   viewActions: [],
    actions: [],
    errorList: new Errors(),
 };
@@ -44,6 +49,30 @@ const getters = {
    }
 };
 
+const actions = {
+   [FETCH_ACTIONS](context, route) {
+    
+      context.commit(SET_APP_ACTIONS, []);
+      let viewActions = fetchViewActions(route.name);
+      context.commit(SET_VIEW_ACTIONS, viewActions);
+   },
+   [LOAD_ACTIONS](context, blocks) {
+      console.log(LOAD_ACTIONS);
+      let viewActions =  context.state.viewActions;
+      
+      let actions = [];
+      blocks.forEach(block => {
+         let blockActions = [];
+         block.forEach(name => {
+            blockActions.push(viewActions.find(item => item.name === name));
+         })
+         actions.push(blockActions);
+      });
+
+      context.commit(SET_APP_ACTIONS, actions);
+   },
+}
+
 
 
 const mutations = {
@@ -67,6 +96,9 @@ const mutations = {
    [SET_MENUS](state, menus) {
       state.menus = menus;
    },
+   [SET_VIEW_ACTIONS](state, actions) {
+      state.viewActions = actions;
+   },
    [SET_APP_ACTIONS](state, actions) {
       state.actions = actions;
    },
@@ -80,6 +112,7 @@ const mutations = {
 
 export default {
    state,
+   actions,
    mutations,
    getters
 };

@@ -7,6 +7,7 @@ export const SET_THEME_COLOR = 'setThemeColor';
 export const SET_DRAWER = 'setDrawer';
 export const TOGGLE_DRAWER = 'toggleDrawer';
 export const SET_MENUS = 'setMenus';
+export const SET_VIEW_ACTIONS = 'setViewActions';
 export const SET_APP_ACTIONS = 'setAppActions';
 
 

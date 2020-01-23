@@ -1,36 +1,15 @@
 <template>
 <div>
-   <v-card v-if="exam">
+   <v-card>
       <v-card-text>
-         <exam-part v-for="(part, index) in exam.parts" :key="index" 
-         :model="part" :start_index="getStartIndex(index)"
-         @show-photo="onShowPhoto" 
+         <exam-part v-for="(part, index) in parts" :key="index" 
+         :model="part"
+         @show-photo="onShowPhoto"  @answer-changed="onAnswerChanged"
          />
       </v-card-text>
-      <v-card-actions>
-         <v-tooltip top>
-            <template v-slot:activator="{ on }">
-               <v-btn :color="exam.reserved ? 'error' : ''" v-on="on" @click="onAbortExam" class="mr-2">
-                  {{ exam.reserved ? '刪除' : '放棄' }}
-               </v-btn>
-            </template>
-            <span>{{ exam.reserved ? '刪除' : '放棄，不存檔' }}</span>
-         </v-tooltip>
-         <v-tooltip top v-if="!exam.isComplete">
-            <template v-slot:activator="{ on }">
-               <v-btn v-on="on" @click="onSaveExam" color="info">存檔</v-btn>
-            </template>
-            <span>存檔，保留此試券，下次繼續</span>
-         </v-tooltip>
-         
-         <v-spacer></v-spacer>
-         <v-tooltip top v-if="!exam.isComplete">
-            <template v-slot:activator="{ on }">
-               <v-btn v-on="on" @click="onStoreExam" color="success">交券</v-btn>
-            </template>
-            <span>交券，計分與存檔</span>
-         </v-tooltip>
-      </v-card-actions>
+      <exam-actions :actions="actions"
+      @action-selected="handleAction"
+      />
    </v-card>
 
    <v-dialog v-model="showPhoto.active" :max-width="showPhoto.maxWidth">
@@ -39,15 +18,24 @@
    
    <v-dialog v-model="save.active" :max-width="save.maxWidth">
       <core-confirmation :title="save.title" :text="save.text"
-      @ok="saveExam" @cancel="save.active = dalse"
+      @ok="saveExam" @cancel="save.active = false"
       >
          <exam-save :model="save.model" />
       </core-confirmation>
    </v-dialog>
 
-   <v-dialog v-model="confirm.active" :max-width="confirm.maxWidth">
+   <v-dialog v-model="confirm.active" :max-width="confirm.maxWidth" persistent>
       <core-confirmation :title="confirm.title" :text="confirm.text"
-      @ok="confirmOk" @cancel="hideConfirm"
+      :ok_text="confirm.ok_text"  :cancel_text="confirm.cancel_text"
+      :on_cancel="confirm.on_cancel"
+      @ok="confirmOk" @cancel="confirmCancel"
+      />
+   </v-dialog>
+
+   <v-dialog v-model="summary.active" :max-width="summary.maxWidth">
+      <exam-summary :model="exam" :doing="true"
+      :has_answers="hasAnswers" :no_answers="noAnswers"
+      @cancel="summary.active = false"
       />
    </v-dialog>
 </div>   
@@ -55,7 +43,9 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { STORE_EXAM, SAVE_EXAM, ABORT_EXAM } from '@/store/actions.type';
+import { EXAM_SUMMARY, STORE_EXAM, SAVE_EXAM, 
+ABORT_EXAM, DELETE_EXAM, EXAM_RECORDS, LEAVE_EXAM 
+} from '@/store/actions.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
 export default {
@@ -64,10 +54,18 @@ export default {
       exam: {
          type: Object,
          default: null
+      },
+      actions: {
+         type: Array,
+         default: null
       }
    },
    data() {
 		return {
+         answerChangeds: 0,
+         hasAnswers: [],
+         noAnswers: [],
+
          showPhoto: {
 				active: false,
 				model: null,
@@ -79,7 +77,10 @@ export default {
             text: '',
             active: false,
             action: '',
-				maxWidth: DIALOG_MAX_WIDTH
+            maxWidth: DIALOG_MAX_WIDTH,
+            ok_text: '確定',
+            cancel_text: '取消',
+            on_cancel: null
          },
 
          save: {
@@ -88,20 +89,58 @@ export default {
             model: '',
             active: false,
 				maxWidth: DIALOG_MAX_WIDTH
-         }
+         },
+
+         summary: {
+				active: false,
+				maxWidth: DIALOG_MAX_WIDTH
+			},
 		}
    },
    computed: {
       ...mapGetters(['responsive','contentMaxWidth','isAuthenticated']),
+      parts() {
+         if(this.exam) return this.exam.parts;
+         return []; 
+      },
+      partQuestions() {
+         if(this.exam) return this.exam.parts.map(item => ({ questions: item.questions }));
+         return []; 
+      },
       questionCounts() {
-         if(this.exam) return this.exam.parts.map(part => part.questions.length);
-         return [];         
+         return this.partQuestions.map(item => item.questions.length);
+      },
+      totalQuestions() {
+         return this.partQuestions.reduce((a, b) => a.questions.length + b.questions.length); 
       }
    },
    methods: {
-      getStartIndex(index) {
-         if(index < 1) return 1;
-         return this.questionCounts[index - 1] + 1;
+      init() {
+         let index = 1;
+         this.exam.parts.forEach(part => {
+            part.questions.forEach(question => {
+               question.index = index;
+               index += 1;
+            })
+         });
+      },
+      onAnswerChanged() {
+         this.answerChangeds += 1;
+
+         let hasAnswers = [];
+         let noAnswers = [];
+         this.exam.parts.forEach(part => {
+            part.questions.forEach(question => {
+               if(question.userAnswerIndexes) {
+                  //有答案
+                  hasAnswers.push(question);
+               }else noAnswers.push(question);
+            })
+         });
+
+         this.hasAnswers = hasAnswers;
+         this.noAnswers = noAnswers;
+         
       },
       onShowPhoto(photo) {
          this.showPhoto.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
@@ -110,6 +149,9 @@ export default {
       },
       onAbortExam() {
          this.showConfirm(ABORT_EXAM, '確定要放棄此測驗嗎?', '');         
+      },
+      onDeleteExam() {
+
       },
       abortExam() {
          let id = this.exam.id;
@@ -141,6 +183,7 @@ export default {
          this.$store.dispatch(SAVE_EXAM, this.exam)
          .then(() => {
             this.exam.reserved = true;
+            this.answerChangeds = 0;
             Bus.$emit('success');
             this.$emit('saved');
          })
@@ -154,19 +197,29 @@ export default {
       storeExam() {
          console.log('storeExam');
       },
-      showConfirm(action, title, text) {
-         this.confirm.action = action;
-         this.confirm.title = title;
-         this.confirm.text = text;
-
-         this.confirm.active = true;
+      showConfirm(action, title, text, ok ='確定', cancel='取消', onCancel = null) {
+         this.confirm = {
+            action,
+            title,
+            text,
+            ok_text: ok,
+            cancel_text: cancel,
+            maxWidth: this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH,
+            active: true,
+            on_cancel: onCancel
+         };
       },
       hideConfirm() {
-         this.confirm.action = '';
-         this.confirm.title = '';
-         this.confirm.text = '';
-
-         this.confirm.active = false;
+         this.confirm = {
+            action: '',
+            title: '',
+            text: '',
+            ok_text: '確定',
+            cancel_text: '取消',
+            maxWidth: DIALOG_MAX_WIDTH,
+            active: false,
+            on_cancel: null
+         };
       },
       confirmOk() {
          let action = this.confirm.action;
@@ -174,6 +227,47 @@ export default {
             this.abortExam();
          }
          this.hideConfirm();
+      },
+      confirmCancel() {
+         let action = this.confirm.action;
+         if(action === ABORT_EXAM) {
+            this.abortExam();
+         }
+      },
+      onLeaveExam() {
+         console.log('onLeaveExam');
+         if(this.exam.isComplete) {
+            this.leaveExam();
+         }else {
+            if(this.answerChangeds) {
+               this.showConfirm(SAVE_EXAM, '是否存檔', '此測驗有尚未儲存的變動，是否存檔?', '存檔', '不存檔', this.leaveExam); 
+            }else {
+               this.leaveExam();
+            }
+         }
+         // if(this.exam.isComplete) {
+         //    this.$emit('leaved');
+         // }
+         console.log('onLeaveExam');
+      },
+      leaveExam() {
+         this.hideConfirm();
+         this.$emit('leave');
+      },
+      handleAction(name) {
+         if(name === EXAM_RECORDS || name === LEAVE_EXAM) {
+            this.onLeaveExam();
+         }else if(name === DELETE_EXAM) {
+            this.onDeleteExam();
+         }else if(name === STORE_EXAM) {
+            this.onStoreExam();
+         }else if(name === SAVE_EXAM) {
+            this.onSaveExam();
+         }else if(name === ABORT_EXAM) {
+            this.onAbortExam();
+         }else if(name === EXAM_SUMMARY) {
+            this.summary.active = true;
+         }
       }
    }
 }

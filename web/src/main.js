@@ -9,10 +9,10 @@ import '@/components';
 import '@/filters';
 
 import JwtService from '@/services/jwt.service';
-import { CHECK_AUTH, REFRESH_TOKEN } from '@/store/actions.type';
+import { CHECK_AUTH, REFRESH_TOKEN, FETCH_ACTIONS } from '@/store/actions.type';
 import { FOR_ALL, GUEST_ONLY, USER_ONLY } from '@/routes/route.type';
 import Menu from '@/common/menu';
-import { SET_MENUS, SET_APP_ACTIONS } from '@/store/mutations.type';
+import { SET_MENUS } from '@/store/mutations.type';
 
 router.beforeEach((to, from, next) => {
 	store.dispatch(CHECK_AUTH).then(auth => {
@@ -44,8 +44,8 @@ const redirect = (next, route) => next(route);
 const authDone = (next, to, auth = false) => {
 	let mainMenus = Menu.getMainMenus(router.options.routes, to, auth);
 	store.commit(SET_MENUS, mainMenus);
-
-	store.commit(SET_APP_ACTIONS, []);
+	
+	store.dispatch(FETCH_ACTIONS, to);
 	return next();
 }
 

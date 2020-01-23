@@ -146,6 +146,9 @@ export default {
       },
       getTitle() {
          return this.bread.text;
+      },
+      getBread() {
+         return this.bread;
       }
 
    }

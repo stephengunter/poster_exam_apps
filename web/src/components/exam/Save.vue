@@ -2,7 +2,7 @@
    <v-container>
       <v-row>
          <v-col cols="12">
-            <v-textarea v-model="model.title" label="標題" outlined auto-grow
+            <v-textarea v-model="model.title" label="存檔名稱" outlined auto-grow
             rows="2"
             row-height="15"
             />

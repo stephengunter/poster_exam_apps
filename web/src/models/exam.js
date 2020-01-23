@@ -1,25 +1,26 @@
 class Exam {
    constructor(model) {
-      
       for (let property in model) {
          this[property] = model[property];
       }
 
-      let partQuestions = model.parts.map(item => ({ questions: item.questions }));
+      this.partQuestions = model.parts.map(item => ({ questions: item.questions }));
      
-      this.totalQuestions = partQuestions.reduce((a, b) => a.questions.length + b.questions.length); 
+      this.totalQuestions = this.partQuestions.reduce((a, b) => a.questions.length + b.questions.length); 
       
-      let hasAnswers = 0;
-      partQuestions.forEach(part => {
-         part.questions.forEach(question => {
-            if(question.userAnswerIndexes) hasAnswers += 1;
-         })
-      })
-
-      this.hasAnswers = hasAnswers;
    }
 
+   get hasAnswers() {
+      let count = 0;
+      this.partQuestions.forEach(part => {
+         part.questions.forEach(question => {
+            if(question.userAnswerIndexes) count += 1;
+         })
+      })
+      return count;
+   }
 
+   
 }
 
 export default Exam;

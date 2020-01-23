@@ -148,10 +148,11 @@ export default {
 				this.err.show = true;
 			}else if(error.status === 401){
 				this.$store.dispatch(CHECK_AUTH).then(auth => {
-					console.log('auth', auth);
 					if(auth){
 						this.$store.dispatch(REFRESH_TOKEN).then(token => {	
 							if(token) {
+								this.$store.dispatch(CHECK_AUTH);
+
 								this.err.title = '請重新操作';
 								this.err.msg = '您的驗証剛剛刷新，請重新操作一次';
 								this.err.isError = false;

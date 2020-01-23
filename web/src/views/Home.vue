@@ -1,43 +1,86 @@
 <template>
 	<v-container>
-	   <core-confirmation :title="confirm.title" :text="confirm.text"
-      @ok="confirmOk" @cancel="hideConfirm"
-      >
-		<v-container>
-            <v-row>
-               <v-col cols="12">
-                  <v-textarea v-model="title" label="標題" outlined auto-grow
-                  rows="2"
-                  row-height="15"
-                  />
-               </v-col>
-            </v-row>
-      </v-container>
-		</core-confirmation>
+	   <v-card class="mx-auto" max-width="300" tile >
+			
+			<v-list v-for="(block, index) in appActions" :key="index">
+				<v-list-item v-for="(item, index) in block" :key="index" @click.prevent="onActionSelected(item.name)">
+					<v-list-item-icon v-if="item.icon">
+						<v-icon>{{ item.icon }}</v-icon>
+					</v-list-item-icon>
+					<v-list-item-content>
+						<v-list-item-title>{{ item.title }}</v-list-item-title>
+					</v-list-item-content>
+				</v-list-item>
+				<v-divider v-if="index < appActions.length - 1"></v-divider>
+			</v-list>
+			
+		</v-card>
 	</v-container>
 </template>
 
 <script>
+import { SELECT_RQS_MODE, STORE_EXAM, DELETE_EXAM,
+   SAVE_EXAM, ABORT_EXAM, NEW_EXAM, EXAM_RECORDS,
+   FILTER_EXAMS, EXAM_SUMMARY
+} from '@/store/actions.type';
 export default {
 	name: 'HomeView',
 	data() {
 		return {
-			title: 'plplpl',
-			 confirm: {
-            title: '測驗存檔',
-            text: '',
-            active: false,
-            action: '',
-				maxWidth: 480
-         },
+			 appActions: [
+				 [{
+				views: ['exams'],
+				name: FILTER_EXAMS,
+				order: 0,
+				icon:'mdi-filter-outline',
+				title: '篩選',
+				description: '篩選測驗紀錄'
+				
+			},{
+				views: ['exams'],
+				name: EXAM_RECORDS,
+				order: 0,
+				icon:'mdi-format-list-bulleted',
+				title: '測驗紀錄',
+				description: '測驗紀錄'
+			},{
+				views: ['exams'],
+				name: EXAM_SUMMARY,
+				order: 0,
+				icon:'mdi-file-document-box-outline',
+				title: '作答概況',
+				description: '作答概況'
+			}],
+			[{
+				views: ['exams'],
+				name: FILTER_EXAMS,
+				order: 0,
+				icon:'mdi-filter-outline',
+				title: '篩選',
+				description: '篩選測驗紀錄'
+				
+			},{
+				views: ['exams'],
+				name: EXAM_RECORDS,
+				order: 0,
+				icon:'mdi-format-list-bulleted',
+				title: '測驗紀錄',
+				description: '測驗紀錄'
+			},{
+				views: ['exams'],
+				name: EXAM_SUMMARY,
+				order: 0,
+				icon:'mdi-file-document-box-outline',
+				title: '作答概況',
+				description: '作答概況'
+			}]
+			]
 		}
 	},
 	created(){
 		
 	},
 	beforeMount() {
-		let title='歷屆試題 > 測驗 > 108年度 > 專業科目(1)：臺灣自然及人文地理_20200121';
-		console.log(title.replace(/\s/g,'').replace(/>/g,'_'));
 		
 	},
 	methods: {

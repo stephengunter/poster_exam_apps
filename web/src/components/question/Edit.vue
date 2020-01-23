@@ -7,7 +7,7 @@
 					<v-icon color="success" class="mr-1">mdi-check-circle</v-icon>
 					<!-- <v-icon color="error" class="mr-1">mdi-close-circle</v-icon> -->
 				</span>
-				<span v-show="order" class="mr-1">{{ order }}.</span>
+				<span class="mr-1">{{ model.index }}.</span>
 				{{ model.question.title }}
 			</p>
 			<core-deselectable-radio-group 
@@ -23,10 +23,6 @@
 export default {
 	name: 'QuestionEdit',
 	props: {
-		order: {
-         type: Number,
-         default: 0
-		},
 		model: {
          type: Object,
          default: null
@@ -85,6 +81,8 @@ export default {
 					this.setAnswer(index);
 				}
 			}
+
+			this.$emit('answer-changed');
 		},
 		clearAnswer() {
 			if(!this.clearable) return;

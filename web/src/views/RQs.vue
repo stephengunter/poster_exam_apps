@@ -9,7 +9,7 @@
          <rq-read ref="rqRead" :model="model" />
       </div>
       <div v-show="isExamMode">
-         <exam-edit ref="examEdit" :exam="exam"
+         <exam-edit ref="examEdit" :exam="exam" :actions="examActions"
          @aborted="onExamAborted"
          /> 
       </div>
@@ -19,13 +19,14 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { FETCH_RQS, SELECT_RQS_MODE, CREATE_EXAM,
-STORE_EXAM, SAVE_EXAM, ABORT_EXAM 
+import { LOAD_ACTIONS, ACTION_SELECTED, EXAM_SUMMARY,
+   FETCH_RQS, SELECT_RQS_MODE, CREATE_EXAM,
+   STORE_EXAM, SAVE_EXAM, ABORT_EXAM 
 } from '@/store/actions.type';
 import { SET_APP_ACTIONS } from '@/store/mutations.type';
 
-import { fetchActions, resolveErrorData, getRouteTitle,
-  toCnNumber, todayString
+import { examActions, resolveErrorData,
+  getRouteTitle,todayString
 } from '@/utils';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
@@ -34,6 +35,9 @@ export default {
    data() {
 		return {
          title: '',
+         mode: null,
+         modeOptions: [],
+
          params: {
             mode: -1,
             year: 0,
@@ -41,13 +45,12 @@ export default {
          },
 
          subjects: [],
-         modeOptions: [],
          yearOptions: [],
 
-         mode: '',
          actions: [],
 
          exam: null,
+         examActions: [],
 
          confirm: {
             title: '',
@@ -77,14 +80,14 @@ export default {
          return this.params.mode < 0;
       },
       isReadMode() {
-         return this.mode === 'read'
+         return this.mode && this.mode.value === 0;
       },
       isExamMode() {
-         return this.mode === 'exam'
+         return this.mode && this.mode.value === 1;
       }
    },
    created(){
-		Bus.$on('action-selected', this.onActionSelected);
+		Bus.$on(ACTION_SELECTED, this.onActionSelected);
 	},
 	beforeMount() {
       this.init();
@@ -104,21 +107,19 @@ export default {
 
          let title = getRouteTitle(this.$route);
          this.title = title;
-         this.fetchData(this.params);
          
-         this.actions = fetchActions(this.$route.name);
+         this.fetchData(this.params);
       },
       onSelectionSubmit(params) {
          this.setMode(params.mode);
          this.params = { ... params };
 
-         if(this.mode === 'read') this.fetchData(params);
-         else if(this.mode === 'exam') this.createExam(params);         
+         if(this.isReadMode) this.fetchData(params);
+         else if(this.isExamMode) this.createExam(params);       
       },
       setMode(val) {
-         if(val === 0) this.mode = 'read';
-         else if(val === 1) this.mode = 'exam';
-         else this.mode = '';
+         this.mode = this.modeOptions.find(item => item.value === val);
+         this.setActions();
       },
       fetchData(params) {
          this.$store.dispatch(FETCH_RQS, { mode: params.mode, recruit: params.subject })
@@ -127,12 +128,12 @@ export default {
                this.modeOptions = model.modeOptions;
                this.yearOptions = model.yearOptions;
                this.subjects = model.subjects;
+
+               this.setMode(model.modeOptions[0].value);
                
                this.$nextTick(() => {
                   this.$refs.rqHeader.load();
                })
-            }else {
-               this.setActions();
             }
          })
 			.catch(error => {
@@ -143,36 +144,53 @@ export default {
          this.exam = null;
          this.$store.dispatch(CREATE_EXAM, { recruit: params.subject })
          .then(exam => {
-            this.exam = exam;
-            let title =  `${this.$refs.rqHeader.getTitle()}_${todayString().replace(/-/g,'')}`;
-            this.exam.title = title.replace(/\s/g,'').replace(/>/g,'_');
-            this.setActions();
+            let bread =  this.$refs.rqHeader.getBread();
+            let items = bread.items.slice(2);
+            let title = `${items.join('_')}_${todayString().replace(/-/g,'')}`;
+            exam.title = title;
+            
+            this.setExam(exam);
          })
 			.catch(error => {
             Bus.$emit('errors', resolveErrorData(error));
 			})
       },
+      setExam(exam) {
+			this.exam = exam ? exam : null;
+			if(exam) {
+				this.exam = exam;
+            this.examActions = examActions(exam);
+
+            this.setActions();
+
+				this.$nextTick(() => {
+            	this.$refs.examEdit.init();
+         	})
+			}else {
+				this.exam = null;
+			}
+		},
       setActions() {
+         let blocks = [];
          let types = [];
-         let actions = [];
-         if(this.isExamMode) {
-            types = [ABORT_EXAM, SAVE_EXAM, STORE_EXAM];
-         }else {
+         if(this.isReadMode) {
             types = [SELECT_RQS_MODE];
+            blocks.push(types);
+         }else if(this.isExamMode) {
+            if(!this.exam) return;
+				blocks.push([SELECT_RQS_MODE, EXAM_SUMMARY]);
+				blocks.push(this.examActions.map(item => item.name));
          }
-         actions = this.actions.filter(item => types.includes(item.name));
-         this.$store.commit(SET_APP_ACTIONS, actions);
-         
+
+         this.$store.dispatch(LOAD_ACTIONS, blocks);
       },
       onActionSelected(name) {
          if(name === SELECT_RQS_MODE) {
             this.$refs.rqHeader.selectMode();            
-         }else if(name === STORE_EXAM) {
-            this.$refs.examEdit.onStoreExam();
-         }else if(name === SAVE_EXAM) {
-            this.$refs.examEdit.onSaveExam();
-         }else if(name === ABORT_EXAM) {
-            this.$refs.examEdit.onAbortExam();
+         }else {
+            if(this.isExamMode) {
+               this.$refs.examEdit.handleAction(name);
+            }
          }
       },
       onExamAborted() {

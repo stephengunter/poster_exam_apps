@@ -12,8 +12,8 @@
             </v-btn>
          </template>
          <v-card class="mx-auto" max-width="300" tile >
-            <v-list>
-               <v-list-item v-for="(item, index) in appActions" :key="index" @click.prevent="onActionSelected(item.name)">
+            <v-list v-for="(block, index) in appActions" :key="index">
+               <v-list-item v-for="(item, index) in block" :key="index" @click.prevent="onActionSelected(item.name)">
                   <v-list-item-icon v-if="item.icon">
                      <v-icon>{{ item.icon }}</v-icon>
                   </v-list-item-icon>
@@ -21,6 +21,7 @@
                      <v-list-item-title>{{ item.title }}</v-list-item-title>
                   </v-list-item-content>
                </v-list-item>
+               <v-divider v-if="index < appActions.length - 1"></v-divider>
             </v-list>
          </v-card>
       </v-menu>
@@ -52,7 +53,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { LOGOUT } from '@/store/actions.type';
+import { LOGOUT, ACTION_SELECTED } from '@/store/actions.type';
 import { TOGGLE_DRAWER } from '@/store/mutations.type';
 import { SITE_TITLE } from '@/config';
 export default {
@@ -74,7 +75,7 @@ export default {
          .then(() => this.$router.push({ path: '/' }))
       },
       onActionSelected(name) {
-         Bus.$emit('action-selected', name);
+         Bus.$emit(ACTION_SELECTED, name);
       }
    }
 };

@@ -1,7 +1,23 @@
 <template>
-   <v-card v-if="model">
+   <v-card v-if="doing">
       <core-close-icon-button @close="cancel" />
       <v-card-text>
+         <v-container>
+            <v-row>
+               <v-col cols="6">
+                  <core-label-text title="已作答" :text="has_answers.length" />
+               </v-col>
+               <v-col cols="6">
+                  <core-label-text title="未作答" :text="no_answers.length" />
+               </v-col>
+            </v-row>
+         </v-container>
+      </v-card-text>
+      <slot></slot>
+   </v-card>
+   <v-card v-else>
+      <core-close-icon-button @close="cancel" />
+      <v-card-text v-if="model" >
          <v-container>
             <v-row>
                <v-col cols="6">
@@ -37,6 +53,18 @@ export default {
    props: {
       model: {
 			type: Object,
+			default: null
+      },
+      doing: {
+         type: Boolean,
+			default: false
+      },
+      has_answers: {
+         type: Array,
+			default: null
+      },
+      no_answers: {
+         type: Array,
 			default: null
       }
    },

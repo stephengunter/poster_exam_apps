@@ -11,11 +11,7 @@
 
 <script>
 export default {
-   props: {
-      title: String,
-      text: String,
-      html: Boolean
-   }
+   props: ['title', 'text', 'html']
 }
 </script>
 

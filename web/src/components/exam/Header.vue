@@ -1,18 +1,18 @@
 <template>
 <div>
    <div class="mb-2" v-if="responsive">
-      <a href="#" @click.prevent="launchFilter" class="a-btn"  >
+      <a href="#" @click.prevent="onTitltClicked" class="a-btn"  >
          {{ bread.text ?  bread.text : title }}
       </a>
    </div>
    <div v-else>
       <v-row>
-			<v-col cols="8">
-				<a href="#" @click.prevent="launchFilter" class="a-btn"  >
+			<v-col :cols="isIndexMode ? 8 : 12">
+				<a href="#" @click.prevent="onTitltClicked" class="a-btn"  >
 					{{ bread.text ?  bread.text : title }}
 				</a>
 			</v-col>
-			<v-col cols="4" class="text-right">
+			<v-col v-if="isIndexMode" cols="4" class="text-right">
 				<v-btn color="info" outlined  @click.prevent="launchCreator">
 					<v-icon left>mdi-plus-circle-outline</v-icon>
 					新測驗
@@ -39,6 +39,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
+import { EXAM_SUMMARY, ACTION_SELECTED } from '@/store/actions.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
 import { getListText } from '@/utils';
 
@@ -145,7 +146,6 @@ export default {
          this.bread.text = getListText(this.bread.items);
       },
       setTitle() {
-         console.log('setTitle');
          if(this.isIndexMode) {
             let params = this.fetchParams;
 
@@ -183,13 +183,18 @@ export default {
             
             let subject = this.creator.model.subject;
             this.addBreadItem(subject.text);
-
-            console.log('creator.model', this.creator.model)
          }
          
       },
       getBread() {
          return this.bread;
+      },
+      onTitltClicked() {
+         if(this.isIndexMode) {
+            this.launchFilter();
+         }else if(this.isEditMode) {
+            Bus.$emit(ACTION_SELECTED,EXAM_SUMMARY);
+         }
       },
       launchFilter(reset = true) {
          if(reset)  this.fetchParams = { ...this.fetch_params };
