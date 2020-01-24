@@ -10,7 +10,7 @@
       </div>
       <div v-show="rqExamMode">
          <exam-edit ref="examEdit" :exam="exam" :actions="examActions"
-         @aborted="onExamAborted"
+         @aborted="onExamAborted" @leave="onLeaveExam"
          /> 
       </div>
       
@@ -22,7 +22,7 @@ import { mapState, mapGetters } from 'vuex';
 import {
    LOAD_ACTIONS, ACTION_SELECTED, EXAM_SUMMARY,
    FETCH_RQS, SELECT_RQS_MODE, CREATE_EXAM,
-   STORE_EXAM, SAVE_EXAM, ABORT_EXAM 
+   STORE_EXAM, SAVE_EXAM, ABORT_EXAM, LEAVE_EXAM 
 } from '@/store/actions.type';
 import { SET_RQS_PAGE_MODE, SET_APP_ACTIONS, SET_EXAM_TITLE } from '@/store/mutations.type';
 
@@ -52,16 +52,15 @@ export default {
          }
 		}
    },
-   // beforeRouteLeave(to, from, next) {
-   //    //檢查是否有未存檔的測驗
-      
-   //    const answer = window.confirm('Do you really want to leave? you have unsaved changes!')
-   //    if (answer) {
-   //       next()
-   //    } else {
-   //       next(false)
-   //    }
-   // },
+   beforeRouteLeave(to, from, next) {
+      //檢查是否有未存檔的測驗
+      if(this.rqExamMode) {
+         this.$refs.examEdit.handleAction(LEAVE_EXAM, next);
+         return;
+      }else {
+         next();
+      }
+   },
    computed: {
       ...mapGetters(['exam', 'rqReadMode', 'rqExamMode', 
 		'responsive','contentMaxWidth','isAuthenticated'
@@ -101,7 +100,7 @@ export default {
       },
       onSelectionSubmit(params) {
          this.params = { ... params };
-         this.setMode(params.mode);         
+         this.setMode(params.mode);
       },
       setMode(val) {
          this.$store.commit(SET_RQS_PAGE_MODE, val);
@@ -121,6 +120,8 @@ export default {
                this.$nextTick(() => {
                   this.$refs.rqHeader.load();
                })
+            }else {
+               this.$refs.rqHeader.setTitle();   
             }
          })
 			.catch(error => {
@@ -128,14 +129,18 @@ export default {
 			})
       },
       createExam(params) {
+         let mode = this.$refs.rqHeader.selectedMode;
+         let year = this.$refs.rqHeader.selectedYear;
+         let subject = this.$refs.rqHeader.selectedSubject;
+         let items = [mode.text, year.text, subject.text];
+
          this.$store.dispatch(CREATE_EXAM, { recruit: params.subject })
          .then(exam => {
-            let bread =  this.$refs.rqHeader.getBread();
-            let items = bread.items.slice(2);
             let title = `${items.join('_')}_${todayString().replace(/-/g,'')}`;
-           
             this.$store.commit(SET_EXAM_TITLE, title);
+
             this.$nextTick(() => {
+               this.$refs.rqHeader.setTitle();
                this.setActions();
             	this.$refs.examEdit.init();
          	})
@@ -159,15 +164,21 @@ export default {
          this.$store.dispatch(LOAD_ACTIONS, blocks);
       },
       onActionSelected(name) {
+         if(this.rqExamMode) {
+            this.$refs.examEdit.handleAction(name);
+            return;
+         }
+
          if(name === SELECT_RQS_MODE) {
             this.$refs.rqHeader.selectMode();            
          }else {
-            if(this.rqExamMode) {
-               this.$refs.examEdit.handleAction(name);
-            }
+            
          }
       },
       onExamAborted() {
+         this.init();
+      },
+      onLeaveExam() {
          this.init();
       }
       

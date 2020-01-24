@@ -1,14 +1,14 @@
 <template>
    <div class="mb-2">
-      <a href="#" @click.prevent="selectMode" class="a-btn"  >
+      <a href="#" @click.prevent="onTitltClicked" class="a-btn"  >
          {{ bread.text ?  bread.text : title }}
       </a>
-      <v-dialog v-model="mode.active" :max-width="mode.maxWidth" persistent>
+      <v-dialog v-model="modeSelector.active" :max-width="modeSelector.maxWidth" persistent>
          <rq-selector  ref="modeSelector"
-         :params="params" :allow_cancel="mode.selected"
+         :params="params" :allow_cancel="modeSelector.selected"
          :mode_options="mode_options" :year_options="year_options"
          :subject_options="subjectOptions"
-         @submit="submit" @cancel="mode.active = false;"
+         @submit="submit" @cancel="modeSelector.active = false;"
          />
       </v-dialog>
    </div>
@@ -16,8 +16,9 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
+import { EXAM_SUMMARY, ACTION_SELECTED } from '@/store/actions.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
-import { getListText } from '@/utils';
+import { isEmptyObject, getListText } from '@/utils';
 
 export default {
    name: 'RQHeader',
@@ -50,7 +51,7 @@ export default {
 
          subjectOptions: [],
 
-         mode: {
+         modeSelector: {
             active: false,
             maxWidth: DIALOG_MAX_WIDTH,
             selected: false
@@ -63,7 +64,27 @@ export default {
 		}
    },
    computed: {
-      ...mapGetters(['responsive','contentMaxWidth','isAuthenticated'])
+      ...mapGetters(['exam', 'rqReadMode', 'rqExamMode', 
+		'responsive','contentMaxWidth','isAuthenticated'
+      ]),
+      selectedMode() {
+         if(this.mode_options && !isEmptyObject(this.params)) {
+            return this.mode_options.find(item => item.value === this.params.mode);
+         }
+         return null;
+      },
+      selectedYear() {
+         if(this.year_options && !isEmptyObject(this.params)) {
+            return this.year_options.find(item => item.value === this.params.year);
+         }
+         return null;
+      },
+      selectedSubject() {
+         if(this.subjectOptions && !isEmptyObject(this.params)) {
+            return this.subjectOptions.find(item => item.value === this.params.subject);
+         }
+         return null;
+      }
    },
    methods: {
       init() {
@@ -73,7 +94,7 @@ export default {
             items: [],
             text: ''
          };
-         this.mode =  {
+         this.modeSelector =  {
             active: false,
             maxWidth: DIALOG_MAX_WIDTH,
             selected: false
@@ -97,10 +118,17 @@ export default {
          this.bread.items.push(text);
          this.bread.text = getListText(this.bread.items);
       },
+      onTitltClicked() {
+         if(this.rqReadMode) {
+            this.selectMode();
+         }else if(this.rqExamMode) {
+            Bus.$emit(ACTION_SELECTED, EXAM_SUMMARY);
+         }
+      },
 		selectMode(reset = true) {
          if(reset) this.params = { ...this.init_params };
-         this.mode.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
-			this.mode.active = true;
+         this.modeSelector.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
+			this.modeSelector.active = true;
       },
       loadSubjectOptions(yearId, subjects = []) {
          if(!subjects) subjects = this.subjects;
@@ -125,30 +153,23 @@ export default {
 
          this.$emit('submit', this.params);
 
-         this.mode.selected = true;
-         this.mode.active = false;
-         this.setTitle();
+         this.modeSelector.selected = true;
+         this.modeSelector.active = false;
          
       },
       setTitle() {
-         this.bread.items = [this.title];
+         if(this.rqReadMode) {
 
-         let modeOptions = this.mode_options;
-         let mode = modeOptions.find(item => item.value === this.params.mode);
-         this.addBreadItem(mode.text);
+            this.bread.items = [this.title];
+            this.addBreadItem(this.selectedMode.text);
+            this.addBreadItem(this.selectedYear.text);
+            this.addBreadItem(this.selectedSubject.text);
 
-         let yearOptions = this.year_options;
-         let year = yearOptions.find(item => item.value === this.params.year);
-         this.addBreadItem(year.text);
-
-         let subject = this.subjectOptions.find(item => item.value === this.params.subject);
-         this.addBreadItem(subject.text);
-      },
-      getTitle() {
-         return this.bread.text;
-      },
-      getBread() {
-         return this.bread;
+         }else if(this.rqExamMode) {
+            this.bread.items = [this.title];
+            if(this.exam) this.addBreadItem(this.exam.title);
+         }
+         
       }
 
    }

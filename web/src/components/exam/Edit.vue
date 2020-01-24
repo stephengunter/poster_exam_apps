@@ -27,8 +27,8 @@
    <v-dialog v-model="confirm.active" :max-width="confirm.maxWidth" persistent>
       <core-confirmation :title="confirm.title" :text="confirm.text"
       :ok_text="confirm.ok_text"  :cancel_text="confirm.cancel_text"
-      :on_cancel="confirm.on_cancel"
-      @ok="confirmOk" @cancel="confirmCancel"
+      :on_cancel="confirm.on_cancel"  :on_ok="confirm.on_ok"
+      @ok="hideConfirm" @cancel="hideConfirm"
       />
    </v-dialog>
 
@@ -45,7 +45,7 @@
 import { mapState, mapGetters } from 'vuex';
 import { EXAM_SUMMARY, STORE_EXAM, SAVE_EXAM, 
    ABORT_EXAM, DELETE_EXAM, EXAM_RECORDS, LEAVE_EXAM,
-   LOAD_EXAM_SUMMARY
+   LOAD_EXAM_SUMMARY, SELECT_RQS_MODE
 } from '@/store/actions.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
@@ -79,6 +79,7 @@ export default {
             maxWidth: DIALOG_MAX_WIDTH,
             ok_text: '確定',
             cancel_text: '取消',
+            on_ok: null,
             on_cancel: null
          },
 
@@ -131,16 +132,24 @@ export default {
 			this.showPhoto.active = true;
       },
       onAbortExam() {
-         this.showConfirm(ABORT_EXAM, '確定要放棄此測驗嗎?', '');         
+        
+         this.showConfirm({
+            action: ABORT_EXAM, 
+            title: '確定要放棄此測驗嗎',
+            onOk: () => {
+               this.abortExam();
+            }
+         });       
       },
       onDeleteExam() {
 
       },
-      abortExam() {
+      abortExam(callback = null) {
          let id = this.exam.id;
          this.$store.dispatch(ABORT_EXAM, id)
          .then(() => {
-            this.$emit('aborted');
+            if(callback) callback();
+            else this.$emit('aborted');
          })
 			.catch(error => {
             Bus.$emit('errors');
@@ -156,7 +165,7 @@ export default {
             this.save.active = true;
          }
       },
-      saveExam() {
+      saveExam(callback = null) {
          if(!this.exam.reserved) {
             //第一次存檔
             this.exam.title = this.save.model.title;
@@ -167,8 +176,10 @@ export default {
          .then(() => {
             this.exam.reserved = true;
             this.answerChangeds = 0;
+
             Bus.$emit('success');
-            this.$emit('saved');
+            if(callback) callback();
+            else this.$emit('saved');
          })
 			.catch(error => {
             Bus.$emit('errors');
@@ -184,7 +195,7 @@ export default {
          this.summary.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
          this.summary.active = true;
       },
-      showConfirm(action, title, text, ok ='確定', cancel='取消', onCancel = null) {
+      showConfirm({action, title, text, ok ='確定', cancel = '取消', onOk = null, onCancel = null}) {
          this.confirm = {
             action,
             title,
@@ -193,6 +204,7 @@ export default {
             cancel_text: cancel,
             maxWidth: this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH,
             active: true,
+            on_ok: onOk,
             on_cancel: onCancel
          };
       },
@@ -205,43 +217,67 @@ export default {
             cancel_text: '取消',
             maxWidth: DIALOG_MAX_WIDTH,
             active: false,
+            on_ok: null,
             on_cancel: null
          };
       },
-      confirmOk() {
-         let action = this.confirm.action;
-         if(action === ABORT_EXAM) {
-            this.abortExam();
-         }
-         this.hideConfirm();
-      },
-      confirmCancel() {
-         let action = this.confirm.action;
-         if(action === ABORT_EXAM) {
-            this.abortExam();
-         }
-      },
-      onLeaveExam() {
-         console.log('onLeaveExam');
+      onLeaveExam(callback = null) {
+         let vm = this;
          if(this.exam.isComplete) {
-            this.leaveExam();
+            this.leaveExam(callback);
          }else {
-            if(this.answerChangeds) {
-               this.showConfirm(SAVE_EXAM, '是否存檔', '此測驗有尚未儲存的變動，是否存檔?', '存檔', '不存檔', this.leaveExam); 
+            if(this.exam.reserved) {
+               if(this.answerChangeds) {
+                  this.showConfirm({
+                     action: SAVE_EXAM, 
+                     title: '是否存檔', 
+                     text: '此測驗有尚未儲存的變動，是否存檔?', 
+                     ok: '存檔', 
+                     cancel:  '不存檔',
+                     onOk: () => {
+                        vm.saveExam(() => {
+                           vm.leaveExam(callback);
+                        });
+                     },
+                     onCancel: () => {
+                        vm.leaveExam(callback);
+                     }
+                  }); 
+               }else {
+                  this.leaveExam(callback);
+               }
             }else {
-               this.leaveExam();
+               this.showConfirm({
+                  action: SAVE_EXAM, 
+                  title: '是否存檔', 
+                  text: '此測驗尚未存檔，是否存檔?', 
+                  ok: '存檔', 
+                  cancel:  '不存檔',
+                  onOk: () => {
+                     vm.saveExam(() => {
+                        vm.leaveExam(callback);
+                     });
+                  },
+                  onCancel: () => {
+                     vm.abortExam(() => {
+                        vm.leaveExam(callback);
+                     });
+                  }
+               }); 
             }
+            
          }
       },
-      leaveExam() {
-         this.hideConfirm();
-         this.$emit('leave');
+      leaveExam(callback) {
+         if(callback) callback();
+         else this.$emit('leave');
       },
-      handleAction(name) {
+      handleAction(name, callback = null) {
          switch (name) {
             case EXAM_RECORDS:
+            case SELECT_RQS_MODE:
             case LEAVE_EXAM:
-               this.onLeaveExam();
+               this.onLeaveExam(callback);
                break;
             case DELETE_EXAM:
                this.onDeleteExam();

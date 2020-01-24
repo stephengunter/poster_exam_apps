@@ -39,6 +39,10 @@ export default {
          type: String,
          default: '取消'
       },
+      on_ok: {
+         type: Function,
+         default: null
+      },
       on_cancel: {
          type: Function,
          default: null
@@ -46,11 +50,12 @@ export default {
    },
    methods: {
       ok() {
+         if(this.on_ok) this.on_ok();
          this.$emit('ok');
       },
       cancel() {
          if(this.on_cancel) this.on_cancel();
-         else this.$emit('cancel');
+         this.$emit('cancel');
       }
    }
 }
