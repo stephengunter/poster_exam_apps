@@ -16,15 +16,20 @@
 
 		<div v-show="examEditMode">
          <exam-edit ref="examEdit" :exam="exam" :actions="examActions"
-			@leave="setMode('index')"
+			@leave="setMode('index')" @aborted="setMode('index')"
          /> 
       </div>
 
 		<v-dialog v-model="summary.active" :max-width="summary.maxWidth">
          <exam-summary :model="summary.model"
-			@cancel="hideSummary" @edit="editExam"
-			@remove="removeExam"
-			/>
+			@cancel="hideSummary"
+			>
+				<v-card-actions>
+					<v-btn @click="removeExam" color="error">刪除</v-btn>
+					<v-spacer />
+					<v-btn @click="editExam" color="success">繼續作答</v-btn>
+				</v-card-actions>
+         </exam-summary>
       </v-dialog>
 	</v-container>
 </template>
@@ -86,7 +91,7 @@ export default {
 	},
 	computed: {
 		...mapGetters(['exam', 'examIndexMode', 'examCreateMode', 'examEditMode', 
-		'responsive','contentMaxWidth','isAuthenticated'
+		'responsive','contentMaxWidth'
 		]),
 		...mapState({
 			mode: state => state.exams.mode,
@@ -103,12 +108,7 @@ export default {
 	methods: {
 		init() {
 			this.title = getRouteTitle(this.$route);
-
-			if(this.isAuthenticated) {
-				this.setMode('index');
-			}else {
-				this.setMode('create');
-			}
+			this.setMode('index');
 		},
 		setMode(name) {
 			let mode = this.modeOptions.find(item => item.name === name);
@@ -144,6 +144,8 @@ export default {
 			this.$store.dispatch(LOAD_ACTIONS, blocks);
 		},
 		onActionSelected(name) {
+			// console.log('onActionSelected', name);
+			// console.log(this.$refs);
 			if(this.examEditMode) {
 				this.$refs.examEdit.handleAction(name);
 				return;
@@ -211,9 +213,8 @@ export default {
 			})
 		},
 		editExam(model) {
-			//繼續作答
 			this.hideSummary();
-
+			//繼續作答
 			let id = model.id;
          this.$store.dispatch(EDIT_EXAM, id)
          .then(exam => {
@@ -224,7 +225,14 @@ export default {
 			})
 		},
 		removeExam() {
-			console.log('removeExam');
+			this.hideSummary();
+			showConfirm({
+            type: 'error', 
+            title: '確定要刪除此測驗嗎?',
+            onOk: () => {
+               this.abortExam();
+            }
+         });
 		}
 		
 	}

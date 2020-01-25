@@ -1,8 +1,8 @@
 <template>
-   <v-container>
+   <v-container v-if="exam">
       <v-row>
          <v-col cols="12">
-            <v-textarea v-model="model.title" label="存檔名稱" outlined auto-grow
+            <v-textarea v-model="exam.title" label="存檔名稱" outlined auto-grow
             rows="2"
             row-height="15"
             />
@@ -15,7 +15,7 @@
 export default {
    name: 'ExamSave',
    props: {
-      model: {
+      exam: {
          type: Object,
          default: null
       }

@@ -18,25 +18,24 @@
    
    <v-dialog v-model="save.active" :max-width="save.maxWidth">
       <core-confirmation :title="save.title" :text="save.text"
-      @ok="saveExam" @cancel="save.active = false"
+      :on_ok="save.onOk" :on_cancel="() => { save.active = false }"
       >
-         <exam-save :model="save.model" />
+         <exam-save :exam="exam" />
       </core-confirmation>
    </v-dialog>
 
-   <v-dialog v-model="confirm.active" :max-width="confirm.maxWidth" persistent>
-      <core-confirmation :title="confirm.title" :text="confirm.text"
-      :ok_text="confirm.ok_text"  :cancel_text="confirm.cancel_text"
-      :on_cancel="confirm.on_cancel"  :on_ok="confirm.on_ok"
-      @ok="hideConfirm" @cancel="hideConfirm"
-      />
-   </v-dialog>
+   
 
    <v-dialog v-model="summary.active" :max-width="summary.maxWidth">
       <exam-summary :model="exam" :doing="true"
       :has_answers="hasAnswers" :no_answers="noAnswers"
+      @to-question="scrollToQuestion"
       @cancel="summary.active = false"
-      />
+      >
+         <exam-actions :actions="actions"
+         @selected="summary.active = false"
+         />
+      </exam-summary>
    </v-dialog>
 </div>   
 </template>
@@ -48,6 +47,7 @@ import { EXAM_SUMMARY, STORE_EXAM, SAVE_EXAM,
    LOAD_EXAM_SUMMARY, SELECT_RQS_MODE
 } from '@/store/actions.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
+import { showConfirm } from '@/utils';
 
 export default {
    name: 'ExamEdit',
@@ -71,24 +71,25 @@ export default {
 				maxWidth: DIALOG_MAX_WIDTH
          },
 
-         confirm: {
-            title: '',
-            text: '',
-            active: false,
-            action: '',
-            maxWidth: DIALOG_MAX_WIDTH,
-            ok_text: '確定',
-            cancel_text: '取消',
-            on_ok: null,
-            on_cancel: null
-         },
+         // confirm: {
+         //    is_err: false,
+         //    title: '',
+         //    text: '',
+         //    active: false,
+         //    action: '',
+         //    maxWidth: DIALOG_MAX_WIDTH,
+         //    ok_text: '確定',
+         //    cancel_text: '取消',
+         //    on_ok: null,
+         //    on_cancel: null
+         // },
 
          save: {
             title: '測驗存檔',
             text: '',
-            model: '',
             active: false,
-				maxWidth: DIALOG_MAX_WIDTH
+            maxWidth: DIALOG_MAX_WIDTH,
+            on_ok: null
          },
 
          summary: {
@@ -132,17 +133,22 @@ export default {
 			this.showPhoto.active = true;
       },
       onAbortExam() {
-        
-         this.showConfirm({
-            action: ABORT_EXAM, 
-            title: '確定要放棄此測驗嗎',
+         showConfirm({
+            type: '', 
+            title: '確定要放棄此測驗嗎?',
             onOk: () => {
                this.abortExam();
             }
          });       
       },
       onDeleteExam() {
-
+         showConfirm({
+            type: 'error', 
+            title: '確定要刪除此測驗嗎?',
+            onOk: () => {
+               this.abortExam();
+            }
+         });
       },
       abortExam(callback = null) {
          let id = this.exam.id;
@@ -155,22 +161,22 @@ export default {
             Bus.$emit('errors');
 			})
       },
-      onSaveExam() {
-         if(this.exam.reserved) {
-            this.saveExam();
-         }else {
-            //第一次存檔
-            this.save.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
-            this.save.model = { title: this.exam.title };
-            this.save.active = true;
-         }
-      },
       saveExam(callback = null) {
-         if(!this.exam.reserved) {
+         let vm = this;
+         if(!this.exam.reserved && !this.save.active) {
             //第一次存檔
-            this.exam.title = this.save.model.title;
-            this.save.active = false;
+            this.save = {
+               title: '測驗存檔',
+               active: true,
+               maxWidth: this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH,
+               onOk: () => {
+                  vm.saveExam(callback);
+               }
+            }
+            return;
          }
+
+         this.save.active = false;
          
          this.$store.dispatch(SAVE_EXAM, this.exam)
          .then(() => {
@@ -195,32 +201,6 @@ export default {
          this.summary.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
          this.summary.active = true;
       },
-      showConfirm({action, title, text, ok ='確定', cancel = '取消', onOk = null, onCancel = null}) {
-         this.confirm = {
-            action,
-            title,
-            text,
-            ok_text: ok,
-            cancel_text: cancel,
-            maxWidth: this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH,
-            active: true,
-            on_ok: onOk,
-            on_cancel: onCancel
-         };
-      },
-      hideConfirm() {
-         this.confirm = {
-            action: '',
-            title: '',
-            text: '',
-            ok_text: '確定',
-            cancel_text: '取消',
-            maxWidth: DIALOG_MAX_WIDTH,
-            active: false,
-            on_ok: null,
-            on_cancel: null
-         };
-      },
       onLeaveExam(callback = null) {
          let vm = this;
          if(this.exam.isComplete) {
@@ -228,8 +208,8 @@ export default {
          }else {
             if(this.exam.reserved) {
                if(this.answerChangeds) {
-                  this.showConfirm({
-                     action: SAVE_EXAM, 
+                  showConfirm({
+                     type: '', 
                      title: '是否存檔', 
                      text: '此測驗有尚未儲存的變動，是否存檔?', 
                      ok: '存檔', 
@@ -247,8 +227,8 @@ export default {
                   this.leaveExam(callback);
                }
             }else {
-               this.showConfirm({
-                  action: SAVE_EXAM, 
+               showConfirm({
+                  type: '', 
                   title: '是否存檔', 
                   text: '此測驗尚未存檔，是否存檔?', 
                   ok: '存檔', 
@@ -273,6 +253,7 @@ export default {
          else this.$emit('leave');
       },
       handleAction(name, callback = null) {
+          console.log('handleAction', name);
          switch (name) {
             case EXAM_RECORDS:
             case SELECT_RQS_MODE:
@@ -286,7 +267,7 @@ export default {
                this.onStoreExam();
                break;
             case SAVE_EXAM:
-               this.onSaveExam();
+               this.saveExam();
                break;
             case ABORT_EXAM:
                this.onAbortExam();
@@ -297,6 +278,11 @@ export default {
             default:
                console.log('name');
          }//end of switch
+      },
+      scrollToQuestion(index) {
+         var element = document.getElementById(`e_${this.exam.id}_q_${index}`);
+         if(!element) return;
+         element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest'});
       }
    }
 }

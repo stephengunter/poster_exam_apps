@@ -6,6 +6,7 @@ const applinks = [{
    view: 'Home',
    parent: '',
    meta: {
+      show: FOR_ALL,
       type: FOR_ALL,
       menu: true,
       icon: 'mdi-home',
@@ -17,6 +18,7 @@ const applinks = [{
    view: 'Test',
    parent: '',
    meta: {
+      show: FOR_ALL,
       type: FOR_ALL,
       menu: false,
       icon: 'mdi-home',
@@ -28,25 +30,27 @@ const applinks = [{
    view: 'RQs',
    parent: '',
    meta: {
+      show: FOR_ALL,
       type: FOR_ALL,
       menu: true,
       icon: 'mdi-database',
       title: '歷屆試題'
    } 
-},{
+}];
+
+const userLinks = [{
    name: 'exams',
    path: '/exams',
    view: 'Exams',
    parent: '',
    meta: {
-      type: FOR_ALL,
+      show: FOR_ALL,
+      type: USER_ONLY,
       menu: true,
       icon: 'mdi-file-document-edit-outline',
       title: '模擬測驗'
    } 
 }];
-
-const userLinks = [];
 
 
 const guestLinks = [{

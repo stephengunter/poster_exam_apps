@@ -3,9 +3,9 @@ import { FOR_ALL, GUEST_ONLY, USER_ONLY } from '@/routes/route.type';
 const getMainMenus = (appRoutes, currentRoute, auth) => {
    let routes = [];
    if(auth) {
-      routes = appRoutes.filter(item => item.meta.type !== GUEST_ONLY);
+      routes = appRoutes.filter(item => item.meta.show !== GUEST_ONLY);
    }else {
-      routes = appRoutes.filter(item => item.meta.type !== USER_ONLY);
+      routes = appRoutes.filter(item => item.meta.show !== USER_ONLY);
    }
    
    let mainLinks = getMainLinks(routes);

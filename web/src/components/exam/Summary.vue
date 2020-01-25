@@ -4,11 +4,23 @@
       <v-card-text>
          <v-container>
             <v-row>
-               <v-col cols="6">
-                  <core-label-text title="已作答" :text="has_answers.length" />
+               <v-col cols="12">
+                  <p> 已作答：  <span v-text="has_answers.length"></span> </p>  
+                  <a @click="toQuestion(eq.index)"   v-for="eq in has_answers" :key="eq.index" >
+                     <v-btn class="mx-1 mb-1" fab depressed  small color="primary" >
+                        {{ eq.index }}
+                     </v-btn>
+                  </a>
                </v-col>
-               <v-col cols="6">
-                  <core-label-text title="未作答" :text="no_answers.length" />
+            </v-row>
+            <v-row>
+               <v-col cols="12">
+                  <p> 未作答：  <span v-text="no_answers.length"></span> </p>
+                  <a @click="toQuestion(eq.index)" v-for="eq in no_answers" :key="eq.index" >
+                     <v-btn class="mx-1 mb-1" depressed  fab small >
+                        {{ eq.index }}
+                     </v-btn>
+                  </a>
                </v-col>
             </v-row>
          </v-container>
@@ -39,11 +51,8 @@
             </v-row>
          </v-container>
       </v-card-text>
-      <v-card-actions>
-         <v-btn @click="remove" color="error">刪除</v-btn>
-         <v-spacer />
-         <v-btn @click="edit" color="success">繼續作答</v-btn>
-      </v-card-actions>
+      <slot></slot>
+      
    </v-card>
 </template>
 
@@ -69,6 +78,11 @@ export default {
       }
    },
    methods: {
+      toQuestion(index) {
+         
+         this.$emit('cancel');
+         this.$emit('to-question', index);
+      },
       getStatusText(model) {
          if(model.isComplete) return model.examStatusText;
          else {

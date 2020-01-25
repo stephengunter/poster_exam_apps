@@ -1,5 +1,5 @@
 <template>
-<v-row>
+<v-row :id="element_id">
 	<v-col>
 		<div>
 			<p class="q-title">
@@ -8,7 +8,7 @@
 					<!-- <v-icon color="error" class="mr-1">mdi-close-circle</v-icon> -->
 				</span>
 				<span class="mr-1">{{ model.index }}.</span>
-				{{ model.question.title }}
+				{{ model.question.title }} 
 			</p>
 			<core-deselectable-radio-group 
 			:options="options" :selected_index="selectedIndex" text_field="title"
@@ -23,6 +23,10 @@
 export default {
 	name: 'QuestionEdit',
 	props: {
+		element_id: {
+         type: String,
+         default: ''
+		},
 		model: {
          type: Object,
          default: null

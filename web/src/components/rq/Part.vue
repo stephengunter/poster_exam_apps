@@ -6,7 +6,7 @@
          </v-col>
 		</v-row>
       <question-item v-for="(question, index) in model.questions" :key="index"
-      :order="index + start_index" :model="question"
+      :model="question" :element_id="`rq_q_${question.index}`"
       @show-photo="onShowPhoto" 
       />
    </div>
@@ -19,11 +19,7 @@ export default {
 		model: {
          type: Object,
          default: null
-      },
-      start_index: {
-         type: Number,
-         default: 0
-      },
+      }
    },
    methods: {
       onShowPhoto(photo) {

@@ -6,6 +6,7 @@
          </v-col>
 		</v-row>
       <question-edit v-for="(question, index) in model.questions" :key="index"
+      :element_id="`e_${model.examId}_q_${question.index}`"
       :model="question" :multi_answers="model.multiAnswers"
       @show-photo="onShowPhoto" @answer-changed="onAnswerChanged"
       />
@@ -21,6 +22,7 @@ export default {
          default: null
       }
    },
+   
    methods: {
       onShowPhoto(photo) {
          this.$emit('show-photo', photo);

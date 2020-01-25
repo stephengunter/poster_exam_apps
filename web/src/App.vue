@@ -23,25 +23,15 @@
 				{{ success.msg  }}
 			</span>
 		</v-snackbar>
-		
-		<v-dialog v-model="err.show" :max-width="err.maxWidth">
-			<v-card>
-				<v-card-title v-if="err.isError" class="headline red lighten-1 pb-5">
-					<v-icon color="white" class="mr-3">
-						mdi-alert-circle
-					</v-icon>
-					<span style="color: #fff;">
-						{{ err.msg  }}
-					</span>
-				</v-card-title>
-				<v-card-title v-else>
-					{{ err.title }}
-				</v-card-title>
-				<v-card-text v-if="!err.isError">
-					{{ err.msg  }}
-				</v-card-text>
-			</v-card>	
-      </v-dialog>
+
+		<v-dialog v-model="confirm.active" :max-width="confirm.maxWidth" :persistent="!confirmNoAction">
+			<core-confirmation :type="confirm.type"
+			:title="confirm.title" :text="confirm.text"
+			:ok_text="confirm.ok_text"  :cancel_text="confirm.cancel_text"
+			:on_cancel="confirm.on_cancel"  :on_ok="confirm.on_ok"
+			@ok="hideConfirm" @cancel="hideConfirm"
+			/>
+		</v-dialog>
 
 		<v-dialog v-model="loginConfirm.show" :max-width="loginConfirm.maxWidth">
          <v-card>
@@ -80,13 +70,6 @@ export default {
 	data(){
 		return {
 			title: '',
-			err: {
-				isError: true,
-				maxWidth: DIALOG_MAX_WIDTH,
-				show: false,
-				title: '',
-				msg: '伺服器暫時無回應，請稍候再試.',
-			},
 			success: {
 				color: 'info',
 				show: false,
@@ -100,7 +83,20 @@ export default {
 				title: '需要登入',
 				text: '您目前執行的程序需要登入.',
 				returnUrl: ''
-			}
+			},
+
+			confirm: {
+            type: false,
+            title: '',
+            text: '',
+            active: false,
+            action: '',
+            maxWidth: DIALOG_MAX_WIDTH,
+            ok_text: '確定',
+            cancel_text: '取消',
+            on_ok: null,
+            on_cancel: null
+         },
 		}
 	},
 	computed:{
@@ -109,12 +105,16 @@ export default {
 			loading: state => state.app.loading,
 			loadingText: state => state.app.loadingText,
 			responsive: state => state.app.responsive
-      })
+		}),
+		confirmNoAction() {
+			return !this.confirm.on_ok && !this.confirm.on_cancel
+		}
 	},
 	created(){
 		Bus.$on('errors', this.onError);
 		Bus.$on('success', this.onSuccess);
 		Bus.$on('warning', this.onWarning);
+		Bus.$on('show-confirm', this.showConfirm);
 		Bus.$on('confirm-login', this.confirmLogin);
 	},
 	mounted(){
@@ -128,44 +128,48 @@ export default {
 	},
 	methods:{
 		onError(error) {
-			this.err.isError = true;
-			this.err.title = '';
-			this.err.text = '';
-			this.err.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
+			let confirm = {
+				type: 'error',
+				title: '伺服器暫時無回應，請稍候再試.',
+				text: '',
 
-			let defaultMsg = '伺服器暫時無回應，請稍候再試.';
-			if(!error){
-				this.err.msg = defaultMsg;
-				this.err.show = true;
-				return;
 			}
-			if(!error.status){
-				this.err.msg = error.msg ? error.msg : defaultMsg;
-				this.err.show = true;
-			}
-			if(error.status === 500){
-				this.err.msg = defaultMsg;
-				this.err.show = true;
-			}else if(error.status === 401){
-				this.$store.dispatch(CHECK_AUTH).then(auth => {
-					if(auth){
-						this.$store.dispatch(REFRESH_TOKEN).then(token => {	
-							if(token) {
-								this.$store.dispatch(CHECK_AUTH);
 
-								this.err.title = '請重新操作';
-								this.err.msg = '您的驗証剛剛刷新，請重新操作一次';
-								this.err.isError = false;
-								this.err.show = true;
-								Bus.$emit(TOKEN_REFRESHED);
-							} 
-							else this.$router.push({ name: 'login', query: { returnUrl: this.$route.path } });
-						})
+			if(error) {
+				let status = error.status;
+				if(status) {
+					if(status === 401) {
+						this.$store.dispatch(CHECK_AUTH).then(auth => {
+							if(auth){
+								this.$store.dispatch(REFRESH_TOKEN).then(token => {	
+									if(token) {
+										this.$store.dispatch(CHECK_AUTH);
+										
+										confirm.type = '';
+										confirm.title = '請重新操作';
+										confirm.text = '您的驗証剛剛刷新，請重新操作一次';
+										this.showConfirm(confirm);
+
+										Bus.$emit(TOKEN_REFRESHED);
+									} 
+									else this.$router.push({ name: 'login', query: { returnUrl: this.$route.path } });
+								})
+							}else {
+								//無token
+								this.$router.push({ name: 'login', query: { returnUrl: this.$route.path } });
+							}
+						}) // end of 401
 					}else {
-						//無token
-						this.$router.push({ name: 'login', query: { returnUrl: this.$route.path } });
+						this.showConfirm(confirm);
 					}
-				})
+
+				}else {
+					// no status code
+					this.showConfirm(confirm);
+				}
+			}else {
+				// no error data
+				this.showConfirm(confirm);
 			}
 		},
 		onSuccess(msg) {
@@ -182,13 +186,41 @@ export default {
 				this.success.show = true;
 			}
 		},
+		showConfirm({type, title, text, ok ='確定', cancel = '取消', onOk = null, onCancel = null, maxWidth = 0 }) {
+			
+			this.confirm = {
+            type,
+            title,
+				text,
+				maxWidth: maxWidth ? maxWidth : DIALOG_MAX_WIDTH,
+            ok_text: ok,
+            cancel_text: cancel,
+            active: true,
+            on_ok: onOk,
+            on_cancel: onCancel
+			};
+			
+      },
+      hideConfirm() {
+         this.confirm = {
+            type: '',
+            title: '',
+            text: '',
+            ok_text: '確定',
+            cancel_text: '取消',
+            maxWidth: DIALOG_MAX_WIDTH,
+            active: false,
+            on_ok: null,
+            on_cancel: null
+         };
+      },
 		confirmLogin(data) {
 			if(data) {
 				this.loginConfirm.title = data.title ? data.title : '需要登入';
 				this.loginConfirm.text = data.text ? data.text : '您目前執行的程序需要登入';
 				this.loginConfirm.returnUrl = data.returnUrl ? data.returnUrl : '/';
 			}
-			this.loginConfirm.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
+			this.loginConfirm.maxWidth = DIALOG_MAX_WIDTH;
 			this.loginConfirm.show = true;
 		},
 		loginConfirmed() {

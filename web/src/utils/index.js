@@ -14,6 +14,10 @@ export const onError = (error) => {
    Bus.$emit('errors');
 }
 
+export const showConfirm = ({ type, title, text, ok ='確定', cancel = '取消', onOk = null, onCancel = null,maxWidth = 0}) => {
+  Bus.$emit('show-confirm', { type, title, text, ok, cancel, onOk, onCancel });
+}
+
 export const activeOptions = () => {
    return [{
       value: true,
@@ -35,6 +39,7 @@ export const buildQuery = (url, params) => {
    }
    return url.substr(0, url.length - 1);
 }
+
 
 export const photoNameUrl = (name, width = 0, height = 0, type = '') => {
    let url = `${SITE_URL}/api/photo`;

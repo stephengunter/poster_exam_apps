@@ -1,9 +1,9 @@
 <template>
-<v-row>
+<v-row :id="element_id">
 	<v-col>
 		<div>
 			<p class="q-title">
-				<span v-show="order" class="mr-1">{{ order }}.</span>
+				<span class="mr-1">{{ model.index }}.</span>
 				{{ model.title }}
 			</p>
 			<option-list :options="model.options" 
@@ -31,9 +31,9 @@
 export default {
 	name: 'QuestionItem',
 	props: {
-		order: {
-         type: Number,
-         default: 0
+		element_id: {
+         type: String,
+         default: ''
 		},
 		model: {
          type: Object,
@@ -42,7 +42,6 @@ export default {
 	},
 	data(){
       return {
-         radioGroup: 1,
          expansion: false
       }
 	},

@@ -57,6 +57,7 @@ export default {
    },
    methods: {
       fire(name) {
+         this.$emit('selected');
          Bus.$emit(ACTION_SELECTED, name);
       }
    }

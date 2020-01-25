@@ -25,6 +25,7 @@ const getters = {
    }
 };
 
+
 const actions = {
    [FETCH_RQS](context, params) {
       context.commit(SET_LOADING, true);
@@ -35,6 +36,13 @@ const actions = {
                //firstLoad
                context.commit(INIT_RQS_PAGE, model);
             }else if(model.parts) {
+               let index = 1;
+               model.parts.forEach(part => {
+                  part.questions.forEach(question => {
+                     question.index = index;
+                     index += 1;
+                  })
+               });
                context.commit(SET_RQS_MODEL, model);
             }
             resolve(model);
