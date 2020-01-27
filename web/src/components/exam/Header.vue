@@ -1,16 +1,16 @@
 <template>
 <div>
    <div class="mb-2" v-if="responsive">
-      <a href="#" @click.prevent="onTitltClicked" class="a-btn"  >
-         {{ bread.text ?  bread.text : title }}
-      </a>
+      <core-bread :items="bread.items"
+      @selected="onBreadSelected"
+      />
    </div>
    <div v-else>
       <v-row>
 			<v-col :cols="examIndexMode ? 8 : 12">
-				<a href="#" @click.prevent="onTitltClicked" class="a-btn"  >
-					{{ bread.text ?  bread.text : title }}
-				</a>
+            <core-bread :items="bread.items"  class_name="pt-2"
+            @selected="onBreadSelected"
+            />
 			</v-col>
 			<v-col v-if="examIndexMode" cols="4" class="text-right">
 				<v-btn color="info" outlined  @click.prevent="launchCreator">
@@ -39,7 +39,10 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { EXAM_SUMMARY, ACTION_SELECTED } from '@/store/actions.type';
+import { FILTER_EXAMS, EXAM_SUMMARY, ACTION_SELECTED,
+   EXAM_RECORDS, NEW_EXAM 
+} from '@/store/actions.type';
+
 import { DIALOG_MAX_WIDTH } from '@/config';
 import { getListText } from '@/utils';
 
@@ -98,8 +101,7 @@ export default {
          },
 
 			bread: {
-            items: [],
-            text: ''
+            items: []
 			},
 		}
    },
@@ -109,7 +111,7 @@ export default {
       ]),
       ...mapState({
 			mode: state => state.exams.mode
-		})
+      })
    },
    methods: {
       init() {
@@ -129,60 +131,67 @@ export default {
          this.setTitle();
 			
       },
-      addBreadItem(text) {
-         this.bread.items.push(text);
-         this.bread.text = getListText(this.bread.items);
+      clearBread() {
+         this.bread.items = [];
+      },
+      addBreadItem(action ,text) {
+         this.bread.items.push({
+            action, text
+         });
       },
       setTitle() {
+         this.clearBread();
+
          if(this.examIndexMode) {
             let params = this.fetchParams;
+            let action = FILTER_EXAMS;
+            this.addBreadItem(action, this.title);
 
-            let subjectText = '';
-            if(params.subject > 0) {
-               let subject = this.subject_options.find(item => item.value === params.subject);
-               subjectText = subject.text;
+            let selectedSubject = null;
+            if(this.fetchParams.subject > 0) {
+               selectedSubject =  this.subject_options.find(item => item.value === this.fetchParams.subject);
             }
 
-            let statusText = '';
-            if(params.status > -1) {
-               let status = this.status_options.find(item => item.value === params.status);
-               statusText = status.text;
+            if(selectedSubject) this.addBreadItem(action, selectedSubject.text);
+            
+            let selectedStatus = null;
+            if(this.fetchParams.status > -1) {
+               selectedStatus =  this.status_options.find(item => item.value === this.fetchParams.status);
             }
 
-            this.bread.items = [this.title];
-            this.addBreadItem(this.mode.text);
-
-            if(statusText) this.addBreadItem(statusText);
-            if(subjectText) this.addBreadItem(subjectText);
+            if(selectedStatus) this.addBreadItem(action, selectedStatus.text);
 
          }else if(this.examEditMode) {
-            this.bread.items = [this.title];
-            this.addBreadItem(this.exam.title);
+            this.addBreadItem(EXAM_RECORDS, this.title);
+
+            if(this.exam) {
+               this.addBreadItem(EXAM_SUMMARY, this.exam.title ? this.exam.title : '無存檔名稱');
+            }
 
          }else if(this.examCreateMode) {
-            this.bread.items = [this.title];
-            this.addBreadItem('新測驗');
+            this.addBreadItem(NEW_EXAM, '新測驗');
 
+            let titleTextList = [];
             let type = this.creator.model.type;
-            this.addBreadItem(type.text);
+            titleTextList.push(type.text);
 
             let year = this.creator.model.year;
-            if(year.value) this.addBreadItem(`${year.text}年度`);
+            titleTextList.push(`${year.text}年度`);
             
             let subject = this.creator.model.subject;
-            this.addBreadItem(subject.text);
+            titleTextList.push(subject.text);
+
+            let title = titleTextList.join('_');
+
+            this.addBreadItem(NEW_EXAM, title);
          }
          
       },
       getBread() {
          return this.bread;
       },
-      onTitltClicked() {
-         if(this.examIndexMode) {
-            this.launchFilter();
-         }else if(this.examEditMode) {
-            Bus.$emit(ACTION_SELECTED,EXAM_SUMMARY);
-         }
+      onBreadSelected(item) {
+         Bus.$emit(ACTION_SELECTED, item.action);
       },
       launchFilter(reset = true) {
          if(reset)  this.fetchParams = { ...this.fetch_params };

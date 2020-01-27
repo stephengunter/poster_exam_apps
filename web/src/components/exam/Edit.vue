@@ -16,12 +16,10 @@
       <photo-show :model="showPhoto.model" @cancel="showPhoto.active = false" />
    </v-dialog>
    
-   <v-dialog v-model="save.active" :max-width="save.maxWidth">
-      <core-confirmation :title="save.title" :text="save.text"
-      :on_ok="save.onOk" :on_cancel="() => { save.active = false }"
-      >
-         <exam-save :exam="exam" />
-      </core-confirmation>
+   <v-dialog v-model="save.active" :max-width="save.maxWidth" persistent>
+      <exam-save :exam="exam" 
+      @save="saveExam" @cancel="onSaveCanceled"
+      />
    </v-dialog>
 
    
@@ -71,25 +69,11 @@ export default {
 				maxWidth: DIALOG_MAX_WIDTH
          },
 
-         // confirm: {
-         //    is_err: false,
-         //    title: '',
-         //    text: '',
-         //    active: false,
-         //    action: '',
-         //    maxWidth: DIALOG_MAX_WIDTH,
-         //    ok_text: '確定',
-         //    cancel_text: '取消',
-         //    on_ok: null,
-         //    on_cancel: null
-         // },
-
          save: {
-            title: '測驗存檔',
-            text: '',
-            active: false,
+            model: null,
             maxWidth: DIALOG_MAX_WIDTH,
-            on_ok: null
+            active: false,
+            callback: null
          },
 
          summary: {
@@ -158,25 +142,25 @@ export default {
             else this.$emit('aborted');
          })
 			.catch(error => {
-            Bus.$emit('errors');
+            Bus.$emit('errors', error);
 			})
       },
       saveExam(callback = null) {
-         let vm = this;
          if(!this.exam.reserved && !this.save.active) {
             //第一次存檔
             this.save = {
-               title: '測驗存檔',
-               active: true,
+               model: { ... this.exam },
                maxWidth: this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH,
-               onOk: () => {
-                  vm.saveExam(callback);
-               }
+               active: true,
+               callback
             }
             return;
          }
 
-         this.save.active = false;
+         if(this.save.active) {
+            this.save.active = false;
+            callback = this.save.callback;
+         }
          
          this.$store.dispatch(SAVE_EXAM, this.exam)
          .then(() => {
@@ -188,14 +172,52 @@ export default {
             else this.$emit('saved');
          })
 			.catch(error => {
-            Bus.$emit('errors');
+            Bus.$emit('errors', error);
 			})
+      },
+      onSaveCanceled() {
+         //還原修改前資料
+         this.exam.title = this.save.model.title;
+         this.save = {
+            model: null,
+            maxWidth: this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH,
+            active: false,
+            callback: null
+         };
       },
       onStoreExam() {
          console.log('onStoreExam');
+         //檢查是否有空白未作答的題目
+
+         //交券
+         this.storeExam();
       },
       storeExam() {
-         console.log('storeExam');
+         console.log('storeExam', this.exam);
+         if(!this.exam.reserved && !this.save.active) {
+            //第一次存檔
+            this.save = {
+               model: { ... this.exam },
+               maxWidth: this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH,
+               active: true,
+               callback:null
+            }
+            return;
+         }
+
+         if(this.save.active) this.save.active = false;
+         
+         this.$store.dispatch(STORE_EXAM, this.exam)
+         .then(() => {
+            alert('then');
+           
+
+            Bus.$emit('success');
+            this.$emit('stored');
+         })
+			.catch(error => {
+            Bus.$emit('errors', error);
+			})
       },
       showSummary() {
          this.summary.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;

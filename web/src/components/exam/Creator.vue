@@ -110,13 +110,13 @@ export default {
 	},
 	methods: {
 		init() {
-         this.subjectOptions = this.subject_options.filter(item => item.value > 0);
-
          this.params = { ...this.init_params };
+        
+         this.subjectOptions = this.subject_options.filter(item => item.value > 0);
 
          if(this.params.subject < 1) this.setSubject(this.subjectOptions[0]);
          if(this.params.type < 1) this.setType(this.type_options[0]);
-         
+
       },
       setType(item) {
          this.params.type = item.value;
@@ -187,8 +187,23 @@ export default {
          this.$emit('cancel');
       },
       submit() {
-         console.log('model', this.model);
-         this.$emit('submit', this.params, this.model);
+         let params = this.params;
+         let model = this.model;
+
+         if(!model.type) {
+            model.type = this.type_options.find(item => item.value === params.type);
+         }
+         if(!model.rtype) {
+            model.rtype = this.recruit_type_options.find(item => item.value === params.rtype);
+         }
+         if(!model.subject) {
+            model.subject = this.subjectOptions.find(item => item.value === params.subject);
+         }
+         if(!model.year) {
+            model.year = this.year_options.find(item => item.value === params.year);
+         }
+        
+         this.$emit('submit', params, model);
       }
 	}
 }

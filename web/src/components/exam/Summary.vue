@@ -33,7 +33,12 @@
          <v-container>
             <v-row>
                <v-col cols="6">
-                  <core-label-text title="存檔名稱" :text="model.title" />
+                  <core-label-text title="存檔名稱" :text="model.title" >
+                     <v-btn @click="edit" class="ml-2" fab  x-small color="info">
+                        <v-icon>mdi-pencil</v-icon>
+                     </v-btn>
+                  </core-label-text>  
+                  
                </v-col>
                <v-col cols="6">
                   <core-label-text title="最後更新" :text="model.lastUpdatedText" />
@@ -47,6 +52,13 @@
             <v-row>
                <v-col cols="12">
                   <core-label-text title="狀態" :text="getStatusText(model)" :html="true" />
+               </v-col>
+            </v-row>
+            <v-row v-if="model.isComplete">
+               <v-col cols="12">
+                  <core-label-text title="得分">
+                     <exam-score :score="model.score" />
+                  </core-label-text>
                </v-col>
             </v-row>
          </v-container>
@@ -86,16 +98,17 @@ export default {
       getStatusText(model) {
          if(model.isComplete) return model.examStatusText;
          else {
-            let total = model.totalQuestions;
             let hasAnswers = model.hasAnswers;
-            return `${model.examStatusText} <span class="ml-2">(共 ${total} 題 , 已答 ${hasAnswers} 題)</span>`
+            let total = hasAnswers.length + model.noAnswers.length;
+           
+            return `${model.examStatusText} <span class="ml-2">(共 ${total} 題 , 已答 ${hasAnswers.length} 題)</span>`
          }
       },
       cancel() {
          this.$emit('cancel');
       },
       edit() {
-         this.$emit('edit', this.model);
+         this.$emit('edit');
       },
       remove() {
          this.$emit('remove');

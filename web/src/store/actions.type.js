@@ -31,6 +31,7 @@ export const STORE_EXAM = 'storeExam';
 export const SAVE_EXAM = 'saveExam';
 export const ABORT_EXAM = 'abortExam';
 export const DELETE_EXAM = 'deleteExam';
+export const UPDATE_EXAM = 'updateExam';
 export const FILTER_EXAMS = 'filterExams';
 export const FETCH_EXAMS = 'fetchExams';
 export const LOAD_EXAM_SUMMARY = 'loadExamSummary';

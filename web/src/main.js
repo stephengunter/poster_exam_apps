@@ -5,6 +5,8 @@ import App from './App.vue';
 import router from './routes';
 import store from './store';
 import vuetify from './plugins/vuetify';
+
+import './plugins/validate';
 import '@/components';
 import '@/filters';
 

@@ -5,6 +5,10 @@
       </p>
       <p v-else class="font-weight-bold" style="font-size:16px">
          {{ text }}
+         <slot>
+            
+         </slot>
+         
       </p>
    </div>
 </template>

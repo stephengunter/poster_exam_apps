@@ -17,20 +17,27 @@
 		<div v-show="examEditMode">
          <exam-edit ref="examEdit" :exam="exam" :actions="examActions"
 			@leave="setMode('index')" @aborted="setMode('index')"
+			@saved="onExamSaved"
          /> 
       </div>
 
 		<v-dialog v-model="summary.active" :max-width="summary.maxWidth">
          <exam-summary :model="summary.model"
-			@cancel="hideSummary"
+			@edit="editExamTitle(summary.model)" @cancel="hideSummary"
 			>
 				<v-card-actions>
-					<v-btn @click="removeExam" color="error">刪除</v-btn>
+					<v-btn @click="onRemoveExam(summary.model)" color="error">刪除</v-btn>
 					<v-spacer />
-					<v-btn @click="editExam" color="success">繼續作答</v-btn>
+					<v-btn @click="editExam(summary.model)" color="success">繼續作答</v-btn>
 				</v-card-actions>
          </exam-summary>
       </v-dialog>
+
+		<v-dialog v-model="save.active" :max-width="save.maxWidth" persistent>
+			<exam-save :exam="save.model" 
+			@save="updateExamTitle" @cancel="save.active = false"
+			/>
+		</v-dialog>
 	</v-container>
 </template>
 
@@ -39,11 +46,11 @@ import { mapState, mapGetters } from 'vuex';
 import { LOAD_ACTIONS, ACTION_SELECTED,
 	NEW_EXAM, EDIT_EXAM, FETCH_EXAMS, FILTER_EXAMS,
 	STORE_EXAM, SAVE_EXAM, ABORT_EXAM, CREATE_EXAM, 
-	EXAM_RECORDS, EXAM_SUMMARY, DELETE_EXAM	
+	EXAM_RECORDS, EXAM_SUMMARY, DELETE_EXAM, UPDATE_EXAM	
 } from '@/store/actions.type';
 import { SET_EXAM_PAGE_MODE, SET_APP_ACTIONS, SET_EXAM_TITLE } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
-import { resolveErrorData, getRouteTitle, todayString } from '@/utils';
+import { showConfirm, resolveErrorData, getRouteTitle, todayString } from '@/utils';
 import Exam from '@/models/exam';
 
 
@@ -86,7 +93,16 @@ export default {
 				active: false,
 				model: null,
 				maxWidth: DIALOG_MAX_WIDTH
-			}
+			},
+
+			save: {
+            model: null,
+            maxWidth: DIALOG_MAX_WIDTH,
+            active: false,
+            callback: null
+			},
+			
+			references: {},
 		}
 	},
 	computed: {
@@ -97,12 +113,24 @@ export default {
 			mode: state => state.exams.mode,
 			pagedList: state => state.exams.pagedList,
 			examActions: state => state.exams.actions,
-		})
+		}),
+		examHeader() {
+			if(this.$refs.examHeader) return this.$refs.examHeader;
+			else if (this.references.examHeader) return this.references.examHeader;
+			return null;
+		},
+		examEdit() {
+			if(this.$refs.examEdit) return this.$refs.examEdit;
+			else if (this.references.examEdit) return this.references.examEdit;
+			return null;
+		}
+
 	},
 	created(){
 		Bus.$on(ACTION_SELECTED, this.onActionSelected);
 	},
 	mounted() {
+		this.references = { ...this.$refs };
 		this.init();
 	},
 	methods: {
@@ -120,11 +148,11 @@ export default {
 				}else if(this.examCreateMode) {
 					
 				}else if(this.examEditMode) {
-					this.$refs.examEdit.init();
+					this.examEdit.init();
 				}
 
 				this.setActions();
-            this.$refs.examHeader.init();
+				this.examHeader.init();
          })
 		},
 		setActions() {
@@ -144,17 +172,15 @@ export default {
 			this.$store.dispatch(LOAD_ACTIONS, blocks);
 		},
 		onActionSelected(name) {
-			// console.log('onActionSelected', name);
-			// console.log(this.$refs);
 			if(this.examEditMode) {
-				this.$refs.examEdit.handleAction(name);
+				this.examEdit.handleAction(name);
 				return;
 			}
 
          if(name === FILTER_EXAMS) {
-            this.$refs.examHeader.launchFilter();         
+            this.examHeader.launchFilter();         
          }else if(name === NEW_EXAM) {
-            this.$refs.examHeader.launchCreator();     
+            this.examHeader.launchCreator();     
          }else {
 				
 			}
@@ -164,6 +190,7 @@ export default {
 			this.fetchExams(params);
 		},
 		fetchExams(params) {
+			this.hideSummary();
 			if(!params) params = this.fetchParams;
          this.$store.dispatch(FETCH_EXAMS, params)
          .then(model => {
@@ -200,13 +227,33 @@ export default {
 			
          this.$store.dispatch(CREATE_EXAM, params)
          .then(exam => {
-				let bread =  this.$refs.examHeader.getBread();
-				let items = bread.items.slice(2);
-				let title = `${items.join('_')}_${todayString().replace(/-/g,'')}`;
+				let bread =  this.examHeader.getBread();
+				let title = bread.items[bread.items.length - 1].text;
+				title = `${title}_${todayString().replace(/-/g,'')}`;
+				
 				
 				this.$store.commit(SET_EXAM_TITLE, title);
 				
 				this.setMode('edit');
+         })
+			.catch(error => {
+            Bus.$emit('errors', resolveErrorData(error));
+			})
+		},
+		editExamTitle(model) {
+			this.save = {
+				model: { ... model },
+				maxWidth: this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH,
+				active: true,
+				callback: null
+			};			
+		},
+		updateExamTitle() {
+			let model = this.save.model;
+			this.$store.dispatch(UPDATE_EXAM, model)
+         .then(() => {
+				this.save.active = false;
+				this.fetchExams();
          })
 			.catch(error => {
             Bus.$emit('errors', resolveErrorData(error));
@@ -224,15 +271,29 @@ export default {
             Bus.$emit('errors', resolveErrorData(error));
 			})
 		},
-		removeExam() {
-			this.hideSummary();
+		onExamSaved() {
+			if(this.examEditMode) {
+				this.examHeader.setTitle();
+			}
+		},
+		onRemoveExam(model) {
 			showConfirm({
             type: 'error', 
             title: '確定要刪除此測驗嗎?',
             onOk: () => {
-               this.abortExam();
+               this.removeExam(model);
             }
-         });
+			});
+		},
+		removeExam(model) {
+			let id = model.id;
+         this.$store.dispatch(ABORT_EXAM, id)
+         .then(() => {
+				this.fetchExams();
+         })
+			.catch(error => {
+            Bus.$emit('errors', resolveErrorData(error));
+			})
 		}
 		
 	}

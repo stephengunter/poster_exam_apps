@@ -1,7 +1,7 @@
 import ExamsService from '@/services/exams.service';
 import { resolveErrorData, examActions } from '@/utils';
 
-import { FETCH_EXAMS, CREATE_EXAM, STORE_EXAM,
+import { FETCH_EXAMS, CREATE_EXAM, STORE_EXAM, UPDATE_EXAM,
    SAVE_EXAM, ABORT_EXAM, EDIT_EXAM, LOAD_EXAM_SUMMARY
 } from '@/store/actions.type';
 
@@ -111,6 +111,36 @@ const actions = {
          })
          .catch(error => {
             reject(resolveErrorData(error));        
+         })
+         .finally(() => { 
+            context.commit(SET_LOADING, false);
+         });
+      });
+   },
+   [UPDATE_EXAM](context, model) {
+      context.commit(SET_LOADING, true);
+      return new Promise((resolve, reject) => {
+         ExamsService.update(model.id, model)
+         .then(() => {
+            resolve(true);
+         })
+         .catch(error => {
+            reject(resolveErrorData(error));
+         })
+         .finally(() => { 
+            context.commit(SET_LOADING, false);
+         });
+      });
+   },
+   [STORE_EXAM](context, model) {
+      context.commit(SET_LOADING, true);
+      return new Promise((resolve, reject) => {
+         ExamsService.store(model)
+         .then(() => {
+            resolve(true);
+         })
+         .catch(error => {
+            reject(resolveErrorData(error));
          })
          .finally(() => { 
             context.commit(SET_LOADING, false);

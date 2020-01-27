@@ -9,8 +9,12 @@ const create = (params) => BaseService.fetch(`${source}/create`, params);
 
 const abort = (id) => BaseService.remove(`${source}/${id}`);
 
-const save = (id, model) => BaseService.put(`${source}/${id}`, model);
+const update = (id, model) => BaseService.put(`${source}/${id}`, model);
 
 const edit = (id) => BaseService.fetch(`${source}/edit/${id}`);
 
-export default { fetch, create, abort, save, edit };
+const save = (id, model) => BaseService.put(`${source}/${id}/save`, model);
+
+const store = (model) => BaseService.post(source, model);
+
+export default { fetch, create, abort, save, edit, update, store };
