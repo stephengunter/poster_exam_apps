@@ -27,6 +27,7 @@
    <v-dialog v-model="summary.active" :max-width="summary.maxWidth">
       <exam-summary :model="exam" :doing="true"
       :has_answers="hasAnswers" :no_answers="noAnswers"
+      :corrects="corrects" :wrongs="wrongs"
       @to-question="scrollToQuestion"
       @cancel="summary.active = false"
       >

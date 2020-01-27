@@ -28,7 +28,7 @@
 				<v-card-actions>
 					<v-btn @click="onRemoveExam(summary.model)" color="error">刪除</v-btn>
 					<v-spacer />
-					<v-btn v-if="summary.model.isComplete" @click="readExam(summary.model)" color="primary">閱讀</v-btn>
+					<v-btn v-if="summary.model.isComplete" @click="readExam(summary.model)" color="primary">閱讀解析</v-btn>
 					<v-btn v-else @click="editExam(summary.model)" color="success">繼續作答</v-btn>
 				</v-card-actions>
          </exam-summary>

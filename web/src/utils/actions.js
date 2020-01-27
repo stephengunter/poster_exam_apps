@@ -84,7 +84,7 @@ const actions = [
    icon:'mdi-delete-circle-outline',
    title: '刪除',
    color: 'error',
-   description: '刪除'
+   description: '刪除這個測驗'
 }];
 
 

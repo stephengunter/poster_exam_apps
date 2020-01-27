@@ -1,17 +1,33 @@
 <template>
+<div>
    <v-data-table :headers="headers" :items="list"
+   :server-items-length="totalItems" :options.sync="options"
    :items-per-page="10" class="elevation-1"
+   :footer-props="{
+      'items-per-page-all-text': '全部',
+      'items-per-page-text' : '單頁資料數',
+      'show-current-page': true
+   }"
    @click:row="onRowSelected"
    >
+      <template v-slot:item.isComplete="{ item }">
+         <v-chip :outlined="!item.isComplete" small color="primary">
+           {{ item.examStatusText }}
+         </v-chip>
+        
+      </template>
+      <template v-slot:item.score="{ item }">
+        <exam-score :score="item.score" />
+      </template>
       <template v-slot:item.lastUpdated="{ item }">
         {{ item.lastUpdatedText }}
       </template>
-      
       <template v-slot:no-data>
         查無資料
       </template>
 
    </v-data-table>
+</div>   
 </template>
 
 <script>
@@ -28,6 +44,9 @@ export default {
    },
    data() {
 		return {
+         loading: false,
+         options: {},
+
          columns:[{
             subjects: [-1, 0],
             status: [-1, 0, 1],
@@ -44,8 +63,14 @@ export default {
             subjects: [],
             status: [-1],
             text: '狀態',
-            value: 'examStatusText',
+            value: 'isComplete',
             sortable: false,
+         },{
+            subjects: [],
+            status: [1],
+            text: '得分',
+            value: 'score',
+            sortable: true,
          },{
             subjects: [],
             status: [-1, 0, 1],
@@ -67,6 +92,10 @@ export default {
 		}
    },
    computed: {
+      totalItems() {
+         if(!this.model) return 0;
+         return this.model.totalItems;
+      },
       list() {
          if(!this.model) return [];
          return this.model.viewList;
@@ -83,6 +112,19 @@ export default {
       headerKeys() {
          return this.headers.map(item => item.value);
       }
+   },
+   watch: {
+      options: {
+        handler () {
+           console.log('options', this.options);
+         //  this.getDataFromApi()
+         //    .then(data => {
+         //      this.desserts = data.items
+         //      this.totalDesserts = data.total
+         //    })
+        },
+        deep: true,
+      },
    },
    methods: {
       onRowSelected(item) {

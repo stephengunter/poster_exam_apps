@@ -2,10 +2,44 @@
    <v-card v-if="doing">
       <core-close-icon-button @close="cancel" />
       <v-card-text>
-         <v-container>
+         <v-container v-if="model.isComplete">
             <v-row>
                <v-col cols="12">
-                  <p> 已作答：  <span v-text="has_answers.length"></span> </p>  
+                  <p> 
+                     得分： <exam-score :score="model.score" />
+                  </p> 
+               </v-col>
+            </v-row>
+            <v-row>
+               <v-col cols="12">
+                  <p> 
+                     答對題目：  <span v-text="corrects.length"></span> 
+                  </p>  
+                  <a @click="toQuestion(eq.index)"   v-for="eq in corrects" :key="eq.index" >
+                     <v-btn class="mx-1 mb-1" fab depressed  small color="success">
+                        {{ eq.index }}
+                     </v-btn>
+                  </a>
+               </v-col>
+            </v-row>
+            <v-row>
+               <v-col cols="12">
+                  <p> 答錯題目：  <span v-text="wrongs.length"></span> </p>
+                  <a @click="toQuestion(eq.index)" v-for="eq in wrongs" :key="eq.index" >
+                     <v-btn class="mx-1 mb-1" depressed  fab small color="error">
+                        {{ eq.index }}
+                     </v-btn>
+                  </a>
+               </v-col>
+            </v-row>
+            
+         </v-container>
+         <v-container v-else>
+            <v-row>
+               <v-col cols="12">
+                  <p> 
+                     已作答：  <span v-text="has_answers.length"></span> 
+                  </p>  
                   <a @click="toQuestion(eq.index)"   v-for="eq in has_answers" :key="eq.index" >
                      <v-btn class="mx-1 mb-1" fab depressed  small color="primary" >
                         {{ eq.index }}
@@ -32,15 +66,16 @@
       <v-card-text v-if="model" >
          <v-container>
             <v-row>
-               <v-col cols="6">
+               <v-col cols="12">
                   <core-label-text title="存檔名稱" :text="model.title" >
                      <v-btn @click="edit" class="ml-2" fab  x-small color="info">
                         <v-icon>mdi-pencil</v-icon>
                      </v-btn>
                   </core-label-text>  
-                  
                </v-col>
-               <v-col cols="6">
+            </v-row>
+            <v-row>
+               <v-col cols="12">
                   <core-label-text title="最後更新" :text="model.lastUpdatedText" />
                </v-col>
             </v-row>
@@ -87,7 +122,18 @@ export default {
       no_answers: {
          type: Array,
 			default: null
+      },
+      corrects: {
+         type: Array,
+			default: null
+      },
+      wrongs: {
+         type: Array,
+			default: null
       }
+   },
+   mounted() {
+      console.log(this.model);
    },
    methods: {
       toQuestion(index) {
@@ -113,9 +159,6 @@ export default {
       },
       edit() {
          this.$emit('edit');
-      },
-      remove() {
-         this.$emit('remove');
       }
    }
 }
