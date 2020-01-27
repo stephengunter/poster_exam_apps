@@ -58,9 +58,10 @@ const guestLinks = [{
    path: '/login',
    view: 'Login',
    meta: {
+      show: GUEST_ONLY,
+      type: GUEST_ONLY,
       icon: 'mdi-login-variant',
       title: '登入',
-      type: GUEST_ONLY,
       menu: true
    } 
 }];

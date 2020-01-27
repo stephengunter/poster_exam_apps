@@ -1,40 +1,18 @@
 <template>
 <div>
-   <v-card v-if="exam">
+   <v-card>
       <v-card-text>
          <exam-part v-for="(part, index) in parts" :key="index" 
-         :model="part" :read_only="exam.isComplete"
-         @show-photo="onShowPhoto"  @answer-changed="onAnswerChanged"
+         :model="part"
+         @show-photo="onShowPhoto"
          />
       </v-card-text>
-      <exam-actions :actions="actions"
-      @action-selected="handleAction"
-      />
    </v-card>
 
    <v-dialog v-model="showPhoto.active" :max-width="showPhoto.maxWidth">
       <photo-show :model="showPhoto.model" @cancel="showPhoto.active = false" />
    </v-dialog>
    
-   <v-dialog v-model="save.active" :max-width="save.maxWidth" persistent>
-      <exam-save v-if="save.active" :exam="exam" :on_ok="save.on_ok"
-      @save="saveExam" @cancel="onSaveCanceled"
-      />
-   </v-dialog>
-
-   
-
-   <v-dialog v-model="summary.active" :max-width="summary.maxWidth">
-      <exam-summary :model="exam" :doing="true"
-      :has_answers="hasAnswers" :no_answers="noAnswers"
-      @to-question="scrollToQuestion"
-      @cancel="summary.active = false"
-      >
-         <exam-actions :actions="actions"
-         @selected="summary.active = false"
-         />
-      </exam-summary>
-   </v-dialog>
 </div>   
 </template>
 
@@ -48,7 +26,7 @@ import { DIALOG_MAX_WIDTH } from '@/config';
 import { showConfirm } from '@/utils';
 
 export default {
-   name: 'ExamEdit',
+   name: 'ExamRead',
    props: {
       exam: {
          type: Object,
@@ -61,20 +39,11 @@ export default {
    },
    data() {
 		return {
-         answerChangeds: 0,
 
          showPhoto: {
 				active: false,
 				model: null,
 				maxWidth: DIALOG_MAX_WIDTH
-         },
-
-         save: {
-            model: null,
-            maxWidth: DIALOG_MAX_WIDTH,
-            active: false,
-            callback: null,
-            on_ok: null
          },
 
          summary: {
@@ -85,12 +54,6 @@ export default {
    },
    computed: {
       ...mapGetters(['responsive','contentMaxWidth','isAuthenticated']),
-      ...mapState({
-			hasAnswers: state => state.exams.summary.hasAnswers,
-         noAnswers: state => state.exams.summary.noAnswers,
-         corrects: state => state.exams.summary.corrects,
-			wrongs: state => state.exams.summary.wrongs
-		}),
       parts() {
          if(this.exam) return this.exam.parts;
          return []; 
@@ -102,10 +65,6 @@ export default {
    },
    methods: {
       init() {
-         this.$store.dispatch(LOAD_EXAM_SUMMARY);
-      },
-      onAnswerChanged() {
-         this.answerChangeds += 1;
          this.$store.dispatch(LOAD_EXAM_SUMMARY);
       },
       onShowPhoto(photo) {
@@ -149,7 +108,6 @@ export default {
                model: { ... this.exam },
                maxWidth: this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH,
                active: true,
-               on_ok: null,
                callback
             }
             return;
@@ -183,93 +141,9 @@ export default {
             callback: null
          };
       },
-      onStoreExam() {
-         console.log('onStoreExam');
-         //檢查是否有空白未作答的題目
-
-         //交券
-         this.storeExam();
-      },
-      storeExam() {
-         console.log('storeExam', this.exam);
-         let vm = this;
-         if(!this.exam.reserved && !this.save.active) {
-            //第一次存檔
-            this.save = {
-               model: { ... this.exam },
-               maxWidth: this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH,
-               active: true,
-               on_ok: vm.storeExam,
-               callback: null
-            }
-            return;
-         }
-
-         if(this.save.active) this.save.active = false;
-         
-         this.$store.dispatch(STORE_EXAM, this.exam)
-         .then(() => {
-            Bus.$emit('success');
-            this.$emit('stored');
-         })
-			.catch(error => {
-            Bus.$emit('errors', error);
-			})
-      },
       showSummary() {
          this.summary.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
          this.summary.active = true;
-      },
-      onLeaveExam(callback = null) {
-         let vm = this;
-         if(this.exam.isComplete) {
-            this.leaveExam(callback);
-         }else {
-            if(this.exam.reserved) {
-               if(this.answerChangeds) {
-                  showConfirm({
-                     type: '', 
-                     title: '是否存檔', 
-                     text: '此測驗有尚未儲存的變動，是否存檔?', 
-                     ok: '存檔', 
-                     cancel:  '不存檔',
-                     onOk: () => {
-                        vm.saveExam(() => {
-                           vm.leaveExam(callback);
-                        });
-                     },
-                     onCancel: () => {
-                        vm.leaveExam(callback);
-                     }
-                  }); 
-               }else {
-                  this.leaveExam(callback);
-               }
-            }else {
-               showConfirm({
-                  type: '', 
-                  title: '是否存檔', 
-                  text: '此測驗尚未存檔，是否存檔?', 
-                  ok: '存檔', 
-                  cancel:  '不存檔',
-                  onOk: () => {
-                     vm.saveExam(() => {
-                        vm.leaveExam(callback);
-                     });
-                  },
-                  onCancel: () => {
-                     vm.abortExam(() => {
-                        vm.leaveExam(callback);
-                     });
-                  }
-               }); 
-            }
-            
-         }
-      },
-      leaveExam(callback) {
-         if(callback) callback();
-         else this.$emit('leave');
       },
       handleAction(name, callback = null) {
           console.log('handleAction', name);

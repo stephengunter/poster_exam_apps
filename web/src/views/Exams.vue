@@ -17,18 +17,19 @@
 		<div v-show="examEditMode">
          <exam-edit ref="examEdit" :exam="exam" :actions="examActions"
 			@leave="setMode('index')" @aborted="setMode('index')"
-			@saved="onExamSaved"
+			@saved="onExamSaved" @stored="onExamStored"
          /> 
       </div>
 
 		<v-dialog v-model="summary.active" :max-width="summary.maxWidth">
-         <exam-summary :model="summary.model"
+         <exam-summary v-if="summary.active" :model="summary.model" 
 			@edit="editExamTitle(summary.model)" @cancel="hideSummary"
 			>
 				<v-card-actions>
 					<v-btn @click="onRemoveExam(summary.model)" color="error">刪除</v-btn>
 					<v-spacer />
-					<v-btn @click="editExam(summary.model)" color="success">繼續作答</v-btn>
+					<v-btn v-if="summary.model.isComplete" @click="readExam(summary.model)" color="primary">閱讀</v-btn>
+					<v-btn v-else @click="editExam(summary.model)" color="success">繼續作答</v-btn>
 				</v-card-actions>
          </exam-summary>
       </v-dialog>
@@ -45,7 +46,7 @@
 import { mapState, mapGetters } from 'vuex';
 import { LOAD_ACTIONS, ACTION_SELECTED,
 	NEW_EXAM, EDIT_EXAM, FETCH_EXAMS, FILTER_EXAMS,
-	STORE_EXAM, SAVE_EXAM, ABORT_EXAM, CREATE_EXAM, 
+	STORE_EXAM, SAVE_EXAM, ABORT_EXAM, CREATE_EXAM, READ_EXAM,
 	EXAM_RECORDS, EXAM_SUMMARY, DELETE_EXAM, UPDATE_EXAM	
 } from '@/store/actions.type';
 import { SET_EXAM_PAGE_MODE, SET_APP_ACTIONS, SET_EXAM_TITLE } from '@/store/mutations.type';
@@ -271,11 +272,27 @@ export default {
             Bus.$emit('errors', resolveErrorData(error));
 			})
 		},
+		readExam(model) {
+			this.hideSummary();
+			
+			let id = model.id;
+         this.$store.dispatch(READ_EXAM, id)
+         .then(exam => {
+				this.setMode('edit');
+         })
+			.catch(error => {
+            Bus.$emit('errors', resolveErrorData(error));
+			})
+		},
 		onExamSaved() {
 			if(this.examEditMode) {
 				this.examHeader.setTitle();
 			}
 		},
+		onExamStored() {
+			//交券完畢, 回index模式
+			this.setMode('index');
+		},	
 		onRemoveExam(model) {
 			showConfirm({
             type: 'error', 

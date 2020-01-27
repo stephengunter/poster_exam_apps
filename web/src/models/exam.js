@@ -5,6 +5,17 @@ class Exam {
       }
 
       if(model.isComplete) {
+         let correctQuestions = [];
+         let wrongQuestions = [];
+         model.parts.forEach(part => {
+            part.questions.forEach(question => {
+               if(question.correct) correctQuestions.push(question);
+               else wrongQuestions.push(question);
+            })
+         });
+         this.correctQuestions = correctQuestions;
+         this.wrongQuestions = wrongQuestions;
+      }else {
          let hasAnswers = [];
          let noAnswers = [];
          model.parts.forEach(part => {
@@ -17,17 +28,6 @@ class Exam {
          });
          this.hasAnswers = hasAnswers;
          this.noAnswers = noAnswers;
-      }else {
-         let correctQuestions = [];
-         let wrongQuestions = [];
-         model.parts.forEach(part => {
-            part.questions.forEach(question => {
-               if(question.correct) correctQuestions.push(question);
-               else wrongQuestions.push(question);
-            })
-         });
-         this.correctQuestions = correctQuestions;
-         this.wrongQuestions = wrongQuestions;
       }
 
       

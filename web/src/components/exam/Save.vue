@@ -37,6 +37,10 @@ export default {
       exam: {
          type: Object,
          default: null
+      },
+      on_ok: {
+         type: Function,
+         default: null
       }
    },
    computed: {
@@ -56,7 +60,10 @@ export default {
       },
       submit() {
          this.$validator.validate().then(valid => {
-            if(valid) this.$emit('save');
+            if(valid) {
+               if(this.on_ok) this.on_ok();
+               else this.$emit('save');
+            }
          });
       }
    }

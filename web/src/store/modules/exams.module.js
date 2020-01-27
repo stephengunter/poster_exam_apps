@@ -1,7 +1,7 @@
 import ExamsService from '@/services/exams.service';
 import { resolveErrorData, examActions } from '@/utils';
 
-import { FETCH_EXAMS, CREATE_EXAM, STORE_EXAM, UPDATE_EXAM,
+import { FETCH_EXAMS, CREATE_EXAM, STORE_EXAM, UPDATE_EXAM, READ_EXAM,
    SAVE_EXAM, ABORT_EXAM, EDIT_EXAM, LOAD_EXAM_SUMMARY
 } from '@/store/actions.type';
 
@@ -15,7 +15,14 @@ const initialState = {
    exam: null,
    actions: [],
    hasAnswers: [],
-   noAnswers: []
+   noAnswers: [],
+   summary: {
+      hasAnswers: [],
+      noAnswers: [],
+      corrects: [],
+      wrongs: []
+   }
+   
 };
 
 export const state = { ...initialState };
@@ -147,6 +154,25 @@ const actions = {
          });
       });
    },
+   [READ_EXAM](context, id) {
+      context.commit(SET_EXAM, null);
+      context.commit(SET_EXAM_ACTIONS, []);
+
+      context.commit(SET_LOADING, true);
+      return new Promise((resolve, reject) => {
+         ExamsService.details(id)
+         .then(exam => {
+            setExam(context, exam);
+            resolve(exam);
+         })
+         .catch(error => {
+            reject(resolveErrorData(error));        
+         })
+         .finally(() => { 
+            context.commit(SET_LOADING, false);
+         });
+      });
+   },
    [ABORT_EXAM](context, id) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
@@ -164,19 +190,37 @@ const actions = {
    },
    [LOAD_EXAM_SUMMARY](context) {
       let state = context.state;
-      let hasAnswers = [];
-      let noAnswers = [];
-      state.exam.parts.forEach(part => {
-         part.questions.forEach(question => {
-            if(question.userAnswerIndexes) {
-               //有答案
-               hasAnswers.push(question);
-            }else noAnswers.push(question);
-         })
-      });
+      let exam = state.exam;
 
-      state.hasAnswers = hasAnswers;
-      state.noAnswers = noAnswers;
+      if(exam.isComplete) {
+         let correctQuestions = [];
+         let wrongQuestions = [];
+         exam.parts.forEach(part => {
+            part.questions.forEach(question => {
+               if(question.correct) correctQuestions.push(question);
+               else wrongQuestions.push(question);
+            })
+         });
+         state.summary.corrects = correctQuestions;
+         state.summary.wrongs = wrongQuestions;
+         state.summary.hasAnswers = [];
+         state.summary.noAnswers = [];
+      }else {
+         let hasAnswers = [];
+         let noAnswers = [];
+         exam.parts.forEach(part => {
+            part.questions.forEach(question => {
+               if(question.userAnswerIndexes) {
+                  //有答案
+                  hasAnswers.push(question);
+               }else noAnswers.push(question);
+            })
+         });
+         state.summary.corrects = [];
+         state.summary.wrongs = [];
+         state.summary.hasAnswers = hasAnswers;
+         state.summary.noAnswers = noAnswers;
+      }
    }
    
 };

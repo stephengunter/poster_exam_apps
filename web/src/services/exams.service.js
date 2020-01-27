@@ -17,4 +17,6 @@ const save = (id, model) => BaseService.put(`${source}/${id}/save`, model);
 
 const store = (model) => BaseService.post(source, model);
 
-export default { fetch, create, abort, save, edit, update, store };
+const details = (id) => BaseService.fetch(`${source}/${id}`);
+
+export default { fetch, create, abort, save, edit, update, store, details };

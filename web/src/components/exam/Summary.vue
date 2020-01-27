@@ -96,12 +96,16 @@ export default {
          this.$emit('to-question', index);
       },
       getStatusText(model) {
-         if(model.isComplete) return model.examStatusText;
-         else {
+         if(model.isComplete) {
+            let correctQuestions = model.correctQuestions;
+            let wrongQuestions = model.wrongQuestions;
+           
+            return `${model.examStatusText} <span class="ml-2">(正確 ${correctQuestions.length} 題 , 錯誤 ${wrongQuestions.length} 題)</span>`
+         }else {
             let hasAnswers = model.hasAnswers;
             let total = hasAnswers.length + model.noAnswers.length;
            
-            return `${model.examStatusText} <span class="ml-2">(共 ${total} 題 , 已答 ${hasAnswers.length} 題)</span>`
+            return `${model.examStatusText} <span class="ml-2">(共 ${total} 題 , 已答 ${hasAnswers.length} 題)</span>`;
          }
       },
       cancel() {
