@@ -30,6 +30,19 @@ const adminlinks = [
       } 
    },
    {
+      name: 'users',
+      path: '/users',
+      view: 'Users',
+      parent: '',
+      meta: {
+         order: 0,
+         icon: 'mdi-account',
+         title: '用戶',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
+   },
+   {
       name: 'recruits',
       path: '/recruits',
       view: 'Recruits',

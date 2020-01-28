@@ -51,13 +51,11 @@ const getters = {
 
 const actions = {
    [FETCH_ACTIONS](context, route) {
-    
       context.commit(SET_APP_ACTIONS, []);
       let viewActions = fetchViewActions(route.name);
       context.commit(SET_VIEW_ACTIONS, viewActions);
    },
    [LOAD_ACTIONS](context, blocks) {
-      console.log(LOAD_ACTIONS);
       let viewActions =  context.state.viewActions;
       
       let actions = [];

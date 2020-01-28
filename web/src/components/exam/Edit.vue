@@ -185,14 +185,22 @@ export default {
          };
       },
       onStoreExam() {
-         console.log('onStoreExam');
          //檢查是否有空白未作答的題目
-
-         //交券
-         this.storeExam();
+         if(this.noAnswers.length) {
+            showConfirm({
+               type: '', 
+               title: `還有 ${this.noAnswers.length} 題沒有作答，是否確定要交券?`,
+               onOk: () => {
+                  this.storeExam();
+               }
+            });
+            return;
+         }else {
+            //交券
+            this.storeExam();
+         }
       },
       storeExam() {
-         console.log('storeExam', this.exam);
          let vm = this;
          if(!this.exam.reserved && !this.save.active) {
             //第一次存檔

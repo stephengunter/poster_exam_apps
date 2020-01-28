@@ -1,12 +1,13 @@
 <template>
-<div>
+<div v-if="model">
    <v-data-table :headers="headers" :items="list"
    :server-items-length="totalItems" :options.sync="options"
-   :items-per-page="10" class="elevation-1"
    :footer-props="{
       'items-per-page-all-text': '全部',
       'items-per-page-text' : '單頁資料數',
-      'show-current-page': true
+      'show-current-page': true,
+      'items-per-page-options' : pageSizeOptions,
+      options: options
    }"
    @click:row="onRowSelected"
    >
@@ -44,8 +45,18 @@ export default {
    },
    data() {
 		return {
-         loading: false,
-         options: {},
+         options: {
+            page: 1,
+            itemsPerPage: 10,
+            sortBy: [],
+            sortDesc: [],
+            groupBy: [],
+            groupDesc: [],
+            multiSort: false,
+            mustSort: false
+         },
+
+         pageSizeOptions: [5, 10, 25, -1],
 
          columns:[{
             subjects: [-1, 0],
@@ -53,41 +64,36 @@ export default {
             text: '科目',
             value: 'subject.title',
             sortable: false,
+            width: ''
          },{
             subjects: [],
             status: [-1, 0, 1],
             text: '存檔名稱',
             value: 'title',
             sortable: false,
+            width: ''
          },{
             subjects: [],
             status: [-1],
             text: '狀態',
             value: 'isComplete',
             sortable: false,
+            width: ''
          },{
             subjects: [],
             status: [1],
             text: '得分',
             value: 'score',
             sortable: true,
+            width: '75'
          },{
             subjects: [],
             status: [-1, 0, 1],
             text: '最後更新',
             value: 'lastUpdated',
             sortable: true,
+            width: ''
          }]
-//          text: string
-//   value: string
-//   align?: 'start' | 'center' | 'end'
-//   sortable?: boolean
-//   filterable?: boolean
-//   divider?: boolean
-//   class?: string | string[]
-//   width?: string | number
-//   filter?: (value: any, search: string, item: any) => boolean
-//   sort?: (a: any, b: any) => number
 			
 		}
    },
@@ -106,7 +112,7 @@ export default {
          let items = this.columns.filter(item => !item.subjects.length || item.subjects.includes(subject))
                                  .filter(item => item.status.includes(status));
          return items.map(item => ({
-            text: item.text, value: item.value, sortable: item.sortable, 
+            text: item.text, value: item.value, sortable: item.sortable, width: item.width
          }))
       },
       headerKeys() {
@@ -115,18 +121,32 @@ export default {
    },
    watch: {
       options: {
-        handler () {
-           console.log('options', this.options);
-         //  this.getDataFromApi()
-         //    .then(data => {
-         //      this.desserts = data.items
-         //      this.totalDesserts = data.total
-         //    })
+        handler (val) {
+            this.$emit('options-changed', {
+               page: val.page,
+               pageSize: val.itemsPerPage,
+               sortBy: val.sortBy[0] ? val.sortBy[0] : '',
+               desc: val.sortDesc[0] ? val.sortDesc[0] : false
+            });
         },
         deep: true,
       },
    },
    methods: {
+      init() {
+         let pageSize = this.pageSizeOptions.includes(this.params.pageSize) ? this.params.pageSize : -1;
+       
+         this.options = {
+            page: this.params.page < 1 ? 1 : this.params.page,
+            itemsPerPage: pageSize,
+            sortBy: [this.params.sortBy],
+            sortDesc: [this.params.desc],
+            groupBy: [],
+            groupDesc: [],
+            multiSort: false,
+            mustSort: false
+         };
+      },
       onRowSelected(item) {
          this.$emit('selected', item);
       },

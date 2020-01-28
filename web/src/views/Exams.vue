@@ -9,8 +9,8 @@
 		@filter-submit="onFilterSubmit" @creator-submit="onCreatorSubmit"
 		/>
 		<div v-show="examIndexMode">
-			<exam-table v-if="pagedList" :params="fetchParams" :model="pagedList" 
-			@selected="onTableSelected"
+			<exam-table ref="examTable" :params="fetchParams" :model="pagedList" 
+			@options-changed="onTableOptionChanged" @selected="onTableSelected"
 			/>
 		</div>
 
@@ -43,6 +43,8 @@
 </template>
 
 <script>
+import pick from 'lodash/pick';
+import isEqual from 'lodash/isEqual';
 import { mapState, mapGetters } from 'vuex';
 import { LOAD_ACTIONS, ACTION_SELECTED,
 	NEW_EXAM, EDIT_EXAM, FETCH_EXAMS, FILTER_EXAMS,
@@ -74,7 +76,10 @@ export default {
 			fetchParams: {
 				subject: -1,
 				status: -1,
-				page: -1
+				sortBy: 'lastUpdated',
+				desc: true,
+				page: -1,
+				pageSize: 10
 			},
 
 			createParams: {
@@ -118,6 +123,11 @@ export default {
 		examHeader() {
 			if(this.$refs.examHeader) return this.$refs.examHeader;
 			else if (this.references.examHeader) return this.references.examHeader;
+			return null;
+		},
+		examTable() {
+			if(this.$refs.examTable) return this.$refs.examTable;
+			else if (this.references.examTable) return this.references.examTable;
 			return null;
 		},
 		examEdit() {
@@ -182,20 +192,40 @@ export default {
             this.examHeader.launchFilter();         
          }else if(name === NEW_EXAM) {
             this.examHeader.launchCreator();     
-         }else {
-				
-			}
+         }
       },
 		onFilterSubmit(params) {
 			this.fetchParams = { ... params };
 			this.fetchExams(params);
 		},
+		onTableOptionChanged(options) {
+			if(this.fetchParams.page < 0) return;
+
+			var origin = pick(this.fetchParams, 'page', 'pageSize', 'sortBy', 'desc');
+			if(isEqual(origin, options)) return;
+
+			this.fetchParams.page = options.page;
+			this.fetchParams.pageSize = options.pageSize;
+			this.fetchParams.sortBy = options.sortBy;
+			this.fetchParams.desc = options.desc;
+
+			this.fetchExams();
+
+		},
 		fetchExams(params) {
 			this.hideSummary();
+
 			if(!params) params = this.fetchParams;
          this.$store.dispatch(FETCH_EXAMS, params)
          .then(model => {
-				if(this.fetchParams.page < 1) this.fetchParams.page = 1;
+				if(model.pagedList) {
+					this.fetchParams.page = model.pagedList.pageNumber;
+					this.fetchParams.pageSize = model.pagedList.pageSize;
+					this.fetchParams.sortBy = model.pagedList.sortBy;
+					this.fetchParams.desc = model.pagedList.desc;
+
+					this.examTable.init();
+				}
 
 				if(model.examTypeOptions.length) this.examTypeOptions = model.examTypeOptions;
 				if(model.recruitExamTypeOptions.length) this.recruitExamTypeOptions = model.recruitExamTypeOptions;
@@ -220,8 +250,8 @@ export default {
 			this.summary.active = true;
 		},
 		hideSummary() {
-			this.summary.model = null;
 			this.summary.active = false;
+			this.summary.model = null;
 		},
 		createExam(params) {
 			this.setMode('create');
@@ -291,6 +321,12 @@ export default {
 		},
 		onExamStored() {
 			//交券完畢, 回index模式
+			//設定搜尋條件為'已完成'
+			this.fetchParams.status = 1;
+			this.fetchParams.sortBy = 'lastUpdated';
+			this.fetchParams.desc = true;
+			this.fetchParams.page = 1;
+
 			this.setMode('index');
 		},	
 		onRemoveExam(model) {

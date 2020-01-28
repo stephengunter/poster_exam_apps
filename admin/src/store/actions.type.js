@@ -8,6 +8,9 @@ export const LOGOUT = 'logout';
 
 export const GET_MENUS = 'getMenus';
 
+//Users
+export const FETCH_USERS = 'fetchUsers';
+
 //Subjects
 export const FETCH_SUBJECTS = 'fetchSubjects';
 export const CREATE_SUBJECT = 'createSubject';

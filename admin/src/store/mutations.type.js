@@ -18,6 +18,9 @@ export const SET_USER = 'setUser';
 export const SET_ERROR = 'setError';
 export const CLEAR_ERROR = 'clearError';
 
+//Users
+export const SET_USERS = 'setUsers';
+
 //Subjects
 export const SET_SUBJECTS = 'setSubjects';
 
