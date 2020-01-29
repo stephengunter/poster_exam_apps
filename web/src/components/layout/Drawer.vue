@@ -20,7 +20,6 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { SITE_TITLE, LOGO_SRC } from '@/config';
 import Menu from '@/common/menu';
 import { SET_DRAWER, TOGGLE_DRAWER } from '@/store/mutations.type';
 

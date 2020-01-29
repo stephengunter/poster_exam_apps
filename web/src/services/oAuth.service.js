@@ -1,7 +1,7 @@
 import BaseService from '@/common/baseService';
-import { SITE_URL } from '@/config';
+import { API_URL } from '@/config';
 
-const source =`${SITE_URL}/api/oauth`;
+const source =`${API_URL}/oauth`;
 
 const googleLogin = (token) => BaseService.post(`${source}/google`, { token });
 

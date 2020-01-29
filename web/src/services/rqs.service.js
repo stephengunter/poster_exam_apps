@@ -1,7 +1,7 @@
 import BaseService from '@/common/baseService';
-import { SITE_URL } from '@/config';
+import { API_URL } from '@/config';
 
-const source =`${SITE_URL}/api/recruitQuestions`;
+const source =`${API_URL}/recruitQuestions`;
 
 const fetch = (params) => BaseService.fetch(source, params);
 

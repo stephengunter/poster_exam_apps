@@ -30,7 +30,6 @@ export default {
 		}
 	},
 	beforeMount() {
-		console.log('login');
 		if(this.$route.query) {
 			this.returnUrl = this.$route.query.returnUrl ?  this.$route.query.returnUrl : '';
 		}

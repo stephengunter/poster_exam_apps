@@ -1,7 +1,7 @@
 <template>
    <v-card v-if="doing">
       <core-close-icon-button @close="cancel" />
-      <v-card-text>
+      <v-card-text v-if="model">
          <v-container v-if="model.isComplete">
             <v-row>
                <v-col cols="12">

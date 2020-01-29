@@ -1,12 +1,20 @@
 import { CANCEL, SUBMIT, SELECT,
-   SELECT_RQS_MODE, STORE_EXAM, DELETE_EXAM,
+   RQS_INDEX, SELECT_RQS_MODE, STORE_EXAM, DELETE_EXAM,
    SAVE_EXAM, ABORT_EXAM, NEW_EXAM, EXAM_RECORDS,
    FILTER_EXAMS, EXAM_SUMMARY
 } from '@/store/actions.type';
 
 const actions = [
 //RQs
-   {
+{
+   views: ['rqs'],
+   name: RQS_INDEX,
+   order: 0,
+   type: SELECT,
+   icon: 'mdi-database',
+   title: '歷屆試題',
+   description: ''
+},{
    views: ['rqs'],
    name: SELECT_RQS_MODE,
    order: 0,

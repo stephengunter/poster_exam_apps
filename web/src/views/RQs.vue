@@ -21,7 +21,7 @@
 import { mapState, mapGetters } from 'vuex';
 import {
    LOAD_ACTIONS, ACTION_SELECTED, EXAM_SUMMARY,
-   FETCH_RQS, SELECT_RQS_MODE, CREATE_EXAM,
+   RQS_INDEX, FETCH_RQS, SELECT_RQS_MODE, CREATE_EXAM,
    STORE_EXAM, SAVE_EXAM, ABORT_EXAM, LEAVE_EXAM 
 } from '@/store/actions.type';
 import { SET_RQS_PAGE_MODE, SET_APP_ACTIONS, SET_EXAM_TITLE } from '@/store/mutations.type';
@@ -41,8 +41,6 @@ export default {
             subject: 0
          },
 
-         actions: [],
-
          confirm: {
             title: '',
             text: '',
@@ -55,7 +53,7 @@ export default {
    beforeRouteLeave(to, from, next) {
       //檢查是否有未存檔的測驗
       if(this.rqExamMode) {
-         this.$refs.examEdit.handleAction(LEAVE_EXAM, next);
+         this.examEdit.handleAction(LEAVE_EXAM, next);
          return;
       }else {
          next();
@@ -72,7 +70,22 @@ export default {
          subjects: state => state.rqs.subjects,
          model: state => state.rqs.model,
          examActions: state => state.exams.actions
-		}),
+      }),
+      rqHeader() {
+			if(this.$refs.rqHeader) return this.$refs.rqHeader;
+			else if (this.references.rqHeader) return this.references.rqHeader;
+			return null;
+      },
+      rqRead() {
+			if(this.$refs.rqRead) return this.$refs.rqRead;
+			else if (this.references.rqRead) return this.references.rqRead;
+			return null;
+		},
+      examEdit() {
+			if(this.$refs.examEdit) return this.$refs.examEdit;
+			else if (this.references.examEdit) return this.references.examEdit;
+			return null;
+		},
       firstLoad() {
          return this.params.mode < 0;
       }
@@ -80,9 +93,10 @@ export default {
    created(){
 		Bus.$on(ACTION_SELECTED, this.onActionSelected);
 	},
-	beforeMount() {
-      this.init();
-   },
+   mounted() {
+		this.references = { ...this.$refs };
+		this.init();
+	},
 	methods: {
       init() {
          this.params = {
@@ -91,7 +105,7 @@ export default {
             subject: 0
          };
 
-         if(this.$refs.rqHeader) this.$refs.rqHeader.init();
+         this.rqHeader.init();
 
          let title = getRouteTitle(this.$route);
          this.title = title;
@@ -118,10 +132,10 @@ export default {
                this.$store.commit(SET_RQS_PAGE_MODE); 
 
                this.$nextTick(() => {
-                  this.$refs.rqHeader.load();
+                  this.rqHeader.load();
                })
             }else {
-               this.$refs.rqHeader.setTitle();   
+               this.rqHeader.setTitle();   
             }
          })
 			.catch(error => {
@@ -129,9 +143,9 @@ export default {
 			})
       },
       createExam(params) {
-         let mode = this.$refs.rqHeader.selectedMode;
-         let year = this.$refs.rqHeader.selectedYear;
-         let subject = this.$refs.rqHeader.selectedSubject;
+         let mode = this.rqHeader.selectedMode;
+         let year = this.rqHeader.selectedYear;
+         let subject = this.rqHeader.selectedSubject;
          let items = [mode.text, year.text, subject.text];
 
          this.$store.dispatch(CREATE_EXAM, { recruit: params.subject })
@@ -140,9 +154,9 @@ export default {
             this.$store.commit(SET_EXAM_TITLE, title);
 
             this.$nextTick(() => {
-               this.$refs.rqHeader.setTitle();
+               this.rqHeader.setTitle();
                this.setActions();
-            	this.$refs.examEdit.init();
+            	this.examEdit.init();
          	})
          })
 			.catch(error => {
@@ -156,8 +170,7 @@ export default {
             types = [SELECT_RQS_MODE];
             blocks.push(types);
          }else if(this.rqExamMode) {
-            if(!this.exam) return;
-				blocks.push([SELECT_RQS_MODE, EXAM_SUMMARY]);
+				blocks.push([RQS_INDEX, EXAM_SUMMARY]);
 				blocks.push(this.examActions.map(item => item.name));
          }
 
@@ -165,12 +178,12 @@ export default {
       },
       onActionSelected(name) {
          if(this.rqExamMode) {
-            this.$refs.examEdit.handleAction(name);
+            this.examEdit.handleAction(name);
             return;
          }
 
-         if(name === SELECT_RQS_MODE) {
-            this.$refs.rqHeader.selectMode();            
+         if(name === SELECT_RQS_MODE || name === RQS_INDEX) {
+            this.rqHeader.selectMode();            
          }else {
             
          }

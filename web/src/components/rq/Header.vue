@@ -1,8 +1,8 @@
 <template>
    <div class="mb-2">
-      <a href="#" @click.prevent="onTitltClicked" class="a-btn"  >
-         {{ bread.text ?  bread.text : title }}
-      </a>
+      <core-bread :items="bread.items"
+      @selected="onBreadSelected"
+      />
       <v-dialog v-model="modeSelector.active" :max-width="modeSelector.maxWidth" persistent>
          <rq-selector  ref="modeSelector"
          :params="params" :allow_cancel="modeSelector.selected"
@@ -16,7 +16,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { EXAM_SUMMARY, ACTION_SELECTED } from '@/store/actions.type';
+import { RQS_INDEX, SELECT_RQS_MODE, EXAM_SUMMARY, ACTION_SELECTED } from '@/store/actions.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
 import { isEmptyObject, getListText } from '@/utils';
 
@@ -58,8 +58,7 @@ export default {
          },
 
          bread: {
-            items: [],
-            text: ''
+            items: []
          },
 		}
    },
@@ -114,16 +113,36 @@ export default {
             this.selectMode(false);
          })
       },
-      addBreadItem(text) {
-         this.bread.items.push(text);
-         this.bread.text = getListText(this.bread.items);
+      getBread() {
+         return this.bread;
       },
-      onTitltClicked() {
+      onBreadSelected(item) {
+         Bus.$emit(ACTION_SELECTED, item.action);
+      },
+      clearBread() {
+         this.bread.items = [];
+      },
+      addBreadItem(action ,text) {
+         this.bread.items.push({
+            action, text
+         });
+      },
+      setTitle() {
+         this.clearBread();
          if(this.rqReadMode) {
-            this.selectMode();
+            this.addBreadItem(SELECT_RQS_MODE, this.title);
+
+            let selectedList = [this.selectedMode.text, this.selectedYear.text, this.selectedSubject.text];
+            this.addBreadItem(SELECT_RQS_MODE, selectedList.join('_'));
+
          }else if(this.rqExamMode) {
-            Bus.$emit(ACTION_SELECTED, EXAM_SUMMARY);
+            this.addBreadItem(RQS_INDEX, this.title);
+
+            let examTitle = '無存檔名稱';
+            if(this.exam && this.exam.title) examTitle = this.exam.title;
+            this.addBreadItem(EXAM_SUMMARY, examTitle);
          }
+         
       },
 		selectMode(reset = true) {
          if(reset) this.params = { ...this.init_params };
@@ -157,20 +176,7 @@ export default {
          this.modeSelector.active = false;
          
       },
-      setTitle() {
-         if(this.rqReadMode) {
-
-            this.bread.items = [this.title];
-            this.addBreadItem(this.selectedMode.text);
-            this.addBreadItem(this.selectedYear.text);
-            this.addBreadItem(this.selectedSubject.text);
-
-         }else if(this.rqExamMode) {
-            this.bread.items = [this.title];
-            if(this.exam) this.addBreadItem(this.exam.title);
-         }
-         
-      }
+      
 
    }
 }

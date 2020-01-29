@@ -67,7 +67,6 @@
 import { mapGetters } from 'vuex';
 import { TOGGLE_DRAWER } from '@/store/mutations.type';
 import { LOGOUT } from '@/store/actions.type';
-import { SITE_URL } from '@/config';
 
 export default {
 	props:{

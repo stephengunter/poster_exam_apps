@@ -16,6 +16,7 @@ export const LOAD_ACTIONS = 'loadActions';
 export const ACTION_SELECTED = 'actionSelected';
 
 //RQs
+export const RQS_INDEX = 'rqsIndex';
 export const SELECT_RQS_MODE = 'selectRQsMode';
 export const FETCH_RQS = 'fetchRQs';
 

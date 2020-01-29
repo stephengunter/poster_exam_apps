@@ -7,7 +7,7 @@
 		<v-layout class="fill-height" tag="v-list" column>
 			<v-list-tile to="/" avatar >
 				<v-list-tile-avatar color="white">
-					<v-img :src="logo_src" height="34" contain />
+					<v-img :src="require('@/assets/logo.png')" height="34" contain />
 				</v-list-tile-avatar>
 				<v-list-tile-title class="title">
 					{{ site_title }}
@@ -49,7 +49,6 @@ export default {
 	},
 	data(){
 		return {
-			logo_src: LOGO_SRC,
 			site_title: SITE_TITLE
 		}
    },

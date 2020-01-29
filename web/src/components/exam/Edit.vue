@@ -43,7 +43,7 @@
 import { mapState, mapGetters } from 'vuex';
 import { EXAM_SUMMARY, STORE_EXAM, SAVE_EXAM, 
    ABORT_EXAM, DELETE_EXAM, EXAM_RECORDS, LEAVE_EXAM,
-   LOAD_EXAM_SUMMARY, SELECT_RQS_MODE
+   LOAD_EXAM_SUMMARY, SELECT_RQS_MODE, RQS_INDEX
 } from '@/store/actions.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
 import { showConfirm } from '@/utils';
@@ -281,9 +281,9 @@ export default {
          else this.$emit('leave');
       },
       handleAction(name, callback = null) {
-          console.log('handleAction', name);
          switch (name) {
             case EXAM_RECORDS:
+            case RQS_INDEX:
             case SELECT_RQS_MODE:
             case LEAVE_EXAM:
                this.onLeaveExam(callback);
