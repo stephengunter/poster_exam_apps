@@ -27,6 +27,9 @@ export const SET_SUBJECTS = 'setSubjects';
 //Terms
 export const SET_TERMS = 'setTerms';
 
+//Notes
+export const SET_NOTES_INDEX_MODEL = 'setNotesIndexModel';
+
 //Recruits
 export const SET_RECRUITS = 'setRecruits';
 

@@ -118,13 +118,14 @@ export default {
    },
 	methods: {
       init() {
+         
          if(this.selected_ids) this.fetchTerms(this.selected_ids);
          else this.fetchTerms([0]);
       },
       fetchTerms(selectedIds){
          let subject = this.subject_id;
 			let parent = -1;
-			let subItems = false;
+         let subItems = false;
 			
 			this.$store.dispatch(FETCH_TERMS, { subject, parent, subItems })
 			.then(terms => {

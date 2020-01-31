@@ -29,6 +29,9 @@ export const UPDATE_TERM = 'updateTerm';
 export const DELETE_TERM = 'deleteTerm';
 export const ORDER_TERMS = 'orderTerms';
 
+//Notes
+export const FETCH_NOTES = 'fetchNotes';
+
 //Recruits
 export const FETCH_RECRUITS = 'fetchRecruits';
 export const CREATE_RECRUIT = 'createRecruit';

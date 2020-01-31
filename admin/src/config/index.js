@@ -1,4 +1,4 @@
-export const PRODUCTION = true;
+export const PRODUCTION = false;
 export const SITE_URL = PRODUCTION ? 'https://poster-exam-admin.waterapps.nctu.me' : 'https://localhost:8080';
 export const SITE_TITLE = 'PosterExam 管理';
 

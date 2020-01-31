@@ -76,7 +76,20 @@ const adminlinks = [
       meta: {
          order: 0,
          icon: 'mdi-file-document-box-outline',
-         title: '條文內容',
+         title: '條文課綱',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
+   },
+   {
+      name: 'notes',
+      path: '/notes',
+      view: 'Notes',
+      parent: '',
+      meta: {
+         order: 0,
+         icon: 'mdi-note-text-outline',
+         title: '筆記',
          type: ADMIN_ONLY,
          menu: true
       } 
