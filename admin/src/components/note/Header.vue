@@ -1,30 +1,18 @@
 <template>
 <div>
 	<v-layout row wrap>
-		<v-flex xs6 sm6 md6>
+		<v-flex xs12>
 			<core-bread :items="bread.items"
 			@selected="onBreadSelected"
 			/>
-			<!-- <v-select label="科目"
-				:items="subject.options" v-model="params.subject"
-				@change="onSubjectChanged"
-			/> -->
-			<!-- <a href="#" @click.prevent="selectSubject"> 科目： {{ subject.fullText }} </a> -->
 		</v-flex>
-		<v-flex xs6 sm6 md6 text-xs-right>
-			
-			<!-- <v-tooltip v-if="false" top content-class="top">
-				<v-btn :disabled="!canCreate" @click.prevent="create" class="mx-2" fab small color="info" slot="activator">
-					<v-icon>mdi-plus</v-icon>
-				</v-btn>
-				<span>新增</span>
-			</v-tooltip> -->
-		</v-flex>
-		
 	</v-layout>
 	<v-dialog v-model="category.active" persistent :max-width="category.maxWidth">
-		<note-category v-if="ready" 
-		:subject_list="subjectList" :params="params"
+		<note-category :allow_cancel="params.term > 0"
+		:subject_options="subjectOptions" :params="params"
+		:trees="trees" 
+		@subject-changed="onSubjectChanged"
+		@selected="onTermSelected" @cancel="category.active = false"
 		/>
 	</v-dialog>
 </div>
@@ -33,24 +21,38 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { DIALOG_MAX_WIDTH } from '@/config';
-import { FETCH_SUBJECTS } from '@/store/actions.type';
+import { NOTE_CATEGORY } from '@/store/actions.type';
 import { onError } from '@/utils';
 
 export default {
    name: 'NoteHeader',
    props: {
+		index_model: {
+			type: Object,
+			default: null
+		},
+      init_params: {
+			type: Object,
+			default: null
+		},
 		can_create: {
 			type: Boolean,
 			default: false
 		},
-      params: {
-			type: Object,
-			default: null
-		}
 	},
    data () {
 		return {
-			ready: false,
+			params: {},
+
+			rootSubjects: [],
+			subjects: [],
+			subject: null,
+			terms: [],
+
+			subjectOptions: [],
+
+			trees: [],
+
 			category: {
 				active: false,
 				maxWidth: DIALOG_MAX_WIDTH
@@ -63,29 +65,95 @@ export default {
 		}
    },
    computed: {
-		...mapGetters(['responsive','contentMaxWidth']),
-		...mapState({
-			subjectList: state => state.subjects.list
-		})
-   },
-   beforeMount(){
-		//只要root科目(考試科目)
-		this.$store.dispatch(FETCH_SUBJECTS, { parent: 0, subItems: true })
-		.then(subjects => {
-			this.$nextTick(() => {
-            this.ready = true;
-         });
-		})
-		.catch(error => {
-			onError(error);
-		})
+		...mapGetters(['responsive','contentMaxWidth'])
    },
    methods: {
 		init() {
-			
-		},
-		onBreadSelected() {
+			this.params = { ...this.init_params };
 
+			let model = this.index_model;
+			this.rootSubjects = model.rootSubjects;
+			this.subjects = model.subjects;
+			this.subject = model.subject;
+			this.terms = model.terms;
+
+			this.subjectOptions = this.rootSubjects.map(item => ({
+				value: item.id, text: item.title
+			}));
+
+			this.params.subject = this.subject.id;
+			this.loadTrees();
+			//this.setTitle();
+		},
+		loadTrees() {
+			let trees = [];
+			let subject = this.subject;
+			let terms = this.terms;
+
+			if(subject.subItems.length) {
+				trees = subject.subItems.map(item => ({
+					type: 'subject',
+					id: item.id, subItems: [],
+					title: item.title, text: item.text
+				}));
+			}else {
+				trees.push({
+					type: 'subject',
+					id: subject.id, subItems: [],
+					title: subject.title, text: subject.text
+				});
+			}
+
+			trees.forEach(item => {
+				item.subItems = terms.filter(term => term.subjectId === item.id);
+			});
+
+			this.trees = trees;
+
+			if(!this.params.term) {
+				this.showCategory();
+			}
+		},
+		setTitle(term) {
+         this.clearBread();
+			this.addBreadItem(NOTE_CATEGORY, this.subject.title);
+			
+			this.addBreadItem(NOTE_CATEGORY, term.subject.title);
+
+			if(term.parentId) {
+				let parent = this.terms.find(item => item.id === term.parentId);
+				this.addBreadItem(NOTE_CATEGORY, parent.fullText);
+			}
+			
+			this.addBreadItem(NOTE_CATEGORY, term.fullText);
+      },
+		clearBread() {
+         this.bread.items = [];
+      },
+      addBreadItem(action ,text) {
+         this.bread.items.push({
+            action, text
+         });
+      },
+		onBreadSelected(item) {
+			this.showCategory();
+		},
+		showCategory() {
+			this.category.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
+			this.category.active = true;
+		},
+		onSubjectChanged(val) {
+			this.subject = this.rootSubjects.find(item => item.id === val);
+			this.loadTrees();
+		},
+		onTermSelected(item) {
+			this.params.term = item.id;
+			console.log('onTermSelected', item);
+			console.log('params', this.params);
+			this.$emit('params-changed', this.params);
+
+			this.setTitle(item);
+			this.category.active = false;
 		}
    }
 }

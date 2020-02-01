@@ -1,9 +1,9 @@
 <template>
    <v-card>
       <v-card-title>
-         <h3>目錄</h3>
+         <h3>目錄 - 請選擇章節</h3>
          <v-spacer />
-         <a href="#" @click.prevent="cancel" class="a-btn">
+         <a v-if="allow_cancel" href="#" @click.prevent="cancel" class="a-btn">
             <v-icon>mdi-window-close</v-icon>
          </a>
       </v-card-title>
@@ -11,11 +11,23 @@
          <v-layout row wrap>
             <v-flex xs6 sm6 md6>
                <v-select label="科目"
-                  :items="subject.options" v-model="params.subject"
+                  :items="subject_options" v-model="params.subject"
                   @change="onSubjectChanged"
                />
             </v-flex>
             <v-flex xs6 sm6 md6>
+            </v-flex>
+         </v-layout>
+         <v-layout row wrap>
+            <v-flex xs12>
+               <v-treeview v-if="trees && trees.length" :items="trees" item-children="subItems"
+               open-all activatable hoverable return-object  active-class="primary--text"
+               :active.sync="tree.active"
+               >
+                  <template v-slot:label="{ item }">
+                     <term-tree-item :item="item" :max_width="treeMaxWidth" />
+                  </template>
+               </v-treeview>
             </v-flex>
          </v-layout>
       </v-card-text>
@@ -24,26 +36,17 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-
-const fetchTerms = (subjectIds, vm) => {
-   let subjectId  = subjectIds.shift();
-   setTimeout(() => {
-      vm.$store.dispatch(FETCH_TERMS, { subject: subjectId, parent: 0 })
-      .then(terms => {
-         vm.loadTerms(subjectId, terms);
-
-         if(subjectIds.length) fetchTerms(subjectIds, vm);
-         else vm.onTermsFetched();              	
-      })
-      .catch(error => {
-         onError(error);
-      })
-   }, 250);
-}
-
 export default {
    props: {
-      subject_list: {
+      subject_options: {
+         type: Array,
+			default: null
+      },
+      allow_cancel: {
+         type: Boolean,
+			default: false
+      },
+      trees: {
          type: Array,
 			default: null
       },
@@ -58,41 +61,48 @@ export default {
 				options: [],
 				root: null,
 				subItems: []
-			},
+         },
+
+         tree: {
+				active: []
+			}
       }
    },
+   computed: {
+      ...mapGetters(['responsive','contentMaxWidth']),
+      selectItem() {
+			if(this.tree.active.length) return this.tree.active[0];
+			return 0;
+		},
+		treeMaxWidth() {
+			return this.contentMaxWidth - 65;
+		}
+   },
+   watch: {
+      selectItem: 'onSelectItemChanged'
+   },
    beforeMount(){
-		this.init();
+		
    },
    methods: {
       init() {
-         console.log('init');
-         let subjectOptions = this.subject_list.map(item => ({
-				value: item.id, text: item.title
-         }));
-
-         this.subject.options = subjectOptions;
          
-         if(!this.params.subject) this.params.subject = subjectOptions[0].value;
-			this.onSubjectChanged(this.params.subject);
       },
       onSubjectChanged(val) {
-			this.subject.root = this.subject_list.find(item => item.id === val);
-		
-         this.subject.subItems = this.subject.subItems.slice(0);
-         
-			let vm = this;
-			fetchTerms(this.subject.subItems.map(item => item.id), vm);
+         this.$emit('subject-changed', val);
       },
-      loadTerms(subjectId, terms) {
-			let subject = this.subject.subItems.find(item => item.id === subjectId);
-			subject.terms = terms;
-      },
-      onTermsFetched() {
-			console.log('onTermsFetched');
-      },
+      onSelectItemChanged() {
+         let item = this.selectItem;
+         if(item.type && item.type === 'subject') {
+            return;
+         }else {
+            console.log(this.params.term);
+            console.log(item.id === this.params.term);
+            if(item.id !== this.params.term)  this.$emit('selected', item);
+         }
+		},
       cancel() {
-
+         this.$emit('cancel');
       }
    }
 }

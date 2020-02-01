@@ -1,78 +1,44 @@
 <template>
-<form @submit.prevent="onSubmit">
-   <v-card>
-      <v-card-title>
-         <v-spacer />
-         <a href="#" @click.prevent="cancel">
-            <v-icon>mdi-window-close</v-icon>
-         </a>
-      </v-card-title>
-      <v-card-text>
-         <v-container grid-list-md>
-            <v-layout row wrap>
-               <v-flex xs12>
-                  <p class="title"> 
-                  {{ question.title }}
-                  </p> 
-               </v-flex>
-               <v-flex xs4>
-                  <v-checkbox v-model="question.multiAnswers" label="複選"  readonly
-                  />
-               </v-flex>
-               <v-flex xs8>
-                  <option-list :options="question.options" 
-                  />
-               </v-flex>
-               <v-flex xs12>
-                  <p> 
-                     <term-tree-item v-for="(term,index) in question.terms" :key="index" 
-                     :item="term" :show_subject="true"
-                     />
-                  </p> 
-               </v-flex>
-               <v-flex xs12>
-                  <span class="title">解析</span>
-                  <v-btn v-show="canCreate" @click.prevent="add" small  fab icon color="info">
-                     <v-icon>mdi-plus</v-icon>
-                  </v-btn>
-               </v-flex>
-               <v-flex xs12>
-                  <v-data-table :items="question.resolves" :headers="headers"  hide-actions item-key="index">
-                     <template slot="headerCell" slot-scope="{ header }">
-                        <span class="subheading font-weight-light text-success text--darken-3">
-                           {{ header.text }}
-                        </span>
-                     </template>
-                     <template slot="items" slot-scope="props">
-                        <resolve-row :model="props.item" :index="props.index"
-                        :enable="enable(props.item, props.index)" :edit="isEdit(props.item, props.index)"
-                        @selected="edit" @cancel="onRowCancel"
-                        @remove="onRemove(props.item)"
-                        @save="onSubmit(props.item)"
-                        />
-                     </template>
-                  </v-data-table>
-               </v-flex>
-            </v-layout>
-            <core-error-list />   
-         </v-container>      
-      </v-card-text>
-   </v-card>
-</form>   
+   <v-layout row wrap>
+      <v-flex sm12>
+         <v-btn @click.prevent="add" small  fab icon color="info">
+            <v-icon>mdi-plus</v-icon>
+         </v-btn>
+         <span class="title" v-text="term.title"></span>
+      </v-flex>
+      <v-flex sm12>
+         <v-data-table :items="term.notes" :headers="headers"  hide-actions item-key="index">
+            <template slot="headerCell" slot-scope="{ header }">
+               <span class="subheading font-weight-light text-success text--darken-3">
+                  {{ header.text }}
+               </span>
+            </template>
+            <template slot="items" slot-scope="props">
+               <note-row :model="props.item" :index="props.index"
+               :enable="enable(props.item, props.index)" :edit="isEdit(props.item, props.index)"
+               @selected="edit" @cancel="onRowCancel"
+               @remove="onRemove(props.item)"
+               @save="onSubmit(props.item)"
+               />
+            </template>
+         </v-data-table>
+      </v-flex>
+   </v-layout>
+   
 </template>
 
 
 <script>
-import { STORE_RESOLVE, UPDATE_RESOLVE, DELETE_RESOLVE, STORE_ATTACHMENT } from '@/store/actions.type';
+import { STORE_NOTE, UPDATE_NOTE, DELETE_NOTE, STORE_ATTACHMENT } from '@/store/actions.type';
 import { CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
 import { onError, deepClone, isValidURL } from '@/utils';
 export default {
-	name: 'ResolveEdit',
+	name: 'NoteEdit',
 	props: {
-      question: {
+      term: {
          type: Object,
          default: null
-		}
+      }
 	},
 	data () {
 		return {
@@ -108,7 +74,6 @@ export default {
 					value: ''
 				}
          ],
-
          selectedIndex: -1,
          editModel: null
 		}
@@ -121,9 +86,9 @@ export default {
          return this.selectedIndex > -1;
       },
       creating() {
-         return this.question.resolves.findIndex(item => item.id === 0) > -1;
+         return this.term.notes.findIndex(item => item.id === 0) > -1;
       }
-	},
+   },
 	methods: {
       cancel(){
 			this.$emit('cancel');
@@ -139,9 +104,9 @@ export default {
       },
       add(){
          this.selectedIndex = -1;
-         this.question.resolves.push({
+         this.term.notes.push({
             id: 0,
-            questionId: this.question.id,
+            termId: this.term.id,
             highlight: '',
             source: '',
             attachments: [],
@@ -152,7 +117,7 @@ export default {
          if(item.id) {
             this.remove(item.id);
          }else {
-            this.question.resolves.splice(this.question.resolves.length - 1, 1);
+            this.term.notes.splice(this.term.notes.length - 1, 1);
          }
       },
       onSubmit(model) {
@@ -177,8 +142,9 @@ export default {
       },
       update(model){
          this.$store.commit(CLEAR_ERROR);
-         this.$store.dispatch(UPDATE_RESOLVE, model)
+         this.$store.dispatch(UPDATE_NOTE, model)
 			.then(() => {
+            console.log('medias', model.medias);
             if(model.medias.length) {
                let uploadForm = {
                   postId : model.id,
@@ -197,7 +163,7 @@ export default {
       },
       store(model) {
          this.$store.commit(CLEAR_ERROR);
-         this.$store.dispatch(STORE_RESOLVE, model)
+         this.$store.dispatch(STORE_NOTE, model)
 			.then(data => {
             if(data.attachments.length) {
                let uploadForm = {
@@ -229,7 +195,7 @@ export default {
 		},
       remove(id) {
          this.$store.commit(CLEAR_ERROR);
-         this.$store.dispatch(DELETE_RESOLVE, id)
+         this.$store.dispatch(DELETE_NOTE, id)
 			.then(() => {
 				this.onSaved();
 			})
@@ -253,17 +219,26 @@ export default {
       onRowCancel() {
          if(this.editting) {
             let index = this.selectedIndex;
-            this.question.resolves.splice(index, 1, { ...this.editModel });
+            this.term.notes.splice(index, 1, { ...this.editModel });
 
             this.$nextTick(() => {
                this.selectedIndex = -1;
             });
             
          } 
-         else if(this.creating) this.question.resolves.splice(this.question.resolves.length - 1, 1);
+         else if(this.creating) this.term.notes.splice(this.term.notes.length - 1, 1);
          
+
+         this.$emit('row-canceled');
       },
       edit(index, model) {
+         if(model.highlights) model.highlight = model.highlights.join('\n');
+         else item.highlights = [];
+
+         if(model.sources) {
+            model.source = model.sources.map(item => `${item.text},${item.link}`).join('\n');
+         }else model.sources = [];
+
          this.selectedIndex = index;
            //複製, 用來還原(取消編輯時)
          this.editModel = deepClone(model);

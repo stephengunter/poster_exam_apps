@@ -30,10 +30,11 @@ export default {
          if(!this.item) return '';
          let item = this.item;         
         
-         let content = item.text;
+         let content = item.text ? item.text : '';
          if(this.show_title) {
             let title = this.show_subject ? `${item.subject.title} ${item.title}` : item.title;
-            content = title + ' ' + content;
+            if(content) content = title + ' ' + content;
+            else content = title;            
          }
           
          return content.replace(/<br>/g, `<br><span style="padding-left:15px"></span>`);

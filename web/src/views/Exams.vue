@@ -108,7 +108,7 @@ export default {
             callback: null
 			},
 			
-			references: {},
+			references: {}
 		}
 	},
 	computed: {

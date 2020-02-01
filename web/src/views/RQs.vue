@@ -47,7 +47,9 @@ export default {
             active: false,
             action: '',
 				maxWidth: DIALOG_MAX_WIDTH
-         }
+         },
+
+         references: {}
 		}
    },
    beforeRouteLeave(to, from, next) {
