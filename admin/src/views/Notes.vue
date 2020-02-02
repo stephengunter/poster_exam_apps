@@ -9,13 +9,17 @@
 					/>
 					
 					<note-edit v-for="(term, index) in terms" :key="index"
-					:term="term"
+					:term="term" :version="version"
+					@remove="onRemove"
+					@saved="onSaved"
 					/>
 						
 				</material-card>
 			</v-flex>
       </v-layout>
-		
+		<v-dialog v-model="deletion.active" :max-width="deletion.maxWidth">
+			<core-confirm @ok="remove" @cancel="cancelRemove" />
+		</v-dialog>
 	</v-container>
     
 	
@@ -24,9 +28,9 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
+import { FETCH_NOTES, DELETE_NOTE } from '@/store/actions.type';
 
-import { FETCH_NOTES } from '@/store/actions.type';
-
+import { DIALOG_MAX_WIDTH } from '@/config';
 import { onError } from '@/utils';
 
 export default {
@@ -40,6 +44,8 @@ export default {
 
 			indexModel: null,
 			terms: [],
+			version: 0,
+
 			headers: [
             {
 					sortable: false,
@@ -72,7 +78,13 @@ export default {
 					value: ''
 				}
          ],
-			references: {}
+			references: {},
+
+			deletion: {
+				id: 0,
+				active: false,
+				maxWidth: DIALOG_MAX_WIDTH
+			}
 		}
 	},
 	computed: {
@@ -113,6 +125,8 @@ export default {
 					}else {
 						this.terms = [model];
 					}
+
+					this.version += 1;
 				}
 				
 			})
@@ -120,9 +134,32 @@ export default {
 				onError(error);
 			})
 		},
-		onParamsChanged(params) {
-			this.fetchData(params);
-			this.params = { ...params };
+		onParamsChanged() {
+			this.fetchData(this.params);
+		},
+		onRemove(item) {
+			this.deletion.id = item.id;
+			this.deletion.active = true;
+		},
+		cancelRemove() {
+			this.deletion.id = 0;
+			this.deletion.active = false;
+		},
+		remove() {
+			let id = this.deletion.id;
+         this.$store.commit(CLEAR_ERROR);
+         this.$store.dispatch(DELETE_NOTE, id)
+			.then(() => {
+				this.cancelRemove();
+				this.onSaved();
+			})
+			.catch(error => {
+				if(!error)  Bus.$emit('errors');
+				else this.$store.commit(SET_ERROR, error);
+			})
+      },
+		onSaved() {
+			this.fetchData(this.params);
 		}
 	}
 }

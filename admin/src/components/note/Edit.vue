@@ -4,7 +4,7 @@
          <v-btn @click.prevent="add" small  fab icon color="info">
             <v-icon>mdi-plus</v-icon>
          </v-btn>
-         <span class="title" v-text="term.title"></span>
+         <span class="title" v-text="term.fullText"></span>
       </v-flex>
       <v-flex sm12>
          <v-data-table :items="term.notes" :headers="headers"  hide-actions item-key="index">
@@ -38,6 +38,10 @@ export default {
       term: {
          type: Object,
          default: null
+      },
+      version: {
+         type: Number,
+         default: 0
       }
 	},
 	data () {
@@ -75,7 +79,8 @@ export default {
 				}
          ],
          selectedIndex: -1,
-         editModel: null
+         editModel: null,
+         postType: 'Note'
 		}
    },
    computed: {
@@ -89,7 +94,13 @@ export default {
          return this.term.notes.findIndex(item => item.id === 0) > -1;
       }
    },
+   watch: {
+      version: 'init'
+   },
 	methods: {
+      init() {
+         this.selectedIndex = -1;
+      },
       cancel(){
 			this.$emit('cancel');
 		},
@@ -115,7 +126,8 @@ export default {
       },
 		onRemove(item){
          if(item.id) {
-            this.remove(item.id);
+            this.$emit('remove', item);
+            //this.remove(item.id);
          }else {
             this.term.notes.splice(this.term.notes.length - 1, 1);
          }
@@ -148,7 +160,7 @@ export default {
             if(model.medias.length) {
                let uploadForm = {
                   postId : model.id,
-                  postType: model.attachments[0].postType,
+                  postType: this.postType,
                   files: model.medias.map(item => item.file)
                }
                this.uploadAttachments(uploadForm);
@@ -245,6 +257,7 @@ export default {
       },
       onSaved() {
          this.$emit('saved');
+         this.selectedIndex = -1;
       }
 	}
 }

@@ -31,7 +31,7 @@ export default {
 			type: Object,
 			default: null
 		},
-      init_params: {
+      params: {
 			type: Object,
 			default: null
 		},
@@ -42,8 +42,6 @@ export default {
 	},
    data () {
 		return {
-			params: {},
-
 			rootSubjects: [],
 			subjects: [],
 			subject: null,
@@ -69,8 +67,6 @@ export default {
    },
    methods: {
 		init() {
-			this.params = { ...this.init_params };
-
 			let model = this.index_model;
 			this.rootSubjects = model.rootSubjects;
 			this.subjects = model.subjects;
@@ -147,10 +143,7 @@ export default {
 			this.loadTrees();
 		},
 		onTermSelected(item) {
-			this.params.term = item.id;
-			console.log('onTermSelected', item);
-			console.log('params', this.params);
-			this.$emit('params-changed', this.params);
+			this.$emit('params-changed');
 
 			this.setTitle(item);
 			this.category.active = false;

@@ -110,7 +110,8 @@ export default {
          ],
 
          selectedIndex: -1,
-         editModel: null
+         editModel: null,
+         postType: 'Resolve'
 		}
    },
    computed: {
@@ -182,7 +183,7 @@ export default {
             if(model.medias.length) {
                let uploadForm = {
                   postId : model.id,
-                  postType: model.attachments[0].postType,
+                  postType: this.postType,
                   files: model.medias.map(item => item.file)
                }
                this.uploadAttachments(uploadForm);

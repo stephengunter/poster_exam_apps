@@ -72,7 +72,7 @@ export default {
       ...mapGetters(['responsive','contentMaxWidth']),
       selectItem() {
 			if(this.tree.active.length) return this.tree.active[0];
-			return 0;
+			return null;
 		},
 		treeMaxWidth() {
 			return this.contentMaxWidth - 65;
@@ -92,13 +92,16 @@ export default {
          this.$emit('subject-changed', val);
       },
       onSelectItemChanged() {
+         if(!this.selectItem) return;
+
          let item = this.selectItem;
          if(item.type && item.type === 'subject') {
             return;
          }else {
-            console.log(this.params.term);
-            console.log(item.id === this.params.term);
-            if(item.id !== this.params.term)  this.$emit('selected', item);
+            if(item.id !== this.params.term) {
+               this.params.term = item.id;
+               this.$emit('selected', item);
+            }
          }
 		},
       cancel() {
