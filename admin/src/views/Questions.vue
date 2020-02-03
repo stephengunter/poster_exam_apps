@@ -76,6 +76,7 @@ import { FETCH_QUESTIONS, CREATE_QUESTION, STORE_QUESTION,
 	STORE_ATTACHMENT, STORE_OPTIONS, FETCH_RESOLVES 
 } from '@/store/actions.type';
 
+import { DIALOG_MAX_WIDTH } from '@/config';
 import { onError } from '@/utils';
 
 export default {
@@ -101,7 +102,7 @@ export default {
 
 			resolves: {
 				active: false,
-				maxWidth: 800,
+				maxWidth: DIALOG_MAX_WIDTH,
 				model: null,
 
 				questionId: 0
@@ -110,19 +111,19 @@ export default {
 			showTerm: {
 				active: false,
 				model: null,
-				maxWidth: 480
+				maxWidth: DIALOG_MAX_WIDTH
 			},
 
 			showPhoto: {
 				active: false,
 				model: null,
-				maxWidth: 480
+				maxWidth: DIALOG_MAX_WIDTH
 			},
 
 			deletion: {
 				id: 0,
 				active: false,
-				maxWidth: 480
+				maxWidth: DIALOG_MAX_WIDTH
 			}
 			
 		}

@@ -155,8 +155,6 @@ export default {
          this.$emit('selected', this.index, this.model);
          this.model.text = replaceBR(this.model.text);
          this.model.medias = [];
-
-         console.log('model', this.model);
       },
       getPhotoPath(attachment) {
          let width = 100;

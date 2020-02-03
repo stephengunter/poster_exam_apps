@@ -58,13 +58,15 @@
    <tr v-else>
       <td>
          <div v-for="(item, index) in model.attachments" :key="index">
-            <v-img :src="item.previewPath | photoNameUrl(100)" max-width="100" aspect-ratio="1"
-            />
+            <a href="#" @click.prevent="showPhoto(item)">
+               <v-img :src="item.previewPath | photoNameUrl(100)" max-width="100" aspect-ratio="1"
+               />
+            </a>
             {{ item.title }}
          </div>
       </td>
       <td>
-         <core-highlight :queries="model.highlights" :content="model.text" />
+         <core-highlight v-if="model.text" :queries="model.highlights" :content="model.text" />
       </td>
       <td>
          <core-label v-for="(item, index) in model.highlights" :key="index">
@@ -129,6 +131,9 @@ export default {
 		}
    },
    methods: {
+      showPhoto(photo){
+         this.$emit('show-photo', photo);
+      },
       save() {
          this.$validator.validate().then(valid => {
 				if(valid) {

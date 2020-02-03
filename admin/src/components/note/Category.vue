@@ -16,6 +16,20 @@
                />
             </v-flex>
             <v-flex xs6 sm6 md6>
+               <form @submit.prevent="search">
+                  <v-text-field label="Search" single-line hide-details
+                  v-model="params.keyword"
+                  >
+                     <template v-slot:prepend>
+                        <v-icon>mdi-magnify</v-icon>
+                     </template>
+                     <template v-slot:append>
+                        <a href="#" @click.prevent="clearSearch">
+                           <v-icon>mdi-close</v-icon>
+                        </a>
+                     </template>
+                  </v-text-field>
+               </form>
             </v-flex>
          </v-layout>
          <v-layout row wrap>
@@ -100,9 +114,19 @@ export default {
          }else {
             if(item.id !== this.params.term) {
                this.params.term = item.id;
+               this.params.keyword = '';
                this.$emit('selected', item);
             }
          }
+      },
+      search() {
+         if(this.params.keyword) {
+            this.tree.active = [];
+            this.$emit('search');
+         }
+      },
+      clearSearch() {
+			this.params.keyword = '';
 		},
       cancel() {
          this.$emit('cancel');

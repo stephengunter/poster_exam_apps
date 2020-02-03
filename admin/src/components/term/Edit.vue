@@ -48,6 +48,13 @@
 							row-height="15"
 							/>
 						</v-flex>
+						<v-flex xs12>
+							<v-textarea v-model="model.highlight" label="重點標記" outlined auto-grow
+							name="text"
+							rows="5"
+							row-height="15"
+							/>
+						</v-flex>
 					</v-layout>
 					<core-error-list  />
 				</v-container>
@@ -196,6 +203,8 @@ export default {
 			if(parent) this.model.parentId = parent.id;
 			else  this.model.parentId = 0;
 
+			let highlight = this.model.highlight;
+         this.model.highlights = highlight.split('\n').filter(Boolean);
 
          this.$validator.validate().then(valid => {
 				if(valid) this.$emit('submit');

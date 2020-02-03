@@ -4,7 +4,7 @@
          <v-btn @click.prevent="add" small  fab icon color="info">
             <v-icon>mdi-plus</v-icon>
          </v-btn>
-         <span class="title" v-text="term.fullText"></span>
+         <core-highlight :queries="term.highlights" :content="term.fullText" />
       </v-flex>
       <v-flex sm12>
          <v-data-table :items="term.notes" :headers="headers"  hide-actions item-key="index">
@@ -17,8 +17,8 @@
                <note-row :model="props.item" :index="props.index"
                :enable="enable(props.item, props.index)" :edit="isEdit(props.item, props.index)"
                @selected="edit" @cancel="onRowCancel"
-               @remove="onRemove(props.item)"
-               @save="onSubmit(props.item)"
+               @show-photo="showPhoto" 
+               @save="onSubmit(props.item)" @remove="onRemove(props.item)"
                />
             </template>
          </v-data-table>
@@ -103,7 +103,10 @@ export default {
       },
       cancel(){
 			this.$emit('cancel');
-		},
+      },
+      showPhoto(photo){
+         this.$emit('show-photo', photo);
+      },
       getErrMsg(keys){
          let err = this.errors.collect(keys[1]);
 			if(err && err.length){
@@ -127,7 +130,6 @@ export default {
 		onRemove(item){
          if(item.id) {
             this.$emit('remove', item);
-            //this.remove(item.id);
          }else {
             this.term.notes.splice(this.term.notes.length - 1, 1);
          }
@@ -245,7 +247,7 @@ export default {
       },
       edit(index, model) {
          if(model.highlights) model.highlight = model.highlights.join('\n');
-         else item.highlights = [];
+         else model.highlights = [];
 
          if(model.sources) {
             model.source = model.sources.map(item => `${item.text},${item.link}`).join('\n');

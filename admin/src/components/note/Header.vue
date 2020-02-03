@@ -12,6 +12,7 @@
 		:subject_options="subjectOptions" :params="params"
 		:trees="trees" 
 		@subject-changed="onSubjectChanged"
+		@search="onSearch"
 		@selected="onTermSelected" @cancel="category.active = false"
 		/>
 	</v-dialog>
@@ -79,7 +80,6 @@ export default {
 
 			this.params.subject = this.subject.id;
 			this.loadTrees();
-			//this.setTitle();
 		},
 		loadTrees() {
 			let trees = [];
@@ -113,15 +113,21 @@ export default {
 		setTitle(term) {
          this.clearBread();
 			this.addBreadItem(NOTE_CATEGORY, this.subject.title);
-			
-			this.addBreadItem(NOTE_CATEGORY, term.subject.title);
 
-			if(term.parentId) {
-				let parent = this.terms.find(item => item.id === term.parentId);
-				this.addBreadItem(NOTE_CATEGORY, parent.fullText);
+			if(this.params.keyword) {
+				this.addBreadItem(NOTE_CATEGORY, `搜尋：${this.params.keyword}` );
+			}else {
+				this.addBreadItem(NOTE_CATEGORY, term.subject.title);
+
+				if(term.parentId) {
+					let parent = this.terms.find(item => item.id === term.parentId);
+					this.addBreadItem(NOTE_CATEGORY, parent.fullText);
+				}
+				
+				this.addBreadItem(NOTE_CATEGORY, term.fullText);
 			}
 			
-			this.addBreadItem(NOTE_CATEGORY, term.fullText);
+			
       },
 		clearBread() {
          this.bread.items = [];
@@ -140,12 +146,20 @@ export default {
 		},
 		onSubjectChanged(val) {
 			this.subject = this.rootSubjects.find(item => item.id === val);
-			this.loadTrees();
+			this.trees = [];
+			this.$nextTick(() => {
+				this.loadTrees();
+			});
 		},
 		onTermSelected(item) {
 			this.$emit('params-changed');
 
 			this.setTitle(item);
+			this.category.active = false;
+		},
+		onSearch() {
+			this.$emit('params-changed');
+			this.setTitle();
 			this.category.active = false;
 		}
    }

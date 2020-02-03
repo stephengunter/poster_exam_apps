@@ -248,6 +248,12 @@ export default {
 			this.$store.commit(CLEAR_ERROR);
 			this.$store.dispatch(EDIT_TERM, id)
 			.then(model => {
+				let term = model.term;
+				if(term.highlights) term.highlight = term.highlights.join('\n');				
+				else term.highlights = [];
+
+				console.log(model);
+				
 				this.setEditModel(model);
 			})
 			.catch(error => {

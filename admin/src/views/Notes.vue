@@ -8,17 +8,34 @@
 					@params-changed="onParamsChanged"
 					/>
 					
-					<note-edit v-for="(term, index) in terms" :key="index"
-					:term="term" :version="version"
-					@remove="onRemove"
-					@saved="onSaved"
-					/>
-						
+					<div v-if="ready">
+						<note-edit v-for="(term, index) in terms" :key="index"
+						:term="term" :version="version"
+						@show-photo="onShowPhoto" 
+						@saved="onSaved" @remove="onRemove"
+						/>
+					</div>	
 				</material-card>
 			</v-flex>
       </v-layout>
 		<v-dialog v-model="deletion.active" :max-width="deletion.maxWidth">
 			<core-confirm @ok="remove" @cancel="cancelRemove" />
+		</v-dialog>
+		<v-dialog v-model="showPhoto.active" :max-width="showPhoto.maxWidth">
+			<v-card v-if="showPhoto.model">
+				<v-card-title>
+					<span class="title">{{ showPhoto.model.title }}</span>
+					<v-spacer />
+					<a href="#" @click.prevent="showPhoto.active = false" class="a-btn">
+						<v-icon>mdi-window-close</v-icon>
+					</a>
+				</v-card-title>
+				<v-card-text>
+					<v-img class="img-center" :src="showPhoto.model.id | photoIdUrl"
+					 :max-width="showPhoto.model.width"
+					/>
+				</v-card-text>
+      	</v-card>
 		</v-dialog>
 	</v-container>
     
@@ -39,12 +56,14 @@ export default {
 		return {
 			params: {
 				subject: 0,
-				term: 0
+				term: 0,
+				keyword: ''
 			},
 
 			indexModel: null,
 			terms: [],
 			version: 0,
+			ready: false,
 
 			headers: [
             {
@@ -80,6 +99,12 @@ export default {
          ],
 			references: {},
 
+			showPhoto: {
+				active: false,
+				model: null,
+				maxWidth: DIALOG_MAX_WIDTH
+			},
+
 			deletion: {
 				id: 0,
 				active: false,
@@ -111,22 +136,22 @@ export default {
 		},
 		fetchData(params) {
 			if(!params) params = this.params;
-
+			this.ready = false;
 			this.$store.dispatch(FETCH_NOTES, params)
 			.then(model => {
 				if(this.firstLoad) {
 					this.indexModel = model;
 					this.$nextTick(() => {
+						this.ready = true;
 						this.noteHeader.init();
 					});
 				}else {
-					if(model.subItems.length) {
-						this.terms = model.subItems;
-					}else {
-						this.terms = [model];
-					}
-
-					this.version += 1;
+					this.terms = model;
+					this.$nextTick(() => {
+						this.ready = true;
+						this.version += 1;
+					});
+					
 				}
 				
 			})
@@ -136,6 +161,10 @@ export default {
 		},
 		onParamsChanged() {
 			this.fetchData(this.params);
+		},
+		onShowPhoto(photo) {
+			this.showPhoto.model = photo;
+			this.showPhoto.active = true;
 		},
 		onRemove(item) {
 			this.deletion.id = item.id;
