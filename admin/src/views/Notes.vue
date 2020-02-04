@@ -5,7 +5,7 @@
 				<material-card>
 					<note-header ref="noteHeader" 
 					:params="params" :index_model="indexModel"
-					@params-changed="onParamsChanged"
+					@params-changed="onParamsChanged" @refresh="fetchData"
 					/>
 					
 					<div v-if="ready">
@@ -37,6 +37,16 @@
 				</v-card-text>
       	</v-card>
 		</v-dialog>
+		<v-dialog v-model="showTerm.active" :max-width="showTerm.maxWidth">
+			<v-card v-if="showTerm.model">
+				<v-card-text>
+					<h3 v-if="showTerm.model.subject" style="margin-top: 5px;">{{ showTerm.model.subject.title }}  {{ showTerm.model.title }}</h3>
+					<term-tree-item :item="showTerm.model" 
+					:show_title="false" :max_width="showTerm.maxWidth" 
+					/>
+				</v-card-text>
+      	</v-card>
+		</v-dialog>
 	</v-container>
     
 	
@@ -45,7 +55,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
-import { FETCH_NOTES, DELETE_NOTE } from '@/store/actions.type';
+import { FETCH_NOTES, DELETE_NOTE, SHOW_TERM, TERM_DETAILS } from '@/store/actions.type';
 
 import { DIALOG_MAX_WIDTH } from '@/config';
 import { onError } from '@/utils';
@@ -105,6 +115,12 @@ export default {
 				maxWidth: DIALOG_MAX_WIDTH
 			},
 
+			showTerm: {
+				active: false,
+				model: null,
+				maxWidth: DIALOG_MAX_WIDTH
+			},
+
 			deletion: {
 				id: 0,
 				active: false,
@@ -128,7 +144,11 @@ export default {
 	},
 	mounted() {
 		this.references = { ...this.$refs };
+		window.addEventListener(SHOW_TERM, this.onShowTerm);
 	},
+	beforeDestroy(){
+      window.removeEventListener(SHOW_TERM, this.onShowTerm);
+   },
 	methods: {
 		init(){
 			
@@ -166,6 +186,24 @@ export default {
 			this.showPhoto.model = photo;
 			this.showPhoto.active = true;
 		},
+		onShowTerm(e) {
+			let id = e.detail.id;
+			let term = this.terms.find(item => item.id === Number(id));
+			if(term) {
+				this.showTerm.model = term;
+				this.showTerm.active = true;
+			}else {
+				this.$store.dispatch(TERM_DETAILS, id)
+				.then(model => {
+					this.showTerm.model = model;
+					this.showTerm.active = true;
+				})
+				.catch(error => {
+					onError(error);
+				})
+			}
+			
+		},
 		onRemove(item) {
 			this.deletion.id = item.id;
 			this.deletion.active = true;
@@ -186,7 +224,7 @@ export default {
 				if(!error)  Bus.$emit('errors');
 				else this.$store.commit(SET_ERROR, error);
 			})
-      },
+		},
 		onSaved() {
 			this.fetchData(this.params);
 		}

@@ -1,10 +1,15 @@
 <template>
 <div>
 	<v-layout row wrap>
-		<v-flex xs12>
+		<v-flex xs12 sm6>
 			<core-bread :items="bread.items"
 			@selected="onBreadSelected"
 			/>
+		</v-flex>
+		<v-flex xs12 sm6 text-xs-right>
+			<v-btn v-show="params.term > 0" @click.prevent="refresh" class="mx-2" fab small>
+				<v-icon>mdi-refresh</v-icon>
+			</v-btn>
 		</v-flex>
 	</v-layout>
 	<v-dialog v-model="category.active" persistent :max-width="category.maxWidth">
@@ -161,6 +166,9 @@ export default {
 			this.$emit('params-changed');
 			this.setTitle();
 			this.category.active = false;
+		},
+		refresh() {
+			this.$emit('refresh');
 		}
    }
 }

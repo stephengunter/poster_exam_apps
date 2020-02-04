@@ -4,7 +4,7 @@
          <v-btn @click.prevent="add" small  fab icon color="info">
             <v-icon>mdi-plus</v-icon>
          </v-btn>
-         <core-highlight :queries="term.highlights" :content="term.fullText" />
+         <term-read :term="term" />
       </v-flex>
       <v-flex sm12>
          <v-data-table :items="term.notes" :headers="headers"  hide-actions item-key="index">

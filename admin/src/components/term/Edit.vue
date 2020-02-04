@@ -4,6 +4,7 @@
 		<v-card>
 			<v-card-title>
 				<span class="headline">{{ title }}</span>
+				<span v-if="model.id" class="headline ml-3">Id : {{ model.id }}</span>
 				<v-spacer />
 				<a href="#" @click.prevent="cancel">
 					<v-icon>mdi-window-close</v-icon>
@@ -53,6 +54,14 @@
 							name="text"
 							rows="5"
 							row-height="15"
+							/>
+						</v-flex>
+						<v-flex xs12>
+							<v-textarea v-model="model.reference" label="參考條文" outlined auto-grow
+							name="text"
+							rows="5"
+							row-height="15"
+							:error-messages="getErrMsg('reference')"
 							/>
 						</v-flex>
 					</v-layout>
@@ -206,8 +215,26 @@ export default {
 			let highlight = this.model.highlight;
          this.model.highlights = highlight.split('\n').filter(Boolean);
 
+			let reference = this.model.reference;
+         let references = reference.split('\n').filter(Boolean);
+         this.model.references = references.map(item => {
+            let parts = item.split(',');
+            return { text: parts[0], id: parts[1] ? parts[1] : '' }
+			});
+
+			
+			
          this.$validator.validate().then(valid => {
-				if(valid) this.$emit('submit');
+				if(valid) {
+					if(this.model.references.findIndex(item => !item.id) < 0){
+						this.$emit('submit');
+					}else {
+						this.errors.add({
+							field: 'reference',
+							msg: '參考格式錯誤'
+						});
+					}
+				} 
          });         
 		}
 	}

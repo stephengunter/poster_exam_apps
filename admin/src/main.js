@@ -1,12 +1,14 @@
 import Vue from 'vue';
 window.Bus = new Vue({});
 
+
+
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
 Vue.component('loading', Loading);
 
 
-
+import '@/events';
 import '@/components';
 import '@/plugins';
 import '@/filters';

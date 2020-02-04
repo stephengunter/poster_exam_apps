@@ -2,7 +2,7 @@ import TermsService from '@/services/terms.service';
 import { resolveErrorData } from '@/utils';
 
 import {
-   FETCH_TERMS, CREATE_TERM, STORE_TERM, 
+   FETCH_TERMS, CREATE_TERM, STORE_TERM, TERM_DETAILS, 
    EDIT_TERM, UPDATE_TERM, DELETE_TERM
 } from '@/store/actions.type';
 
@@ -61,6 +61,20 @@ const actions = {
             })
             .catch(error => {
                reject(resolveErrorData(error)); 
+            })
+            .finally(() => { 
+               context.commit(SET_LOADING, false);
+            });
+      });
+   },
+   [TERM_DETAILS](context, id) {
+      return new Promise((resolve, reject) => {
+         TermsService.details(id)
+            .then(model => {
+               resolve(model);
+            })
+            .catch(error => {
+               reject(error);        
             })
             .finally(() => { 
                context.commit(SET_LOADING, false);

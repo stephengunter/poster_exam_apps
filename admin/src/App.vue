@@ -79,11 +79,12 @@ export default {
 	mounted(){
 		if(window.innerWidth) this.$store.commit(SET_WINDOW_WIDTH, window.innerWidth);
 
-      this.onResponsiveInverted()
-      window.addEventListener('resize', this.onResponsiveInverted)
+      this.onResponsiveInverted();
+		window.addEventListener('resize', this.onResponsiveInverted);
+		
 	},
 	beforeDestroy(){
-      window.removeEventListener('resize', this.onResponsiveInverted)
+      window.removeEventListener('resize', this.onResponsiveInverted);
    },
 	methods:{
 		onError(error){

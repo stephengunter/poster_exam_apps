@@ -28,6 +28,8 @@ export const EDIT_TERM = 'editTerm';
 export const UPDATE_TERM = 'updateTerm';
 export const DELETE_TERM = 'deleteTerm';
 export const ORDER_TERMS = 'orderTerms';
+export const TERM_DETAILS = 'termDetails';
+export const SHOW_TERM = 'showTerm';
 
 //Notes
 export const FETCH_NOTES = 'fetchNotes';
