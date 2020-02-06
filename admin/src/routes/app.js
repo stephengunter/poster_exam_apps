@@ -101,7 +101,7 @@ const adminlinks = [
       parent: '',
       meta: {
          order: 0,
-         icon: 'mdi-database-check',
+         icon: 'mdi-database-edit',
          title: '題庫',
          type: ADMIN_ONLY,
          menu: true
@@ -120,7 +120,19 @@ const adminlinks = [
          menu: true
       } 
    },
-   
+   {
+      name: 'db',
+      path: '/db',
+      view: 'DB',
+      parent: '',
+      meta: {
+         order: 0,
+         icon: 'mdi-database',
+         title: '數據庫',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
+   },
       
 ];
 

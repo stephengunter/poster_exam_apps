@@ -35,7 +35,7 @@
          <v-layout row wrap>
             <v-flex xs12>
                <v-treeview v-if="trees && trees.length" :items="trees" item-children="subItems"
-               open-all activatable hoverable return-object  active-class="primary--text"
+               activatable hoverable return-object  active-class="primary--text"
                :active.sync="tree.active"
                >
                   <template v-slot:label="{ item }">

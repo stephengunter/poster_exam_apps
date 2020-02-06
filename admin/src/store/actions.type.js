@@ -73,3 +73,8 @@ export const FETCH_RECRUIT_QUESTIONS = 'fetchRecruitQuestions';
 
 //Attachments
 export const STORE_ATTACHMENT = 'storeAttachment';
+
+//DB
+export const DB_IMPORT = 'dbImport';
+export const DB_EXPORT = 'dbExport';
+export const DB_BACKUP = 'dbBackup';

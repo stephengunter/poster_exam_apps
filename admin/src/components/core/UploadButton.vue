@@ -29,7 +29,15 @@ export default {
       multiple: {
          type: Boolean,
          default: true
-      }
+      },
+      allow_types: {
+         type: Array,
+         default: null
+      },
+      is_media: {
+         type: Boolean,
+         default: true
+      },
    },
    data () {
 		return {
@@ -38,30 +46,43 @@ export default {
          accept: '',
          exclude: [],
          files: [],
-         thumbnails: [],	
+         thumbnails: [],
+
+         references: {}
 		}
+   },
+   computed: {
+      inputUpload() {
+			if(this.$refs.inputUpload) return this.$refs.inputUpload;
+			else if (this.references.inputUpload) return this.references.inputUpload;
+			return null;
+      }
    },
    beforeMount() {
       this.init();
    },
+   mounted() {
+		this.references = { ...this.$refs };
+	},
    methods: {
       init() {
-         this.accept = this.image_types.toString();
+         if(this.is_media) this.accept = this.image_types.toString();
+         else this.accept = this.allow_types.toString();
       },
       launch() {
-         this.$refs.inputUpload.value = '';
+         this.inputUpload.value = '';
          this.files = [];
          this.thumbnails = [];
-         this.$refs.inputUpload.click();
+         this.inputUpload.click();
       },
       charge() {
          let vm = this;
          document.body.onfocus = () => { setTimeout(vm.checkOnCancel, 100); };
       },
       checkOnCancel() {
-         if(this.$refs.inputUpload.value.length === 0) {
-            console.log();
-            this.setLoading(true);
+         if(!this.inputUpload) return;
+         if(this.inputUpload.value.length === 0) {
+            this.setLoading(false);
             this.$emit('cancel');
          }
          document.body.onfocus = null;
@@ -83,7 +104,12 @@ export default {
          }
          let vm = this;
          Promise.all(addFiles).then(() => {
-            vm.$emit('file-added', { files: vm.files, thumbs: vm.thumbnails });
+            if(this.is_media) {
+               vm.$emit('file-added', { files: vm.files, thumbs: vm.thumbnails });
+            }else {
+               vm.$emit('file-added', vm.files);
+            }
+            
             vm.loading = false;
          });
       },
@@ -124,24 +150,32 @@ export default {
       },
       addFile(file) {
          let vm = this;
-         return new Promise((resolve, reject) => {
-            let image = vm.createImage(file);
-            image.then(data => {
-               let thumb = {
-                  data: data,
-                  name: file.name,
-                  type: file.type,
-               };
+         if(this.is_media) {
+            return new Promise((resolve, reject) => {
+               let image = vm.createImage(file);
+               image.then(data => {
+                  let thumb = {
+                     data: data,
+                     name: file.name,
+                     type: file.type,
+                  };
+                  vm.files.push(file);
+                  vm.thumbnails.push(thumb);
+
+                  resolve(true);
+
+               }).catch(error => {
+                  console.error(error);
+                  reject();
+               })
+            });
+         }else {
+            return new Promise((resolve) => {
                vm.files.push(file);
-               vm.thumbnails.push(thumb);
-
                resolve(true);
-
-            }).catch(error => {
-               console.error(error);
-               reject();
-            })
-         });
+            });
+         }
+         
 
       },
       removeFile(name) {

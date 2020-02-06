@@ -265,6 +265,13 @@ export default {
          
       },
       edit(index, model) {
+         if(model.highlights) model.highlight = model.highlights.join('\n');
+         else model.highlights = [];
+
+         if(model.sources) {
+            model.source = model.sources.map(item => `${item.text},${item.link}`).join('\n');
+         }else model.sources = [];
+
          this.selectedIndex = index;
            //複製, 用來還原(取消編輯時)
          this.editModel = deepClone(model);

@@ -158,7 +158,6 @@ export default {
          this.$store.commit(CLEAR_ERROR);
          this.$store.dispatch(UPDATE_NOTE, model)
 			.then(() => {
-            console.log('medias', model.medias);
             if(model.medias.length) {
                let uploadForm = {
                   postId : model.id,
