@@ -10,11 +10,6 @@
       <v-card-text>
          <v-layout row wrap>
             <v-flex xs12>
-               <v-select label="資料"
-                  :items="typeOptions" v-model="model.cmd"
-               />
-            </v-flex>
-            <v-flex xs12 sm6 md4>
                <v-text-field v-model="model.key" label="Key"
                v-validate="'required'"
                :error-messages="getErrMsg('key')"
@@ -23,10 +18,10 @@
                />
             </v-flex>
             <v-flex xs12>
-               <v-chip v-if="hasFile" close label outline @input="clearFile">
+               <v-chip v-for="(file, index) in model.files" :key="index" close label outline @input="clearFile(index)">
                   <v-icon left>mdi-file</v-icon>{{ filename }}
                </v-chip>
-               <core-upload-button v-else :multiple="false"
+               <core-upload-button v-if="!hasFile"  :multiple="true"
                :is_media="false" :allow_types="allowTypes"
                @file-added="onFileAdded" @loading="upload.loading = true"
                @cancel="upload.loading = false"
@@ -62,10 +57,6 @@ export default {
 	},
    data () {
       return {
-         typeOptions: [{
-            value: 'Question', text: 'Question'
-         }],
-
          allowTypes: ['application/JSON'],
 
          upload: {
@@ -83,11 +74,11 @@ export default {
       }      
    },
    beforeMount(){
-		this.model.cmd = this.typeOptions[0].value;
+		
    },
    methods: {
-      clearFile() {
-         this.model.files = [];
+      clearFile(index) {
+         this.model.files.splice(index, 1);
       },
       onFileAdded(files) {
          this.model.files = files;
