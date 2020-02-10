@@ -32,6 +32,7 @@ export const TERM_DETAILS = 'termDetails';
 export const SHOW_TERM = 'showTerm';
 
 //Notes
+export const FETCH_NOTE_CATEGORIES = 'fetchNoteCategories';
 export const FETCH_NOTES = 'fetchNotes';
 export const NOTE_CATEGORY = 'noteCategory';
 export const CREATE_NOTE = 'createNote';

@@ -88,7 +88,7 @@ const adminlinks = [
       parent: '',
       meta: {
          order: 0,
-         icon: 'mdi-note-text-outline',
+         icon: 'mdi-notebook-outline',
          title: '筆記',
          type: ADMIN_ONLY,
          menu: true

@@ -15,6 +15,11 @@ export const FETCH_ACTIONS = 'fetchActions';
 export const LOAD_ACTIONS = 'loadActions';
 export const ACTION_SELECTED = 'actionSelected';
 
+//Notes
+export const FETCH_NOTE_CATEGORIES = 'fetchNoteCategories';
+export const FETCH_NOTES = 'fetchNotes';
+export const NOTE_CATEGORY = 'noteCategory';
+
 //RQs
 export const RQS_INDEX = 'rqsIndex';
 export const SELECT_RQS_MODE = 'selectRQsMode';

@@ -2,48 +2,48 @@
    <v-card>
       <v-card-title>
          <h3>目錄 - 請選擇章節</h3>
-         <v-spacer />
-         <a v-show="paramsValid" href="#" @click.prevent="cancel" class="a-btn">
-            <v-icon>mdi-window-close</v-icon>
-         </a>
       </v-card-title>
       <v-card-text>
-         <v-layout row wrap>
-            <v-flex xs6 sm6 md6>
+         <v-row>
+            <v-col cols="12" md="8">
                <v-select label="科目"
-                  :items="subjectOptions" v-model="params.rootSubject"
+                  :items="subject_options" v-model="params.rootSubject"
                   @change="onSubjectChanged"
                />
-            </v-flex>
-            <v-flex xs6 sm6 md6>
-               <form v-show="canSearch" @submit.prevent="search">
-                  <v-text-field label="Search" single-line hide-details
+            </v-col>
+            <v-col cols="12" md="4" v-show="canSearch" >
+               <form @submit.prevent="search">
+                  <v-text-field label="" single-line hide-details
                   v-model="params.keyword"
                   >
                      <template v-slot:prepend>
-                        <v-icon>mdi-magnify</v-icon>
+                        <a href="#" @click.prevent="search" class="a-btn">
+                           <v-icon>mdi-magnify</v-icon>
+                        </a>
                      </template>
                      <template v-slot:append>
-                        <a href="#" @click.prevent="clearSearch">
+                        <a href="#" @click.prevent="clearSearch" class="a-btn">
                            <v-icon>mdi-close</v-icon>
                         </a>
                      </template>
                   </v-text-field>
                </form>
-            </v-flex>
-         </v-layout>
-         <v-layout row wrap>
-            <v-flex xs12>
-               <v-treeview :items="tree.items" item-children="subItems"
+            </v-col>
+			</v-row>
+			<v-row>
+            <v-col cols="12">
+               <v-treeview :items="tree_items" item-children="subItems"
                activatable hoverable return-object  active-class="primary--text"
                :active.sync="tree.active"
                >
                   <template v-slot:label="{ item }">
-                     <term-tree-item :item="item" :show_title="false" :max_width="treeMaxWidth" />
+                     <span style="font-size: 16px;">
+                        {{ item.text }}
+                     </span>
                   </template>
                </v-treeview>
-            </v-flex>
-         </v-layout>
+            </v-col>
+         </v-row>
       </v-card-text>
    </v-card>
 </template>
@@ -51,32 +51,33 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { FETCH_NOTE_CATEGORIES } from '@/store/actions.type';
-import { onError } from '@/utils';
+import { resolveErrorData } from '@/utils';
 
 export default {
-   data () {
-      return {
-         subjectOptions: [],
-         params: {
-				rootSubject: 0,
-				subject: 0,
-            term: 0,
-            keyword: '',
-         },
+   name: 'NoteCategory',
+   props: {
+      params: {
+         type: Object,
+         default: null
+      },
+      subject_options: {
+			type: Array,
+         default: null
+      },
+      tree_items: {
+			type: Array,
+         default: null
+      },
+   },
+   data() {
+		return {
          tree: {
-            items: [],
 				active: []
-			}
-      }
+			},
+		}
    },
    computed: {
       ...mapGetters(['responsive','contentMaxWidth']),
-      ...mapState({
-			categories: state => state.notes.categories
-      }),
-      paramsValid() {
-         return this.params.subject > 0 || this.params.term > 0
-      },
       selectItem() {
 			if(this.tree.active.length) return this.tree.active[0];
 			return null;
@@ -91,34 +92,9 @@ export default {
    watch: {
       selectItem: 'onSelectItemChanged'
    },
-   beforeMount(){
-      this.$store.dispatch(FETCH_NOTE_CATEGORIES)
-      .then(() => {
-         this.$nextTick(() => {
-            this.init();
-         });
-      })
-      .catch(error => {
-         onError(error);
-      })
-   },
-   methods: {
-      init() {
-         let subjectOptions = this.categories.map(item => ({ value: item.id, text: item.text }));
-         this.params.rootSubject = subjectOptions[0].value;
-         this.setTreeItems();
-
-         this.subjectOptions = subjectOptions;
-         this.$emit('ready');
-      },
-      setTreeItems() {
-         let rootSubjectId = this.params.rootSubject;
-         let category = this.categories.find(item => item.id === rootSubjectId);
-
-         this.tree.items = category.subItems;
-      },
+	methods: {
       onSubjectChanged() {
-         this.setTreeItems();
+         this.$emit('root-changed');
       },
       onSelectItemChanged(newVal, oldVal) {
          if(oldVal) {
@@ -155,11 +131,8 @@ export default {
       },
       clearSearch() {
 			this.params.keyword = '';
-		},
-      cancel() {
-         this.$emit('cancel');
-      }
-   }
+		}
+	}
 }
 </script>
 

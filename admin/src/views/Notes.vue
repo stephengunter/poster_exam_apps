@@ -3,9 +3,8 @@
       <v-layout justify-center  align-center>
 			<v-flex xs12>
 				<material-card>
-					<note-header ref="noteHeader" 
-					:params="params" :index_model="indexModel"
-					@params-changed="onParamsChanged" @refresh="fetchData"
+					<note-header
+					@params-changed="fetchData" @refresh="refresh"
 					/>
 					
 					<div v-if="ready">
@@ -14,7 +13,7 @@
 						@show-photo="onShowPhoto" 
 						@saved="onSaved" @remove="onRemove"
 						/>
-					</div>	
+					</div>
 				</material-card>
 			</v-flex>
       </v-layout>
@@ -70,10 +69,8 @@ export default {
 				keyword: ''
 			},
 
-			indexModel: null,
-			terms: [],
-			version: 0,
 			ready: false,
+			version: 0,
 
 			headers: [
             {
@@ -107,7 +104,6 @@ export default {
 					value: ''
 				}
          ],
-			references: {},
 
 			showPhoto: {
 				active: false,
@@ -130,56 +126,35 @@ export default {
 	},
 	computed: {
 		...mapGetters(['responsive','contentMaxWidth']),
-		firstLoad() {
-			return this.params.subject < 1;
-		},
-		noteHeader() {
-			if(this.$refs.noteHeader) return this.$refs.noteHeader;
-			else if (this.references.noteHeader) return this.references.noteHeader;
-			return null;
-      },
-	},
-	beforeMount(){
-		this.fetchData();
+		...mapState({
+			terms: state => state.notes.terms
+		})
 	},
 	mounted() {
-		this.references = { ...this.$refs };
 		window.addEventListener(SHOW_TERM, this.onShowTerm);
 	},
 	beforeDestroy(){
       window.removeEventListener(SHOW_TERM, this.onShowTerm);
    },
 	methods: {
-		init(){
-			
-			
-		},
-		fetchData(params) {
-			if(!params) params = this.params;
+		fetchData({ subject, term, keyword }) {
 			this.ready = false;
-			this.$store.dispatch(FETCH_NOTES, params)
-			.then(model => {
-				if(this.firstLoad) {
-					this.indexModel = model;
-					this.$nextTick(() => {
-						this.ready = true;
-						this.noteHeader.init();
-					});
-				}else {
-					this.terms = model;
-					this.$nextTick(() => {
-						this.ready = true;
-						this.version += 1;
-					});
-					
-				}
-				
+			this.params = {
+				subject, term, keyword
+			};
+			
+			this.$store.dispatch(FETCH_NOTES, { subject, term, keyword })
+			.then(terms => {
+				this.$nextTick(() => {
+					this.ready = true;
+					this.version += 1;
+				});
 			})
 			.catch(error => {
 				onError(error);
 			})
 		},
-		onParamsChanged() {
+		refresh() {
 			this.fetchData(this.params);
 		},
 		onShowPhoto(photo) {

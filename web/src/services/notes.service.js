@@ -7,10 +7,4 @@ const categories = () => BaseService.fetch(`${source}/categories`);
 
 const fetch = (params) => BaseService.fetch(source, params);
 
-const store = (model) => BaseService.post(source, model);
-
-const update = (id, model) => BaseService.put(`${source}/${id}`, model);
-
-const remove = (id) => BaseService.remove(`${source}/${id}`);
-
-export default { categories, fetch, store, update, remove };
+export default { categories, fetch };

@@ -41,6 +41,10 @@
 							/>
 						</v-flex>
 						<v-flex xs12>
+							<v-checkbox v-model="model.chapterTitle" label="章節標題" 
+							/>
+						</v-flex>
+						<v-flex xs12>
 							<v-textarea v-model="model.text" label="內容" outlined auto-grow
 							v-validate="'required'"
 							:error-messages="getErrMsg('text')"

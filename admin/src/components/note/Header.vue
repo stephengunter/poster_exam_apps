@@ -7,18 +7,15 @@
 			/>
 		</v-flex>
 		<v-flex xs12 sm6 text-xs-right>
-			<v-btn v-show="params.term > 0" @click.prevent="refresh" class="mx-2" fab small>
+			<v-btn @click.prevent="refresh" class="mx-2" fab small>
 				<v-icon>mdi-refresh</v-icon>
 			</v-btn>
 		</v-flex>
 	</v-layout>
 	<v-dialog v-model="category.active" persistent :max-width="category.maxWidth">
-		<note-category :allow_cancel="params.term > 0"
-		:subject_options="subjectOptions" :params="params"
-		:trees="trees" 
-		@subject-changed="onSubjectChanged"
-		@search="onSearch"
-		@selected="onTermSelected" @cancel="category.active = false"
+		<note-category @ready="init"
+		@params-changed="onParamsChanged"
+		@cancel="category.active = false"
 		/>
 	</v-dialog>
 </div>
@@ -33,14 +30,6 @@ import { onError } from '@/utils';
 export default {
    name: 'NoteHeader',
    props: {
-		index_model: {
-			type: Object,
-			default: null
-		},
-      params: {
-			type: Object,
-			default: null
-		},
 		can_create: {
 			type: Boolean,
 			default: false
@@ -48,15 +37,9 @@ export default {
 	},
    data () {
 		return {
-			rootSubjects: [],
-			subjects: [],
-			subject: null,
+			params: null,
+			subjects : [],
 			terms: [],
-
-			subjectOptions: [],
-
-			trees: [],
-
 			category: {
 				active: false,
 				maxWidth: DIALOG_MAX_WIDTH
@@ -69,69 +52,59 @@ export default {
 		}
    },
    computed: {
-		...mapGetters(['responsive','contentMaxWidth'])
-   },
+		...mapGetters(['responsive','contentMaxWidth']),
+		...mapState({
+			categories: state => state.notes.categories
+		}),
+		rootSubject() {
+			if(this.params.rootSubject) return this.categories.find(item => item.id === this.params.rootSubject);
+			return null;
+		},
+		subject() {
+			if(this.params.subject) {
+				return this.subjects.find(item => item.id === this.params.subject);
+			}else if(this.term){
+				return this.subjects.find(item => item.id === this.term.parentId);
+			}
+			return null;
+		},
+		term() {
+			if(this.params.term) {
+				return this.terms.find(item => item.id === this.params.term);
+			}
+			return null;
+		}
+	},
+	beforeMount() {
+
+	},
    methods: {
 		init() {
-			let model = this.index_model;
-			this.rootSubjects = model.rootSubjects;
-			this.subjects = model.subjects;
-			this.subject = model.subject;
-			this.terms = model.terms;
+			this.showCategory();
 
-			this.subjectOptions = this.rootSubjects.map(item => ({
-				value: item.id, text: item.title
-			}));
-
-			this.params.subject = this.subject.id;
-			this.loadTrees();
+			let subjects = this.categories.flatMap(item => item.subItems);
+			let terms = subjects.flatMap(item => item.subItems);
+			this.subjects = subjects;
+			this.terms = terms;
 		},
-		loadTrees() {
-			let trees = [];
-			let subject = this.subject;
-			let terms = this.terms;
-
-			if(subject.subItems.length) {
-				trees = subject.subItems.map(item => ({
-					type: 'subject',
-					id: item.id, subItems: [],
-					title: item.title, text: item.text
-				}));
-			}else {
-				trees.push({
-					type: 'subject',
-					id: subject.id, subItems: [],
-					title: subject.title, text: subject.text
-				});
-			}
-
-			trees.forEach(item => {
-				item.subItems = terms.filter(term => term.subjectId === item.id);
-			});
-
-			this.trees = trees;
-
-			if(!this.params.term) {
-				this.showCategory();
-			}
+		onParamsChanged(params) {
+			this.$emit('params-changed', params);
+			this.params = params;
+			this.setTitle();
+			this.category.active = false;
 		},
-		setTitle(term) {
-         this.clearBread();
-			this.addBreadItem(NOTE_CATEGORY, this.subject.title);
+		setTitle() {
+			this.clearBread();
+			this.addBreadItem(NOTE_CATEGORY, this.rootSubject.text);
 
 			if(this.params.keyword) {
+				if(this.subject) this.addBreadItem(NOTE_CATEGORY, this.subject.text);
 				this.addBreadItem(NOTE_CATEGORY, `搜尋：${this.params.keyword}` );
 			}else {
-				this.addBreadItem(NOTE_CATEGORY, term.subject.title);
-
-				if(term.parentId) {
-					let parent = this.terms.find(item => item.id === term.parentId);
-					this.addBreadItem(NOTE_CATEGORY, parent.fullText);
-				}
 				
-				this.addBreadItem(NOTE_CATEGORY, term.fullText);
+				this.addBreadItem(NOTE_CATEGORY, this.subject.text);
+				if(this.term) this.addBreadItem(NOTE_CATEGORY, this.term.text);
 			}
-			
 			
       },
 		clearBread() {
@@ -148,24 +121,6 @@ export default {
 		showCategory() {
 			this.category.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
 			this.category.active = true;
-		},
-		onSubjectChanged(val) {
-			this.subject = this.rootSubjects.find(item => item.id === val);
-			this.trees = [];
-			this.$nextTick(() => {
-				this.loadTrees();
-			});
-		},
-		onTermSelected(item) {
-			this.$emit('params-changed');
-
-			this.setTitle(item);
-			this.category.active = false;
-		},
-		onSearch() {
-			this.$emit('params-changed');
-			this.setTitle();
-			this.category.active = false;
 		},
 		refresh() {
 			this.$emit('refresh');

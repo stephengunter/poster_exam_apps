@@ -19,6 +19,16 @@
 							/>
 						</v-flex>
 					</v-layout>
+					<v-layout row  v-if="pageList" style="height: 100px; position: relative">
+						<v-flex sm12 v-show="pageList.viewList.length">
+							共 {{ pageList.totalItems }} 題
+
+							
+						</v-flex>
+						<v-btn @click.prevent="create" :disabled="!canCreate" class="mx-2" fab small color="info" absolute dark right>
+							<v-icon>mdi-plus</v-icon>
+						</v-btn>
+					</v-layout>
 				</material-card>
 			</v-flex>
       </v-layout>
