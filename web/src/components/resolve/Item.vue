@@ -8,10 +8,9 @@
          <div v-for="(item, index) in model.attachments" :key="index">
             <a href="#" @click.prevent="showPhoto(item)">
                <v-img :src="item.previewPath | photoNameUrl(100)" max-width="100" aspect-ratio="1"
-               @click="showPhoto(item)"
                />
             </a>
-            {{ item.title }}
+            <span v-if="item.title" class="ml-1">{{ item.title }}</span>
          </div>
       </v-col>
    </v-row>

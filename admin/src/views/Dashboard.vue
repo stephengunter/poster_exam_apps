@@ -20,6 +20,7 @@
  <h3>
     發生道路交通事故，應在適當距離處豎立車輛故障標誌或其他明顯警告設施：
  </h3>
+  
    <table class="custom-table">
       <tr>
          <th style="width:50%">高速公路</th>

@@ -154,9 +154,6 @@ export default {
 		showCategory() {
 			this.category.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
 			this.category.active = true;
-		},
-		refresh() {
-			this.$emit('refresh');
 		}
       
 

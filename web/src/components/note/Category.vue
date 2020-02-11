@@ -4,32 +4,32 @@
          <h3>目錄 - 請選擇章節</h3>
       </v-card-title>
       <v-card-text>
-         <v-row>
-            <v-col cols="12" md="8">
+         <v-row v-if="responsive">
+            <v-col cols="10">
                <v-select label="科目"
                   :items="subject_options" v-model="params.rootSubject"
                   @change="onSubjectChanged"
                />
             </v-col>
-            <v-col cols="12" md="4" v-show="canSearch" >
-               <form @submit.prevent="search">
-                  <v-text-field label="" single-line hide-details
-                  v-model="params.keyword"
-                  >
-                     <template v-slot:prepend>
-                        <a href="#" @click.prevent="search" class="a-btn">
-                           <v-icon>mdi-magnify</v-icon>
-                        </a>
-                     </template>
-                     <template v-slot:append>
-                        <a href="#" @click.prevent="clearSearch" class="a-btn">
-                           <v-icon>mdi-close</v-icon>
-                        </a>
-                     </template>
-                  </v-text-field>
-               </form>
+            <v-col cols="2">
+               <v-btn v-if="canSearch" v-show="!showSearch" @click.prevent="showSearch = true" text icon color="info" class="mt-3">
+                  <v-icon>mdi-magnify</v-icon>
+               </v-btn>
             </v-col>
 			</v-row>
+         <v-row v-else>
+            <v-col cols="6">
+               <v-select label="科目"
+                  :items="subject_options" v-model="params.rootSubject"
+                  @change="onSubjectChanged"
+               />
+            </v-col>
+            <v-col cols="6">
+               <note-search :params="params" v-if="canSearch"
+               @search="search" @clear-search="clearSearch"
+               />
+            </v-col>
+         </v-row>
 			<v-row>
             <v-col cols="12">
                <v-treeview :items="tree_items" item-children="subItems"
@@ -44,6 +44,13 @@
                </v-treeview>
             </v-col>
          </v-row>
+         <v-row v-if="responsive" v-show="showSearch">
+            <v-col cols="12">
+               <note-search :params="params" v-if="canSearch"
+               @search="search" @clear-search="clearSearch"
+               />
+            </v-col>
+			</v-row>
       </v-card-text>
    </v-card>
 </template>
@@ -71,6 +78,7 @@ export default {
    },
    data() {
 		return {
+         showSearch: false,
          tree: {
 				active: []
 			},
@@ -130,6 +138,7 @@ export default {
          }
       },
       clearSearch() {
+         this.showSearch = false;
 			this.params.keyword = '';
 		}
 	}

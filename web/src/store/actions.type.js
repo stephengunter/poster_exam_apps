@@ -20,6 +20,11 @@ export const FETCH_NOTE_CATEGORIES = 'fetchNoteCategories';
 export const FETCH_NOTES = 'fetchNotes';
 export const NOTE_CATEGORY = 'noteCategory';
 
+
+//Terms
+export const SHOW_TERM = 'showTerm';
+export const TERM_DETAILS = 'termDetails';
+
 //RQs
 export const RQS_INDEX = 'rqsIndex';
 export const SELECT_RQS_MODE = 'selectRQsMode';

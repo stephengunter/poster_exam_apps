@@ -7,6 +7,7 @@ import store from './store';
 import vuetify from './plugins/vuetify';
 
 import './plugins/validate';
+import '@/events';
 import '@/components';
 import '@/filters';
 

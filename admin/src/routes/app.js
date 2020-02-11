@@ -121,6 +121,19 @@ const adminlinks = [
       } 
    },
    {
+      name: 'question-analysis',
+      path: '/question-analysis',
+      view: 'QuestionAnalysis',
+      parent: 'questions',
+      meta: {
+         order: 0,
+         icon: '',
+         title: '試題分析',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
+   },
+   {
       name: 'db',
       path: '/db',
       view: 'DB',

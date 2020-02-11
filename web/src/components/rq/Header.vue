@@ -8,6 +8,7 @@
          :params="params" :allow_cancel="modeSelector.selected"
          :mode_options="mode_options" :year_options="year_options"
          :subject_options="subjectOptions"
+         @year-changed="onYearChanged"
          @submit="submit" @cancel="modeSelector.active = false;"
          />
       </v-dialog>
@@ -112,6 +113,13 @@ export default {
          this.$nextTick(() => {
             this.selectMode(false);
          })
+      },
+      onYearChanged() {
+         let options = this.loadSubjectOptions(this.params.year, this.subjects);
+         let subjectIds = options.map(item => item.value);
+         if(!subjectIds.includes(this.params.subject)) {
+            this.params.subject = subjectIds[0];
+         }
       },
       getBread() {
          return this.bread;

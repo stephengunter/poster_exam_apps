@@ -2,21 +2,35 @@
    <v-container>
       <note-header ref="noteHeader"
 		:version="version" :title="title"
-      @params-changed="fetchData" @refresh="refresh"
+      @params-changed="fetchData"
       />
 
       <div v-if="ready">
 			<note-list v-for="(term, index) in terms" :key="index"
-				:term="term" :max_width="contentMaxWidth - 65"
+			:term="term" :max_width="contentMaxWidth - 65"
+			@show-photo="onShowPhoto"
 			/>
 		</div>
-      
+
+
+		<v-dialog v-model="showPhoto.active" :max-width="showPhoto.maxWidth">
+			<photo-show :model="showPhoto.model" @cancel="showPhoto.active = false" />
+		</v-dialog>
+      <v-dialog v-model="showTerm.active" :max-width="showTerm.maxWidth">
+			<term-show :model="showTerm.model" :max_width="showTerm.maxWidth"
+			@cancel="showTerm.active = false"
+			/>
+		</v-dialog>
+
+		
    </v-container>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { FETCH_NOTES, NOTE_CATEGORY, ACTION_SELECTED } from '@/store/actions.type';
+import { LOAD_ACTIONS, FETCH_NOTES, NOTE_CATEGORY,
+SHOW_TERM, TERM_DETAILS, ACTION_SELECTED
+} from '@/store/actions.type';
 import { resolveErrorData, getRouteTitle } from '@/utils';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
@@ -33,6 +47,18 @@ export default {
 
 			ready: false,
 			version: 0,
+
+			showPhoto: {
+				active: false,
+				model: null,
+				maxWidth: DIALOG_MAX_WIDTH
+			},
+
+			showTerm: {
+				active: false,
+				model: null,
+				maxWidth: DIALOG_MAX_WIDTH
+			},
 
 			references: {}
 		}
@@ -56,12 +82,21 @@ export default {
 	},
 	mounted() {
 		this.references = { ...this.$refs };
+		window.addEventListener(SHOW_TERM, this.onShowTerm);
 	},
+	beforeDestroy(){
+      window.removeEventListener(SHOW_TERM, this.onShowTerm);
+   },
 	methods: {
 		init() {
          let title = getRouteTitle(this.$route);
-         this.title = title;
-      },
+			this.title = title;
+			this.setActions();
+		},
+		setActions() {
+			let types = [NOTE_CATEGORY];
+			this.$store.dispatch(LOAD_ACTIONS, [types]);
+		},
       fetchData({ subject, term, keyword }) {
 			this.ready = false;
 			this.params = {
@@ -69,7 +104,6 @@ export default {
 			};
 			this.$store.dispatch(FETCH_NOTES, { subject, term, keyword })
 			.then(terms => {
-				console.log(terms);
 				this.$nextTick(() => {
 					this.ready = true;
 					this.version += 1;
@@ -79,15 +113,11 @@ export default {
 				Bus.$emit('errors', resolveErrorData(error));
 			})
 		},
-		refresh() {
-			this.fetchData(this.params);
-		},
 		onActionSelected(name) {
-         if(name === NOTE_CATEGORY) {
-            this.noteHeader.showCategory();            
-         }
+         if(name === NOTE_CATEGORY) this.noteHeader.showCategory();
       },
 		onShowPhoto(photo) {
+			this.showPhoto.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
 			this.showPhoto.model = photo;
 			this.showPhoto.active = true;
 		},
@@ -95,43 +125,21 @@ export default {
 			let id = e.detail.id;
 			let term = this.terms.find(item => item.id === Number(id));
 			if(term) {
-				this.showTerm.model = term;
-				this.showTerm.active = true;
+				this.showTermDialog(term);
 			}else {
 				this.$store.dispatch(TERM_DETAILS, id)
 				.then(model => {
-					this.showTerm.model = model;
-					this.showTerm.active = true;
+					this.showTermDialog(model);
 				})
 				.catch(error => {
 					onError(error);
 				})
 			}
-			
 		},
-		onRemove(item) {
-			this.deletion.id = item.id;
-			this.deletion.active = true;
-		},
-		cancelRemove() {
-			this.deletion.id = 0;
-			this.deletion.active = false;
-		},
-		remove() {
-			let id = this.deletion.id;
-         this.$store.commit(CLEAR_ERROR);
-         this.$store.dispatch(DELETE_NOTE, id)
-			.then(() => {
-				this.cancelRemove();
-				this.onSaved();
-			})
-			.catch(error => {
-				if(!error)  Bus.$emit('errors');
-				else this.$store.commit(SET_ERROR, error);
-			})
-		},
-		onSaved() {
-			this.fetchData(this.params);
+		showTermDialog(term) {
+			this.showTerm.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
+			this.showTerm.model = term;
+			this.showTerm.active = true;
 		}
       
 	}

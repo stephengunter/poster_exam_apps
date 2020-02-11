@@ -23,6 +23,7 @@
                <v-select
                   :items="year_options"
                   label="年度" v-model="params.year"
+                  @change="onYearChanged"
                />
             </v-col>
             <v-col cols="12" md="8">
@@ -71,17 +72,9 @@ export default {
          default: false
       },
    },
-   data() {
-		return {
-
-		}
-	},
-	beforeMount() {
-      this.init();
-	},
 	methods: {
-		init() {
-			
+      onYearChanged() {
+         this.$emit('year-changed');
       },
       cancel() {
          this.$emit('cancel');

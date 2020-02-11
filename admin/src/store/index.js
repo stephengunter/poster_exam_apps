@@ -14,6 +14,7 @@ import attachments from './modules/attachments.module';
 import recruits from './modules/recruits.module';
 import recruitQuestions from './modules/recruit-questions.module';
 import db from './modules/db.module';
+import analysis from './modules/analysis.module';
 
 Vue.use(Vuex);
 
@@ -31,6 +32,7 @@ export default new Vuex.Store({
       attachments,
       recruits,
       recruitQuestions,
-      db
+      db,
+      analysis
    }
 });
