@@ -174,7 +174,6 @@ export default {
 	width : 30px;
 	height : 30px;
 }
-
 .custom-table {
 	border-collapse: collapse;
    width: 100%;

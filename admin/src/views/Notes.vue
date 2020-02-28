@@ -12,6 +12,7 @@
 						:term="term" :version="version"
 						@show-photo="onShowPhoto" 
 						@saved="onSaved" @remove="onRemove"
+						@order-updated="onSaved"
 						/>
 					</div>
 				</material-card>

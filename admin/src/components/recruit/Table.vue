@@ -127,7 +127,6 @@ export default {
       },
       editSubItem(id) {
          this.$emit('edit', id);
-         //this.$emit('edit-subItem', id);
       }
    }
 

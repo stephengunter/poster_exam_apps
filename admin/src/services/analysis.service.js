@@ -3,6 +3,8 @@ import { API_URL } from '@/config';
 
 const source =`${API_URL}/admin/analysis`;
 
-const fetch = (params) => BaseService.fetch(source, params);
+const index = () => BaseService.fetch(source);
 
-export default { fetch };
+const rq = (params) => BaseService.fetch(`${source}/rq`, params);
+
+export default { index, rq };

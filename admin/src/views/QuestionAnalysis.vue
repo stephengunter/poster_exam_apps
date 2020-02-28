@@ -17,6 +17,11 @@
 							/>
 						</v-flex>
 					</v-layout>
+					<v-layout row wrap>
+						<v-flex xs12>
+							<analysis-rq :version="version" :results="results" />
+						</v-flex>
+					</v-layout>
 				</material-card>
 			</v-flex>
       </v-layout>
@@ -24,7 +29,9 @@
 </template>
 
 <script>
-import { QUESTION_ANALYSIS } from '@/store/actions.type';
+import { mapState, mapGetters } from 'vuex';
+import { ANALYSIS_INDEX, RQ_ANALYSIS } from '@/store/actions.type';
+import { onError } from '@/utils';
 
 export default {
 	name: 'QuestionAnalysisView',
@@ -34,23 +41,42 @@ export default {
 				recruit: 0,
 				subject: 0
 			},
+			version: 0,
 
 			recruitOptions: [],
 			subjectOptions: []
 		}
+	},
+	computed: {
+		...mapGetters(['responsive','contentMaxWidth']),
+		...mapState({
+			results: state => state.analysis.results
+		})
 	},
 	beforeMount(){
 		this.init();
 	},
 	methods: {
 		init() {
-			this.fetchData();
-		},
-		fetchData() {
-			this.$store.dispatch(QUESTION_ANALYSIS, this.params)
+			this.$store.dispatch(ANALYSIS_INDEX)
 			.then(model => {
 				this.loadRecruitOptions(model.recruits);
 				this.loadSubjectOptions(model.subjects);
+
+				this.$nextTick(() => {
+               this.fetchData();
+            });
+			})
+			.catch(error => {
+				onError(error);
+			})
+		},
+		fetchData() {
+			this.$store.dispatch(RQ_ANALYSIS, this.params)
+			.then(() => {
+				this.$nextTick(() => {
+					this.version += 1;
+            });
 			})
 			.catch(error => {
 				onError(error);
@@ -70,7 +96,7 @@ export default {
 			this.subjectOptions = options;
 		},
 		onSubjectChanged() {
-
+			this.fetchData();
 		}
 	}
 }

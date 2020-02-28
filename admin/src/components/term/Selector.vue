@@ -41,9 +41,9 @@
                :select_default="select_default"
                @select-changed="onTermChanged"
                />
-               <v-layout v-if="select.model" row wrap>
+               <v-layout row wrap>
                   <v-flex sm12>
-                     <div v-html="select.model.fullText">
+                     <div v-html="selectedText">
 
                      </div>
                      
@@ -106,7 +106,9 @@ export default {
             textList: [],
             ids: [],
             idsText: ''
-         }
+         },
+
+         selectedText: ''
 		}
    },
    computed: {
@@ -205,6 +207,7 @@ export default {
       },
       onTermChanged(item) {
          this.select.model = item;
+         this.selectedText = item.fullText;
       },
       onTermSelected() {
          let item = { ...this.select.model };

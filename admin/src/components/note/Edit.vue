@@ -7,14 +7,14 @@
          <term-read :term="term" />
       </v-flex>
       <v-flex sm12>
-         <v-data-table :items="term.notes" :headers="headers"  hide-actions item-key="index">
+         <v-data-table ref="tableNotes" :items="term.notes" :headers="headers"  hide-actions item-key="index">
             <template slot="headerCell" slot-scope="{ header }">
                <span class="subheading font-weight-light text-success text--darken-3">
                   {{ header.text }}
                </span>
             </template>
             <template slot="items" slot-scope="props">
-               <note-row :model="props.item" :index="props.index"
+               <note-row :model="props.item" :index="props.index" :key="props.item.id"
                :enable="enable(props.item, props.index)" :edit="isEdit(props.item, props.index)"
                @selected="edit" @cancel="onRowCancel"
                @show-photo="showPhoto" 
@@ -29,7 +29,11 @@
 
 
 <script>
-import { STORE_NOTE, UPDATE_NOTE, DELETE_NOTE, STORE_ATTACHMENT } from '@/store/actions.type';
+import Sortable from 'sortablejs';
+import { STORE_NOTE, UPDATE_NOTE, DELETE_NOTE, ORDER_NOTES,
+CREATE_NOTE, STORE_ATTACHMENT
+} from '@/store/actions.type';
+
 import { CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
 import { onError, deepClone, isValidURL } from '@/utils';
 export default {
@@ -53,34 +57,34 @@ export default {
                value: '',
                width: '15%'
             },
+            {
+					sortable: false,
+					text: '標題',
+               value: '',
+               width: '15%'
+            },
 				{
 					sortable: false,
 					text: '內容',
                value: '',
-               width: '30%'
+                width: '50%'
             },
             {
 					sortable: false,
 					text: '重點標記',
-               value: '',
-               width: '30%'
-            },
-            {
-					sortable: false,
-					text: '資料來源',
-               value: '',
                width: '15%'
             },
             {
-               width: '50px',
 					sortable: false,
 					text: '',
-					value: ''
+					width: '5%'
 				}
          ],
          selectedIndex: -1,
          editModel: null,
-         postType: 'Note'
+         postType: 'Note',
+
+         sortable: null,
 		}
    },
    computed: {
@@ -97,9 +101,40 @@ export default {
    watch: {
       version: 'init'
    },
+   mounted() {
+      this.bindSortable();
+   },
 	methods: {
       init() {
          this.selectedIndex = -1;
+      },
+      bindSortable() {
+         const el = this.$refs.tableNotes.$el.getElementsByTagName('tbody')[0];
+         this.sortable = Sortable.create(
+            el,
+            {
+               draggable: '.row-note',
+               onEnd: this.onDragEnd
+            }
+         );
+      },
+      onDragEnd ({ oldIndex, newIndex }) {
+			if(oldIndex === newIndex) return;
+
+			let up = oldIndex > newIndex;
+
+			let targetId = this.term.notes[oldIndex].id;
+         let replaceId = this.term.notes[newIndex].id;
+
+			this.$store.dispatch(ORDER_NOTES, { targetId, replaceId, up })
+			.then(() => {
+            this.$emit('order-updated');
+				Bus.$emit('success');
+			})
+			.catch(error => {
+				if(!error)  Bus.$emit('errors');
+				else this.$store.commit(SET_ERROR, error);
+			})       		
       },
       cancel(){
 			this.$emit('cancel');
@@ -117,15 +152,17 @@ export default {
 			return '';
       },
       add(){
-         this.selectedIndex = -1;
-         this.term.notes.push({
-            id: 0,
-            termId: this.term.id,
-            highlight: '',
-            source: '',
-            attachments: [],
-            medias: []
-         });
+         let term = this.term.id;
+         this.$store.dispatch(CREATE_NOTE, { term })
+			.then(model => {
+            model.medias = [];
+            this.selectedIndex = -1;
+            this.term.notes.push(model);
+			})
+			.catch(error => {
+				Bus.$emit('errors');
+			}) 
+         
       },
 		onRemove(item){
          if(item.id) {

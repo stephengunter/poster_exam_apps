@@ -27,10 +27,12 @@ export default {
    beforeMount() {
       this.init();
    },
+   watch: {
+      content: 'init',
+   },
    methods: {
       init() {
          let text = this.content;
-
          if(!text) {
             this.html = '';
             return;
@@ -40,7 +42,6 @@ export default {
          let diacriticsSensitive = false;
 
          let highlights = highlightChunks(text, queries, { caseSensitive, diacriticsSensitive });
-         
          this.render(highlights);
       },
       render(highlights) {
@@ -54,6 +55,11 @@ export default {
          });
         
          this.html = htmls.join('');
+
+         this.$nextTick(() => {
+            this.$forceUpdate();
+         });
+         
          
       }
    }

@@ -72,7 +72,7 @@ import { mapState, mapGetters } from 'vuex';
 import { SET_LOADING, CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
 import { FETCH_RECRUIT_QUESTIONS, CREATE_QUESTION, STORE_QUESTION,
 	EDIT_QUESTION, UPDATE_QUESTION, DELETE_QUESTION,
-	STORE_ATTACHMENT, STORE_OPTIONS 
+	STORE_ATTACHMENT, STORE_OPTIONS, FETCH_RESOLVES 
 } from '@/store/actions.type';
 
 import { onError } from '@/utils';
@@ -341,9 +341,12 @@ export default {
 			if(model) this.editor.lastModel = model;
 		},
 		editResolves(id){
+			let question = this.pageList.viewList.find(item => item.id === id);
+			let model = { ...question };
 			this.$store.commit(CLEAR_ERROR);
-			this.$store.dispatch(EDIT_QUESTION, id)
-			.then(model => {
+			this.$store.dispatch(FETCH_RESOLVES, { question: id })
+			.then(resolves => {
+				model.resolves = resolves;
 				this.setResolvesModel(model);
 			})
 			.catch(error => {

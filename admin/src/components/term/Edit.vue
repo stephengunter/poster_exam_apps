@@ -211,21 +211,25 @@ export default {
 			this.$emit('cancel');
 		},
 		onSubmit() {
+			
 			let parent = this.$refs.categorySelector.getSelectedItem();
 			
 			if(parent) this.model.parentId = parent.id;
 			else  this.model.parentId = 0;
 
 			let highlight = this.model.highlight;
-         this.model.highlights = highlight.split('\n').filter(Boolean);
+         this.model.highlights = highlight ? highlight.split('\n').filter(Boolean) : [];
 
 			let reference = this.model.reference;
-         let references = reference.split('\n').filter(Boolean);
-         this.model.references = references.map(item => {
-            let parts = item.split(',');
-            return { text: parts[0], id: parts[1] ? parts[1] : '' }
-			});
-
+			if(reference) {
+				let references = reference.split('\n').filter(Boolean);
+					this.model.references = references.map(item => {
+					let parts = item.split(',');
+					return { text: parts[0], id: parts[1] ? parts[1] : '' }
+				});
+			}else {
+				this.model.references = [];
+			}
 			
 			
          this.$validator.validate().then(valid => {

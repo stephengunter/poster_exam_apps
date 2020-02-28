@@ -44,7 +44,8 @@
                         </span>
                      </template>
                      <template slot="items" slot-scope="props">
-                        <resolve-row :model="props.item" :index="props.index"
+                        <resolve-row :question="question"
+                        :model="props.item" :index="props.index"
                         :enable="enable(props.item, props.index)" :edit="isEdit(props.item, props.index)"
                         @selected="edit" @cancel="onRowCancel"
                         @remove="onRemove(props.item)"
@@ -145,6 +146,8 @@ export default {
             questionId: this.question.id,
             highlight: '',
             source: '',
+            sources: [],
+            highlights: [],
             attachments: [],
             medias: []
          });
@@ -157,21 +160,30 @@ export default {
          }
       },
       onSubmit(model) {
-         let highlight = model.highlight;
-         model.highlights = highlight.split('\n').filter(Boolean);
 
-         let source = model.source;
-         let sources = source.split('\n').filter(Boolean);
-         model.sources = sources.map(item => {
-            let parts = item.split(',');
-            return { text: parts[0], link: parts[1] ? parts[1] : '' }
-         });
+         if(model.sources.length) {
+            model.attachments = [];
+            model.medias = [];
+            model.highlights = [];
+            model.text = '';
+         }else {
+            let highlight = model.highlight;
+            model.highlights = highlight.split('\n').filter(Boolean);
+         }
+         
 
-         model.sources.forEach(item => {
-            if(item.link) {
-               if(!isValidURL(item.link)) item.link = '';
-            }
-         })
+         // let source = model.source;
+         // let sources = source.split('\n').filter(Boolean);
+         // model.sources = sources.map(item => {
+         //    let parts = item.split(',');
+         //    return { text: parts[0], link: parts[1] ? parts[1] : '' }
+         // });
+
+         // model.sources.forEach(item => {
+         //    if(item.link) {
+         //       if(!isValidURL(item.link)) item.link = '';
+         //    }
+         // })
 
          if(model.id) this.update(model);
 			else this.store(model);

@@ -1,7 +1,7 @@
 <template>
-   <tr class="row-note" v-if="edit">
+   <tr>
       <td>
-         <core-upload-button :multiple="true"
+         <core-upload-button :multiple="true" v-show="!hasSources"
          @file-added="onFileAdded" @loading="medias.loading = true"
          @cancel="hideUpload"
          >
@@ -20,11 +20,12 @@
          </div>
       </td>
       <td>
-         <v-text-field v-model="model.title"
+         
+         <source-item v-for="(item, index) in model.sources"  :key="index"
+         :model="item"
          />
-      </td>
-      <td>
-         <v-textarea v-model="model.text" label="內容" outlined auto-grow
+
+         <v-textarea v-if="!hasSources" v-model="model.text" label="內容" outlined auto-grow 
          :error-messages="getErrMsg('text')"
          name="text"
          rows="5"
@@ -33,10 +34,15 @@
 
       </td>
       <td>
-         <v-textarea v-model="model.highlight" label="重點標記" outlined auto-grow
+         <v-textarea v-model="model.highlight" label="重點標記" outlined auto-grow v-show="!hasSources"
          name="text"
          rows="5"
          row-height="15"
+         />
+      </td>
+      <td>
+         <source-selector :subject_id="question.subjectId" :sources="model.sources"
+         @changed="onSourceChanged"       
          />
       </td>
       <td v-if="enable">
@@ -52,59 +58,18 @@
          
       </td>
    </tr>
-   <tr class="row-note" v-else>
-      <td>
-         <div v-for="(item, index) in model.attachments" :key="index">
-            <a href="#" @click.prevent="showPhoto(item)">
-               <v-img :src="item.previewPath | photoNameUrl(100)" max-width="100" aspect-ratio="1"
-               />
-            </a>
-            {{ item.title }}
-         </div>
-      </td>
-      <td>
-         {{ model.title }}
-      </td>
-      <td>
-         <core-highlight v-if="model.text" :queries="model.highlights" :content="model.text" />
-      </td>
-      <td>
-         <core-label v-for="(item, index) in model.highlights" :key="index">
-           {{ item }}
-         </core-label>
-      </td>
-      <td>
-         <ul>
-            <li v-for="(item, index) in model.sources"  :key="index">
-               <source-tag 
-               :text="item.text" :link="item.link"
-               />
-            </li>
-         </ul>
-        
-      </td>
-      <td v-if="enable">
-        
-         <v-btn @click.prevent="select" small  flat icon color="success">
-            <v-icon>mdi-pencil</v-icon>
-         </v-btn>
-
-         <v-btn @click.prevent="remove" small  flat icon color="error">
-            <v-icon>mdi-delete-circle</v-icon>
-         </v-btn>
-      </td>
-      <td v-else>
-         
-      </td>
-   </tr>
   
 </template>
 
 <script>
 import { photoNameUrl, replaceBR } from '@/utils';
 export default {
-   name: 'NoteRow',
+   name: 'ResolveRowEdit',
    props: {
+      question: {
+         type: Object,
+         default: null
+		},
       index: {
          type: Number,
          default: 0
@@ -112,10 +77,6 @@ export default {
       model: {
          type: Object,
          default: null
-      },
-      edit: {
-         type: Boolean,
-         default: false
       },
       enable: {
          type: Boolean,
@@ -130,13 +91,20 @@ export default {
          }
 		}
    },
+   computed: {
+      hasSources() {
+         if(!this.model) return false;
+         return this.model.sources.length > 0;
+      }
+   },
    methods: {
-      showPhoto(photo){
-         this.$emit('show-photo', photo);
-      },
       save() {
          this.$validator.validate().then(valid => {
 				if(valid) {
+               if(this.hasSources) {
+                  this.$emit('save');
+                  return;
+               } 
                if(!this.model.text && !this.model.attachments.length) {
                   this.errors.add({
                      field: 'text',
@@ -151,18 +119,16 @@ export default {
       getErrMsg(key){
 			let err = this.errors.collect(key);
 			if(err && err.length){
-				let msg = err[0];
+            let msg = err[0];
 				return msg.replace('text', '內容');
 			}
 			return '';
       },
-      select() {
-         this.$emit('selected', this.index, this.model);
-         this.model.text = replaceBR(this.model.text);
-         this.model.medias = [];
-
-         console.log('model', this.model);
-      },
+      // select() {
+      //    this.$emit('selected', this.index, this.model);
+      //    if(this.model.text) this.model.text = replaceBR(this.model.text);
+      //    this.model.medias = [];
+      // },
       getPhotoPath(attachment) {
          let width = 100;
          if(attachment.previewPath) return photoNameUrl(attachment.previewPath, width);
@@ -213,6 +179,11 @@ export default {
          }
          
          this.hideUpload();
+      },
+      onSourceChanged() {
+        //  this.$forceUpdate(); 
+         console.log('onSourceChanged');
+          console.log(this.model.sources);
       },
       cancel() {
          this.$emit('cancel');

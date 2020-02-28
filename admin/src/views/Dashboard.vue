@@ -1,89 +1,54 @@
 <template>
 <div>
-   <table class="custom-table">
-      <tr>
-         <th></th>
-         <th>臨時停車</th>
-         <th>停車</th>
-      </tr>
-      <tr>
-         <td>汽車</td>
-         <td>距離路面邊緣60公分內(大型車為1公尺內)</td>
-         <td>距離路面邊緣40公分內</td>
-      </tr>
-      <tr>
-         <td>機車</td>
-         <td>距離路面邊緣40公分內</td>
-         <td>距離路面邊緣30公分內</td>
-      </tr>
-   </table>
- <h3>
-    發生道路交通事故，應在適當距離處豎立車輛故障標誌或其他明顯警告設施：
- </h3>
-  
-   <table class="custom-table">
-      <tr>
-         <th style="width:50%">高速公路</th>
-         <td>事故地點後方 100 公尺處</td>
-      </tr>
-      <tr>
-         <th>快速道路或速限超過60公里</th>
-         <td>事故地點後方 80 公尺處</td>
-      </tr>
-      <tr>
-         <th>速限50至60公里</th>
-         <td>事故地點後方 50 公尺處</td>
-      </tr>
-      <tr>
-         <th>速限50公里以下</th>
-         <td>事故地點後方 30 公尺處</td>
-      </tr>
-      <tr>
-         <th>交通壅塞或行車時速低於10公里</th>
-         <td>事故地點後方 5 公尺處</td>
-      </tr>
-   </table>
-   <h3>
-    交通事故案件當事人或利害關係人，得向警察機關申請閱覽或提供相關資料：
- </h3>
-   <table class="custom-table">
-      <tr>
-         <th style="width:50%">事故現場</th>
-         <td>當事人登記聯單</td>
-      </tr>
-      <tr>
-         <th>事故七日後</th>
-         <td>現場圖、現場照片</td>
-      </tr>
-      <tr>
-         <th>三十日後</th>
-         <td>交通事故初步分析研判表</td>
-      </tr>
-   </table>
+
+   <ul>
+      <li>
+         台灣位於歐亞板塊及菲律賓海板塊的接觸帶
+      </li>
+      <li>
+         由於兩板塊仍不時碰撞，因此台灣島多地震
+      </li>
+      <li>
+         其中花東地區因位於板塊交界處，是台灣地震頻率最高的地區
+      </li>
+      <li>
+         921大地震(集集大地震)：
+         <ul>
+            <li>
+               發生於臺灣中部山區的逆斷層(車籠埔斷層)型地震
+            </li>
+            <li>
+               南投縣、台中縣因位於震央附近，災情最為慘重
+            </li>
+            <li>
+               紀念公園：石岡水壩921地震紀念公園、草嶺地質公園..等
+            </li>
+           
+         </ul>
+      </li>
+     
+   </ul>
+   
 </div>
+  
 </template>
 
 <script>
 export default {
-   name: 'Dashboard',
-   data() {
+   data () {
       return {
          
       }
    },
-   computed: {
-		canCreate(){
-			return true;
-		},
-   },
    beforeMount(){
-      
+		
    },
    methods: {
-      init() {
-
-      },
+      
    }
-   
 }
 </script>
+
+<style>
+
+</style>

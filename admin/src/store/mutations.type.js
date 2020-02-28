@@ -28,8 +28,10 @@ export const SET_SUBJECTS = 'setSubjects';
 export const SET_TERMS = 'setTerms';
 
 //Notes
-export const SET_NOTE_CATEGORIES = 'setNoteCategories';
 export const SET_NOTES = 'setNotes';
+
+//Categories
+export const SET_CATEGORIES = 'setCategories';
 
 //Recruits
 export const SET_RECRUITS = 'setRecruits';
@@ -39,3 +41,6 @@ export const SET_QUESTIONS = 'setQuestions';
 
 //Resolves
 export const SET_RESOLVES = 'setResolves';
+
+//Analysis
+export const SET_ANALYSIS_RESULT = 'setAnalysisResult';

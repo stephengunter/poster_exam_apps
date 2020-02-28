@@ -6,6 +6,7 @@ import auth from './modules/auth.module';
 import users from './modules/users.module';
 import subjects from './modules/subjects.module';
 import terms from './modules/terms.module';
+import categories from './modules/categories.module';
 import notes from './modules/notes.module';
 import questions from './modules/questions.module';
 import options from './modules/options.module';
@@ -26,6 +27,7 @@ export default new Vuex.Store({
       subjects,
       terms,
       notes,
+      categories,
       questions,
       options,
       resolves,

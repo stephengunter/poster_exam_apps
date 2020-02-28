@@ -50,7 +50,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { FETCH_NOTE_CATEGORIES } from '@/store/actions.type';
+import { FETCH_CATEGORIES } from '@/store/actions.type';
 import { onError } from '@/utils';
 
 export default {
@@ -72,7 +72,7 @@ export default {
    computed: {
       ...mapGetters(['responsive','contentMaxWidth']),
       ...mapState({
-			categories: state => state.notes.categories
+			categories: state => state.categories.list
       }),
       paramsValid() {
          return this.params.subject > 0 || this.params.term > 0
@@ -91,8 +91,9 @@ export default {
    watch: {
       selectItem: 'onSelectItemChanged'
    },
-   beforeMount(){
-      this.$store.dispatch(FETCH_NOTE_CATEGORIES)
+   beforeMount() {
+      if(this.categories.length) return;
+      this.$store.dispatch(FETCH_CATEGORIES)
       .then(() => {
          this.$nextTick(() => {
             this.init();

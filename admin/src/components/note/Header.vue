@@ -54,7 +54,7 @@ export default {
    computed: {
 		...mapGetters(['responsive','contentMaxWidth']),
 		...mapState({
-			categories: state => state.notes.categories
+			categories: state => state.categories.list
 		}),
 		rootSubject() {
 			if(this.params.rootSubject) return this.categories.find(item => item.id === this.params.rootSubject);
@@ -76,7 +76,7 @@ export default {
 		}
 	},
 	beforeMount() {
-
+		
 	},
    methods: {
 		init() {
@@ -96,12 +96,11 @@ export default {
 		setTitle() {
 			this.clearBread();
 			this.addBreadItem(NOTE_CATEGORY, this.rootSubject.text);
-
+			
 			if(this.params.keyword) {
 				if(this.subject) this.addBreadItem(NOTE_CATEGORY, this.subject.text);
 				this.addBreadItem(NOTE_CATEGORY, `搜尋：${this.params.keyword}` );
 			}else {
-				
 				this.addBreadItem(NOTE_CATEGORY, this.subject.text);
 				if(this.term) this.addBreadItem(NOTE_CATEGORY, this.term.text);
 			}

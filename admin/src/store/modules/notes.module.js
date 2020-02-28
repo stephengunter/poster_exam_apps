@@ -1,8 +1,8 @@
 import NotesService from '@/services/notes.service';
 import { resolveErrorData } from '@/utils';
 
-import { FETCH_NOTE_CATEGORIES,
-   FETCH_NOTES, STORE_NOTE, UPDATE_NOTE, DELETE_NOTE
+import { ORDER_NOTES, 
+   FETCH_NOTES, CREATE_NOTE, STORE_NOTE, UPDATE_NOTE, DELETE_NOTE
 } from '@/store/actions.type';
 
 import { SET_LOADING, SET_NOTE_CATEGORIES, SET_NOTES } from '@/store/mutations.type';
@@ -10,7 +10,6 @@ import { SET_LOADING, SET_NOTE_CATEGORIES, SET_NOTES } from '@/store/mutations.t
 
 
 const initialState = {
-   categories: [],
    terms: []
 };
 
@@ -22,22 +21,6 @@ const getters = {
 
 
 const actions = {
-   [FETCH_NOTE_CATEGORIES](context) {
-      context.commit(SET_LOADING, true);
-      return new Promise((resolve, reject) => {
-         NotesService.categories()
-            .then(categories => {
-               context.commit(SET_NOTE_CATEGORIES, categories);
-               resolve(categories);
-            })
-            .catch(error => {
-               reject(error);
-            })
-            .finally(() => { 
-               context.commit(SET_LOADING, false);
-            });
-      });
-   },
    [FETCH_NOTES](context, params) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
@@ -48,6 +31,20 @@ const actions = {
             })
             .catch(error => {
                reject(error);
+            })
+            .finally(() => { 
+               context.commit(SET_LOADING, false);
+            });
+      });
+   },
+   [CREATE_NOTE](context, params) {
+      return new Promise((resolve, reject) => {
+         NotesService.create(params)
+            .then(model => {
+               resolve(model);
+            })
+            .catch(error => {
+               reject(error);      
             })
             .finally(() => { 
                context.commit(SET_LOADING, false);
@@ -84,6 +81,21 @@ const actions = {
             });
       });
    },
+   [ORDER_NOTES](context, model) {
+      context.commit(SET_LOADING, true);
+      return new Promise((resolve, reject) => {
+         NotesService.order(model)
+            .then(() => {
+               resolve(true);
+            })
+            .catch(error => {
+               reject(resolveErrorData(error));
+            })
+            .finally(() => { 
+               context.commit(SET_LOADING, false);
+            });
+      });
+   },
    [DELETE_NOTE](context, id) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
@@ -103,9 +115,6 @@ const actions = {
 
 
 const mutations = {
-   [SET_NOTE_CATEGORIES](state, categories) {
-      state.categories = categories;
-   },
    [SET_NOTES](state, terms) {
       state.terms = terms;
    }

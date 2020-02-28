@@ -198,7 +198,6 @@ export default {
                recruitList.push(recruit);
             }
          }
-
          this.recruitList = recruitList;
       },
 		submit(){
@@ -208,6 +207,7 @@ export default {
          
       },
       onSelected(index) {
+         this.loadRecruitList();
          this.launchSelect(index);
       },
       launchSelect(index) {
