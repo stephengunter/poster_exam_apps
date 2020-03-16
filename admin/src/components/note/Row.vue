@@ -1,6 +1,13 @@
 <template>
    <tr class="row-note" v-if="edit">
       <td>
+         {{ model.id }}
+      </td>
+      <td>
+         <v-text-field v-model="model.order"
+         />
+      </td>
+      <td>
          <core-upload-button :multiple="true"
          @file-added="onFileAdded" @loading="medias.loading = true"
          @cancel="hideUpload"
@@ -39,6 +46,14 @@
          row-height="15"
          />
       </td>
+       <td>
+         <v-textarea v-model="model.reference" label="參考條文" outlined auto-grow
+         name="text"
+         rows="5"
+         row-height="15"
+         :error-messages="getErrMsg('reference')"
+         />
+      </td>
       <td v-if="enable">
          <v-btn @click.prevent="save" small  flat icon color="success">
             <v-icon>mdi-content-save</v-icon>
@@ -53,6 +68,14 @@
       </td>
    </tr>
    <tr class="row-note" v-else>
+      <td>
+         {{ model.id }}
+      </td>
+      <td>
+         <v-icon v-if="model.active" color="success" style="vertical-align: baseline;">
+            mdi-check-circle
+         </v-icon>
+      </td>
       <td>
          <div v-for="(item, index) in model.attachments" :key="index">
             <a href="#" @click.prevent="showPhoto(item)">

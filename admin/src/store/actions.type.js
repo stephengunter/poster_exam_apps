@@ -40,6 +40,8 @@ export const EDIT_NOTE = 'editNote';
 export const UPDATE_NOTE = 'updateNote';
 export const DELETE_NOTE = 'deleteNote';
 export const ORDER_NOTES = 'orderNotes';
+export const NOTE_DETAILS = 'noteDetails';
+export const SHOW_NOTE = 'showNote';
 
 //Recruits
 export const FETCH_RECRUITS = 'fetchRecruits';

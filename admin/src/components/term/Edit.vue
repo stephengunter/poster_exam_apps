@@ -61,7 +61,7 @@
 							/>
 						</v-flex>
 						<v-flex xs12>
-							<v-textarea v-model="model.reference" label="參考條文" outlined auto-grow
+							<v-textarea v-model="model.reference" label="參考(text, id, type)" outlined auto-grow
 							name="text"
 							rows="5"
 							row-height="15"
@@ -99,7 +99,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { SET_LOADING } from '@/store/mutations.type';
-
+import { isValidReference } from '@/utils';
 
 export default {
 	name: 'TermEdit',
@@ -225,16 +225,16 @@ export default {
 				let references = reference.split('\n').filter(Boolean);
 					this.model.references = references.map(item => {
 					let parts = item.split(',');
-					return { text: parts[0], id: parts[1] ? parts[1] : '' }
+					return { text: parts[0], id: parts[1] ? parts[1] : '', type:  parts[2] ? parts[2] : ''}
 				});
 			}else {
 				this.model.references = [];
 			}
 			
-			
          this.$validator.validate().then(valid => {
 				if(valid) {
-					if(this.model.references.findIndex(item => !item.id) < 0){
+					let referencesErrorIndex = this.model.references.findIndex(item => !isValidReference(item));
+					if(referencesErrorIndex < 0) {
 						this.$emit('submit');
 					}else {
 						this.errors.add({

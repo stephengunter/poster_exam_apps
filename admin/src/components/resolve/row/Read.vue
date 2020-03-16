@@ -5,7 +5,7 @@
       </td>
       <td>
          <source-item v-for="(item, index) in model.sources"  :key="index"
-         :model="item"
+         :model="item" :index="index"
          />
       </td>
       <td>

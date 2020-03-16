@@ -19,6 +19,7 @@
 import { mapState, mapGetters } from 'vuex';
 import { FETCH_NOTE_CATEGORIES, NOTE_CATEGORY, ACTION_SELECTED } from '@/store/actions.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
+import { resolveErrorData } from '@/utils';
 
 export default {
 	name: 'NoteHeader',
@@ -149,7 +150,6 @@ export default {
       },
 		onBreadSelected(item) {
 			Bus.$emit(ACTION_SELECTED, item.action);
-			//this.showCategory();
 		},
 		showCategory() {
 			this.category.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;

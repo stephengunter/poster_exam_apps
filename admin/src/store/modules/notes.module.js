@@ -1,7 +1,7 @@
 import NotesService from '@/services/notes.service';
 import { resolveErrorData } from '@/utils';
 
-import { ORDER_NOTES, 
+import { ORDER_NOTES, NOTE_DETAILS,
    FETCH_NOTES, CREATE_NOTE, STORE_NOTE, UPDATE_NOTE, DELETE_NOTE
 } from '@/store/actions.type';
 
@@ -64,6 +64,20 @@ const actions = {
          .finally(() => { 
             context.commit(SET_LOADING, false);
          });
+      });
+   },
+   [NOTE_DETAILS](context, id) {
+      return new Promise((resolve, reject) => {
+         NotesService.details(id)
+            .then(model => {
+               resolve(model);
+            })
+            .catch(error => {
+               reject(error);        
+            })
+            .finally(() => { 
+               context.commit(SET_LOADING, false);
+            });
       });
    },
    [UPDATE_NOTE](context, model) {

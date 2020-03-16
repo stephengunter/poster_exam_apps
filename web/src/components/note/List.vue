@@ -1,13 +1,13 @@
 <template>
 <div>
-   <v-row>
+   <v-row v-if="!term.hide">
       <v-col cols="12">
          <term-read :term="term" />
       </v-col>
    </v-row>
    <v-card v-if="term.notes.length">
       <v-card-text>
-         <note-item  v-for="(note, index) in term.notes" :key="index"
+         <note-item  v-for="(note, index) in activeNotes" :key="index"
          :model="note"
          @show-photo="showPhoto"
          />
@@ -28,6 +28,12 @@ export default {
       max_width: {
          type: Number,
          default: 800
+      }
+   },
+   computed: {
+      activeNotes() {
+         if(this.term) return this.term.notes.filter(item => item.active);
+         else return [];
       }
    },
    methods: {

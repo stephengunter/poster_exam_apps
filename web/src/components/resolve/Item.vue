@@ -1,5 +1,11 @@
 <template>
-   <v-row>
+   <v-row v-if="hasSources">
+      <v-col cols="12" v-for="(item, index) in model.sources"  :key="index">
+         <source-item  :model="item" :index="index" />
+      </v-col>
+     
+   </v-row>
+   <v-row v-else>
       <v-col v-if="model.text" cols="12" :md="hasAttachments ? 8 : 12">
          <core-highlight  :queries="model.highlights" :content="model.text" />
          
@@ -20,6 +26,10 @@
 export default {
    name: 'ResolveItem',
    computed:{
+      hasSources() {
+         if(!this.model) return false;
+         return this.model.sources.length > 0;
+      },
       hasText() {
          if(!this.model) return false;
          if(this.model.text) return true;

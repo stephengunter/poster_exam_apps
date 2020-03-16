@@ -55,7 +55,9 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
-import { FETCH_NOTES, DELETE_NOTE, SHOW_TERM, TERM_DETAILS } from '@/store/actions.type';
+import { FETCH_NOTES, DELETE_NOTE, SHOW_TERM, SHOW_NOTE,
+TERM_DETAILS, NOTE_DETAILS
+} from '@/store/actions.type';
 
 import { DIALOG_MAX_WIDTH } from '@/config';
 import { onError } from '@/utils';
@@ -133,9 +135,11 @@ export default {
 	},
 	mounted() {
 		window.addEventListener(SHOW_TERM, this.onShowTerm);
+		window.addEventListener(SHOW_NOTE, this.onShowNote);
 	},
 	beforeDestroy(){
-      window.removeEventListener(SHOW_TERM, this.onShowTerm);
+		window.removeEventListener(SHOW_TERM, this.onShowTerm);
+		window.removeEventListener(SHOW_NOTE, this.onShowNote);
    },
 	methods: {
 		fetchData({ subject, term, keyword }) {
@@ -178,6 +182,18 @@ export default {
 					onError(error);
 				})
 			}
+			
+		},
+		onShowNote(e) {
+			let id = e.detail.id;
+			this.$store.dispatch(NOTE_DETAILS, id)
+				.then(model => {
+					this.showTerm.model = model;
+					this.showTerm.active = true;
+				})
+				.catch(error => {
+					onError(error);
+				})
 			
 		},
 		onRemove(item) {

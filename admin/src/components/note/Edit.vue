@@ -6,7 +6,7 @@
          </v-btn>
          <term-read :term="term" />
       </v-flex>
-      <v-flex sm12>
+      <v-flex sm12 v-show="hasNotes">
          <v-data-table ref="tableNotes" :items="term.notes" :headers="headers"  hide-actions item-key="index">
             <template slot="headerCell" slot-scope="{ header }">
                <span class="subheading font-weight-light text-success text--darken-3">
@@ -53,6 +53,18 @@ export default {
 			headers: [
             {
 					sortable: false,
+					text: 'Id',
+               value: '',
+               width: '30px'
+            },
+            {
+					sortable: false,
+					text: 'Active',
+               value: '',
+               width: '50px'
+            },
+            {
+					sortable: false,
 					text: '附圖',
                value: '',
                width: '15%'
@@ -67,11 +79,16 @@ export default {
 					sortable: false,
 					text: '內容',
                value: '',
-                width: '50%'
+               width: '35%'
             },
             {
 					sortable: false,
 					text: '重點標記',
+               width: '15%'
+            },
+            {
+					sortable: false,
+					text: '參考',
                width: '15%'
             },
             {
@@ -96,6 +113,10 @@ export default {
       },
       creating() {
          return this.term.notes.findIndex(item => item.id === 0) > -1;
+      },
+      hasNotes() {
+         if(!this.term) return false;
+         return this.term.notes.length > 0;
       }
    },
    watch: {
@@ -172,21 +193,21 @@ export default {
          }
       },
       onSubmit(model) {
+         //console.log(model);
+         //return;
          let highlight = model.highlight;
-         model.highlights = highlight.split('\n').filter(Boolean);
+         model.highlights = highlight ? highlight.split('\n').filter(Boolean) : [];
 
-         let source = model.source;
-         let sources = source.split('\n').filter(Boolean);
-         model.sources = sources.map(item => {
-            let parts = item.split(',');
-            return { text: parts[0], link: parts[1] ? parts[1] : '' }
-         });
-
-         model.sources.forEach(item => {
-            if(item.link) {
-               if(!isValidURL(item.link)) item.link = '';
-            }
-         })
+         let reference = model.reference;
+         if(reference) {
+				let references = reference.split('\n').filter(Boolean);
+					model.references = references.map(item => {
+					let parts = item.split(',');
+					return { text: parts[0], id: parts[1] ? parts[1] : '', type:  parts[2] ? parts[2] : ''}
+				});
+			}else {
+				model.references = [];
+         }
 
          if(model.id) this.update(model);
 			else this.store(model);

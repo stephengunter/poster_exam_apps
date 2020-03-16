@@ -31,20 +31,13 @@ export default {
             return;
          }
          let queries = this.term.highlights;
-         let referenceTextList = [];
-         if(this.term.references.length) {
-            referenceTextList = this.term.references.map(item => item.text);
-            if(referenceTextList) queries = queries.concat(referenceTextList);
-         }
-
-         this.reference.textList = referenceTextList;
+         if(this.term.references.length) this.reference.textList = this.term.references.map(item => item.text);
 
 
          let caseSensitive = false;
          let diacriticsSensitive = false;
 
          let highlights = highlightChunks(text, queries, { caseSensitive, diacriticsSensitive });
-         
          this.render(highlights);
       },
       isReference(text) {
@@ -54,22 +47,25 @@ export default {
       referenceTag(text) {
          let reference = this.term.references.find(item => item.text === text);
          if(reference) {
-            return `<a href="#" onclick="event.preventDefault(); showTerm(${reference.id});" >${text}</a>`;
+            if(reference.type.toLowerCase() === 'note') {
+               return `<a href="#" onclick="event.preventDefault(); showNote(${reference.id});" >${text}</a>`;
+            }else {
+               return `<a href="#" onclick="event.preventDefault(); showTerm(${reference.id});" >${text}</a>`;
+            }
          }else return text;
       },
-      render(highlights) {
+      render(highlights) {        
+        
          let htmls = highlights.map(item => {
-            if(item.isHighlighted) {
-               if(this.isReference(item.text)) {
-                  return this.referenceTag(item.text);
-               }else return `<mark class="text__highlight">${item.text}</mark>`;
-               
-            }else {
-               return item.text;
-            }
+            if(item.isHighlighted) return `<mark class="text__highlight">${item.text}</mark>`;
+            else return item.text;
          });
         
          this.html = htmls.join('');
+
+         this.reference.textList.forEach(text => {
+            this.html = this.html.replace(text, this.referenceTag(text))
+         });
          
       }
    }

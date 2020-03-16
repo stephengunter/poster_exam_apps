@@ -1,6 +1,7 @@
 <template>
 <v-row>
    <v-col cols="12" v-if="model.text">
+      <p v-if="model.title" class="note-title">{{ model.title }}</p>
       <core-highlight  :queries="model.highlights" :content="model.text" />
    </v-col>
    <v-col :cols="responsive ? 6 : 4" v-for="(photo, index) in model.attachments" :key="index">
@@ -35,6 +36,9 @@ export default {
 }
 </script>
 
-<style>
-
+<style scoped>
+.note-title {
+   font-size: 1.2em;
+   margin-bottom: 10px;
+}
 </style>

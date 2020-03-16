@@ -20,6 +20,10 @@ export const FETCH_NOTE_CATEGORIES = 'fetchNoteCategories';
 export const FETCH_NOTES = 'fetchNotes';
 export const NOTE_CATEGORY = 'noteCategory';
 
+//Questions
+export const FETCH_QUESTIONS = 'fetchQuestions';
+export const SEE_QUESTIONS = 'seeQuestions';
+
 
 //Terms
 export const SHOW_TERM = 'showTerm';

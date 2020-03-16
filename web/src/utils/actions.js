@@ -1,5 +1,5 @@
 import { CANCEL, SUBMIT, SELECT,
-   NOTE_CATEGORY,
+   NOTE_CATEGORY, SEE_QUESTIONS,
    RQS_INDEX, SELECT_RQS_MODE, STORE_EXAM, DELETE_EXAM,
    SAVE_EXAM, ABORT_EXAM, NEW_EXAM, EXAM_RECORDS,
    FILTER_EXAMS, EXAM_SUMMARY
@@ -14,6 +14,15 @@ const actions = [
    type: SELECT,
    icon: 'mdi-format-list-bulleted',
    title: '筆記目錄',
+   description: ''
+},
+{
+   views: ['notes'],
+   name: SEE_QUESTIONS,
+   order: 0,
+   type: SELECT,
+   icon: 'mdi-database',
+   title: '相關試題',
    description: ''
 },
 //RQs

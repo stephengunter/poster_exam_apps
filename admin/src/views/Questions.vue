@@ -354,22 +354,13 @@ export default {
 			if(model) this.editor.lastModel = model;
 		},
 		editResolves(id){
+			
 			let question = this.getQuestion(id);
 			let model = { ...question };
 
 			this.$store.commit(CLEAR_ERROR);
 			this.$store.dispatch(FETCH_RESOLVES, { question: question.id })
-			.then(pageList => {
-				let resolves = pageList.viewList.slice(0);
-				resolves.forEach(item => {
-					if(item.highlights) item.highlight = item.highlights.join('\n');
-					else item.highlights = [];
-
-					if(item.sources) {
-						item.source = item.sources.map(item => `${item.text},${item.link}`).join('\n');
-					}else item.sources = [];
-					
-				});
+			.then(resolves => {
 				model.resolves = resolves;
 				this.setResolvesModel(model);
 			})

@@ -1,12 +1,16 @@
 <template>
 <v-row :id="element_id">
 	<v-col v-if="read_only">
-		<p class="q-title">
+		<p v-if="exam_id" class="q-title">
 			<v-icon :color="model.correct ? 'success' : 'error'" class="mr-1 pb-1">
 				{{ model.correct ? 'mdi-check-circle' : 'mdi-close-circle'  }}
 			</v-icon>
 			<span class="mr-1">{{ model.index }}.</span>
 			{{ model.question.title }} 
+		</p>
+		<p v-else class="q-title">
+			<span class="mr-1">{{ index }}.</span>
+				{{ model.title }} 
 		</p>
 		<v-radio-group v-model="selectedIndex" readonly>
 			<v-radio v-for="(item, index) in options" :key="index" :value="index">
@@ -35,14 +39,27 @@
   		</v-expansion-panels>
 	</v-col>
 	<v-col v-else>
-		<p class="q-title">
-			<span class="mr-1">{{ model.index }}.</span>
-			{{ model.question.title }} 
-		</p>
-		<core-deselectable-radio-group 
-		:options="options" :selected_index="selectedIndex" text_field="title"
-		@selected="onSelect" @show-photo="showPhoto"
-		/>
+		<div v-if="exam_id">
+			<p class="q-title">
+				<span class="mr-1">{{ model.index }}.</span>
+				{{ model.question.title }} 
+			</p>
+			<core-deselectable-radio-group 
+			:options="options" :selected_index="selectedIndex" text_field="title"
+			@selected="onSelect" @show-photo="showPhoto"
+			/>
+		</div>
+		<div v-else>
+			<p class="q-title">
+				<span class="mr-1">{{ index }}.</span>
+				{{ model.title }} 
+			</p>
+			<core-deselectable-radio-group 
+			:options="options" :selected_index="selectedIndex" text_field="title"
+			@selected="onSelect" @show-photo="showPhoto"
+			/>
+		</div>
+		
 	</v-col>
 </v-row> 
 </template>
@@ -51,6 +68,14 @@
 export default {
 	name: 'QuestionEdit',
 	props: {
+		exam_id: {
+         type: Number,
+         default: 0
+		},
+		index: {
+         type: Number,
+         default: 0
+		},
 		read_only: {
          type: Boolean,
          default: false
@@ -92,45 +117,63 @@ export default {
 			return this.model.resolves.filter(item => item.reviewed);
 		}
 	},
+	watch: {
+      read_only(val){
+			if(val) {
+				if(this.selectedIndex < 0) this.model.correct = false;
+				else {
+					let selectedOption = this.options[this.selectedIndex];
+					this.model.correct = selectedOption.correct;
+				}
+				
+			}
+      }
+   },
 	beforeMount() {
-		let model = this.model;
-
-		let userAnswerIndexes = model.userAnswerIndexes;
-	   if(userAnswerIndexes) {
-			if(this.multi_answers) {
-				this.selectedIndexes = userAnswerIndexes.split(',').map(id => Number(id));
-			}else this.selectedIndex = Number(userAnswerIndexes);
-		}
-
-		if(model.options && model.options.length) {
-			this.options = model.options;
-		}else {
-			let optionIds = model.optionIds.split(',').map(id => Number(id));
-			this.optionIds = optionIds;
-			for(let i = 0; i < optionIds.length; i++){
-				let id = optionIds[i];
-				let option = model.question.options.find(item => item.id === id);
-				this.options.push({ ...option });
-			}
-		}
-
-		if(model.answerIndexes) {
-			if(this.multi_answers) {
-				this.answerIndexes = model.answerIndexes.split(',').map(idx => Number(idx));
-			}else {
-				this.answerIndex = Number(model.answerIndexes);
-			}
-		}
+		this.init();
 	},
 	methods: {
-		test(val) {
-			console.log(val);
+		init() {
+			
+			let model = this.model;
+
+			let userAnswerIndexes = model.userAnswerIndexes;
+			
+			if(userAnswerIndexes && userAnswerIndexes.length) {
+				if(this.multi_answers) {
+					this.selectedIndexes = userAnswerIndexes.split(',').map(id => Number(id));
+				}else this.selectedIndex = Number(userAnswerIndexes);
+			}
+
+			if(model.options && model.options.length) {
+				this.options = model.options;
+			}else {
+				let optionIds = model.optionIds.split(',').map(id => Number(id));
+				this.optionIds = optionIds;
+				for(let i = 0; i < optionIds.length; i++){
+					let id = optionIds[i];
+					let option = model.question.options.find(item => item.id === id);
+					this.options.push({ ...option });
+				}
+			}
+
+			if(model.answerIndexes) {
+				if(this.multi_answers) {
+					this.answerIndexes = model.answerIndexes.split(',').map(idx => Number(idx));
+				}else {
+					this.answerIndex = Number(model.answerIndexes);
+				}
+			}
 		},
 		isCorrect(optionIndex) {
 			if(this.multi_answers) {
 				return this.answerIndexes.includes(optionIndex);
 			}else {
-				return this.answerIndex === optionIndex;
+				if(this.exam_id) return this.answerIndex === optionIndex;
+				else {
+					let option = this.options[optionIndex];
+					return option.correct;
+				}
 			}
 		},
 		onSelect(index) {

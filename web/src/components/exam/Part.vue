@@ -6,7 +6,7 @@
          </v-col>
 		</v-row>
       <question-edit v-for="(question, index) in model.questions" :key="index"
-      :read_only="read_only"
+      :exam_id="model.examId" :read_only="read_only"
       :element_id="`e_${model.examId}_q_${question.index}`"
       :model="question" :multi_answers="model.multiAnswers"
       @show-photo="onShowPhoto" @answer-changed="onAnswerChanged"

@@ -36,8 +36,13 @@
          <v-card-text>
             <v-container>
                <v-layout row wrap>
-                  <v-flex xs12 sm6>
-                     <h5>{{ subjectTitle }}</h5>
+                  <v-flex xs12>
+                     <v-select label="科目"
+                        :items="subjectOptions" v-model="subjectId"
+                        @change="onSubjectChanged" 
+                     />
+                  </v-flex> 
+                  <v-flex xs12>
                      <v-treeview :items="tree.items" item-children="subItems"
                      activatable hoverable return-object  active-class="primary--text"
                      :open.sync="tree.open" :active.sync="tree.active"
@@ -47,7 +52,7 @@
                         </template>
                      </v-treeview>
                   </v-flex>
-                  <v-flex xs12 sm6 v-if="selected.term">
+                  <v-flex xs12 v-if="selected.term">
                      <term-read :term="selected.term" />
                      <v-data-table :items="selected.term.notes" :headers="headers"  hide-actions item-key="index">
                         <template slot="headerCell" slot-scope="{ header }">
@@ -164,13 +169,14 @@ export default {
          },
 
          model: null,
-
-         subjectTitle: '',
+         subjectOptions: [],
+         subjectId : 0,
+         subject: null,
          tree: {
             ready: false,
             items: [],
             open: [],
-				active: [405]
+				active: []
 			},
 
          selectedText: ''
@@ -181,6 +187,10 @@ export default {
       ...mapState({
 			categories: state => state.categories.list
       }),
+      allSubjects() {
+         if(!this.categories) return [];
+         return this.categories.flatMap(item => item.subItems);
+      },
       treeMaxWidth() {
 			return this.contentMaxWidth - 65;
       },
@@ -199,7 +209,8 @@ export default {
       }
    },
    beforeMount() {
-      console.log('beforeMount', this.sources);
+      this.subjectId = this.subject_id;
+
       if(this.categories.length) {
          this.init();
          return;
@@ -221,11 +232,23 @@ export default {
    },
 	methods: {
       init() {
-         let subjects = this.categories.flatMap(item => item.subItems);
-        
-         let subject = subjects.find(item => item.id === this.subject_id);
-         this.subjectTitle = subject.text;
+         this.setSubject();
+         this.$nextTick(() => {
+            let rootsubject = this.categories.find(item => item.id === this.subject.parentId);
+             this.subjectOptions = rootsubject.subItems.map(item => ({
+               value: item.id, text: item.text
+            }));
+         })
+      },
+      onSubjectChanged() {
+         this.setSubject();
+         this.setSelectedTerm();
+      },
+      setSubject() {
+         let subject = this.allSubjects.find(item => item.id === this.subjectId);
          this.tree.items = subject.subItems;
+
+         this.subject = subject;
       },
       fetchNotes() {
 			this.$store.dispatch(FETCH_NOTES, this.params)

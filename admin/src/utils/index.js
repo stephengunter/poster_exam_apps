@@ -92,3 +92,4 @@ export const uuid = (len = 8, radix = 16) => {
 
 export * from './helper';
 export * from './highlight';
+export * from './reference';

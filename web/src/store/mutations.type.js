@@ -27,6 +27,9 @@ export const SET_RQS_MODEL = 'setRQsModel';
 export const SET_NOTE_CATEGORIES = 'setNoteCategories';
 export const SET_NOTES = 'setNotes';
 
+//Questions
+export const SET_QUESTIONS = 'setQuestions';
+
 //Exams
 export const SET_EXAM_PAGE_MODE = 'setExamPageMode';
 export const SET_EXAMS = 'setExams';

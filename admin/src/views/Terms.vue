@@ -253,7 +253,7 @@ export default {
 				else term.highlights = [];
 
 				if(term.references) {
-					term.reference = term.references.map(item => `${item.text},${item.id}`).join('\n');
+					term.reference = term.references.map(item => `${item.text},${item.id},${item.type}`).join('\n');
 				}else term.references = [];
 				
 				this.setEditModel(model);
