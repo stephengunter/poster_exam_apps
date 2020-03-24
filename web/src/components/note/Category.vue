@@ -1,5 +1,6 @@
 <template>
    <v-card>
+      <core-close-icon-button v-if="allow_cancel" @close="cancel" />
       <v-card-title>
          <h3>目錄 - 請選擇章節</h3>
       </v-card-title>
@@ -63,6 +64,14 @@ import { resolveErrorData } from '@/utils';
 export default {
    name: 'NoteCategory',
    props: {
+      allow_cancel: {
+         type: Boolean,
+         default: true
+      },
+      version: {
+         type: Number,
+         default: 0
+      },
       params: {
          type: Object,
          default: null
@@ -81,7 +90,9 @@ export default {
          showSearch: false,
          tree: {
 				active: []
-			},
+         },
+         cloneTreeActive: [],
+         canceled: false
 		}
    },
    computed: {
@@ -98,13 +109,25 @@ export default {
       }
    },
    watch: {
-      selectItem: 'onSelectItemChanged'
+      selectItem: 'onSelectItemChanged',
+      version: 'init'
    },
 	methods: {
-      onSubjectChanged() {
-         this.$emit('root-changed');
+      init() {
+         this.canceled = false;
+         this.cloneTreeActive = this.tree.active.slice(0);
+      },
+      cancel() {
+         this.canceled = true;
+         this.tree.active = this.cloneTreeActive.slice(0);
+         this.$emit('cancel');
+      },
+      onSubjectChanged(val) {
+         this.$emit('root-changed', val);
       },
       onSelectItemChanged(newVal, oldVal) {
+         if(this.canceled && this.version > 0) return;
+
          if(oldVal) {
             if(oldVal.type === 'Subject') {
                if(newVal) this.params.subject = newVal.id;
@@ -129,18 +152,21 @@ export default {
          }
 
          if(this.selectItem.subItems.length) return;
-         this.$emit('params-changed', this.params);
+         else this.submit();
       },
       search() {
          if(this.params.keyword) {
             this.params.term = 0;
-            this.$emit('params-changed', this.params);
+            this.submit();
          }
       },
       clearSearch() {
          this.showSearch = false;
 			this.params.keyword = '';
-		}
+      },
+      submit() {
+         this.$emit('submit', this.params);
+      }
 	}
 }
 </script>

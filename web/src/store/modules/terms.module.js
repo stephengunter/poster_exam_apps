@@ -23,7 +23,7 @@ const actions = {
                resolve(model);
             })
             .catch(error => {
-               reject(error);        
+               reject(error); 
             })
             .finally(() => { 
                context.commit(SET_LOADING, false);

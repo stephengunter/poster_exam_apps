@@ -69,7 +69,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { SET_LOADING, CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
+import { SET_LOADING, CLEAR_ERROR, SET_ERROR, SET_NOTE_CATEGORIES } from '@/store/mutations.type';
 
 import { FETCH_QUESTIONS, CREATE_QUESTION, STORE_QUESTION,
 	EDIT_QUESTION, UPDATE_QUESTION, DELETE_QUESTION,
@@ -140,6 +140,7 @@ export default {
 		},
 	},
 	beforeMount(){
+		this.$store.commit(SET_NOTE_CATEGORIES, []);
 		this.init();
 	},
 	methods: {
@@ -188,9 +189,9 @@ export default {
 		},
 		create(){
 			this.$store.commit(CLEAR_ERROR);
-			this.$store.dispatch(CREATE_QUESTION)
+			this.$store.dispatch(CREATE_QUESTION, { subject: this.params.subject, term: this.params.term })
 				.then(model => {
-					model.subjectId = this.params.subject;
+					
 					let recruits = this.$refs.questionHeader.recruit.recruits;
 					if(recruits && recruits.length) model.recruits = recruits.slice(0);
 

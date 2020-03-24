@@ -1,7 +1,7 @@
 import NotesService from '@/services/notes.service';
 import { resolveErrorData } from '@/utils';
 
-import { ORDER_NOTES, NOTE_DETAILS,
+import { ORDER_NOTES, NOTE_DETAILS, FETCH_NOTE_CATEGORIES,
    FETCH_NOTES, CREATE_NOTE, STORE_NOTE, UPDATE_NOTE, DELETE_NOTE
 } from '@/store/actions.type';
 
@@ -10,6 +10,7 @@ import { SET_LOADING, SET_NOTE_CATEGORIES, SET_NOTES } from '@/store/mutations.t
 
 
 const initialState = {
+   categories: [],
    terms: []
 };
 
@@ -21,6 +22,22 @@ const getters = {
 
 
 const actions = {
+   [FETCH_NOTE_CATEGORIES](context, params) {
+      context.commit(SET_LOADING, true);
+      return new Promise((resolve, reject) => {
+         NotesService.categories(params)
+            .then(categories => {
+               context.commit(SET_NOTE_CATEGORIES, categories);
+               resolve(categories);
+            })
+            .catch(error => {
+               reject(error);
+            })
+            .finally(() => { 
+               context.commit(SET_LOADING, false);
+            });
+      });
+   },
    [FETCH_NOTES](context, params) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
@@ -129,6 +146,9 @@ const actions = {
 
 
 const mutations = {
+   [SET_NOTE_CATEGORIES](state, categories) {
+      state.categories = categories;
+   },
    [SET_NOTES](state, terms) {
       state.terms = terms;
    }

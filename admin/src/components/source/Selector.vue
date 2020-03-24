@@ -103,7 +103,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { FETCH_CATEGORIES, FETCH_NOTES } from '@/store/actions.type';
+import { FETCH_NOTE_CATEGORIES, FETCH_NOTES } from '@/store/actions.type';
 import { onError } from '@/utils';
 export default {
 	name: 'SourceSelector',
@@ -185,7 +185,7 @@ export default {
    computed: {
       ...mapGetters(['responsive','contentMaxWidth']),
       ...mapState({
-			categories: state => state.categories.list
+			categories: state => state.notes.categories
       }),
       allSubjects() {
          if(!this.categories) return [];
@@ -216,7 +216,7 @@ export default {
          return;
       }
          
-      this.$store.dispatch(FETCH_CATEGORIES, { type: 1 })
+      this.$store.dispatch(FETCH_NOTE_CATEGORIES, { type: 1 })
       .then(() => {
          this.$nextTick(() => {
             this.init();

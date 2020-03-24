@@ -6,10 +6,18 @@
          </span>
       </template>
       <template slot="items" slot-scope="props">
-         <td>
+         <td v-if="can_remove">
+            <v-btn @click.prevent="remove(props.item.id)" small  flat icon color="error">
+               <v-icon>mdi-delete-circle</v-icon>
+            </v-btn>
+         </td>
+         <td v-if="can_edit">
             <v-btn @click.prevent="edit(props.item.id)" flat icon color="success">
               <v-icon small>mdi-pencil</v-icon>
             </v-btn>
+         </td>
+         <td>
+            {{ props.item.id }}
          </td>
          <td>
             {{ props.item.title }}
@@ -53,6 +61,14 @@ export default {
          type: Array,
          default: null
       },
+      can_remove: {
+         type: Boolean,
+         default: false
+      },
+      can_edit: {
+         type: Boolean,
+         default: true
+      },
       show_resolves: {
          type: Boolean,
          default: true
@@ -71,9 +87,9 @@ export default {
 			headers: [
             {
 					sortable: false,
-					text: '',
+					text: 'Id',
                value: '',
-               width: '45px'
+               width: '30px'
 				},
 				{
 					sortable: false,
@@ -90,6 +106,18 @@ export default {
 		}
    },
    beforeMount() {
+      if(this.can_remove) this.headers.unshift({
+         sortable: false,
+         text: '',
+         value: '',
+         width: '45px'
+      });
+      if(this.can_edit) this.headers.unshift({
+         sortable: false,
+         text: '',
+         value: '',
+         width: '45px'
+      });
       if(this.show_resolves) this.headers.push({
          sortable: false,
          text: '解析',
@@ -119,6 +147,9 @@ export default {
       },
       recruitText(item) {
          return item.parents[0].title;
+      },
+      remove(id) {
+         this.$emit('remove', id);
       },
       edit(id){
          this.$emit('edit', id);

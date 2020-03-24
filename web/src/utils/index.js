@@ -11,7 +11,7 @@ export const resolveErrorData = (error) => {
 
 
 export const onError = (error) => {
-   Bus.$emit('errors');
+   Bus.$emit('errors', error);
 }
 
 export const showConfirm = ({ type, title, text, ok ='確定', cancel = '取消', onOk = null, onCancel = null,maxWidth = 0}) => {

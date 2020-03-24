@@ -5,7 +5,7 @@ const source =`${API_URL}/admin/questions`;
 
 const fetch = (params) => BaseService.fetch(source, params);
 
-const create = () => BaseService.fetch(`${source}/create`);
+const create = (params) => BaseService.fetch(`${source}/create`, params);
 
 const store = (model) => BaseService.post(source, model);
 

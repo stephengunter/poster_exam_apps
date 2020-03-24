@@ -3,7 +3,7 @@ import { API_URL } from '@/config';
 
 const source =`${API_URL}/admin/notes`;
 
-const categories = () => BaseService.fetch(`${source}/categories`);
+const categories = (params) => BaseService.fetch(`${source}/categories`, params);
 
 const fetch = (params) => BaseService.fetch(source, params);
 

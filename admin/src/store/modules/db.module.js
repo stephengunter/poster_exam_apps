@@ -1,7 +1,9 @@
 import DBService from '@/services/db.service';
 import { resolveErrorData } from '@/utils';
 
-import { DB_IMPORT, DB_BACKUP, DB_EXPORT } from '@/store/actions.type';
+import { GET_DB_NAME, DB_MIGRATE, 
+DB_IMPORT, DB_BACKUP, DB_EXPORT
+} from '@/store/actions.type';
 import { SET_LOADING } from '@/store/mutations.type';
 
 
@@ -17,6 +19,21 @@ const getters = {
 };
 
 const actions = {
+   [GET_DB_NAME](context) {
+      context.commit(SET_LOADING, true);
+      return new Promise((resolve, reject) => {
+         DBService.dbName()
+            .then(name => {
+               resolve(name);
+            })
+            .catch(error => {
+               reject(error);
+            })
+            .finally(() => { 
+               context.commit(SET_LOADING, false);
+            });
+      });
+   },
    [DB_IMPORT](context, { key, cmd, files }) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
@@ -57,6 +74,21 @@ const actions = {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          DBService.exporting({ key })
+         .then(() => {
+            resolve(true);
+         })
+         .catch(error => {
+            reject(resolveErrorData(error)); 
+         })
+         .finally(() => { 
+            context.commit(SET_LOADING, false);
+         });
+      });
+   },
+   [DB_MIGRATE](context, { key }) {
+      context.commit(SET_LOADING, true);
+      return new Promise((resolve, reject) => {
+         DBService.migrate({ key })
          .then(() => {
             resolve(true);
          })

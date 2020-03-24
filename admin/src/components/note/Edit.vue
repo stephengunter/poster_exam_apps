@@ -6,22 +6,27 @@
          </v-btn>
          <term-read :term="term" />
       </v-flex>
-      <v-flex sm12 v-show="hasNotes">
-         <v-data-table ref="tableNotes" :items="term.notes" :headers="headers"  hide-actions item-key="index">
-            <template slot="headerCell" slot-scope="{ header }">
-               <span class="subheading font-weight-light text-success text--darken-3">
-                  {{ header.text }}
-               </span>
-            </template>
-            <template slot="items" slot-scope="props">
-               <note-row :model="props.item" :index="props.index" :key="props.item.id"
-               :enable="enable(props.item, props.index)" :edit="isEdit(props.item, props.index)"
-               @selected="edit" @cancel="onRowCancel"
-               @show-photo="showPhoto" 
-               @save="onSubmit(props.item)" @remove="onRemove(props.item)"
-               />
-            </template>
-         </v-data-table>
+      <v-flex sm12 v-show="activeNotes.length">
+         <note-table ref="tableNotes" 
+         :notes="notes" :seleted_index="selectedIndex"
+         :editting="editting" :creating="creating"
+         @edit="edit" @row-canceled="onRowCancel"
+         @remove="onRemove" @submit="onSubmit"
+         @showPhoto="showPhoto"
+         />
+      </v-flex>
+      <v-flex sm12 >
+         <span class="title">相關試題</span>
+         <v-btn small @click.prevent="addQuestion" fab icon color="warning">
+            <v-icon>mdi-plus</v-icon>
+         </v-btn>
+         <div v-if="hasQuestions">
+            <question-table :list="term.questions" :show_recruits="false" :show_resolves="false"
+            :can_remove="true" :can_edit="false"
+            @remove="removeQuestion"
+            />
+         </div>
+         
       </v-flex>
    </v-layout>
    
@@ -50,53 +55,6 @@ export default {
 	},
 	data () {
 		return {
-			headers: [
-            {
-					sortable: false,
-					text: 'Id',
-               value: '',
-               width: '30px'
-            },
-            {
-					sortable: false,
-					text: 'Active',
-               value: '',
-               width: '50px'
-            },
-            {
-					sortable: false,
-					text: '附圖',
-               value: '',
-               width: '15%'
-            },
-            {
-					sortable: false,
-					text: '標題',
-               value: '',
-               width: '15%'
-            },
-				{
-					sortable: false,
-					text: '內容',
-               value: '',
-               width: '35%'
-            },
-            {
-					sortable: false,
-					text: '重點標記',
-               width: '15%'
-            },
-            {
-					sortable: false,
-					text: '參考',
-               width: '15%'
-            },
-            {
-					sortable: false,
-					text: '',
-					width: '5%'
-				}
-         ],
          selectedIndex: -1,
          editModel: null,
          postType: 'Note',
@@ -114,9 +72,22 @@ export default {
       creating() {
          return this.term.notes.findIndex(item => item.id === 0) > -1;
       },
-      hasNotes() {
+      notes() {
+         return this.activeNotes.concat(this.unactiveNotes);
+      },
+      activeNotes() {
+         if(this.term && this.term.notes) {
+            return this.term.notes.filter(item => item.active);
+         }else  return [];
+      },
+      unactiveNotes() {
+         if(this.term && this.term.notes) {
+            return this.term.notes.filter(item => !item.active);
+         }else  return [];
+      },
+      hasQuestions() {
          if(!this.term) return false;
-         return this.term.notes.length > 0;
+          return this.term.questions && this.term.questions.length;
       }
    },
    watch: {
@@ -157,20 +128,8 @@ export default {
 				else this.$store.commit(SET_ERROR, error);
 			})       		
       },
-      cancel(){
-			this.$emit('cancel');
-      },
       showPhoto(photo){
          this.$emit('show-photo', photo);
-      },
-      getErrMsg(keys){
-         let err = this.errors.collect(keys[1]);
-			if(err && err.length){
-            let msg = err[0];
-            if(keys[0] === 'text') return msg.replace(keys[1], '內容');
-				return msg;
-			}
-			return '';
       },
       add(){
          let term = this.term.id;
@@ -185,6 +144,18 @@ export default {
 			}) 
          
       },
+      edit(index, model) {
+         if(model.highlights) model.highlight = model.highlights.join('\n');
+         else model.highlights = [];
+
+         if(model.references && model.references.length) {
+            model.reference = model.references.map(item => `${item.text},${item.id},${item.type}`).join('\n');
+         }else model.reference = '';
+
+         this.selectedIndex = index;
+           //複製, 用來還原(取消編輯時)
+         this.editModel = deepClone(model);
+      },
 		onRemove(item){
          if(item.id) {
             this.$emit('remove', item);
@@ -193,8 +164,6 @@ export default {
          }
       },
       onSubmit(model) {
-         //console.log(model);
-         //return;
          let highlight = model.highlight;
          model.highlights = highlight ? highlight.split('\n').filter(Boolean) : [];
 
@@ -275,18 +244,6 @@ export default {
 				else this.$store.commit(SET_ERROR, error);
 			})
       },
-      isEdit(item, index) {
-         if(!item.id) return true;
-         return index === this.selectedIndex;
-      },
-      enable(item, index) {
-         if(item.id) {
-            if(this.creating)  return false;
-            else if(this.editting) return index === this.selectedIndex;
-            return true
-         }
-         return true
-      },
       onRowCancel() {
          if(this.editting) {
             let index = this.selectedIndex;
@@ -299,24 +256,16 @@ export default {
          } 
          else if(this.creating) this.term.notes.splice(this.term.notes.length - 1, 1);
          
-
-         this.$emit('row-canceled');
-      },
-      edit(index, model) {
-         if(model.highlights) model.highlight = model.highlights.join('\n');
-         else model.highlights = [];
-
-         if(model.sources) {
-            model.source = model.sources.map(item => `${item.text},${item.link}`).join('\n');
-         }else model.sources = [];
-
-         this.selectedIndex = index;
-           //複製, 用來還原(取消編輯時)
-         this.editModel = deepClone(model);
       },
       onSaved() {
          this.$emit('saved');
          this.selectedIndex = -1;
+      },
+      addQuestion() {
+         this.$emit('add-question', this.term.id);
+      },
+      removeQuestion(id) {
+         this.$emit('remove-question', { termId: this.term.id, questionId: id });
       }
 	}
 }

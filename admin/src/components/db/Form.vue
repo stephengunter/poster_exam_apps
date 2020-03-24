@@ -11,6 +11,13 @@
       <v-card-text>
          <v-layout row wrap>
             <v-flex xs12>
+               <v-text-field label="數據庫名稱" readonly
+               :value="db_name"
+               />
+            </v-flex>
+         </v-layout>
+         <v-layout row wrap>
+            <v-flex xs12>
                <v-text-field v-model="model.key" label="Key"
                v-validate="'required'"
                :error-messages="getErrMsg('key')"
@@ -32,6 +39,10 @@
 export default {
    name: 'DBForm',
    props: {
+      db_name: {
+         type: String,
+         default: ''
+      },
       title: {
          type: String,
          default: ''

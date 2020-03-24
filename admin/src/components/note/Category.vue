@@ -3,7 +3,7 @@
       <v-card-title>
          <h3>目錄 - 請選擇章節</h3>
          <v-spacer />
-         <a v-show="paramsValid" href="#" @click.prevent="cancel" class="a-btn">
+         <a v-if="allow_cancel" @click.prevent="cancel"  class="a-btn">
             <v-icon>mdi-window-close</v-icon>
          </a>
       </v-card-title>
@@ -11,7 +11,7 @@
          <v-layout row wrap>
             <v-flex xs6 sm6 md6>
                <v-select label="科目"
-                  :items="subjectOptions" v-model="params.rootSubject"
+                  :items="subject_options" v-model="params.rootSubject"
                   @change="onSubjectChanged"
                />
             </v-flex>
@@ -34,7 +34,8 @@
          </v-layout>
          <v-layout row wrap>
             <v-flex xs12>
-               <v-treeview :items="tree.items" item-children="subItems"
+               
+               <v-treeview :items="tree_items" item-children="subItems"
                activatable hoverable return-object  active-class="primary--text"
                :active.sync="tree.active"
                >
@@ -50,23 +51,39 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { FETCH_CATEGORIES } from '@/store/actions.type';
 import { onError } from '@/utils';
 
 export default {
+   props: {
+      allow_cancel: {
+         type: Boolean,
+         default: true
+      },
+      version: {
+         type: Number,
+         default: 0
+      },
+      params: {
+         type: Object,
+         default: null
+      },
+      subject_options: {
+			type: Array,
+         default: null
+      },
+      tree_items: {
+			type: Array,
+         default: null
+      },
+   },
    data () {
       return {
-         subjectOptions: [],
-         params: {
-				rootSubject: 0,
-				subject: 0,
-            term: 0,
-            keyword: '',
-         },
+         showSearch: false,
          tree: {
-            items: [],
 				active: []
-			}
+         },
+         cloneTreeActive: [],
+         canceled: false
       }
    },
    computed: {
@@ -74,9 +91,6 @@ export default {
       ...mapState({
 			categories: state => state.categories.list
       }),
-      paramsValid() {
-         return this.params.subject > 0 || this.params.term > 0
-      },
       selectItem() {
 			if(this.tree.active.length) return this.tree.active[0];
 			return null;
@@ -89,39 +103,26 @@ export default {
       }
    },
    watch: {
-      selectItem: 'onSelectItemChanged'
-   },
-   beforeMount() {
-      if(this.categories.length) return;
-      this.$store.dispatch(FETCH_CATEGORIES)
-      .then(() => {
-         this.$nextTick(() => {
-            this.init();
-         });
-      })
-      .catch(error => {
-         onError(error);
-      })
+      selectItem: 'onSelectItemChanged',
+      version: 'init'
    },
    methods: {
       init() {
-         let subjectOptions = this.categories.map(item => ({ value: item.id, text: item.text }));
-         this.params.rootSubject = subjectOptions[0].value;
-         this.setTreeItems();
-
-         this.subjectOptions = subjectOptions;
-         this.$emit('ready');
+         this.canceled = false;
+         this.cloneTreeActive = this.tree.active.slice(0);
       },
-      setTreeItems() {
-         let rootSubjectId = this.params.rootSubject;
-         let category = this.categories.find(item => item.id === rootSubjectId);
-
-         this.tree.items = category.subItems;
+      cancel() {
+         console.log('cancel');
+         this.canceled = true;
+         this.tree.active = this.cloneTreeActive.slice(0);
+         this.$emit('cancel');
       },
-      onSubjectChanged() {
-         this.setTreeItems();
+      onSubjectChanged(val) {
+         this.$emit('root-changed', val);
       },
       onSelectItemChanged(newVal, oldVal) {
+         if(this.canceled && this.version > 0) return;
+
          if(oldVal) {
             if(oldVal.type === 'Subject') {
                if(newVal) this.params.subject = newVal.id;
@@ -146,19 +147,20 @@ export default {
          }
 
          if(this.selectItem.subItems.length) return;
-         this.$emit('params-changed', this.params);
+         else this.submit();
       },
       search() {
          if(this.params.keyword) {
             this.params.term = 0;
-            this.$emit('params-changed', this.params);
+            this.submit();
          }
       },
       clearSearch() {
+         this.showSearch = false;
 			this.params.keyword = '';
-		},
-      cancel() {
-         this.$emit('cancel');
+      },
+      submit() {
+         this.$emit('submit', this.params);
       }
    }
 }

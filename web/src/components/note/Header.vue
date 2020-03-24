@@ -4,12 +4,14 @@
       @selected="onBreadSelected"
       />
       
-      <v-dialog v-model="category.active" :max-width="category.maxWidth" :persistent="version < 1 || !paramsValid">
+      <v-dialog v-model="category.active" :max-width="category.maxWidth" :persistent="true">
 			<note-category
-         :params="params" :subject_options="subjectOptions"
+			:allow_cancel="version > 0 || paramsValid" :version="category.version"
+         :params="category.params" :subject_options="subjectOptions"
 			:tree_items="tree.items"
+			@cancel="category.active = false;"
 			@root-changed="onRootSubjectChanged"
-         @params-changed="onParamsChanged"
+         @submit="onParamsChanged"
          />
       </v-dialog>
    </div>
@@ -45,6 +47,8 @@ export default {
 			subjects : [],
 			terms: [],
 			category: {
+				params: {},
+				version: 0,
 				active: false,
 				maxWidth: DIALOG_MAX_WIDTH
          },
@@ -100,7 +104,7 @@ export default {
       init() {
          let subjectOptions = this.categories.map(item => ({ value: item.id, text: item.text }));
          this.params.rootSubject = subjectOptions[0].value;
-         this.setTreeItems();
+         this.setTreeItems(this.params.rootSubject);
 
          this.subjectOptions = subjectOptions;
 			this.showCategory();
@@ -110,20 +114,22 @@ export default {
 			this.subjects = subjects;
 			this.terms = terms;
       },
-      setTreeItems() {
-         let rootSubjectId = this.params.rootSubject;
+      setTreeItems(rootSubjectId) {
          let category = this.categories.find(item => item.id === rootSubjectId);
-
          this.tree.items = category.subItems;
 		},
-		onRootSubjectChanged() {
-			this.setTreeItems();
+		onRootSubjectChanged(val) {
+			this.setTreeItems(val);
 		},
-		onParamsChanged() {
-			this.$emit('params-changed', this.params);
+		onParamsChanged(params) {
+		
+			this.params = { ...params };
+			this.$emit('params-changed', params);
 			
-			this.setTitle();
-			this.category.active = false;
+			this.$nextTick(() => {
+				this.setTitle();
+				this.category.active = false;
+			});
 		},
 		setTitle() {
 			this.clearBread();
@@ -152,6 +158,8 @@ export default {
 			Bus.$emit(ACTION_SELECTED, item.action);
 		},
 		showCategory() {
+			this.category.params = { ...this.params };
+			this.category.version += 1;
 			this.category.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
 			this.category.active = true;
 		}

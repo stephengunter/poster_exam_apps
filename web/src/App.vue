@@ -128,6 +128,7 @@ export default {
 	},
 	methods:{
 		onError(error) {
+			console.log('onError', error);
 			let confirm = {
 				type: 'error',
 				title: '伺服器暫時無回應，請稍候再試.',

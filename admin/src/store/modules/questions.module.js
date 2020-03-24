@@ -38,9 +38,9 @@ const actions = {
             });
       });
    },
-   [CREATE_QUESTION](context) {
+   [CREATE_QUESTION](context, params) {
       return new Promise((resolve, reject) => {
-         QuestionsService.create()
+         QuestionsService.create(params)
             .then(model => {
                resolve(model);
             })

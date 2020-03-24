@@ -3,16 +3,18 @@
       <v-layout justify-center  align-center>
 			<v-flex xs12>
 				<material-card>
-					<note-header
+					<note-header ref="noteHeader"
+					:version="version"
 					@params-changed="fetchData" @refresh="refresh"
 					/>
-					
 					<div v-if="ready">
 						<note-edit v-for="(term, index) in terms" :key="index"
 						:term="term" :version="version"
 						@show-photo="onShowPhoto" 
 						@saved="onSaved" @remove="onRemove"
 						@order-updated="onSaved"
+						@add-question="editTermQuestions"
+						@remove-question="removeTermQuestion"
 						/>
 					</div>
 				</material-card>
@@ -37,15 +39,25 @@
 				</v-card-text>
       	</v-card>
 		</v-dialog>
-		<v-dialog v-model="showTerm.active" :max-width="showTerm.maxWidth">
-			<v-card v-if="showTerm.model">
-				<v-card-text>
-					<h3 v-if="showTerm.model.subject" style="margin-top: 5px;">{{ showTerm.model.subject.title }}  {{ showTerm.model.title }}</h3>
-					<term-tree-item :item="showTerm.model" 
-					:show_title="false" :max_width="showTerm.maxWidth" 
+		<v-dialog v-model="showReference.active" :max-width="showReference.maxWidth">
+			<v-card v-if="showReference.model">
+				<v-card-text v-if="showReference.type.toLowerCase() === 'term'">
+					<h3 v-if="showReference.model.subject" style="margin-top: 5px;">{{ showReference.model.subject.title }}  {{ showReference.model.title }}</h3>
+					<term-tree-item :item="showReference.model" 
+					:show_title="false" :max_width="showReference.maxWidth" 
 					/>
 				</v-card-text>
+				<v-card-text v-else>
+					<h3 v-if="showReference.model.title" style="margin-top: 5px;">{{ showReference.model.title }}</h3>
+					<note-read :model="showReference.model"/>
+				</v-card-text>
       	</v-card>
+		</v-dialog>
+		<v-dialog v-model="termQuestions.active" :max-width="termQuestions.maxWidth">
+			<term-question-edit :term="termQuestions.term"
+			:version="termQuestions.version"
+			@cancel="termQuestions.active = false" @saved="onTermQIdUpdated"
+			/>
 		</v-dialog>
 	</v-container>
     
@@ -56,7 +68,7 @@
 import { mapState, mapGetters } from 'vuex';
 import { CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
 import { FETCH_NOTES, DELETE_NOTE, SHOW_TERM, SHOW_NOTE,
-TERM_DETAILS, NOTE_DETAILS
+TERM_DETAILS, NOTE_DETAILS, DELETE_TERM_QUESTION
 } from '@/store/actions.type';
 
 import { DIALOG_MAX_WIDTH } from '@/config';
@@ -114,9 +126,23 @@ export default {
 				maxWidth: DIALOG_MAX_WIDTH
 			},
 
+			showReference: {
+				active: false,
+				type: '',
+				model: null,
+				maxWidth: DIALOG_MAX_WIDTH
+			},
+
 			showTerm: {
 				active: false,
 				model: null,
+				maxWidth: DIALOG_MAX_WIDTH
+			},
+
+			termQuestions: {
+				term: null,
+				version: 0,
+				active: false,
 				maxWidth: DIALOG_MAX_WIDTH
 			},
 
@@ -124,16 +150,24 @@ export default {
 				id: 0,
 				active: false,
 				maxWidth: DIALOG_MAX_WIDTH
-			}
+			},
+
+			references: {}
 		}
 	},
 	computed: {
 		...mapGetters(['responsive','contentMaxWidth']),
 		...mapState({
 			terms: state => state.notes.terms
-		})
+		}),
+		noteHeader() {
+			if(this.$refs.noteHeader) return this.$refs.noteHeader;
+			else if (this.references.noteHeader) return this.references.noteHeader;
+			return null;
+      },
 	},
 	mounted() {
+		this.references = { ...this.$refs };
 		window.addEventListener(SHOW_TERM, this.onShowTerm);
 		window.addEventListener(SHOW_NOTE, this.onShowNote);
 	},
@@ -144,20 +178,27 @@ export default {
 	methods: {
 		fetchData({ subject, term, keyword }) {
 			this.ready = false;
-			this.params = {
+			let params = {
 				subject, term, keyword
 			};
-			
-			this.$store.dispatch(FETCH_NOTES, { subject, term, keyword })
+			this.params = params;
+			this.$store.dispatch(FETCH_NOTES, params)
 			.then(terms => {
 				this.$nextTick(() => {
-					this.ready = true;
-					this.version += 1;
+					this.setReady(true);
 				});
 			})
 			.catch(error => {
 				onError(error);
 			})
+		},
+		setReady(val) {
+			if(val) {
+				this.ready = true;
+				this.version += 1;
+			}else {
+				this.ready = false;
+			}
 		},
 		refresh() {
 			this.fetchData(this.params);
@@ -170,13 +211,17 @@ export default {
 			let id = e.detail.id;
 			let term = this.terms.find(item => item.id === Number(id));
 			if(term) {
-				this.showTerm.model = term;
-				this.showTerm.active = true;
+				this.showReference.model = term;
+				this.showReference.type = 'term';
+				this.showReference.active = true;
 			}else {
 				this.$store.dispatch(TERM_DETAILS, id)
 				.then(model => {
-					this.showTerm.model = model;
-					this.showTerm.active = true;
+					this.showReference.model = model;
+					this.showReference.type = 'term';
+					this.showReference.active = true;
+
+					console.log('this.showReference', this.showReference);
 				})
 				.catch(error => {
 					onError(error);
@@ -188,8 +233,9 @@ export default {
 			let id = e.detail.id;
 			this.$store.dispatch(NOTE_DETAILS, id)
 				.then(model => {
-					this.showTerm.model = model;
-					this.showTerm.active = true;
+					this.showReference.model = model;
+					this.showReference.type = 'note';
+					this.showReference.active = true;
 				})
 				.catch(error => {
 					onError(error);
@@ -219,6 +265,27 @@ export default {
 		},
 		onSaved() {
 			this.fetchData(this.params);
+		},
+		editTermQuestions(id) {
+			this.termQuestions.term = this.terms.find(item => item.id === id);
+			this.termQuestions.version += 1;
+			this.termQuestions.active = true;
+		},
+		removeTermQuestion(model) {
+			let term = this.terms.find(item => item.id === model.termId);
+
+			this.$store.dispatch(DELETE_TERM_QUESTION, model)
+			.then(() => {
+				this.refresh();
+			})
+			.catch(error => {
+				Bus.$emit('errors');
+			})
+		},
+		onTermQIdUpdated() {
+			this.termQuestions.active = false;
+			this.termQuestions.term = null;
+			this.refresh();
 		}
 	}
 }

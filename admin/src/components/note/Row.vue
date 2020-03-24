@@ -4,6 +4,10 @@
          {{ model.id }}
       </td>
       <td>
+         <v-text-field v-model="model.termId"
+         />
+      </td>
+      <td>
          <v-text-field v-model="model.order"
          />
       </td>
@@ -47,7 +51,7 @@
          />
       </td>
        <td>
-         <v-textarea v-model="model.reference" label="參考條文" outlined auto-grow
+         <v-textarea v-model="model.reference" label="參考(text, id, type)" outlined auto-grow
          name="text"
          rows="5"
          row-height="15"
@@ -71,6 +75,9 @@
       <td>
          {{ model.id }}
       </td>
+       <td>
+         {{ model.termId }}
+      </td>
       <td>
          <v-icon v-if="model.active" color="success" style="vertical-align: baseline;">
             mdi-check-circle
@@ -89,7 +96,7 @@
          {{ model.title }}
       </td>
       <td>
-         <core-highlight v-if="model.text" :queries="model.highlights" :content="model.text" />
+         <note-read :model="model"/>
       </td>
       <td>
          <core-label v-for="(item, index) in model.highlights" :key="index">
@@ -98,13 +105,10 @@
       </td>
       <td>
          <ul>
-            <li v-for="(item, index) in model.sources"  :key="index">
-               <source-tag 
-               :text="item.text" :link="item.link"
-               />
+            <li v-for="(item, index) in model.references"  :key="index">
+              {{ item.text }} 
             </li>
          </ul>
-        
       </td>
       <td v-if="enable">
         
@@ -153,6 +157,10 @@ export default {
          }
 		}
    },
+   mounted() {
+      if(this.model.id == 2616) console.log(this.model);
+      
+   },
    methods: {
       showPhoto(photo){
          this.$emit('show-photo', photo);
@@ -183,8 +191,6 @@ export default {
          this.$emit('selected', this.index, this.model);
          this.model.text = replaceBR(this.model.text);
          this.model.medias = [];
-
-         console.log('model', this.model);
       },
       getPhotoPath(attachment) {
          let width = 100;

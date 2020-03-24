@@ -62,7 +62,7 @@ import { LOAD_ACTIONS, FETCH_NOTES, NOTE_CATEGORY, FETCH_QUESTIONS,
 SHOW_TERM, TERM_DETAILS, ACTION_SELECTED, SEE_QUESTIONS
 } from '@/store/actions.type';
 import { SET_QUESTIONS } from '@/store/mutations.type';
-import { resolveErrorData, getRouteTitle } from '@/utils';
+import { onError, resolveErrorData, getRouteTitle } from '@/utils';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
 export default {
@@ -139,12 +139,13 @@ export default {
 			this.params = params;
 			this.$store.dispatch(FETCH_NOTES, params)
 			.then(terms => {
-				if(this.params.term) this.fetchQuestions();
-				else {
-					this.$nextTick(() => {
-						this.setReady(true);
-					});
-				}
+				this.fetchQuestions();
+				// if(this.params.keyword) {
+				// 	this.$nextTick(() => {
+				// 		this.setReady(true);
+				// 	});
+				// }else this.fetchQuestions();
+				
 			})
 			.catch(error => {
 				Bus.$emit('errors', resolveErrorData(error));
@@ -161,8 +162,7 @@ export default {
 			}
 		},
 		fetchQuestions() {
-			if(!this.params.term) return;
-			let params = { term: this.params.term };
+			let params = { term: this.params.term, subject: this.params.subject };
 			this.$store.dispatch(FETCH_QUESTIONS, params)
 			.then(questions => {
 				this.$nextTick(() => {

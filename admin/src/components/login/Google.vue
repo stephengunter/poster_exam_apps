@@ -35,7 +35,7 @@ export default {
          this.googleSignedIn = result.signedIn;
          this.ready = true;    
       }).catch(error => {
-         console.log(error);
+         console.error(error);
       })
    },
    methods: {

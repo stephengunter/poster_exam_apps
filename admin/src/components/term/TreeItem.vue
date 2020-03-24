@@ -1,5 +1,11 @@
 <template>
-   <div class="term-text" :style="{ 'max-width': `${max_width}px` }" v-html="getContent()">
+   <div :style="{ 'max-width': `${max_width}px` }"  style="display:inline-block;">
+     
+      <p >
+         <v-icon v-if="item.chapterTitle && item.hide">mdi-close</v-icon>
+         <span style="font-size:16px"  v-html="getContent()"></span>
+      </p>
+     
    </div>
 </template>
 
@@ -36,15 +42,12 @@ export default {
             if(content) content = title + ' ' + content;
             else content = title;            
          }
-          
-         return content.replace(/<br>/g, `<br><span style="padding-left:15px"></span>`);
+
+         content = content.replace(/<br>/g, `<br><span style="padding-left:15px"></span>`);
+         
+         //content += '<v-icon>mdi-close</v-icon>';
+         return content;
       }
    }
 }
 </script>
-
-<style scoped>
-.term-text {
-   font-size: 16px;
-}
-</style>

@@ -31,7 +31,13 @@ export const ORDER_TERMS = 'orderTerms';
 export const TERM_DETAILS = 'termDetails';
 export const SHOW_TERM = 'showTerm';
 
+//TermQuestions
+export const FETCH_TERM_QUESTIONS = 'fetchTermQuestions';
+export const STORE_TERM_QUESTION = 'storeTermQuestion';
+export const DELETE_TERM_QUESTION = 'deleteTermQuestion';
+
 //Notes
+export const FETCH_NOTE_CATEGORIES = 'fetchNoteCategories';
 export const FETCH_NOTES = 'fetchNotes';
 export const NOTE_CATEGORY = 'noteCategory';
 export const CREATE_NOTE = 'createNote';
@@ -64,9 +70,6 @@ export const ORDER_QUESTIONS = 'orderQuestions';
 //Options
 export const STORE_OPTIONS = 'storeOptions';
 
-//Categories
-export const FETCH_CATEGORIES = 'fetchCategories';
-
 //Resolves
 export const FETCH_RESOLVES = 'fetchResolves';
 export const STORE_RESOLVE = 'storeResolve';
@@ -84,6 +87,8 @@ export const ANALYSIS_INDEX = 'analysisIndex';
 export const RQ_ANALYSIS = 'rqAnalysis';
 
 //DB
+export const GET_DB_NAME = 'getDbName';
 export const DB_IMPORT = 'dbImport';
 export const DB_EXPORT = 'dbExport';
 export const DB_BACKUP = 'dbBackup';
+export const DB_MIGRATE = 'dbMigrate';

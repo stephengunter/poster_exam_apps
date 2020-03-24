@@ -206,8 +206,10 @@ export default {
          }
       },
       onTermChanged(item) {
-         this.select.model = item;
-         this.selectedText = item.fullText;
+         if(item) {
+            this.select.model = item;
+            this.selectedText = item.fullText;
+         }
       },
       onTermSelected() {
          let item = { ...this.select.model };

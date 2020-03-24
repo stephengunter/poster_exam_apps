@@ -75,6 +75,8 @@ import { FETCH_RECRUIT_QUESTIONS, CREATE_QUESTION, STORE_QUESTION,
 	STORE_ATTACHMENT, STORE_OPTIONS, FETCH_RESOLVES 
 } from '@/store/actions.type';
 
+import { SET_NOTE_CATEGORIES } from '@/store/mutations.type';
+
 import { onError } from '@/utils';
 
 export default {
@@ -134,6 +136,7 @@ export default {
 		},
 	},
 	beforeMount(){
+		this.$store.commit(SET_NOTE_CATEGORIES, []);
 		this.init();
 	},
 	methods: {
