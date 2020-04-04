@@ -12,6 +12,9 @@
          />
       </td>
       <td>
+         <v-switch v-model="model.important" />
+      </td>
+      <td>
          <core-upload-button :multiple="true"
          @file-added="onFileAdded" @loading="medias.loading = true"
          @cancel="hideUpload"
@@ -80,6 +83,11 @@
       </td>
       <td>
          <v-icon v-if="model.active" color="success" style="vertical-align: baseline;">
+            mdi-check-circle
+         </v-icon>
+      </td>
+      <td>
+         <v-icon v-if="model.important" color="error" style="vertical-align: baseline;">
             mdi-check-circle
          </v-icon>
       </td>

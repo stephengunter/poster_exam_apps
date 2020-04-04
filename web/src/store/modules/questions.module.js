@@ -2,12 +2,11 @@ import QuestionsService from '@/services/questions.service';
 
 import { FETCH_QUESTIONS } from '@/store/actions.type';
 
-import { SET_LOADING, SET_QUESTIONS } from '@/store/mutations.type';
+import { SET_LOADING } from '@/store/mutations.type';
 
 
 
 const initialState = {
-   list: []
 };
 
 export const state = { ...initialState };
@@ -26,7 +25,6 @@ const actions = {
                for(let i = 0; i < questions.length; i++){
                   questions[i].userAnswerIndexes = [];
                }
-               context.commit(SET_QUESTIONS, questions);
                resolve(questions);
             })
             .catch(error => {
@@ -41,9 +39,6 @@ const actions = {
 
 
 const mutations = {
-   [SET_QUESTIONS](state, questions) {
-      state.list = questions;
-   }
 };
 
 export default {

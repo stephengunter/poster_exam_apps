@@ -11,7 +11,9 @@
          <v-container grid-list-md>
             <v-flex xs12 v-if="term">
                <p class="title"> 
-               {{ term.title }} {{ term.text }}
+               {{ term.title }}
+               
+               <span v-html="term.text"></span>
                </p> 
             </v-flex>
             <v-flex xs12>

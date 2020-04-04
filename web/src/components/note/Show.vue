@@ -1,29 +1,23 @@
 <template>
-   <v-card v-if="model">
+   <v-card>
       <core-close-icon-button @close="cancel" />
-      <v-card-title>
-         {{ model.subject.title }}  {{ model.title }}
+      <v-card-title v-if="model.title">
+         {{ model.title }}
       </v-card-title>
       <v-card-text>
-         <term-tree-item :content="model.text" 
-         :max_width="max_width" 
-         />
+        <note-content :model="model"/>
       </v-card-text>
    </v-card>
 </template>
 
 <script>
 export default {
-   name: 'TermShow',
+   name: 'NoteShow',
    props: {
       model: {
          type: Object,
          default: null
-      },
-      max_width: {
-         type: Number,
-         default: 0
-      },
+      }
    },
    methods: {
       cancel() {

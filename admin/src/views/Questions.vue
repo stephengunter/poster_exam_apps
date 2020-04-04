@@ -6,7 +6,9 @@
 					<question-header ref="questionHeader" 
 					:multi_recruits="false"
 					:params="params" :can_create="canCreate" 
-					@params-changed="onParamsChanged" @create="create"
+					@params-changed="onParamsChanged" 
+					@search="search" @clear-search="clearSearch"
+					@create="create"
 					/>
 					<v-layout row wrap v-if="pageList">
 						<v-flex sm12>
@@ -32,6 +34,7 @@
       </v-layout>
 	   <v-dialog v-model="editor.active" persistent :max-width="editor.maxWidth">
 			<question-edit v-if="editor.active" :model="editor.model"
+			:choice="editor.choice"
 			@submit="onSubmit" @cancel="cancelEdit" @remove="remove"
 			/>
 		</v-dialog>
@@ -95,6 +98,7 @@ export default {
 				active: false,
 				maxWidth: 800,
 				model: null,
+				choice: true,
 
 				questionId: 0,
 				lastModel: null
@@ -168,6 +172,12 @@ export default {
 		onShowTerm(item) {
 			this.showTerm.model = item;
 			this.showTerm.active = true;
+		},
+		search(keyword) {
+			this.search;
+		},
+		clearSearch() {
+			this.params.keyword = '';
 		},
 		fetchData(params){
 			let model = {
@@ -301,8 +311,10 @@ export default {
 			})
 		},
 		store(model, medias) {
+			let choice = this.editor.choice;
+			let question = model;
 			this.$store.commit(CLEAR_ERROR);
-         this.$store.dispatch(STORE_QUESTION, model)
+         this.$store.dispatch(STORE_QUESTION, { choice, question })
 			.then(question => {
 				if(medias && medias.length) {
 					question.options.forEach(option => {

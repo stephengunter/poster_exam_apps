@@ -24,8 +24,12 @@
 							row-height="15"
 							/>
 						</v-flex>
-						<v-flex xs12>
+						<v-flex xs6>
 							<v-checkbox v-model="model.multiAnswers" label="複選" 
+							/>
+						</v-flex>
+						<v-flex xs6>
+							<v-checkbox v-if="this.mode === 'create'" v-model="choice" label="加入精選" 
 							/>
 						</v-flex>
 					</v-layout>
@@ -55,7 +59,11 @@ export default {
 		model: {
          type: Object,
          default: null
-		}
+		},
+		choice: {
+         type: Boolean,
+         default: true
+		},
 	},
 	data () {
 		return {

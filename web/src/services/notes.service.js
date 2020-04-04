@@ -7,4 +7,6 @@ const categories = () => BaseService.fetch(`${source}/categories`);
 
 const fetch = (params) => BaseService.fetch(source, params);
 
-export default { categories, fetch };
+const details = (id) => BaseService.fetch(`${source}/${id}`);
+
+export default { categories, fetch, details };

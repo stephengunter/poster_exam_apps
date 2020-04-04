@@ -4,7 +4,15 @@
 	:selected_id="subject.id"
 	@submit="onSubjectSelected"
 	>
-		<v-flex xs12 sm6 md6 text-xs-right>
+		<v-flex v-show="searching" xs12 sm6 md6 text-xs-right>
+			<core-search
+			@submit="search" @clear="clearSearch"
+			/>
+		</v-flex>
+		<v-flex v-show="!searching"  xs12 sm6 md6 text-xs-right>
+			<v-btn @click.prevent="searching = true" class="mx-2" fab small>
+				<v-icon>mdi-magnify</v-icon>
+			</v-btn>
 			<v-btn v-if="allow_create" :disabled="!can_create" @click.prevent="create" class="mx-2" fab small color="info">
 				<v-icon>mdi-plus</v-icon>
 			</v-btn>
@@ -58,6 +66,8 @@ export default {
 	},
    data () {
 		return {
+			searching: false,
+
 			recruitList: [],
 
 			subject: {
@@ -114,6 +124,18 @@ export default {
 			}
 			this.recruit.ids = selectedIds;
 		},
+		onSearching() {
+			this.$emit('search');
+		},
+		search(keyword) {
+			this.params.keyword = keyword;
+			this.$emit('params-changed');
+		},
+		clearSearch() {
+			this.searching = false;
+			this.params.keyword = '';
+			this.$emit('params-changed');
+      },
       create() {
 			this.$emit('create');
       },

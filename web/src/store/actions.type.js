@@ -19,6 +19,8 @@ export const ACTION_SELECTED = 'actionSelected';
 export const FETCH_NOTE_CATEGORIES = 'fetchNoteCategories';
 export const FETCH_NOTES = 'fetchNotes';
 export const NOTE_CATEGORY = 'noteCategory';
+export const SHOW_NOTE = 'showNote';
+export const NOTE_DETAILS = 'noteDetails';
 
 //Questions
 export const FETCH_QUESTIONS = 'fetchQuestions';

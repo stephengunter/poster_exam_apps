@@ -6,49 +6,30 @@
       />
 
       <div v-if="ready">
-			<note-list v-for="(term, index) in terms" :key="index"
+			<note-list v-for="(term, index) in termList" :key="index"
+			:show_term="params.mode < 1"
 			:term="term" :max_width="contentMaxWidth - 65"
 			@show-photo="onShowPhoto"
 			/>
-			<div id="related-questions">
-				<v-card v-show="questions.length">
-					<v-card-text>
-						<v-row>
-							<v-col cols="6">
-								<h3>相關試題</h3>
-							</v-col>
-							<v-col cols="6" class="text-right">
-								<v-btn :color="showQuestionAnswers ? 'default' : 'info'" outlined @click.prevent="showQuestionAnswers = !showQuestionAnswers">
-									{{ showQuestionAnswers ? '隱藏答案' : '顯示答案'}}
-								</v-btn>
-							</v-col>
-						</v-row>
-						<question-edit v-for="(question, index) in questions" :key="index"
-						:index="index + 1" :read_only="showQuestionAnswers"
-						:element_id="`q_${question.index}`"
-						:model="question"
-						/>
-						<v-row v-if="questions.length >= 5">
-							<v-col cols="6">
-								
-							</v-col>
-							<v-col cols="6" class="text-right">
-								<v-btn :color="showQuestionAnswers ? 'default' : 'info'" outlined @click.prevent="showQuestionAnswers = !showQuestionAnswers">
-									{{ showQuestionAnswers ? '隱藏答案' : '顯示答案'}}
-								</v-btn>
-							</v-col>
-						</v-row>
-					</v-card-text>
-				</v-card>	
-			</div>
+			
 		</div>
-
+		<div id="related-questions" style="padding-top:16px">
+			<note-questions ref="relatedQuestions"
+			:term_id="params.term" :subject_id="params.subject"
+			@show-photo="onShowPhoto"
+			/>
+		</div>
 		<v-dialog v-model="showPhoto.active" :max-width="showPhoto.maxWidth">
 			<photo-show :model="showPhoto.model" @cancel="showPhoto.active = false" />
 		</v-dialog>
       <v-dialog v-model="showTerm.active" :max-width="showTerm.maxWidth">
 			<term-show :model="showTerm.model" :max_width="showTerm.maxWidth"
 			@cancel="showTerm.active = false"
+			/>
+		</v-dialog>
+		<v-dialog v-model="showReference.active" :max-width="showReference.maxWidth">
+			<note-show :model="showReference.model"
+			@cancel="showReference.active = false"
 			/>
 		</v-dialog>
 
@@ -58,12 +39,12 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { LOAD_ACTIONS, FETCH_NOTES, NOTE_CATEGORY, FETCH_QUESTIONS,
-SHOW_TERM, TERM_DETAILS, ACTION_SELECTED, SEE_QUESTIONS
+import { LOAD_ACTIONS, FETCH_NOTES, NOTE_CATEGORY,
+SHOW_TERM, SHOW_NOTE, TERM_DETAILS, NOTE_DETAILS, 
+ACTION_SELECTED, SEE_QUESTIONS
 } from '@/store/actions.type';
-import { SET_QUESTIONS } from '@/store/mutations.type';
 import { onError, resolveErrorData, getRouteTitle } from '@/utils';
-import { DIALOG_MAX_WIDTH } from '@/config';
+import { DIALOG_MAX_WIDTH, NOTES_SETTINGS } from '@/config';
 
 export default {
    name: 'NotesView',
@@ -71,10 +52,13 @@ export default {
 		return {
 			title: '',
          params: {
+				mode: 0,
 				subject: 0,
 				term: 0,
 				keyword: ''
 			},
+
+			subjectSettings: null,
 
 			ready: false,
 			version: 0,
@@ -91,7 +75,19 @@ export default {
 				maxWidth: DIALOG_MAX_WIDTH
 			},
 
-			showQuestionAnswers: false,
+			showReference: {
+				active: false,
+				type: '',
+				model: null,
+				maxWidth: DIALOG_MAX_WIDTH
+			},
+
+			questions: {
+				page: 1,
+				pageSize: 10,
+				pageList: [],
+				showAnswers: false,
+			},
 
 			references: {}
 		}
@@ -99,14 +95,28 @@ export default {
    computed: {
 		...mapGetters(['responsive','contentMaxWidth']),
 		...mapState({
-			terms: state => state.notes.terms,
-			questions: state => state.questions.list
+			terms: state => state.notes.terms
 		}),
+		termList() {
+			if(!this.terms) return [];
+			if(!this.subjectSettings) return [];
+			if(this.subjectSettings.showTerm) return this.terms;
+			return this.terms.filter(item => item.notes && item.notes.length);
+		},
 		noteHeader() {
 			if(this.$refs.noteHeader) return this.$refs.noteHeader;
 			else if (this.references.noteHeader) return this.references.noteHeader;
 			return null;
+		},
+		relatedQuestions() {
+			if(this.$refs.relatedQuestions) return this.$refs.relatedQuestions;
+			else if (this.references.relatedQuestions) return this.references.relatedQuestions;
+			return null;
       },
+		hasMoreQuestions() {
+			if(!this.questionsModel) return false;
+			return this.questionsModel.hasNextPage;
+		}
 	},
    created(){
 		Bus.$on(ACTION_SELECTED, this.onActionSelected);
@@ -117,9 +127,11 @@ export default {
 	mounted() {
 		this.references = { ...this.$refs };
 		window.addEventListener(SHOW_TERM, this.onShowTerm);
+		window.addEventListener(SHOW_NOTE, this.onShowNote);
 	},
 	beforeDestroy(){
       window.removeEventListener(SHOW_TERM, this.onShowTerm);
+		window.removeEventListener(SHOW_NOTE, this.onShowNote);
    },
 	methods: {
 		init() {
@@ -131,25 +143,29 @@ export default {
 			let types = [NOTE_CATEGORY, SEE_QUESTIONS];
 			this.$store.dispatch(LOAD_ACTIONS, [types]);
 		},
-      fetchData({ subject, term, keyword }) {
+      fetchData({ mode, rootSubject, subject, term, keyword }) {
+			this.setSubjectSettings(rootSubject);
 			this.setReady(false);
+			this.relatedQuestions.init();
 			let params = {
-				subject, term, keyword
+				mode, subject, term, keyword
 			};
 			this.params = params;
 			this.$store.dispatch(FETCH_NOTES, params)
 			.then(terms => {
-				this.fetchQuestions();
-				// if(this.params.keyword) {
-				// 	this.$nextTick(() => {
-				// 		this.setReady(true);
-				// 	});
-				// }else this.fetchQuestions();
-				
+				if(!this.params.keyword) {
+					this.$nextTick(() => {
+						this.relatedQuestions.fetchData();
+						this.setReady(true);
+					});
+				}
 			})
 			.catch(error => {
 				Bus.$emit('errors', resolveErrorData(error));
 			})
+		},
+		setSubjectSettings(subjectId) {
+			this.subjectSettings = NOTES_SETTINGS.subjects.find(item => item.id === subjectId);
 		},
 		setReady(val) {
 			if(val) {
@@ -157,21 +173,7 @@ export default {
 				this.version += 1;
 			}else {
 				this.ready = false;
-				this.showQuestionAnswers = false;
-				this.$store.commit(SET_QUESTIONS, []);
 			}
-		},
-		fetchQuestions() {
-			let params = { term: this.params.term, subject: this.params.subject };
-			this.$store.dispatch(FETCH_QUESTIONS, params)
-			.then(questions => {
-				this.$nextTick(() => {
-					this.setReady(true);
-				});
-			})
-			.catch(error => {
-				Bus.$emit('errors', resolveErrorData(error));
-			})
 		},
 		onActionSelected(name) {
 			if(name === NOTE_CATEGORY) this.noteHeader.showCategory();
@@ -206,6 +208,19 @@ export default {
 			this.showTerm.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
 			this.showTerm.model = term;
 			this.showTerm.active = true;
+		},
+		onShowNote(e) {
+			let id = e.detail.id;
+			this.$store.dispatch(NOTE_DETAILS, id)
+				.then(model => {
+					this.showReference.model = model;
+					this.showReference.type = 'note';
+					this.showReference.active = true;
+				})
+				.catch(error => {
+					onError(error);
+				})
+			
 		}
       
 	}

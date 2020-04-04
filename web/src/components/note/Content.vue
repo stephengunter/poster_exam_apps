@@ -5,7 +5,7 @@
 <script>
 import { highlightChunks } from '@/utils';
 export default {
-   name: 'NoteRead',
+   name: 'NoteContent',
    props: {
       model: {
          type: Object,
@@ -32,7 +32,9 @@ export default {
             return;
          }
          let queries = this.model.highlights;
-         if(this.model.references.length) this.reference.textList = this.model.references.map(item => item.text);
+         if(this.model.references.length) {
+            this.reference.textList = this.model.references.map(item => item.text);
+         }
 
 
          let caseSensitive = false;

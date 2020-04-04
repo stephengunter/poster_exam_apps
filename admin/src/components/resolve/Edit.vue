@@ -172,19 +172,6 @@ export default {
          }
          
 
-         // let source = model.source;
-         // let sources = source.split('\n').filter(Boolean);
-         // model.sources = sources.map(item => {
-         //    let parts = item.split(',');
-         //    return { text: parts[0], link: parts[1] ? parts[1] : '' }
-         // });
-
-         // model.sources.forEach(item => {
-         //    if(item.link) {
-         //       if(!isValidURL(item.link)) item.link = '';
-         //    }
-         // })
-
          if(model.id) this.update(model);
 			else this.store(model);
       },

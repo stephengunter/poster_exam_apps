@@ -16,20 +16,9 @@
                />
             </v-flex>
             <v-flex xs6 sm6 md6>
-               <form v-show="canSearch" @submit.prevent="search">
-                  <v-text-field label="Search" single-line hide-details
-                  v-model="params.keyword"
-                  >
-                     <template v-slot:prepend>
-                        <v-icon>mdi-magnify</v-icon>
-                     </template>
-                     <template v-slot:append>
-                        <a href="#" @click.prevent="clearSearch">
-                           <v-icon>mdi-close</v-icon>
-                        </a>
-                     </template>
-                  </v-text-field>
-               </form>
+               <core-search
+               @submit="search" @clear="clearSearch"
+               />
             </v-flex>
          </v-layout>
          <v-layout row wrap>
@@ -112,7 +101,6 @@ export default {
          this.cloneTreeActive = this.tree.active.slice(0);
       },
       cancel() {
-         console.log('cancel');
          this.canceled = true;
          this.tree.active = this.cloneTreeActive.slice(0);
          this.$emit('cancel');
@@ -149,8 +137,9 @@ export default {
          if(this.selectItem.subItems.length) return;
          else this.submit();
       },
-      search() {
-         if(this.params.keyword) {
+      search(keyword) {
+         this.params.keyword = keyword;
+         if(keyword) {
             this.params.term = 0;
             this.submit();
          }

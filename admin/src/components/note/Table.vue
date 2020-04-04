@@ -62,6 +62,12 @@ export default {
             },
             {
 					sortable: false,
+					text: '重要',
+               value: '',
+               width: '50px'
+            },
+            {
+					sortable: false,
 					text: '附圖',
                value: '',
                width: '15%'

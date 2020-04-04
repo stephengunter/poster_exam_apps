@@ -1,6 +1,6 @@
 import NotesService from '@/services/notes.service';
 
-import { FETCH_NOTE_CATEGORIES, FETCH_NOTES } from '@/store/actions.type';
+import { FETCH_NOTE_CATEGORIES, FETCH_NOTES, NOTE_DETAILS } from '@/store/actions.type';
 
 import { SET_LOADING, SET_NOTE_CATEGORIES, SET_NOTES } from '@/store/mutations.type';
 
@@ -45,6 +45,20 @@ const actions = {
             })
             .catch(error => {
                reject(error);
+            })
+            .finally(() => { 
+               context.commit(SET_LOADING, false);
+            });
+      });
+   },
+   [NOTE_DETAILS](context, id) {
+      return new Promise((resolve, reject) => {
+         NotesService.details(id)
+            .then(model => {
+               resolve(model);
+            })
+            .catch(error => {
+               reject(error);        
             })
             .finally(() => { 
                context.commit(SET_LOADING, false);

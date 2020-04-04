@@ -7,10 +7,12 @@
 			</v-icon>
 			<span class="mr-1">{{ model.index }}.</span>
 			{{ model.question.title }} 
+			
 		</p>
 		<p v-else class="q-title">
 			<span class="mr-1">{{ index }}.</span>
 				{{ model.title }} 
+			<span v-if="show_recruits" class="ml-1 green--text" v-text="getRecruitsText(model)"></span>	
 		</p>
 		<v-radio-group v-model="selectedIndex" readonly>
 			<v-radio v-for="(item, index) in options" :key="index" :value="index">
@@ -52,7 +54,8 @@
 		<div v-else>
 			<p class="q-title">
 				<span class="mr-1">{{ index }}.</span>
-				{{ model.title }} 
+				{{ model.title }}
+				<span v-if="show_recruits" class="ml-1 green--text" v-text="getRecruitsText(model)"></span>
 			</p>
 			<core-deselectable-radio-group 
 			:options="options" :selected_index="selectedIndex" text_field="title"
@@ -95,6 +98,10 @@ export default {
 		clearable: {
 			type: Boolean,
          default: true
+		},
+		show_recruits: {
+			type: Boolean,
+         default: false
 		}
 	},
 	data(){
@@ -165,6 +172,13 @@ export default {
 				}
 			}
 		},
+		getRecruitsText(model) {
+			let recruits = model.recruits;
+			if(recruits && recruits.length) {
+				let titleList = recruits.map(item => item.parents[0].title).join();
+				return `(${titleList})`;
+			}return '';
+      },
 		isCorrect(optionIndex) {
 			if(this.multi_answers) {
 				return this.answerIndexes.includes(optionIndex);

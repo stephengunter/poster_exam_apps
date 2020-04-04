@@ -124,11 +124,6 @@ export default {
 			}
 			return '';
       },
-      // select() {
-      //    this.$emit('selected', this.index, this.model);
-      //    if(this.model.text) this.model.text = replaceBR(this.model.text);
-      //    this.model.medias = [];
-      // },
       getPhotoPath(attachment) {
          let width = 100;
          if(attachment.previewPath) return photoNameUrl(attachment.previewPath, width);
@@ -181,8 +176,6 @@ export default {
          this.hideUpload();
       },
       onSourceChanged() {
-        //  this.$forceUpdate(); 
-         console.log('onSourceChanged');
           console.log(this.model.sources);
       },
       cancel() {
