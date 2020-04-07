@@ -16,6 +16,7 @@ import recruits from './modules/recruits.module';
 import recruitQuestions from './modules/recruit-questions.module';
 import db from './modules/db.module';
 import analysis from './modules/analysis.module';
+import settings from './modules/settings.module';
 
 Vue.use(Vuex);
 
@@ -35,6 +36,7 @@ export default new Vuex.Store({
       recruits,
       recruitQuestions,
       db,
-      analysis
+      analysis,
+      settings
    }
 });

@@ -86,6 +86,10 @@ export const STORE_ATTACHMENT = 'storeAttachment';
 export const ANALYSIS_INDEX = 'analysisIndex';
 export const RQ_ANALYSIS = 'rqAnalysis';
 
+//Settings
+export const FIND_EXAM_SETTINGS = 'findExamSettings';
+export const SAVE_EXAM_SETTINGS = 'saveExamSettings';
+
 //DB
 export const GET_DB_NAME = 'getDbName';
 export const DB_IMPORT = 'dbImport';

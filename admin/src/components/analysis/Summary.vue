@@ -7,9 +7,16 @@
       </template>
       <template slot="items" slot-scope="props">
          <tr class="row-recruit" :key="props.item.id">
-            <td> {{ props.item.recruit.parentTitle }}</td>
+            <td> 
+               <a href="#" @click.prevent="select(props.item.recruitId)">
+               {{ props.item.recruit.parentTitle }}
+               </a>
+            </td>
             <td v-for="(subject, index) in subjects" :key="index">
               {{ getSummaryContent(props.item.summaryList, subject) }}
+            </td>
+            <td>
+               {{ getTotal(props.item) }}
             </td>
          </tr>
       </template>
@@ -35,16 +42,6 @@ export default {
          subjects: [],
 		}
    },
-   // computed: {
-   //    headers() {
-   //       let headers = this.subjects.map(item => ({
-   //          sortable: false, text: item.title
-   //       }));
-
-   //       headers.unshift({ sortable: false, text: '' });
-   //       return headers;
-   //    }
-   // },
    watch: {
       version: 'init'
    },
@@ -52,6 +49,7 @@ export default {
       init() {
          let subjects = [];
          let summaryList = this.results.flatMap(item => item.summaryList);
+       
          summaryList.forEach(summary => {
             let idx = subjects.findIndex(item => item.id === summary.subjectId);
             if(idx < 0) subjects.push({ ...summary.subject });
@@ -59,24 +57,31 @@ export default {
          let headers = subjects.map(item => ({
             sortable: false, text: item.title
          }));
+        
+
+         headers.push({ sortable: false, text: 'Total' });
          headers.unshift({ sortable: false, text: '' });
+
+         
          this.headers = headers;
          this.subjects = subjects;
-      },
-      getSummary(item, subject) {
-
       },
       getSummaryContent(summaryList, subject) {
          let summary = summaryList.find(item => item.subjectId === subject.id);
          
          if(summary) return summary.points;
          else return '';
-         
+      },
+      getTotal(item) {
+         let total = 0;
+         for(let i = 0; i < item.summaryList.length; i++) {
+            total += item.summaryList[i].points;
+         }
+         return total;
+      },
+      select(id) {
+         this.$emit('selected', id);
       }
    }
 }
 </script>
-
-<style>
-
-</style>

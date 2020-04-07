@@ -1,15 +1,14 @@
-import AnalysisService from '@/services/analysis.service';
+import SettingsService from '@/services/settings.service';
+import { resolveErrorData } from '@/utils';
 
 import {
-   ANALYSIS_INDEX, RQ_ANALYSIS
+   FIND_EXAM_SETTINGS, SAVE_EXAM_SETTINGS
 } from '@/store/actions.type';
 
-import { SET_LOADING, SET_ANALYSIS_RESULT, SET_ANALYSIS_VIEWS } from '@/store/mutations.type';
+import { SET_LOADING } from '@/store/mutations.type';
 
 
 const initialState = {
-   viewList: [],
-   results: []
 };
 
 export const state = { ...initialState };
@@ -20,32 +19,30 @@ const getters = {
 
 
 const actions = {
-   [ANALYSIS_INDEX](context) {
+   [FIND_EXAM_SETTINGS](context, params) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         AnalysisService.index()
+         SettingsService.findExamSettings(params)
             .then(model => {
                resolve(model);
             })
             .catch(error => {
-               reject(error);
+               reject(resolveErrorData(error));
             })
             .finally(() => { 
                context.commit(SET_LOADING, false);
             });
       });
    },
-   [RQ_ANALYSIS](context, params) {
+   [SAVE_EXAM_SETTINGS](context, model) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         AnalysisService.rq(params)
-            .then(model => {
-               context.commit(SET_ANALYSIS_RESULT, model.results);
-               context.commit(SET_ANALYSIS_VIEWS, model.viewList);
+         SettingsService.saveExamSettings(model)
+            .then(() => {
                resolve(true);
             })
             .catch(error => {
-               reject(error);
+               reject(resolveErrorData(error));
             })
             .finally(() => { 
                context.commit(SET_LOADING, false);
@@ -56,12 +53,6 @@ const actions = {
 
 
 const mutations = {
-   [SET_ANALYSIS_RESULT](state, results) {
-      state.results = results;
-   },
-   [SET_ANALYSIS_VIEWS](state, viewList) {
-      state.viewList = viewList;
-   }
 };
 
 export default {

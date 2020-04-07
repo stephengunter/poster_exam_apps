@@ -146,6 +146,19 @@ const adminlinks = [
          menu: true
       } 
    },
+   {
+      name: 'settings',
+      path: '/settings',
+      view: 'Settings',
+      parent: '',
+      meta: {
+         order: 0,
+         icon: 'mdi-cog-outline',
+         title: '設定',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
+   }
       
 ];
 
