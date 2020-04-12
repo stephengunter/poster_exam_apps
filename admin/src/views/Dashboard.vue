@@ -20,12 +20,12 @@ export default {
       }
    },
    beforeMount(){
-		this.fetchData();
+		//this.fetchData();
    },
    methods: {
       test() {
          let key = 'dcd5f797-beea-40be-b1fb-e0f2933bb607';
-         DataService.storeSubjectQuestions({ key })
+         DataService.storeYearRecruits({ key })
          .then(model => {
             console.log(model);
          })
@@ -33,7 +33,7 @@ export default {
       },
       fetchData() {
          let url = `${API_URL}/atest`;
-         let params = { subject: 1 };
+         let params = { recruit:21 };
          BaseService.fetch(url, params)
          .then(model => {
             console.log('model', model);

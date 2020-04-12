@@ -1,8 +1,7 @@
 <template>
    <v-container>
       <rq-header ref="rqHeader" :title="title"
-      :init_params="params" :subjects="subjects"
-      :mode_options="modeOptions" :year_options="yearOptions"
+      :params="params" :mode_options="modeOptions"
       @submit="onSelectionSubmit"
       />
       <div v-show="rqReadMode">
@@ -11,6 +10,7 @@
       <div v-show="rqExamMode">
          <exam-edit ref="examEdit" :exam="exam" :actions="examActions"
          @aborted="onExamAborted" @leave="onLeaveExam"
+         @stored="onExamStored"
          /> 
       </div>
       
@@ -37,8 +37,7 @@ export default {
 
          params: {
             mode: -1,
-            year: 0,
-            subject: 0
+            recruit: 0
          },
 
          confirm: {
@@ -46,7 +45,7 @@ export default {
             text: '',
             active: false,
             action: '',
-				maxWidth: DIALOG_MAX_WIDTH
+            maxWidth: DIALOG_MAX_WIDTH
          },
 
          references: {}
@@ -67,10 +66,8 @@ export default {
 		]),
       ...mapState({
          mode: state => state.rqs.mode,
-         modeOptions: state => state.rqs.modeOptions,
-         yearOptions: state => state.rqs.yearOptions,
-         subjects: state => state.rqs.subjects,
          model: state => state.rqs.model,
+         modeOptions: state => state.rqs.modeOptions,
          examActions: state => state.exams.actions
       }),
       rqHeader() {
@@ -103,8 +100,7 @@ export default {
       init() {
          this.params = {
             mode: -1,
-            year: 0,
-            subject: 0
+            recruit: 0
          };
 
          this.rqHeader.init();
@@ -114,9 +110,11 @@ export default {
          
          this.fetchData(this.params);
       },
-      onSelectionSubmit(params) {
-         this.params = { ... params };
-         this.setMode(params.mode);
+      loadHeader() {
+         let modeOptions = this.modeOptions;
+         if(this.params.mode < 0) this.params.mode = modeOptions[0].value;
+
+         this.rqHeader.load();
       },
       setMode(val) {
          this.$store.commit(SET_RQS_PAGE_MODE, val);
@@ -127,14 +125,16 @@ export default {
 				this.setActions();
          })
       },
+      onSelectionSubmit() {
+         this.setMode(this.params.mode);
+      },
       fetchData(params) {
-         this.$store.dispatch(FETCH_RQS, { mode: params.mode, recruit: params.subject })
+         this.$store.dispatch(FETCH_RQS, params)
          .then(model => {
             if(this.firstLoad) {
-               this.$store.commit(SET_RQS_PAGE_MODE); 
-
+               this.$store.commit(SET_RQS_PAGE_MODE);
                this.$nextTick(() => {
-                  this.rqHeader.load();
+                  this.loadHeader();
                })
             }else {
                this.rqHeader.setTitle();   
@@ -145,12 +145,12 @@ export default {
 			})
       },
       createExam(params) {
-         let mode = this.rqHeader.selectedMode;
-         let year = this.rqHeader.selectedYear;
-         let subject = this.rqHeader.selectedSubject;
-         let items = [mode.text, year.text, subject.text];
+        
+         let model = this.rqHeader.getModel();
+         
+         let items = [model.mode.text, model.rootRecruit.title, model.subject.text];
 
-         this.$store.dispatch(CREATE_EXAM, { recruit: params.subject })
+         this.$store.dispatch(CREATE_EXAM, { recruit: params.recruit })
          .then(exam => {
             let title = `${items.join('_')}_${todayString().replace(/-/g,'')}`;
             this.$store.commit(SET_EXAM_TITLE, title);
@@ -195,6 +195,10 @@ export default {
       },
       onLeaveExam() {
          this.init();
+      },
+      onExamStored() {
+         //交券成功，跳轉至測驗紀錄
+         this.$router.push({ name: 'exams' });
       }
       
 	}

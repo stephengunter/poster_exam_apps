@@ -93,7 +93,7 @@ const actions = [
    name: EXAM_SUMMARY,
    order: 0,
    type: SELECT,
-   icon:'mdi-file-document-box-outline',
+   icon: 'mdi-text-box-outline',
    title: '作答概況',
    description: '作答概況'
 },{

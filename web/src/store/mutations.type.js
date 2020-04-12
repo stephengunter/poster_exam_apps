@@ -31,6 +31,7 @@ export const SET_NOTES = 'setNotes';
 export const SET_QUESTIONS = 'setQuestions';
 
 //Exams
+export const SET_EXAM_INDEX_MODEL = 'setExamIndexModel';
 export const SET_EXAM_PAGE_MODE = 'setExamPageMode';
 export const SET_EXAMS = 'setExams';
 export const SET_EXAM = 'setExam';

@@ -134,7 +134,6 @@ export default {
    },
    methods: {
       toQuestion(index) {
-         
          this.$emit('cancel');
          this.$emit('to-question', index);
       },

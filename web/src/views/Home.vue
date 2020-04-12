@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { GOOGLE_AUTH_PARAMS } from '@/config';
+
 export default {
 	name: 'HomeView',
 	data() {
@@ -15,10 +15,10 @@ export default {
 		
 	},
 	beforeMount() {
-		//this.$router.push({ path: '/rqs' });
+		this.$router.push({ name: 'rqs' });
 	},
 	methods: {
-
+		
 	}
 }
 </script>

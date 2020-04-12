@@ -3,13 +3,10 @@
 		<exam-header ref="examHeader"
 		:title="title"
 		:fetch_params="fetchParams" :create_params="createParams" 
-		:type_options="examTypeOptions"  :year_options="yearOptions"
-		:recruit_type_options="recruitExamTypeOptions"
-		:status_options="statusOptions" :subject_options="subjectOptions"
 		@filter-submit="onFilterSubmit" @creator-submit="onCreatorSubmit"
 		/>
 		<div v-show="examIndexMode">
-			<exam-table ref="examTable" :params="fetchParams" :model="pagedList" 
+			<exam-table ref="examTable" :init_params="fetchParams" :model="pagedList" 
 			@options-changed="onTableOptionChanged" @selected="onTableSelected"
 			/>
 		</div>
@@ -73,9 +70,13 @@ export default {
 				text: '模擬測驗'
 			}],
 
+			params: {
+				rootRecruitId: 0
+			},
+
 			fetchParams: {
-				subject: -1,
 				status: -1,
+				subject: -1,
 				sortBy: 'lastUpdated',
 				desc: true,
 				page: -1,
@@ -83,17 +84,11 @@ export default {
 			},
 
 			createParams: {
+				recruit: 0,
 				type: -1,
 				rtype: -1,
-				year: -1,
-				subject: -1
+				subject: 0				
 			},
-			
-			examTypeOptions: [],
-			recruitExamTypeOptions: [],
-			yearOptions: [],
-			subjectOptions: [],
-			statusOptions: [],
 
 			summary: {
 				active: false,
@@ -116,6 +111,7 @@ export default {
 		'responsive','contentMaxWidth'
 		]),
 		...mapState({
+			indexModel: state => state.exams.indexModel,
 			mode: state => state.exams.mode,
 			pagedList: state => state.exams.pagedList,
 			examActions: state => state.exams.actions,
@@ -200,16 +196,20 @@ export default {
 		},
 		onTableOptionChanged(options) {
 			if(this.fetchParams.page < 0) return;
-
-			var origin = pick(this.fetchParams, 'page', 'pageSize', 'sortBy', 'desc');
+			let origin = pick(this.fetchParams, 'page', 'pageSize', 'sortBy', 'desc');
+		
+			//判斷是否參數有變
+			
 			if(isEqual(origin, options)) return;
 
 			this.fetchParams.page = options.page;
 			this.fetchParams.pageSize = options.pageSize;
 			this.fetchParams.sortBy = options.sortBy;
 			this.fetchParams.desc = options.desc;
-
-			this.fetchExams();
+			
+			this.$nextTick(() => {
+				this.fetchExams(this.fetchParams);
+         });
 
 		},
 		fetchExams(params) {
@@ -218,20 +218,7 @@ export default {
 			if(!params) params = this.fetchParams;
          this.$store.dispatch(FETCH_EXAMS, params)
          .then(model => {
-				if(model.pagedList) {
-					this.fetchParams.page = model.pagedList.pageNumber;
-					this.fetchParams.pageSize = model.pagedList.pageSize;
-					this.fetchParams.sortBy = model.pagedList.sortBy;
-					this.fetchParams.desc = model.pagedList.desc;
-
-					this.examTable.init();
-				}
-
-				if(model.examTypeOptions.length) this.examTypeOptions = model.examTypeOptions;
-				if(model.recruitExamTypeOptions.length) this.recruitExamTypeOptions = model.recruitExamTypeOptions;
-				if(model.yearOptions.length) this.yearOptions = model.yearOptions;
-				if(model.subjectOptions.length) this.subjectOptions = model.subjectOptions;
-				if(model.statusOptions.length) this.statusOptions = model.statusOptions;
+				if(this.fetchParams.page < 0) this.fetchParams.page = 1;
          })
 			.catch(error => {
             Bus.$emit('errors', resolveErrorData(error));
@@ -261,7 +248,6 @@ export default {
 				let bread =  this.examHeader.getBread();
 				let title = bread.items[bread.items.length - 1].text;
 				title = `${title}_${todayString().replace(/-/g,'')}`;
-				
 				
 				this.$store.commit(SET_EXAM_TITLE, title);
 				
@@ -326,6 +312,8 @@ export default {
 			this.fetchParams.sortBy = 'lastUpdated';
 			this.fetchParams.desc = true;
 			this.fetchParams.page = 1;
+
+			this.examTable.init();
 
 			this.setMode('index');
 		},	

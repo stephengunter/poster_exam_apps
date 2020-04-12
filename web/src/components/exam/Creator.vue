@@ -25,25 +25,24 @@
             </v-col>
 			</v-row>
          <v-row>
-            <v-col cols="12" md="4">
-               <v-select :disabled="!exactlyRecruit"
+            <v-col cols="12">
+               <v-select v-show="exactlyRecruit"
                   :items="year_options"
-                  label="年度" v-model="params.year"
-                  @change="onYearChanged"
+                  label="年度" v-model="rootRecruitId"
+                  @change="onRootRecruitIdChanged"
                />
-            </v-col>
-            <v-col cols="12" md="8">
                <v-select
                   :items="subjectOptions"
                   label="科目" v-model="params.subject"
                   @change="onSubjectChanged"
+                  name="subject" :error-messages="getErrMsg('subject')"
                />
             </v-col>
 			</v-row>
       </v-card-text>
       <v-card-actions>
          <v-spacer></v-spacer>
-         <v-btn @click="submit" color="success">
+         <v-btn @click="onSubmit" color="success">
             確定
          </v-btn>
       </v-card-actions>
@@ -79,6 +78,10 @@ export default {
          type: Array,
          default: null
       },
+      year_recruits: {
+         type: Array,
+         default: null
+      },
       allow_cancel: {
          type: Boolean,
          default: true
@@ -87,8 +90,9 @@ export default {
    data() {
 		return {
          params: {},
+         rootRecruitId: 0, //年度
+         subjectOptions: [],
          model: {},
-         subjectOptions: []
 		}
    },
    computed: {
@@ -104,6 +108,18 @@ export default {
       crossYearsRecruit() {
          return isCrossYearsRecruit(this.params.rtype);
       },
+      selectedType() {
+         if(this.type_options) return this.type_options.find(item => item.value === this.params.type);
+         return null;
+      },
+      selectedRootRecruit() {
+         if(this.rootRecruitId) return this.year_recruits.find(item => item.id === this.rootRecruitId);
+         return null;
+      },
+      selectedRecruit() {
+         if(this.selectedRootRecruit) return this.selectedRootRecruit.subItems.find(item => item.subjectId === this.params.subject);         
+         return null;
+      }
    },
 	beforeMount() {
       this.init();
@@ -111,98 +127,105 @@ export default {
 	methods: {
 		init() {
          this.params = { ...this.init_params };
-        
-         this.subjectOptions = this.subject_options.filter(item => item.value > 0);
-
-         if(this.params.subject < 1) this.setSubject(this.subjectOptions[0]);
          if(this.params.type < 1) this.setType(this.type_options[0]);
-
+         else this.setType(this.selectedType);
+      },
+      setRootRecruitId(val) {
+         this.rootRecruitId = val;
+         this.onRootRecruitIdChanged();
       },
       setType(item) {
          this.params.type = item.value;
          this.onTypeChanged(item.value);
-
-         this.model.type = item;
       },
       onTypeChanged(val) {
+         this.setRootRecruitId(this.year_options[0].value);
+
          let rtypeItem = null;
          if(isRecruitSource(val)) { //歷屆試題
+            //預設為'完全相同'
             rtypeItem = this.recruit_type_options.find(item => isExactlyRecruit(item.value)); //完全相同
             this.setRType(rtypeItem);
          }else if(isRandomSource(val)) {  //系統自訂
+           // 不限年度
             rtypeItem = this.recruit_type_options.find(item => isCrossYearsRecruit(item.value)); //不限年度
             this.setRType(rtypeItem);
-         }
-
-
-         if(!this.model.type || this.model.type.value !== val) {
-            this.model.type = this.type_options.find(item => item.value === val);
          }
       },
       setRType(item) {
          this.params.rtype = item.value;
          this.onRTypeChanged(item.value);
-
-         this.model.rtype = item;
       },
       onRTypeChanged(val) {
-         let yearItem = null;
-         if(isExactlyRecruit(val)) { //完全相同
-            if(this.params.year < 1) {
-               yearItem = this.year_options.find(item => item.value > 0); 
-               this.setYear(yearItem);
-            }
-         }else if(isCrossYearsRecruit(val)) { //不限年度
-            yearItem = this.year_options.find(item => item.value < 1); //全部年度
-            this.setYear(yearItem);
-         }
-
-         if(!this.model.rtype || this.model.rtype.value !== val) {
-            this.model.rtype = this.recruit_type_options.find(item => item.value === val);
-         } 
+         
       },
-      setYear(item) {
-         this.params.year = item.value;
-         this.onYearChanged(item.value);
+      onRootRecruitIdChanged() {
+         this.setSubjectOptions();
 
-         this.model.year = item;
+         let ids = this.subjectOptions.map(item => item.value);
+         if(!ids.includes(this.params.subject)) this.params.subject = 0;
       },
-      onYearChanged(val) {
-         if(!this.model.year || this.model.year.value !== val) {
-            this.model.year = this.year_options.find(item => item.value === val);
-         }
-      },
-      setSubject(item) {
-         this.params.subject = item.value;
-         this.onSubjectChanged(item.value);
-
-         this.model.subject = item;
+      setSubjectOptions() {
+         if(this.exactlyRecruit) {
+            let subjectIds = this.selectedRootRecruit.subItems.map(item => item.subjectId);
+            this.subjectOptions = this.subject_options.filter(item => subjectIds.includes(item.value));
+         }else this.subjectOptions = this.subject_options.filter(item => item.value > 0);
       },
       onSubjectChanged(val) {
-         if(!this.model.subject || this.model.subject.value !== val) {
-            this.model.subject = this.subjectOptions.find(item => item.value === val);
-         }
+         if(val) this.errors.remove('subject');
+      },
+      getErrMsg(key){
+			let err = this.errors.collect(key);
+			if(err && err.length){
+				let msg = err[0];
+				return msg.replace('subject', '科目');
+			}
+			return '';
       },
       cancel() {
          this.$emit('cancel');
       },
+      onSubmit() {
+         this.$validator.validate().then(valid => {
+            if(!valid) return;
+
+            if(this.exactlyRecruit) {
+               //歷屆試題, 完全相同
+               if(!this.params.subject) {
+                  this.errors.add({
+                     field: 'subject',
+                     msg: '請選擇科目'
+                  });
+               }else {
+                  //必須要有 recruit
+                  this.params.recruit = this.selectedRecruit.id;
+               }
+            }else {
+               if(!this.params.subject) {
+                  this.errors.add({
+                     field: 'subject',
+                     msg: '請選擇科目'
+                  });
+               }else {
+                  this.params.recruit = 0;
+               }
+            }
+
+            if(this.errors.any()) return;
+
+            this.submit();
+         });
+      },
       submit() {
          let params = this.params;
-         let model = this.model;
-
-         if(!model.type) {
-            model.type = this.type_options.find(item => item.value === params.type);
-         }
-         if(!model.rtype) {
-            model.rtype = this.recruit_type_options.find(item => item.value === params.rtype);
-         }
-         if(!model.subject) {
-            model.subject = this.subjectOptions.find(item => item.value === params.subject);
-         }
-         if(!model.year) {
-            model.year = this.year_options.find(item => item.value === params.year);
-         }
-        
+         let model = {
+            rootRecruit: this.selectedRootRecruit,
+            recruit: this.selectedRecruit,
+            type: this.type_options.find(item => item.value === params.type),
+            rtype: this.recruit_type_options.find(item => item.value === params.rtype),
+            subject: this.subjectOptions.find(item => item.value === params.subject)
+         };
+         this.model = model;
          this.$emit('submit', params, model);
       }
 	}

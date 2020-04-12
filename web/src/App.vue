@@ -128,42 +128,20 @@ export default {
 	},
 	methods:{
 		onError(error) {
-			console.log('onError', error);
 			let confirm = {
 				type: 'error',
 				title: '伺服器暫時無回應，請稍候再試.',
-				text: '',
-
+				text: ''
 			}
 
 			if(error) {
 				let status = error.status;
 				if(status) {
 					if(status === 401) {
-						this.$store.dispatch(CHECK_AUTH).then(auth => {
-							if(auth){
-								this.$store.dispatch(REFRESH_TOKEN).then(token => {	
-									if(token) {
-										this.$store.dispatch(CHECK_AUTH);
-										
-										confirm.type = '';
-										confirm.title = '請重新操作';
-										confirm.text = '您的驗証剛剛刷新，請重新操作一次';
-										this.showConfirm(confirm);
-
-										Bus.$emit(TOKEN_REFRESHED);
-									} 
-									else this.$router.push({ name: 'login', query: { returnUrl: this.$route.path } });
-								})
-							}else {
-								//無token
-								this.$router.push({ name: 'login', query: { returnUrl: this.$route.path } });
-							}
-						}) // end of 401
+						this.onFourZeroOne();
 					}else {
 						this.showConfirm(confirm);
 					}
-
 				}else {
 					// no status code
 					this.showConfirm(confirm);
@@ -172,6 +150,28 @@ export default {
 				// no error data
 				this.showConfirm(confirm);
 			}
+		},
+		onFourZeroOne() {
+			this.$store.dispatch(CHECK_AUTH).then(auth => {
+				if(auth){
+					this.$store.dispatch(REFRESH_TOKEN).then(token => {	
+						if(token) {
+							this.$store.dispatch(CHECK_AUTH);
+							this.showConfirm({
+								type: '',
+								title: '請重新操作',
+								text: '您的驗証剛剛刷新，請重新操作一次'
+							});
+
+							Bus.$emit(TOKEN_REFRESHED);
+						} 
+						else this.$router.push({ name: 'login', query: { returnUrl: this.$route.path } });
+					})
+				}else {
+					//無token
+					this.$router.push({ name: 'login', query: { returnUrl: this.$route.path } });
+				}
+			})
 		},
 		onSuccess(msg) {
 			this.success.icon = 'mdi-check-circle';

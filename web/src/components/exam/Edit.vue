@@ -78,6 +78,8 @@ export default {
             on_ok: null
          },
 
+         stored: false,
+
          summary: {
 				active: false,
 				maxWidth: DIALOG_MAX_WIDTH
@@ -87,11 +89,20 @@ export default {
    computed: {
       ...mapGetters(['responsive','contentMaxWidth','isAuthenticated']),
       ...mapState({
-			hasAnswers: state => state.exams.summary.hasAnswers,
-         noAnswers: state => state.exams.summary.noAnswers,
-         corrects: state => state.exams.summary.corrects,
-			wrongs: state => state.exams.summary.wrongs
-		}),
+         examSummary: state => state.exams.summary
+      }),
+      hasAnswers() {
+         return this.examSummary.hasAnswers
+      },
+      noAnswers() {
+         return this.examSummary.noAnswers
+      },
+      corrects() {
+         return this.examSummary.corrects
+      },
+      wrongs() {
+         return this.examSummary.wrongs
+      },
       parts() {
          if(this.exam) return this.exam.parts;
          return []; 
@@ -103,6 +114,7 @@ export default {
    },
    methods: {
       init() {
+         this.stored = false;
          this.$store.dispatch(LOAD_EXAM_SUMMARY);
       },
       onAnswerChanged() {
@@ -185,6 +197,8 @@ export default {
          };
       },
       onStoreExam() {
+         if(this.stored) return;
+         
          //檢查是否有空白未作答的題目
          if(this.noAnswers.length) {
             showConfirm({
@@ -214,10 +228,12 @@ export default {
             return;
          }
 
+         //將存檔視窗關閉
          if(this.save.active) this.save.active = false;
          
          this.$store.dispatch(STORE_EXAM, this.exam)
          .then(() => {
+            this.stored = true;
             Bus.$emit('success');
             this.$emit('stored');
          })
@@ -231,11 +247,11 @@ export default {
       },
       onLeaveExam(callback = null) {
          let vm = this;
-         if(this.exam.isComplete) {
-            this.leaveExam(callback);
+         if(vm.exam.isComplete || vm.stored) {
+            vm.leaveExam(callback);
          }else {
-            if(this.exam.reserved) {
-               if(this.answerChangeds) {
+            if(vm.exam.reserved) {
+               if(vm.answerChangeds) {
                   showConfirm({
                      type: '', 
                      title: '是否存檔', 
@@ -252,7 +268,7 @@ export default {
                      }
                   }); 
                }else {
-                  this.leaveExam(callback);
+                  vm.leaveExam(callback);
                }
             }else {
                showConfirm({
@@ -302,7 +318,7 @@ export default {
                break;
             case EXAM_SUMMARY:
                this.showSummary();
-               break;       
+               break;
             default:
                console.log('name');
          }//end of switch

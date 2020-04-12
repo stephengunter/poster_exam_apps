@@ -5,11 +5,12 @@ import { FETCH_EXAMS, CREATE_EXAM, STORE_EXAM, UPDATE_EXAM, READ_EXAM,
    SAVE_EXAM, ABORT_EXAM, EDIT_EXAM, LOAD_EXAM_SUMMARY
 } from '@/store/actions.type';
 
-import { SET_LOADING, SET_EXAM_PAGE_MODE,
+import { SET_LOADING, SET_EXAM_PAGE_MODE, SET_EXAM_INDEX_MODEL,
    SET_EXAMS, SET_EXAM, SET_EXAM_TITLE, SET_EXAM_ACTIONS
 } from '@/store/mutations.type';
 
 const initialState = {
+   indexModel: null,
    mode: null,
    pagedList: null,
    exam: null,
@@ -56,10 +57,12 @@ const setExam = (context, exam) => {
 
 const actions = {
    [FETCH_EXAMS](context, params) {
+      let firstLoad = params.page < 0;
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          ExamsService.fetch(params)
             .then(model => {
+               if(firstLoad)  context.commit(SET_EXAM_INDEX_MODEL, model);
                context.commit(SET_EXAMS, model.pagedList);
                resolve(model);
             })
@@ -227,6 +230,9 @@ const actions = {
 
 
 const mutations = {
+   [SET_EXAM_INDEX_MODEL](state, model) {
+      state.indexModel = model;
+   },
    [SET_EXAM_PAGE_MODE](state, mode) {
       state.mode = mode;
    },

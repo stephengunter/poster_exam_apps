@@ -3,14 +3,51 @@
       <core-bread :items="bread.items"
       @selected="onBreadSelected"
       />
-      <v-dialog v-model="modeSelector.active" :max-width="modeSelector.maxWidth" persistent>
-         <rq-selector  ref="modeSelector"
-         :params="params" :allow_cancel="modeSelector.selected"
-         :mode_options="mode_options" :year_options="year_options"
-         :subject_options="subjectOptions"
-         @year-changed="onYearChanged"
-         @submit="submit" @cancel="modeSelector.active = false;"
-         />
+      <v-dialog v-model="selector.active" :max-width="selector.maxWidth" persistent>
+         <v-card>
+            <v-card-title>
+               <h3>歷屆試題</h3>
+               <v-spacer />
+               <a href="#" v-if="selector.selected" @click.prevent="selector.active = false" class="a-btn">
+                  <v-icon>mdi-window-close</v-icon>
+               </a>
+            </v-card-title>
+            <v-card-text>
+               <v-row>
+                  <v-col cols="12">
+                     <v-radio-group v-model="params.mode">
+                        <v-radio  v-for="(item, index) in mode_options" :key="index"
+                        :label="item.text" :value="item.value" 
+                        />
+                     </v-radio-group>
+
+                  </v-col>
+               </v-row>
+               <v-row>
+                  <v-col cols="12" md="4">
+                     <v-select
+                        :items="yearOptions"
+                        label="年度" v-model="rootRecruitId"
+                        @change="onRootRecruitIdChanged"
+                     />
+                  </v-col>
+                  <v-col cols="12" md="8">
+                     <v-select
+                        :items="subjectOptions"
+                        label="科目" v-model="subjectId"
+                        @change="onSubjectChanged"
+                        name="subject" :error-messages="getErrMsg('subject')"
+                     />
+                  </v-col>
+               </v-row>
+            </v-card-text>
+            <v-card-actions>
+               <v-spacer></v-spacer>
+               <v-btn @click="submit" color="success">
+                  確定
+               </v-btn>
+            </v-card-actions>
+         </v-card>
       </v-dialog>
    </div>
 </template>
@@ -28,31 +65,23 @@ export default {
 			type: String,
 			default: ''
 		},
-      init_params: {
+      params: {
 			type: Object,
 			default: null
       },
       mode_options: {
 			type: Array,
 			default: null
-      },
-      year_options: {
-			type: Array,
-			default: null
-      },
-      subjects: {
-			type: Array,
-			default: null
-      },
-      
+      }
    },
    data() {
 		return {
-         params: {},
-
+         rootRecruitId: 0, //年度
+         subjectId: 0,
          subjectOptions: [],
+         model: null,
 
-         modeSelector: {
+         selector: {
             active: false,
             maxWidth: DIALOG_MAX_WIDTH,
             selected: false
@@ -60,66 +89,87 @@ export default {
 
          bread: {
             items: []
-         },
+         }
 		}
    },
    computed: {
       ...mapGetters(['exam', 'rqReadMode', 'rqExamMode', 
 		'responsive','contentMaxWidth','isAuthenticated'
       ]),
+      ...mapState({
+         yearRecruits: state => state.rqs.yearRecruits,
+         subject_options: state => state.rqs.subjectOptions
+      }),
       selectedMode() {
          if(this.mode_options && !isEmptyObject(this.params)) {
             return this.mode_options.find(item => item.value === this.params.mode);
          }
          return null;
       },
-      selectedYear() {
-         if(this.year_options && !isEmptyObject(this.params)) {
-            return this.year_options.find(item => item.value === this.params.year);
-         }
+      selectedRootRecruit() {
+         if(this.rootRecruitId) return this.yearRecruits.find(item => item.id === this.rootRecruitId);
+         return null;
+      },
+      selectedRecruit() {
+         if(this.selectedRootRecruit) return this.selectedRootRecruit.subItems.find(item => item.subjectId === this.subjectId);         
          return null;
       },
       selectedSubject() {
          if(this.subjectOptions && !isEmptyObject(this.params)) {
-            return this.subjectOptions.find(item => item.value === this.params.subject);
+            return this.subjectOptions.find(item => item.value === this.subjectId);
          }
          return null;
+      },
+      yearOptions() {
+         if(this.yearRecruits) {
+            return this.yearRecruits.map(item => ({
+               value: item.id, text: item.title
+            }));
+         }
+         return [];
       }
    },
    methods: {
       init() {
-         this.params = { ...this.init_params };
-         this.subjectOptions = [];
          this.bread = {
             items: [],
             text: ''
          };
-         this.modeSelector =  {
+         this.selector =  {
             active: false,
             maxWidth: DIALOG_MAX_WIDTH,
             selected: false
          };
       },
       load() {
-         let yearOptions = this.year_options;
-         let yearId = yearOptions[0].value;
-         let subjectOptions = this.loadSubjectOptions(yearId, this.subjects);
-         this.params.subject = subjectOptions[0].value;
-
-         let modeOptions = this.mode_options;
-         this.params.mode = modeOptions[0].value;
-         this.params.year = yearId;
+        
+         this.rootRecruitId = this.yearOptions[0].value;
+         this.onRootRecruitIdChanged();
 
          this.$nextTick(() => {
-            this.selectMode(false);
+            this.selectMode();
          })
       },
-      onYearChanged() {
-         let options = this.loadSubjectOptions(this.params.year, this.subjects);
-         let subjectIds = options.map(item => item.value);
-         if(!subjectIds.includes(this.params.subject)) {
-            this.params.subject = subjectIds[0];
-         }
+      onRootRecruitIdChanged() {
+         this.setSubjectOptions();
+
+         let ids = this.subjectOptions.map(item => item.value);
+         if(!ids.includes(this.subjectId)) this.subjectId = ids[0];
+      },
+      setSubjectOptions() {
+         let subjectIds = this.selectedRootRecruit.subItems.map(item => item.subjectId);
+         this.subjectOptions = this.subject_options.filter(item => subjectIds.includes(item.value));
+      },
+      onSubjectChanged(val) {
+         if(val) this.errors.remove('subject');
+      },
+      getErrMsg(key){
+			let err = this.errors.collect(key);
+			if(err && err.length){
+				let msg = err[0];
+				return msg.replace('subject', '科目');
+			}
+			return '';
       },
       getBread() {
          return this.bread;
@@ -137,10 +187,11 @@ export default {
       },
       setTitle() {
          this.clearBread();
+
          if(this.rqReadMode) {
             this.addBreadItem(SELECT_RQS_MODE, this.title);
-
-            let selectedList = [this.selectedMode.text, this.selectedYear.text, this.selectedSubject.text];
+            // 閱讀, 108年度, 專業科目1
+            let selectedList = [this.selectedMode.text, this.selectedRootRecruit.title, this.selectedSubject.text];
             this.addBreadItem(SELECT_RQS_MODE, selectedList.join('_'));
 
          }else if(this.rqExamMode) {
@@ -152,38 +203,51 @@ export default {
          }
          
       },
-		selectMode(reset = true) {
-         if(reset) this.params = { ...this.init_params };
-         this.modeSelector.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
-			this.modeSelector.active = true;
-      },
-      loadSubjectOptions(yearId, subjects = []) {
-         if(!subjects) subjects = this.subjects;
-         let subitems = subjects.filter(item => item.parentId === yearId);
-         let options = subitems.map(item => ({
-            value: item.id, text: item.title
-         }));
-
-         this.subjectOptions = options;
-         return options;
+		selectMode() {
+         this.selector.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
+			this.selector.active = true;
       },
       checkAuth() {
          if(this.params.mode > 0) return this.isAuthenticated;
          return true;
       },
       submit() {
+         this.$validator.validate().then(valid => {
+            if(!valid) return;
+            if(this.selectedRecruit) {
+               this.params.recruit = this.selectedRecruit.id
+            }else {
+               this.errors.add({
+                  field: 'subject',
+                  msg: '請選擇科目'
+               });
+            }
+         })
+
+         if(this.errors.any()) return;
+
          let auth = this.checkAuth();
          if(!auth) {
             Bus.$emit('confirm-login', { returnUrl: this.$route.path });
             return;
          }
 
-         this.$emit('submit', this.params);
+         this.model = {
+            mode: this.selectedMode,
+            rootRecruit: this.selectedRootRecruit,
+            recruit: this.selectedRecruit,
+            subject: this.selectedSubject
+         };
 
-         this.modeSelector.selected = true;
-         this.modeSelector.active = false;
-         
+         this.$nextTick(() => {
+            this.$emit('submit');
+            this.selector.selected = true;
+            this.selector.active = false;
+         });
       },
+      getModel() {
+         return this.model;
+      }
       
 
    }

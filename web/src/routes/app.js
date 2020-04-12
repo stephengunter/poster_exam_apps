@@ -36,34 +36,22 @@ const applinks = [{
       icon: 'mdi-database',
       title: '歷屆試題'
    } 
-},{
+}];
+
+const userLinks = [
+   {
    name: 'notes',
    path: '/notes',
    view: 'Notes',
    parent: '',
    meta: {
       show: FOR_ALL,
-      type: FOR_ALL,
+      type: USER_ONLY,
       menu: true,
       icon: 'mdi-notebook-outline',
       title: '讀書筆記'
    } 
-}];
-
-const userLinks = [
-//    {
-//    name: 'notes',
-//    path: '/notes',
-//    view: 'Notes',
-//    parent: '',
-//    meta: {
-//       show: FOR_ALL,
-//       type: USER_ONLY,
-//       menu: true,
-//       icon: 'mdi-notebook-outline',
-//       title: '讀書筆記'
-//    } 
-// },
+},
 {
    name: 'exams',
    path: '/exams',

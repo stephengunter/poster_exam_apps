@@ -63,9 +63,23 @@ export default {
    },
    data() {
 		return {
-
+         params: null
 		}
-	},
+   },
+   computed: {
+      selectedSubject() {
+         if(this.subject_options && this.params.subject > 0) {
+            return this.subject_options.find(item => item.value === this.params.subject);
+         }     
+         return null;
+      },
+      selectedStatus() {
+         if(this.status_options && this.params.status > -1) {
+            return this.status_options.find(item => item.value === this.params.status);
+         }     
+         return null;
+      }
+   },
 	beforeMount() {
       this.init();
 	},
@@ -78,7 +92,11 @@ export default {
          this.$emit('cancel');
       },
       submit() {
-         this.$emit('submit', this.params);
+         let model = {
+            subject: this.selectedSubject,
+            status: this.selectedStatus
+         };
+         this.$emit('submit', this.params, model);
       }
 	}
 }

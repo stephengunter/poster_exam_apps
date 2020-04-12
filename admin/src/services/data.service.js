@@ -5,4 +5,6 @@ const source =`${API_URL}/admin/data`;
 
 const storeSubjectQuestions = (model) => BaseService.post(`${source}/subject-questions`, model);
 
-export default { storeSubjectQuestions };
+const storeYearRecruits = (model) => BaseService.post(`${source}/year-recruits`, model);
+
+export default { storeSubjectQuestions, storeYearRecruits };

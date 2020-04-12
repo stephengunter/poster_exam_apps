@@ -38,13 +38,14 @@ export default {
 			type: Object,
 			default: null
       },
-      params: {
+      init_params: {
 			type: Object,
 			default: null
 		}
    },
    data() {
 		return {
+         params: null,
          options: {
             page: 1,
             itemsPerPage: 10,
@@ -107,8 +108,11 @@ export default {
          return this.model.viewList;
       },
       headers() {
+         if(!this.params) return [];
+
          let subject = this.params.subject;
          let status = this.params.status;
+        
          let items = this.columns.filter(item => !item.subjects.length || item.subjects.includes(subject))
                                  .filter(item => item.status.includes(status));
          return items.map(item => ({
@@ -119,21 +123,36 @@ export default {
          return this.headers.map(item => item.value);
       }
    },
+   beforeMount() {
+      this.init();
+   },
    watch: {
       options: {
         handler (val) {
+          
+            if(val.sortBy[0] === undefined) return;
+            if(val.sortDesc[0] === undefined) return;
+
             this.$emit('options-changed', {
                page: val.page,
                pageSize: val.itemsPerPage,
-               sortBy: val.sortBy[0] ? val.sortBy[0] : '',
-               desc: val.sortDesc[0] ? val.sortDesc[0] : false
+               sortBy: val.sortBy[0],
+               desc: val.sortDesc[0]
             });
         },
         deep: true,
       },
+      init_params: {
+         handler (val) {
+            this.params.status = val.status;
+            this.params.subject = val.subject;
+         },
+         deep: true,
+      },
    },
    methods: {
       init() {
+         this.params = { ...this.init_params };
          let pageSize = this.pageSizeOptions.includes(this.params.pageSize) ? this.params.pageSize : -1;
        
          this.options = {

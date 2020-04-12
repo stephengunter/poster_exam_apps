@@ -23,14 +23,15 @@
 
    <v-dialog v-model="filter.active" :max-width="filter.maxWidth" persistent>
       <exam-filter v-if="filter.active" :init_params="fetchParams"
-      :status_options="status_options" :subject_options="subject_options"
+      :status_options="statusOptions" :subject_options="subjectOptions"
       @submit="submitFilter" @cancel="filter.active = false;"
       />
    </v-dialog>
    <v-dialog v-model="creator.active" :max-width="creator.maxWidth" persistent>
       <exam-creator v-if="creator.active"  :init_params="createParams"
-      :type_options="type_options" :recruit_type_options="recruit_type_options"
-      :year_options="year_options" :subject_options="subject_options"
+      :type_options="typeOptions" :recruit_type_options="rTypeOptions"
+      :year_options="yearOptions" :subject_options="subjectOptions"
+      :year_recruits="yearRecruits"
       @submit="submitCreator" @cancel="creator.active = false;"
       />
    </v-dialog>
@@ -60,26 +61,6 @@ export default {
       title: {
 			type: String,
 			default: ''
-      },
-      type_options: {
-         type: Array,
-         default: null
-      },
-      recruit_type_options: {
-         type: Array,
-         default: null
-      },
-      year_options: {
-         type: Array,
-         default: null
-      },
-      status_options: {
-         type: Array,
-         default: null
-      },
-      subject_options: {
-         type: Array,
-         default: null
       }
    },
    data() {
@@ -90,7 +71,8 @@ export default {
          filter: {
             active: false,
             maxWidth: DIALOG_MAX_WIDTH,
-            selected: false
+            selected: false,
+            model: null
          },
 
          creator: {
@@ -110,8 +92,37 @@ export default {
 		'responsive','contentMaxWidth','isAuthenticated'
       ]),
       ...mapState({
+         indexModel: state => state.exams.indexModel,
 			mode: state => state.exams.mode
-      })
+      }),
+      statusOptions() {
+         if(this.indexModel) return this.indexModel.statusOptions;
+         return [];
+      },
+      typeOptions() {
+         if(this.indexModel) return this.indexModel.examTypeOptions;
+         return [];
+      },
+      rTypeOptions() {
+         if(this.indexModel) return this.indexModel.recruitExamTypeOptions;
+         return [];
+      },
+      subjectOptions() {
+         if(this.indexModel) return this.indexModel.subjectOptions;
+         return [];
+      },
+      yearRecruits() {
+         if(this.indexModel) return this.indexModel.yearRecruits;
+         return [];
+      },
+      yearOptions() {
+         if(this.yearRecruits) {
+            return this.yearRecruits.map(item => ({
+               value: item.id, text: item.title
+            }));
+         }
+         return [];
+      }
    },
    methods: {
       init() {
@@ -143,23 +154,20 @@ export default {
          this.clearBread();
 
          if(this.examIndexMode) {
-            let params = this.fetchParams;
             let action = FILTER_EXAMS;
             this.addBreadItem(action, this.title);
 
-            let selectedSubject = null;
-            if(this.fetchParams.subject > 0) {
-               selectedSubject =  this.subject_options.find(item => item.value === this.fetchParams.subject);
+            if(!this.filter.model) return;
+
+            let selectedSubject = this.filter.model.subject;
+            if(selectedSubject) {
+               this.addBreadItem(action, selectedSubject.text);   
             }
 
-            if(selectedSubject) this.addBreadItem(action, selectedSubject.text);
-            
-            let selectedStatus = null;
-            if(this.fetchParams.status > -1) {
-               selectedStatus =  this.status_options.find(item => item.value === this.fetchParams.status);
+            let selectedStatus = this.filter.model.status;
+            if(selectedStatus) {
+               this.addBreadItem(action, selectedStatus.text);   
             }
-
-            if(selectedStatus) this.addBreadItem(action, selectedStatus.text);
 
          }else if(this.examEditMode) {
             this.addBreadItem(EXAM_RECORDS, this.title);
@@ -175,14 +183,16 @@ export default {
             let type = this.creator.model.type;
             titleTextList.push(type.text);
 
-            let year = this.creator.model.year;
-            titleTextList.push(`${year.text}年度`);
+            let recruit = this.creator.model.recruit;
+            if(recruit) {
+               let rootRecruit = this.creator.model.rootRecruit;
+               titleTextList.push(rootRecruit.title);
+            }
             
             let subject = this.creator.model.subject;
             titleTextList.push(subject.text);
 
             let title = titleTextList.join('_');
-
             this.addBreadItem(NEW_EXAM, title);
          }
          
@@ -199,10 +209,11 @@ export default {
          this.filter.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
 			this.filter.active = true;
       },
-      submitFilter(params) {
+      submitFilter(params, model) {
          this.fetchParams = { ...params };
          this.$emit('filter-submit', params);
-      
+         this.filter.model = model;
+
          this.setTitle();
          this.filter.active = false;
       },

@@ -8,9 +8,8 @@ import { SET_RQS_MODEL, INIT_RQS_PAGE, SET_RQS_PAGE_MODE,
 const initialState = {
    mode: null,
    modeOptions: [],
-   yearOptions: [],
-   subjects: [],
-
+   subjectOptions: [],
+   yearRecruits: [],
    model: null
 };
 
@@ -28,12 +27,12 @@ const getters = {
 
 const actions = {
    [FETCH_RQS](context, params) {
+      let firstLoad = params.mode < 0;
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          RQService.fetch(params)
          .then(model => {
-            if(params.mode < 0) {
-               //firstLoad
+            if(firstLoad) {
                context.commit(INIT_RQS_PAGE, model);
             }else if(model.parts) {
                let index = 1;
@@ -62,9 +61,9 @@ const actions = {
 
 const mutations = {
    [INIT_RQS_PAGE](state, indexModel) {
+      state.yearRecruits = indexModel.yearRecruits;
+      state.subjectOptions = indexModel.subjectOptions;
       state.modeOptions = indexModel.modeOptions;
-      state.yearOptions = indexModel.yearOptions;
-      state.subjects = indexModel.subjects;
    },
    [SET_RQS_MODEL](state, model) {
       state.model = model;
