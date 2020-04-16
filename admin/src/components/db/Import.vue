@@ -19,7 +19,7 @@
             </v-flex>
             <v-flex xs12>
                <v-chip v-for="(file, index) in model.files" :key="index" close label outline @input="clearFile(index)">
-                  <v-icon left>mdi-file</v-icon>{{ filename }}
+                  <v-icon left>mdi-file</v-icon>{{ file.name }}
                </v-chip>
                <core-upload-button v-if="!hasFile"  :multiple="true"
                :is_media="false" :allow_types="allowTypes"
@@ -68,10 +68,7 @@ export default {
    computed: {
       hasFile() {
          return this.model.files.length > 0;
-      },
-      filename() {
-         if(this.model.files.length) return this.model.files[0].name;
-      }      
+      }   
    },
    beforeMount(){
 		

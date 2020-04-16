@@ -39,7 +39,7 @@ const actions = [
    name: SELECT_RQS_MODE,
    order: 0,
    type: SELECT,
-   icon: 'mdi-settings-outline',
+   icon: 'mdi-cog-outline',
    title: '選擇模式',
    description: ''
 },{
