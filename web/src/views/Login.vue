@@ -26,12 +26,17 @@ export default {
 	name: 'LoginView',
 	data(){
 		return {
-			returnUrl: ''
+			returnUrl: '',
+			returnQuery: null
 		}
 	},
 	beforeMount() {
 		if(this.$route.query) {
 			this.returnUrl = this.$route.query.returnUrl ?  this.$route.query.returnUrl : '';
+
+			let copy = JSON.parse(JSON.stringify(this.$route.query))
+			delete copy['returnUrl'];
+			this.returnQuery = copy;
 		}
 	},
 	methods: {
@@ -47,7 +52,10 @@ export default {
 			})
       },
       onSuccess(){
-         if(this.returnUrl) this.$router.push({ path: this.returnUrl });
+         if(this.returnUrl) {
+				if(this.returnQuery) this.$router.push({ path: this.returnUrl, query: this.returnQuery });
+				else this.$router.push({ path: this.returnUrl });
+			} 
          else this.$router.push({ path: '/' });         
       }
    }

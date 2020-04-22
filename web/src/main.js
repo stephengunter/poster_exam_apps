@@ -1,6 +1,9 @@
 import Vue from 'vue';
 window.Bus = new Vue({});
 
+import VueQrcode from '@chenfengyuan/vue-qrcode';
+Vue.component(VueQrcode.name, VueQrcode);
+
 import App from './App.vue';
 import router from './routes';
 import store from './store';
@@ -18,10 +21,11 @@ import Menu from '@/common/menu';
 import { SET_MENUS } from '@/store/mutations.type';
 
 router.beforeEach((to, from, next) => {
-	store.dispatch(CHECK_AUTH).then(auth => {
-		if(to.meta.type === FOR_ALL) return authDone(next, to, auth);
+	store.dispatch(CHECK_AUTH).then(user => {
+		
+		if(to.meta.type === FOR_ALL) return authDone(next, to, user);
 	
-		if(auth){
+		if(user){
 			let tokenStatus = JwtService.tokenStatus();
 			if(tokenStatus === -1) {
 				//token過期
@@ -31,21 +35,22 @@ router.beforeEach((to, from, next) => {
 				return refreshToken(next, to);
 			}else {
 				if(to.meta.type === GUEST_ONLY) return redirect(next, { path: '/' });
-				else return authDone(next, to, auth);
+				else return authDone(next, to, user);
 			}
 			
 		}else{
 			//無token
-			if(to.meta.type === GUEST_ONLY) return authDone(next, to, auth);
-			else return redirect(next, { path: '/login', query: { returnUrl: to.path } });
+			let query = { ...to.query, returnUrl: to.path };
+			if(to.meta.type === GUEST_ONLY) return authDone(next, to, user);
+			else return redirect(next, { path: '/login', query });
 		}
 	})
 });
 
 const redirect = (next, route) => next(route);
 
-const authDone = (next, to, auth = false) => {
-	let mainMenus = Menu.getMainMenus(router.options.routes, to, auth);
+const authDone = (next, to, user = null) => {
+	let mainMenus = Menu.getMainMenus(router.options.routes, to, user);
 	store.commit(SET_MENUS, mainMenus);
 	
 	store.dispatch(FETCH_ACTIONS, to);
@@ -53,7 +58,8 @@ const authDone = (next, to, auth = false) => {
 }
 
 const refreshToken = (next, to) => {
-	store.dispatch(REFRESH_TOKEN).then(token => {	
+	store.dispatch(REFRESH_TOKEN)
+	.then(token => {	
 		if(token) return redirect(next, { path: to.path });
 		else return redirect(next, { path: '/login' });
 	})

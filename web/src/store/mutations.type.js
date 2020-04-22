@@ -38,6 +38,10 @@ export const SET_EXAM = 'setExam';
 export const SET_EXAM_TITLE = 'setExamTitle';
 export const SET_EXAM_ACTIONS = 'setExamActions';
 
-
+//Subscribes
+export const SET_PLAN = 'setPlan';
+export const SET_PAYWAYS = 'setPayways';
+export const SET_SUBSCRIBE_RECORDS = 'setSubscribeRecords';
+export const SET_CURRENT_SUBSCRIBE = 'setCurrentSubscribe';
 
 

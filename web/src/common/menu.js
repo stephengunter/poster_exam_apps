@@ -1,12 +1,22 @@
 import { FOR_ALL, GUEST_ONLY, USER_ONLY } from '@/routes/route.type';
+import { isSubscriber } from '@/utils';
 
-const getMainMenus = (appRoutes, currentRoute, auth) => {
+const getMainMenus = (appRoutes, currentRoute, user = null) => {
+  
    let routes = [];
-   if(auth) {
-      routes = appRoutes.filter(item => item.meta.show !== GUEST_ONLY);
+   if(user) {
+      routes = appRoutes.filter(item => item.meta.show && item.meta.show !== GUEST_ONLY);
+      if(isSubscriber(user)) {
+         //如果已經是Subscriber, 菜單不顯示 '訂閱會員'
+         let idx = routes.findIndex(item => item.name === 'subscribes');
+         if(idx > -1) routes.splice(idx, 1);
+      }
+      
    }else {
-      routes = appRoutes.filter(item => item.meta.show !== USER_ONLY);
+      routes = appRoutes.filter(item => item.meta.show  && item.meta.show !== USER_ONLY);
    }
+   
+   
    
    let mainLinks = getMainLinks(routes);
    mainLinks.forEach(item => {

@@ -7,7 +7,7 @@
 
       <div v-if="ready">
 			<note-list v-for="(term, index) in termList" :key="index"
-			:show_term="params.mode < 1"
+			:mode="params.mode"
 			:term="term" :max_width="contentMaxWidth - 65"
 			@show-photo="onShowPhoto"
 			/>
@@ -153,7 +153,11 @@ export default {
 			this.params = params;
 			this.$store.dispatch(FETCH_NOTES, params)
 			.then(terms => {
-				if(!this.params.keyword) {
+				if(this.params.keyword) {
+					this.$nextTick(() => {
+						this.setReady(true);
+					});
+				}else {
 					this.$nextTick(() => {
 						this.relatedQuestions.fetchData();
 						this.setReady(true);

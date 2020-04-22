@@ -30,6 +30,32 @@ const adminlinks = [
       } 
    },
    {
+      name: 'subscribes',
+      path: '/subscribes',
+      view: 'Subscribes',
+      parent: '',
+      meta: {
+         order: 0,
+         icon: 'mdi-credit-card-check-outline',
+         title: '訂閱',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
+   },
+   {
+      name: 'plans',
+      path: '/plans',
+      view: 'Plans',
+      parent: 'subscribes',
+      meta: {
+         order: 0,
+         icon: 'mdi-text-box-outline',
+         title: '方案',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
+   },
+   {
       name: 'users',
       path: '/users',
       view: 'Users',

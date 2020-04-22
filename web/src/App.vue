@@ -1,17 +1,10 @@
 <template>
    <v-app>
-  		<TheDrawer />
-		<TheHeader />
-		<TheContainer />
-		<v-overlay :value="loading">
-			<div class="text-center">
-				<v-progress-circular indeterminate size="48">
-				</v-progress-circular>
-				<p v-if="loadingText" style="margin:12px">
-					{{ loadingText }}
-				</p>
-			</div>
-		</v-overlay>
+		<layout-drawer />
+		<layout-header />
+		<layout-container />
+		
+		<layout-loading />
 
 		<v-snackbar :timeout="success.timeout" top right dark
 			:color="success.color" v-model="success.show"
@@ -56,17 +49,8 @@ import { CHECK_AUTH, REFRESH_TOKEN, TOKEN_REFRESHED } from '@/store/actions.type
 import { SET_WINDOW_WIDTH, SET_RESPONSIVE, TOGGLE_DRAWER } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
-import TheHeader from './components/layout/Header';
-import TheDrawer from './components/layout/Drawer';
-import TheContainer from './components/layout/Container';
-
 export default {
 	name: 'App',
-	components: {
-		TheHeader,
-		TheDrawer,
-		TheContainer
-	},
 	data(){
 		return {
 			title: '',
@@ -101,11 +85,6 @@ export default {
 	},
 	computed:{
 		...mapGetters(['currentUser','responsive','contentMaxWidth']),
-      ...mapState({
-			loading: state => state.app.loading,
-			loadingText: state => state.app.loadingText,
-			responsive: state => state.app.responsive
-		}),
 		confirmNoAction() {
 			return !this.confirm.on_ok && !this.confirm.on_cancel
 		}
@@ -128,6 +107,7 @@ export default {
 	},
 	methods:{
 		onError(error) {
+			console.log('onError');
 			let confirm = {
 				type: 'error',
 				title: '伺服器暫時無回應，請稍候再試.',
@@ -152,8 +132,8 @@ export default {
 			}
 		},
 		onFourZeroOne() {
-			this.$store.dispatch(CHECK_AUTH).then(auth => {
-				if(auth){
+			this.$store.dispatch(CHECK_AUTH).then(user => {
+				if(user){
 					this.$store.dispatch(REFRESH_TOKEN).then(token => {	
 						if(token) {
 							this.$store.dispatch(CHECK_AUTH);
@@ -297,5 +277,7 @@ html {
   background-color: #4CAF50;
   color: white;
 }
-
+.cn {
+	font-family: "微軟正黑體"
+}
 </style>

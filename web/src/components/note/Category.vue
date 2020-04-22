@@ -192,6 +192,7 @@ export default {
       search() {
          if(this.params.keyword) {
             this.params.term = 0;
+            this.params.mode = 0;
             this.submit();
          }
       },
@@ -204,7 +205,13 @@ export default {
             this.$emit('submit', this.params);
          }else {
             if(this.params.subject) {
-               if(this.params.keyword || this.selectItem.subItems.length < 1) this.$emit('submit', this.params)
+               if(this.params.keyword) {
+                  this.params.term = 0;
+                  this.params.mode = 0;
+                  this.$emit('submit', this.params);
+               }else if(this.selectItem.subItems.length < 1) {
+                  this.$emit('submit', this.params);
+               }
                else this.errText = '請選擇章節';
             }            
             else this.errText = '請選擇章節';

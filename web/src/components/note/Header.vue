@@ -146,7 +146,6 @@ export default {
 			this.setTreeItems(val);
 		},
 		onParamsChanged(params) {
-		
 			this.params = { ...params };
 			this.$emit('params-changed', params);
 			

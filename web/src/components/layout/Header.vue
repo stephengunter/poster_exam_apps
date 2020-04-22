@@ -28,13 +28,24 @@
       <v-menu v-if="currentUser" offset-y>
          <template v-slot:activator="{ on }">
             <v-btn icon v-on="on">
-               <v-avatar size="36">
-                  <img :src="currentUser.picture">
+               <v-avatar v-if="pictureError" size="36" color="indigo">
+                  <span class="cn">{{ currentUser.name }}</span>
+               </v-avatar>
+               <v-avatar v-else size="36">
+                  <img :src="currentUser.picture" @error="pictureError = true">
                </v-avatar>
             </v-btn>
          </template>
          <v-card class="mx-auto" max-width="300" tile >
             <v-list>
+               <!-- <v-list-item @click.prevent="logout">
+                  <v-list-item-icon>
+                     <v-icon>mdi-logout-variant</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                     <v-list-item-title>訂閱紀錄</v-list-item-title>
+                  </v-list-item-content>
+               </v-list-item> -->
                <v-list-item @click.prevent="logout">
                   <v-list-item-icon>
                         <v-icon>mdi-logout-variant</v-icon>
@@ -60,7 +71,8 @@ export default {
    name: 'TheHeader',
    data() {
       return {
-         title: SITE_TITLE
+         title: SITE_TITLE,
+         pictureError: false
       }
    },
    computed:{
@@ -72,7 +84,10 @@ export default {
       },
       logout(){
          this.$store.dispatch(LOGOUT)
-         .then(() => this.$router.push({ path: '/' }))
+         .then(() => {
+            if(this.$route.name === 'home') window.location.reload();
+            else this.$router.push({ name: 'home' });
+         })
       },
       onActionSelected(name) {
          Bus.$emit(ACTION_SELECTED, name);

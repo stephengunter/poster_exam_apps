@@ -1,6 +1,6 @@
 <template>
 	<v-container >
-		
+		Test
 	</v-container>
 </template>
 
@@ -13,7 +13,7 @@ export default {
 		}
 	},
 	beforeMount() {
-		this.$router.push({ name: 'rqs' });
+		
 	},
 	methods: {
 	},

@@ -8,6 +8,17 @@ export const LOGOUT = 'logout';
 
 export const GET_MENUS = 'getMenus';
 
+//Subscribes
+export const FETCH_SUBSCRIBES = 'fetchSubscribes';
+
+//Plans
+export const FETCH_PLANS = 'fetchPlans';
+export const CREATE_PLAN = 'createPlan';
+export const STORE_PLAN = 'storePlan';
+export const EDIT_PLAN = 'editPlan';
+export const UPDATE_PLAN = 'updatePlan';
+export const DELETE_PLAN = 'deletePlan';
+
 //Users
 export const FETCH_USERS = 'fetchUsers';
 

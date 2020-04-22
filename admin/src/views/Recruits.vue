@@ -40,7 +40,7 @@ import {
    EDIT_RECRUIT, UPDATE_RECRUIT, ORDER_RECRUITS, DELETE_RECRUIT
 } from '@/store/actions.type';
 
-import { toRocYear } from '@/utils';
+import { onError, toRocYear } from '@/utils';
 
 export default {
    name: 'RecruitsView',

@@ -2,7 +2,7 @@
    <div>
 
       
-<a href="#" @click.prevent="test">Test</a>
+<a href="#" v-if="false" @click.prevent="test">Test</a>
 
    </div>
   
@@ -25,7 +25,7 @@ export default {
    methods: {
       test() {
          let key = 'dcd5f797-beea-40be-b1fb-e0f2933bb607';
-         DataService.storeYearRecruits({ key })
+         DataService.storeNoteCategories({ key })
          .then(model => {
             console.log(model);
          })

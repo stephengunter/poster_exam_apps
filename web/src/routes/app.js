@@ -15,7 +15,7 @@ const applinks = [{
 },{
    name: 'test',
    path: '/test',
-   view: 'Test',
+   view: 'test/Test',
    parent: '',
    meta: {
       show: FOR_ALL,
@@ -63,6 +63,42 @@ const userLinks = [
       menu: true,
       icon: 'mdi-file-document-edit-outline',
       title: '模擬測驗'
+   } 
+},{
+   name: 'bills',
+   path: '/bills',
+   view: 'Bills',
+   parent: '',
+   meta: {
+      show: '',
+      type: USER_ONLY,
+      menu: false,
+      icon: 'mdi-wallet-membership',
+      title: '訂閱會員'
+   } 
+},{
+   name: 'subscribes',
+   path: '/subscribes',
+   view: 'Subscribes',
+   parent: '',
+   meta: {
+      show: FOR_ALL,
+      type: USER_ONLY,
+      menu: true,
+      icon: 'mdi-wallet-membership',
+      title: '訂閱會員'
+   } 
+},{
+   name: 'subscribes-create',
+   path: '/subscribes/create',
+   view: 'subscribes/Create',
+   parent: '',
+   meta: {
+      show: '',
+      type: USER_ONLY,
+      menu: false,
+      icon: 'mdi-wallet-membership',
+      title: '訂閱會員'
    } 
 }];
 

@@ -53,3 +53,7 @@ export const READ_EXAM = 'readExam';
 export const FILTER_EXAMS = 'filterExams';
 export const FETCH_EXAMS = 'fetchExams';
 export const LOAD_EXAM_SUMMARY = 'loadExamSummary';
+
+//Subscribes
+export const FETCH_PLANS = 'fetchPlans';
+export const SUBSCRIBES_INDEX = 'subscribesIndex';

@@ -1,9 +1,11 @@
 <template>
    <ul :class="class_name">
       <li v-for="(item, index) in items" :key="index">
-         <a href="#" @click.prevent="selected(item)">
+         <a v-if="item.action" href="#" @click.prevent="selected(item)">
             {{ item.text }}
          </a>
+         <span v-else>{{ item.text }}</span>
+          
          <v-icon v-if="index < items.length - 1" class="pb-1 mr-1" size="16">
             mdi-chevron-right
          </v-icon>

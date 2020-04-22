@@ -98,18 +98,21 @@ const actions = {
    [CHECK_AUTH](context) {
       return new Promise((resolve) => {
          let token = JwtService.getToken();
-         if (token) {
+         if(token) {
             BaseService.setHeader(token);
             let claims = jwtDecode(token);
-            context.commit(SET_USER, {
+            let user = {
                id: claims.id,
                email: claims.sub,
-               picture: claims.picture
-            }); 
-            resolve(true);           
+               picture: claims.picture,
+               name: claims.name,
+               roles: claims.roles ? claims.roles.split(',') : []
+            };
+            context.commit(SET_USER, user); 
+            resolve(user);           
          }else {
             context.commit(PURGE_AUTH);
-            resolve(false);
+            resolve(null);
          }
       });
    },
@@ -128,6 +131,7 @@ const actions = {
                resolve(true);
             })
             .catch(err => {
+               console.error(err);
                context.commit(PURGE_AUTH);
                resolve(false);           
             })
