@@ -3,12 +3,15 @@
       <template v-slot:default>
          <thead>
             <tr>
-               <th>金額</th>
                <th>有效期限</th>
+               <th>金額</th>
             </tr>
          </thead>
          <tbody>
             <tr>
+               <td>
+                  {{ periodText }}
+               </td>
                <td>
                   <div class="item-price">
                      <span class="mr-1">$</span>
@@ -17,9 +20,6 @@
                      優惠價
                      </v-chip>
                   </div>
-               </td>
-               <td>
-                  {{ periodText }}
                </td>
             </tr>
          </tbody>
@@ -58,7 +58,7 @@
 <script>
 import { getPlanStartDateText, getPlanEndDateText } from '@/utils';
 export default {
-   name: 'SubscribePlan',
+   name: 'SubscribeCurrent',
    props: {
       model: {
          type: Object,

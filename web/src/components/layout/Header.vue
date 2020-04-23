@@ -38,14 +38,14 @@
          </template>
          <v-card class="mx-auto" max-width="300" tile >
             <v-list>
-               <!-- <v-list-item @click.prevent="logout">
-                  <v-list-item-icon>
-                     <v-icon>mdi-logout-variant</v-icon>
+               <v-list-item v-for="(item, index) in userMenus" :key="index" @click.prevent="onMenuSelected(item.name)">
+                  <v-list-item-icon v-if="item.meta.icon">
+                     <v-icon v-text="item.meta.icon"></v-icon>
                   </v-list-item-icon>
                   <v-list-item-content>
-                     <v-list-item-title>訂閱紀錄</v-list-item-title>
+                     <v-list-item-title>{{ item.meta.title }}</v-list-item-title>
                   </v-list-item-content>
-               </v-list-item> -->
+               </v-list-item>
                <v-list-item @click.prevent="logout">
                   <v-list-item-icon>
                         <v-icon>mdi-logout-variant</v-icon>
@@ -76,7 +76,7 @@ export default {
       }
    },
    computed:{
-		...mapGetters(['currentUser', 'appActions'])
+		...mapGetters(['currentUser', 'appActions', 'userMenus'])
    },
    methods:{
       toggleDrawer(){
@@ -88,6 +88,9 @@ export default {
             if(this.$route.name === 'home') window.location.reload();
             else this.$router.push({ name: 'home' });
          })
+      },
+      onMenuSelected(name) {
+         this.$router.push({ name });
       },
       onActionSelected(name) {
          Bus.$emit(ACTION_SELECTED, name);

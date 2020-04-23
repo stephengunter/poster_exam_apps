@@ -4,19 +4,36 @@
 			<core-bread :items="bread.items"
 			/>
       </div>
-		<v-row v-if="false">
-			<v-col cols="12">
-				<subscribe-plan :model="plan" 
-				@select="onPlanSelected"
-				/>
-			</v-col>
-		</v-row>
-		<v-row v-if="createMode">
-			<v-col cols="12">
-				<subscribe-confirm :model="edit.model"
-				/>
-			</v-col>
-		</v-row>
+		<div v-if="ready">
+			<v-row v-if="!currentSubscribe">
+				<v-col cols="12">
+					<subscribe-alert :can_create="canCreate"
+					@submit="subscribeNow"
+					/>
+				</v-col>
+			</v-row>
+			
+			<v-row>
+				<v-col cols="12">
+					<v-tabs v-model="tab">
+						<v-tab v-for="(tab, index) in tabs" :key="index" @change="onTabChanged(tab.key)">
+						{{ tab.title }}
+						</v-tab>
+					</v-tabs>
+					<v-tabs-items v-model="tab">
+						<v-tab-item>
+							<bill-list />
+						</v-tab-item>
+						<v-tab-item>
+							<subscribe-table v-if="selectedTabKey === 'records'"
+							:list="records"
+							/>
+							
+						</v-tab-item>
+					</v-tabs-items>
+				</v-col>
+			</v-row>
+		</div>
    </v-container>
 </template>
 
@@ -30,8 +47,10 @@ export default {
 	name: 'SubscribesView',
 	data() {
 		return {
+			
+		  
 			title: '',
-			mode: 'index',
+			ready: false,
          bread: {
             items: []
 			},
@@ -40,51 +59,35 @@ export default {
 			edit: {
 				model: null
 			},
-			
-			payway: 0,
-			paywayOptions: [{
-				text: 'LINE Pay', value: 0
+
+			tab: null,
+			selectedTabKey: '',
+			tabs:[{
+				key: 'bills', title: '訂單查詢'
 			},{
-				text: '電力商店繳費', value: 1
-			}]
+				key: 'records', title: '訂閱紀錄'
+			}],
 		}
 	},
 	computed: {
-		...mapGetters(['isAuthenticated', 'currentUser','responsive', 'plan']),
-		indexMode() {
-			return this.mode === 'index';
-		},
-		confirmMode() {
-			return this.mode === 'confirm';
-		},
-		createMode() {
-			return this.mode === 'create';
-		},
-		recordsMode() {
-			return this.mode === 'records';
-		}
+		...mapGetters(['loading','currentSubscribe']),
+		...mapState({
+			records: state => state.subscribes.records,
+			canCreate: state => state.subscribes.canCreate
+		}),
 	},
 	beforeMount() {
-		let query = this.$route.query;
-		if(query.plan) this.planId = Number(query.plan);
-
 		this.title = getRouteTitle(this.$route);
-		//this.setMode('index');
+		this.setTitle();
+
+		this.selectedTabKey = this.tabs[0].key;
+
 		this.fetchData();
 	},
 	methods: {
-		setMode(mode) {
-			this.mode = mode;
+		setTitle() {
 			this.clearBread();
-
 			this.addBreadItem('', this.title);
-
-			if(this.indexMode) {
-				
-			}else if(this.createMode) {
-				if(this.edit.model) this.addBreadItem('', '確認訂單');
-            
-         }
 		},
 		clearBread() {
          this.bread.items = [];
@@ -93,6 +96,10 @@ export default {
          this.bread.items.push({
             action, text
          });
+		},
+		subscribeNow() {
+			console.log('subscribeNow');
+			this.$router.push({ path: '/subscribes/create' });
 		},
 		fetchData() {
 			this.$store.commit(SET_LOADING, true);
@@ -109,35 +116,12 @@ export default {
 				this.$store.commit(SET_LOADING, false);
 			});
 		},
-		init() {
-			if(this.plan && this.planId === this.plan.id) {
-				this.edit.model = {
-					plan: {
-						...this.plan
-					},
-					payway: 0
-				};
-				this.setMode('create');
-
-				console.log(this.edit.model);
-			}
+		onTabChanged(val) {
+			console.log('onTabChanged', val);
 		},
-		onPlanSelected() {
-
+		init() {
+			this.ready = true;
 		}
 	}
 }
 </script>
-
-<style scoped>
-.item-price {
-	color: #ee4d2d;
-   font-weight: 400;	
-}
-.price-number{
-	font-size: 155%;
-	max-width: 130px;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-</style>

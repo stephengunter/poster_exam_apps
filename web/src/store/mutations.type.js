@@ -7,6 +7,7 @@ export const SET_THEME_COLOR = 'setThemeColor';
 export const SET_DRAWER = 'setDrawer';
 export const TOGGLE_DRAWER = 'toggleDrawer';
 export const SET_MENUS = 'setMenus';
+export const SET_USER_MENUS = 'setUserMenus';
 export const SET_VIEW_ACTIONS = 'setViewActions';
 export const SET_APP_ACTIONS = 'setAppActions';
 
@@ -43,5 +44,6 @@ export const SET_PLAN = 'setPlan';
 export const SET_PAYWAYS = 'setPayways';
 export const SET_SUBSCRIBE_RECORDS = 'setSubscribeRecords';
 export const SET_CURRENT_SUBSCRIBE = 'setCurrentSubscribe';
+export const SET_CAN_CREATE_SUBSCRIBE = 'setCanCreateSubscribe';
 
 

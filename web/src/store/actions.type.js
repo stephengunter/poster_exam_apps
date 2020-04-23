@@ -57,3 +57,6 @@ export const LOAD_EXAM_SUMMARY = 'loadExamSummary';
 //Subscribes
 export const FETCH_PLANS = 'fetchPlans';
 export const SUBSCRIBES_INDEX = 'subscribesIndex';
+export const CREATE_SUBSCRIBE = 'createSubscribe';
+export const STORE_SUBSCRIBE = 'storeSubscribe';
+export const STORE_PAY = 'storePay';

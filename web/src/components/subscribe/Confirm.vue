@@ -49,8 +49,7 @@ export default {
    },
    methods: {
 		onSubmit() {
-         console.log('onSubmit');
-         //this.$emit('submit')
+         this.$emit('submit')
       }
 	}
 }

@@ -18,7 +18,7 @@ import JwtService from '@/services/jwt.service';
 import { CHECK_AUTH, REFRESH_TOKEN, FETCH_ACTIONS } from '@/store/actions.type';
 import { FOR_ALL, GUEST_ONLY, USER_ONLY } from '@/routes/route.type';
 import Menu from '@/common/menu';
-import { SET_MENUS } from '@/store/mutations.type';
+import { SET_MENUS, SET_USER_MENUS } from '@/store/mutations.type';
 
 router.beforeEach((to, from, next) => {
 	store.dispatch(CHECK_AUTH).then(user => {
@@ -52,6 +52,11 @@ const redirect = (next, route) => next(route);
 const authDone = (next, to, user = null) => {
 	let mainMenus = Menu.getMainMenus(router.options.routes, to, user);
 	store.commit(SET_MENUS, mainMenus);
+
+	if(user) {
+		let userMenus = Menu.getUserMenus(router.options.routes, to, user);
+		store.commit(SET_USER_MENUS, userMenus);
+	}
 	
 	store.dispatch(FETCH_ACTIONS, to);
 	return next();

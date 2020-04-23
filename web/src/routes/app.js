@@ -6,9 +6,10 @@ const applinks = [{
    view: 'Home',
    parent: '',
    meta: {
-      show: FOR_ALL,
       type: FOR_ALL,
-      menu: true,
+      menus: [{
+         key: 'main', show: FOR_ALL
+      }],
       icon: 'mdi-home',
       title: '首頁'
    } 
@@ -18,10 +19,8 @@ const applinks = [{
    view: 'test/Test',
    parent: '',
    meta: {
-      show: FOR_ALL,
       type: FOR_ALL,
-      menu: false,
-      icon: 'mdi-home',
+      menus: [],
       title: 'Test'
    } 
 },{
@@ -30,24 +29,25 @@ const applinks = [{
    view: 'RQs',
    parent: '',
    meta: {
-      show: FOR_ALL,
       type: FOR_ALL,
-      menu: true,
+      menus: [{
+         key: 'main', show: FOR_ALL
+      }],
       icon: 'mdi-database',
       title: '歷屆試題'
    } 
 }];
 
-const userLinks = [
-   {
+const userLinks = [{
    name: 'notes',
    path: '/notes',
    view: 'Notes',
    parent: '',
    meta: {
-      show: FOR_ALL,
       type: USER_ONLY,
-      menu: true,
+      menus: [{
+         key: 'main', show: FOR_ALL
+      }],
       icon: 'mdi-notebook-outline',
       title: '讀書筆記'
    } 
@@ -58,21 +58,23 @@ const userLinks = [
    view: 'Exams',
    parent: '',
    meta: {
-      show: FOR_ALL,
       type: USER_ONLY,
-      menu: true,
+      menus: [{
+         key: 'main', show: FOR_ALL
+      }],
       icon: 'mdi-file-document-edit-outline',
       title: '模擬測驗'
    } 
 },{
-   name: 'bills',
-   path: '/bills',
-   view: 'Bills',
+   name: 'subscribes-create',
+   path: '/subscribes/create',
+   view: 'subscribes/Create',
    parent: '',
    meta: {
-      show: '',
       type: USER_ONLY,
-      menu: false,
+      menus: [{
+         key: 'main', show: FOR_ALL
+      }],
       icon: 'mdi-wallet-membership',
       title: '訂閱會員'
    } 
@@ -82,23 +84,12 @@ const userLinks = [
    view: 'Subscribes',
    parent: '',
    meta: {
-      show: FOR_ALL,
       type: USER_ONLY,
-      menu: true,
+      menus: [{
+         key: 'user', show: USER_ONLY
+      }],
       icon: 'mdi-wallet-membership',
-      title: '訂閱會員'
-   } 
-},{
-   name: 'subscribes-create',
-   path: '/subscribes/create',
-   view: 'subscribes/Create',
-   parent: '',
-   meta: {
-      show: '',
-      type: USER_ONLY,
-      menu: false,
-      icon: 'mdi-wallet-membership',
-      title: '訂閱會員'
+      title: '我的訂閱'
    } 
 }];
 
@@ -108,8 +99,10 @@ const guestLinks = [{
    path: '/login',
    view: 'Login',
    meta: {
-      show: GUEST_ONLY,
       type: GUEST_ONLY,
+      menus: [{
+         key: 'main', show: GUEST_ONLY
+      }],
       icon: 'mdi-login-variant',
       title: '登入',
       menu: true

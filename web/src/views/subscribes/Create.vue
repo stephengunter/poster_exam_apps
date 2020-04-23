@@ -8,6 +8,7 @@
 			<v-row v-if="planSelected">
 				<v-col cols="12">
 					<subscribe-confirm :model="edit.model" :payway_options="paywayOptions"
+					@submit="onSubmit"
 					/>
 				</v-col>
 			</v-row>
@@ -25,8 +26,9 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { resolveErrorData, getRouteTitle } from '@/utils';
-import { SUBSCRIBES_INDEX, FETCH_PLANS } from '@/store/actions.type';
+import { resolveErrorData, getRouteTitle, uuid } from '@/utils';
+import { SUBSCRIBES_INDEX, CREATE_SUBSCRIBE, 
+STORE_SUBSCRIBE, STORE_PAY } from '@/store/actions.type';
 import { SET_LOADING } from '@/store/mutations.type';
 
 export default {
@@ -43,6 +45,8 @@ export default {
 			edit: {
 				model: null,
 			},
+
+			bill: null,
 			
 			paywayOptions: []
 		}
@@ -55,6 +59,7 @@ export default {
 		}
 	},
 	beforeMount() {
+
 		let query = this.$route.query;
 		if(query.plan) this.planId = Number(query.plan);
 
@@ -79,19 +84,19 @@ export default {
          });
 		},
 		fetchData() {
-			this.$store.commit(SET_LOADING, true);
-			this.$store.dispatch(SUBSCRIBES_INDEX)
-			.then(() => {
-				this.$nextTick(() => {
-					this.init();
-				});
+			this.$store.dispatch(CREATE_SUBSCRIBE)
+			.then(canCreate => {
+				if(canCreate) {
+					this.$nextTick(() => {
+						this.init();
+					});
+				}else {
+					this.redirect();
+				}
          })
 			.catch(error => {
-            Bus.$emit('errors', resolveErrorData(error));
+            Bus.$emit('errors', error);
          })
-			.finally(() => { 
-				this.$store.commit(SET_LOADING, false);
-			});
 		},
 		init() {
 			this.loadPayWayOptions();
@@ -123,6 +128,46 @@ export default {
 		},
 		onPlanNotFound() {
 
+		},
+		onSubmit() {
+			this.bill = null;
+			let model = this.edit.model;
+			this.$store.dispatch(STORE_SUBSCRIBE, model)
+			.then(bill => {
+				this.bill = bill;
+				this.$nextTick(() => {
+					this.beginPay(bill);
+				});
+         })
+			.catch(error => {
+				console.log('error', error);
+				//Bus.$emit('errors', error);
+				//this.redirect();
+         })
+		},
+		beginPay(bill) {
+			//開始支付
+			
+			console.log('beginPay', bill);
+			//以下為測試
+			let model = {
+				id: uuid(),
+				billId: bill.id,
+				money: String(bill.amount),
+				payWay: this.payWays.find(item => item.id === bill.payWayId).code
+			};
+			this.$store.dispatch(STORE_PAY, model)
+			.then(() => {
+				Bus.$emit('success');
+         })
+			.catch(error => {
+				console.log('error', error);
+				//Bus.$emit('errors', error);
+				//this.redirect();
+         })
+		},
+		redirect() {
+			this.$router.push({ path: '/subscribes' });
 		}
 	}
 }
