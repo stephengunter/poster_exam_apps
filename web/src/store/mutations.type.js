@@ -40,10 +40,11 @@ export const SET_EXAM_TITLE = 'setExamTitle';
 export const SET_EXAM_ACTIONS = 'setExamActions';
 
 //Subscribes
+export const SET_CURRENT_SUBSCRIBE = 'setCurrentSubscribe';
+export const SET_BILLS = 'setBills';
+export const SET_SUBSCRIBE_RECORDS = 'setSubscribeRecords';
 export const SET_PLAN = 'setPlan';
 export const SET_PAYWAYS = 'setPayways';
-export const SET_SUBSCRIBE_RECORDS = 'setSubscribeRecords';
-export const SET_CURRENT_SUBSCRIBE = 'setCurrentSubscribe';
 export const SET_CAN_CREATE_SUBSCRIBE = 'setCanCreateSubscribe';
 
 

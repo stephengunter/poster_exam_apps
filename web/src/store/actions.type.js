@@ -59,4 +59,8 @@ export const FETCH_PLANS = 'fetchPlans';
 export const SUBSCRIBES_INDEX = 'subscribesIndex';
 export const CREATE_SUBSCRIBE = 'createSubscribe';
 export const STORE_SUBSCRIBE = 'storeSubscribe';
+
+//Bills
+export const BILL_DETAILS = 'billDetails';
+export const EDIT_BILL = 'editBill';
 export const STORE_PAY = 'storePay';

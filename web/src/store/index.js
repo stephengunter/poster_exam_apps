@@ -9,6 +9,7 @@ import terms from './modules/terms.module';
 import rqs from './modules/rqs.module';
 import exams from './modules/exams.module';
 import subscribes from './modules/subscribes.module';
+import bills from './modules/bills.module';
 
 Vue.use(Vuex);
 
@@ -21,6 +22,7 @@ export default new Vuex.Store({
       terms,
       rqs,
       exams,
-      subscribes
+      subscribes,
+      bills
    }
 });

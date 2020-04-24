@@ -7,7 +7,7 @@ import { SUBSCRIBES_INDEX, FETCH_PLANS, CREATE_SUBSCRIBE,
    STORE_SUBSCRIBE, STORE_PAY
 } from '@/store/actions.type';
 
-import { SET_LOADING, SET_PLAN, SET_CURRENT_SUBSCRIBE, 
+import { SET_LOADING, SET_PLAN, SET_CURRENT_SUBSCRIBE, SET_BILLS,
 SET_SUBSCRIBE_RECORDS, SET_PAYWAYS, SET_CAN_CREATE_SUBSCRIBE } from '@/store/mutations.type';
 
 const initialState = {
@@ -39,8 +39,10 @@ const actions = {
       return new Promise((resolve, reject) => {
          SubscribesService.index()
          .then(model => {
+            context.commit(SET_CURRENT_SUBSCRIBE, model.current);
+            context.commit(SET_BILLS, model.bills);
             context.commit(SET_SUBSCRIBE_RECORDS, model.records);
-            context.commit(SET_CURRENT_SUBSCRIBE, model.current);   
+              
             context.commit(SET_PLAN, model.plan);
             context.commit(SET_PAYWAYS, model.payWays);
             context.commit(SET_CAN_CREATE_SUBSCRIBE, model.canCreate);
@@ -68,12 +70,14 @@ const actions = {
       return new Promise((resolve, reject) => {
          SubscribesService.create()
          .then(model => {
-            context.commit(SET_SUBSCRIBE_RECORDS, model.records);
-            context.commit(SET_CURRENT_SUBSCRIBE, model.current);   
-            context.commit(SET_PLAN, model.plan);
-            context.commit(SET_PAYWAYS, model.payWays);
-            context.commit(SET_CAN_CREATE_SUBSCRIBE, model.canCreate);
-            resolve(model.canCreate);
+            // context.commit(SET_CURRENT_SUBSCRIBE, model.current);
+            // context.commit(SET_BILLS, model.bills);
+            // context.commit(SET_SUBSCRIBE_RECORDS, model.records);
+              
+            // context.commit(SET_PLAN, model.plan);
+            //context.commit(SET_PAYWAYS, model.payWays);
+            // context.commit(SET_CAN_CREATE_SUBSCRIBE, model.canCreate);
+            resolve(model);
          })
          .catch(error => {
             reject(resolveErrorData(error));
@@ -118,17 +122,20 @@ const actions = {
 
 
 const mutations = {
+   [SET_CURRENT_SUBSCRIBE](state, model) {
+      state.current = model;
+   },
+   [SET_BILLS](state, bills) {
+      state.bills = bills;
+   },
+   [SET_SUBSCRIBE_RECORDS](state, records) {
+      state.records = records;
+   },
    [SET_PLAN](state, plan) {
       state.plan = plan;
    },
    [SET_PAYWAYS](state, payWays) {
       state.payWays = payWays;
-   },
-   [SET_SUBSCRIBE_RECORDS](state, records) {
-      state.records = records;
-   },
-   [SET_CURRENT_SUBSCRIBE](state, model) {
-      state.current = model;
    },
    [SET_CAN_CREATE_SUBSCRIBE](state, val) {
       state.canCreate = val;

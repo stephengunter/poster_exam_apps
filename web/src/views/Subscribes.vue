@@ -22,10 +22,12 @@
 					</v-tabs>
 					<v-tabs-items v-model="tab">
 						<v-tab-item>
-							<bill-list />
+							<bill-list :list="bills"
+							@selected="onBillSelected"
+							/>
 						</v-tab-item>
 						<v-tab-item>
-							<subscribe-table v-if="selectedTabKey === 'records'"
+							<subscribe-list
 							:list="records"
 							/>
 							
@@ -34,20 +36,26 @@
 				</v-col>
 			</v-row>
 		</div>
+
+		<v-dialog v-model="bill.active" :max-width="bill.maxWidth" persistent>
+			<bill-details v-if="bill.model" :model="bill.model" :payway_options="paywayOptions"
+			 @cancel="cancelSelectBill"
+			/>
+		</v-dialog>
    </v-container>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { resolveErrorData, getRouteTitle } from '@/utils';
-import { SUBSCRIBES_INDEX, FETCH_PLANS } from '@/store/actions.type';
+import { SUBSCRIBES_INDEX, FETCH_PLANS, EDIT_BILL, BILL_DETAILS } from '@/store/actions.type';
 import { SET_LOADING } from '@/store/mutations.type';
+import { DIALOG_MAX_WIDTH } from '@/config';
 
 export default {
 	name: 'SubscribesView',
 	data() {
 		return {
-			
 		  
 			title: '',
 			ready: false,
@@ -56,8 +64,10 @@ export default {
 			},
 			planId: 0,
 
-			edit: {
-				model: null
+			bill: {
+				model: null,
+            maxWidth: DIALOG_MAX_WIDTH,
+            active: false
 			},
 
 			tab: null,
@@ -67,11 +77,14 @@ export default {
 			},{
 				key: 'records', title: '訂閱紀錄'
 			}],
+
+			paywayOptions: []
 		}
 	},
 	computed: {
-		...mapGetters(['loading','currentSubscribe']),
+		...mapGetters(['loading','currentSubscribe', 'contentMaxWidth']),
 		...mapState({
+			bills: state => state.subscribes.bills,
 			records: state => state.subscribes.records,
 			canCreate: state => state.subscribes.canCreate
 		}),
@@ -98,7 +111,6 @@ export default {
          });
 		},
 		subscribeNow() {
-			console.log('subscribeNow');
 			this.$router.push({ path: '/subscribes/create' });
 		},
 		fetchData() {
@@ -116,11 +128,56 @@ export default {
 				this.$store.commit(SET_LOADING, false);
 			});
 		},
+		onBillSelected(bill) {
+			let id =  bill.id;
+			if(bill.payed) this.billDetails(id);
+			else this.editBill(id);
+			
+		},
+		billDetails(id) {
+			this.$store.dispatch(BILL_DETAILS, id)
+			.then(bill => {
+				this.bill.model = bill;
+				this.bill.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
+				this.bill.active = true;
+         })
+			.catch(error => {
+            Bus.$emit('errors', error);
+         })
+		},
+		editBill(id) {
+			this.$store.dispatch(EDIT_BILL, id)
+			.then(form => {
+				this.loadPaywayOptions(form.payWays);
+
+				this.bill.model = form.bill;
+				this.bill.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
+				this.bill.active = true;
+         })
+			.catch(error => {
+            Bus.$emit('errors', error);
+         })
+		},
+		cancelSelectBill() {
+			this.bill.active = false;
+			this.bill.model = null;
+		},
 		onTabChanged(val) {
+			
 			console.log('onTabChanged', val);
+			console.log('records', this.records);
 		},
 		init() {
 			this.ready = true;
+
+			
+		},
+		loadPaywayOptions(payWays) {
+			if(payWays.length) {
+				this.paywayOptions = payWays.map(item => ({
+					value: item.id, text: item.title
+				})); 
+			}else this.paywayOptions = [];
 		}
 	}
 }

@@ -38,7 +38,7 @@ export default {
       payway_options: {
          type: Array,
          default: null
-      },
+      }
    },
    data() {
 		return {

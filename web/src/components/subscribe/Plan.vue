@@ -3,7 +3,7 @@
       <template v-slot:default>
          <thead>
             <tr>
-               <th>金額</th>
+               <th style="width:25%">金額</th>
                <th>有效期限</th>
             </tr>
          </thead>
@@ -103,16 +103,3 @@ export default {
 	}
 }
 </script>
-
-<style scoped>
-.item-price {
-	color: #ee4d2d;
-   font-weight: 400;	
-}
-.price-number{
-	font-size: 155%;
-	max-width: 130px;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-</style>

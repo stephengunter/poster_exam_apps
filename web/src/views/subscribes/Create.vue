@@ -5,20 +5,28 @@
 			/>
       </div>
 		<div v-if="ready">
-			<v-row v-if="planSelected">
-				<v-col cols="12">
-					<subscribe-confirm :model="edit.model" :payway_options="paywayOptions"
-					@submit="onSubmit"
-					/>
-				</v-col>
-			</v-row>
-			<v-row v-else>
-				<v-col cols="12">
-					<subscribe-plan v-if="plan" :model="plan"
-					@select="onPlanSelected"
-					/>
-				</v-col>
-			</v-row>
+			<div v-if="existingBill">
+				<bill-details :model="edit.model" :payway_options="paywayOptions"
+				:allow_cancel="false"
+				/>
+			</div>
+			<div v-else>
+				<v-row v-if="planSelected">
+					<v-col cols="12">
+						<subscribe-confirm :model="edit.model" :payway_options="paywayOptions"
+						@submit="onSubmit"
+						/>
+					</v-col>
+				</v-row>
+				<v-row v-else>
+					<v-col cols="12">
+						<subscribe-plan v-if="plan" :model="plan"
+						@select="onPlanSelected"
+						/>
+					</v-col>
+				</v-row>
+			</div>
+			
 		</div>
 		
    </v-container>
@@ -40,6 +48,8 @@ export default {
          bread: {
             items: []
 			},
+
+			plan: null,
 			planId: 0,
 
 			edit: {
@@ -52,7 +62,13 @@ export default {
 		}
 	},
 	computed: {
-		...mapGetters(['plan', 'payWays']),
+		//...mapGetters(['plan', 'payWays']),
+		existingBill() {
+			if(this.edit.model) {
+				return this.edit.model.id > 0;
+			}
+			return false;
+		},
 		planSelected() {
 			if(this.edit.model) return true;
 			return false;
@@ -85,37 +101,43 @@ export default {
 		},
 		fetchData() {
 			this.$store.dispatch(CREATE_SUBSCRIBE)
-			.then(canCreate => {
-				if(canCreate) {
-					this.$nextTick(() => {
-						this.init();
-					});
-				}else {
-					this.redirect();
-				}
+			.then(model => {
+				console.log('model', model);
+				if(model.bill) {
+					this.init(model);
+				}else this.redirect();
+				
+				// if(canCreate) {
+				// 	this.$nextTick(() => {
+				// 		this.init();
+				// 	});
+				// }else {
+				// 	this.redirect();
+				// }
          })
 			.catch(error => {
             Bus.$emit('errors', error);
          })
 		},
-		init() {
-			this.loadPayWayOptions();
-
-			if(!this.plan) {
-				this.onPlanNotFound();
-				return false;
-			}
-
-			if(this.planId === this.plan.id) {
-				this.onPlanSelected();
-			}
+		init(model) {
 			
-			this.ready = true;
-		},
-		loadPayWayOptions() {
-			this.paywayOptions = this.payWays.map(item => ({
+			this.paywayOptions = model.payWays.map(item => ({
 				value: item.id, text: item.title
 			}));
+
+			let bill = model.bill;
+
+			if(bill.id) {
+				//edit bill 支付未完成的帳單
+			}else {
+				this.plan = model.plan;
+				if(this.planId === model.plan.id) bill.planId = this.planId;
+			}
+
+			this.edit.model = bill;
+			
+			
+			this.ready = true;
 		},
 		onPlanSelected() {
 			this.edit.model = {

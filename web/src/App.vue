@@ -280,4 +280,14 @@ html {
 .cn {
 	font-family: "微軟正黑體"
 }
+.item-price {
+	color: #ee4d2d;
+   font-weight: 400;	
+}
+.price-number{
+	font-size: 155%;
+	max-width: 130px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
 </style>
