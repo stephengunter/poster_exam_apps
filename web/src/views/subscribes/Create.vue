@@ -6,15 +6,18 @@
       </div>
 		<div v-if="ready">
 			<div v-if="existingBill">
-				<bill-details :model="edit.model" :payway_options="paywayOptions"
-				:allow_cancel="false"
+				<bill-edit :model="edit.model" :payways="payWays"
+				:action="edit.action" :allow_cancel="false"
+				@begin-pay-failed="onBeginPayFailed"
+				@pay-canceled="onPayCanceled"
 				/>
 			</div>
-			<div v-else>
+			<div v-if="newBill">
 				<v-row v-if="planSelected">
 					<v-col cols="12">
-						<subscribe-confirm :model="edit.model" :payway_options="paywayOptions"
-						@submit="onSubmit"
+						<bill-edit :model="edit.model" :payways="payWays"
+						:allow_cancel="false"
+						@created="onBillCreated" @create-bill-failed="onCreateBillFailed"
 						/>
 					</v-col>
 				</v-row>
@@ -28,16 +31,15 @@
 			</div>
 			
 		</div>
-		
    </v-container>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { resolveErrorData, getRouteTitle, uuid } from '@/utils';
-import { SUBSCRIBES_INDEX, CREATE_SUBSCRIBE, 
-STORE_SUBSCRIBE, STORE_PAY } from '@/store/actions.type';
+import { isBadRequest, getRouteTitle, uuid } from '@/utils';
+import { CREATE_SUBSCRIBE, BEGIN_PAY } from '@/store/actions.type';
 import { SET_LOADING } from '@/store/mutations.type';
+import { DIALOG_MAX_WIDTH } from '@/config';
 
 export default {
 	name: 'SubscribesCreateView',
@@ -54,23 +56,42 @@ export default {
 
 			edit: {
 				model: null,
+				tradeSPToken: null,
+				action: ''
 			},
 
-			bill: null,
+			pay: {
+				maxWidth: DIALOG_MAX_WIDTH,
+				model: null,
+				active: false,
+			},
+
+			confirm: {
+				maxWidth: DIALOG_MAX_WIDTH,
+				active: false,
+			},
 			
-			paywayOptions: []
+			payWays: []
 		}
 	},
 	computed: {
-		//...mapGetters(['plan', 'payWays']),
+		...mapGetters(['contentMaxWidth']),
 		existingBill() {
 			if(this.edit.model) {
 				return this.edit.model.id > 0;
 			}
 			return false;
 		},
+		newBill() {
+			if(this.edit.model) {
+				return this.edit.model.id < 1;
+			}
+			return false;
+		},
 		planSelected() {
-			if(this.edit.model) return true;
+			if(this.edit.model) {
+				return this.edit.model.planId > 0;
+			}
 			return false;
 		}
 	},
@@ -89,7 +110,9 @@ export default {
 			this.clearBread();
 			this.addBreadItem('', this.title);
 
-			if(this.edit.model) this.addBreadItem('', '確認訂單');
+			if(this.newBill) {
+				if(this.planSelected) this.addBreadItem('', '確認訂單');
+			}
 		},
 		clearBread() {
          this.bread.items = [];
@@ -102,31 +125,17 @@ export default {
 		fetchData() {
 			this.$store.dispatch(CREATE_SUBSCRIBE)
 			.then(model => {
-				console.log('model', model);
-				if(model.bill) {
-					this.init(model);
-				}else this.redirect();
-				
-				// if(canCreate) {
-				// 	this.$nextTick(() => {
-				// 		this.init();
-				// 	});
-				// }else {
-				// 	this.redirect();
-				// }
+				if(model.bill) this.init(model);
+				else this.redirect();
          })
 			.catch(error => {
             Bus.$emit('errors', error);
          })
 		},
 		init(model) {
-			
-			this.paywayOptions = model.payWays.map(item => ({
-				value: item.id, text: item.title
-			}));
+			this.payWays = model.payWays;
 
 			let bill = model.bill;
-
 			if(bill.id) {
 				//edit bill 支付未完成的帳單
 			}else {
@@ -136,57 +145,31 @@ export default {
 
 			this.edit.model = bill;
 			
-			
 			this.ready = true;
 		},
 		onPlanSelected() {
-			this.edit.model = {
-				plan: {
-					...this.plan
-				},
-				payWayId: this.payWays.length ? this.payWays[0].id : 0 
-			};
+			this.edit.model.planId = this.plan.id;
+			this.edit.model.plan = this.plan;
 			this.setTitle();
 		},
-		onPlanNotFound() {
-
+		onBillCreated(bill) {
+			this.edit.model = bill;
+			this.edit.action = BEGIN_PAY;
 		},
-		onSubmit() {
-			this.bill = null;
-			let model = this.edit.model;
-			this.$store.dispatch(STORE_SUBSCRIBE, model)
-			.then(bill => {
-				this.bill = bill;
-				this.$nextTick(() => {
-					this.beginPay(bill);
-				});
-         })
-			.catch(error => {
-				console.log('error', error);
-				//Bus.$emit('errors', error);
-				//this.redirect();
-         })
+		onCreateBillFailed() {
+			setTimeout(() => {
+				this.redirect();
+			}, 500);
 		},
-		beginPay(bill) {
-			//開始支付
-			
-			console.log('beginPay', bill);
-			//以下為測試
-			let model = {
-				id: uuid(),
-				billId: bill.id,
-				money: String(bill.amount),
-				payWay: this.payWays.find(item => item.id === bill.payWayId).code
-			};
-			this.$store.dispatch(STORE_PAY, model)
-			.then(() => {
-				Bus.$emit('success');
-         })
-			.catch(error => {
-				console.log('error', error);
-				//Bus.$emit('errors', error);
-				//this.redirect();
-         })
+		onBeginPayFailed() {
+			setTimeout(() => {
+				this.redirect();
+			}, 500);
+		},
+		onPayCanceled() {
+			setTimeout(() => {
+				this.redirect();
+			}, 500);
 		},
 		redirect() {
 			this.$router.push({ path: '/subscribes' });

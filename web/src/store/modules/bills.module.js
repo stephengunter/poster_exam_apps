@@ -2,7 +2,7 @@ import PaysService from '@/services/pays.service';
 import BillsService from '@/services/bills.service';
 import { resolveErrorData } from '@/utils';
 
-import { EDIT_BILL, BILL_DETAILS, STORE_PAY
+import { EDIT_BILL, BILL_DETAILS, BEGIN_PAY
 } from '@/store/actions.type';
 
 import { SET_LOADING } from '@/store/mutations.type';
@@ -17,15 +17,15 @@ const getters = {
 };
 
 const actions = {
-   [STORE_PAY](context, model) {
+   [BEGIN_PAY](context, bill) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         PaysService.store(model)
-         .then(() => {
-            resolve(true);
+         BillsService.update(bill.id, bill)
+         .then(model => {
+            resolve(model);
          })
          .catch(error => {
-            reject(resolveErrorData(error));
+            reject(error);
          })
          .finally(() => { 
             context.commit(SET_LOADING, false);

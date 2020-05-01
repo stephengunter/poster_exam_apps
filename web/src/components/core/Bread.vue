@@ -6,7 +6,7 @@
          </a>
          <span v-else>{{ item.text }}</span>
           
-         <v-icon v-if="index < items.length - 1" class="pb-1 mr-1" size="16">
+         <v-icon v-if="index < items.length - 1" class="pb-1 ml-1 mr-1" size="16">
             mdi-chevron-right
          </v-icon>
       </li>

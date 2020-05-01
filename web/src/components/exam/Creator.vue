@@ -50,6 +50,7 @@
 </template>
 
 <script>
+import { mapState, mapGetters } from 'vuex';
 import { isRecruitSource, isRandomSource, isExactlyRecruit, isCrossYearsRecruit } from '@/utils';
 export default {
    name: 'ExamCreator',
@@ -96,6 +97,7 @@ export default {
 		}
    },
    computed: {
+      ...mapGetters(['currentUser', 'userIsSubscriber']),
       recruitSource() {
          return isRecruitSource(this.params.type);
       },
@@ -213,8 +215,20 @@ export default {
 
             if(this.errors.any()) return;
 
-            this.submit();
+            if(this.userIsSubscriber) this.submit();
+            else {
+               if(this.params.recruit) this.submit();
+               else {
+                  //未訂閱者僅限歷屆試題
+                  this.onNotSubscriber();
+               }
+            }
+
+            
          });
+      },
+      onNotSubscriber() {
+         Bus.$emit('errors', { status: 403 });
       },
       submit() {
          let params = this.params;

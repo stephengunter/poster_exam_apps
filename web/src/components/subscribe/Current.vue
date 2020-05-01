@@ -1,57 +1,25 @@
 <template>
-   <v-simple-table v-if="mode === 'summary'">
-      <template v-slot:default>
-         <thead>
-            <tr>
-               <th>有效期限</th>
-               <th>金額</th>
-            </tr>
-         </thead>
-         <tbody>
-            <tr>
-               <td>
-                  {{ periodText }}
-               </td>
-               <td>
-                  <div class="item-price">
-                     <span class="mr-1">$</span>
-                     <span class="price-number">{{ model.price }}</span>
-                     <v-chip v-show="model.hasDiscount" color="warning"  class="ml-3 mb-2" small>
-                     優惠價
-                     </v-chip>
-                  </div>
-               </td>
-            </tr>
-         </tbody>
-      </template>
-   </v-simple-table>
-   <v-card v-else class="px-4" style="min-height: 225px" :color="color" :flat="flat">
-      <v-card-title class="font-weight-black">
+   <v-card>
+      <v-card-text>
          <v-row>
-            <v-col cols="4" class="text-left">
-               <div class="item-price">
-                  <span class="mr-1">$</span>
-                  <span class="price-number">{{ model.price }}</span>
-                  <v-chip v-show="model.hasDiscount" color="warning"  class="ml-3 mb-2" small>
-                  優惠價
+            <v-col cols="6">
+               <span class="font-weight-thin ml-1">狀態</span>
+               <p>
+                  <v-chip class="mt-1" :color="model.active ? 'success' : ''" >
+                     {{ model.statusText }}
                   </v-chip>
-               </div>
+               </p>
             </v-col>
-            <v-col cols="8" class="text-left subtitle-1">
-               <span>有效期限：{{ endDateText }}</span>
+            <v-col cols="6">
+               <span class="font-weight-thin">有效期限</span>
+               <p>
+                  <span class="title">
+                    {{ endDateText }}                    
+                  </span>
+               </p>
             </v-col>
          </v-row>
-      </v-card-title>
-      <v-card-text class="subtitle-1" style="text-align: left">
-         <p v-html="model.description">
-           
-         </p>
       </v-card-text>
-      <v-card-actions>
-         <v-btn color="primary" large @click.prevent="select">
-            我要訂閱
-         </v-btn>
-      </v-card-actions>
    </v-card>
 </template>
 
@@ -63,56 +31,17 @@ export default {
       model: {
          type: Object,
          default: null
-      },
-      mode: {
-         type: String,
-         default: 'details'
-      },
-      color: {
-         type: String,
-         default: ''
-      },
-      flat: {
-         type: Boolean,
-         default: false
-      },
+      }
    },
    computed: {
-      periodText() {
-         if(this.model) {
-            let start = getPlanStartDateText(this.model);
-            let end = getPlanEndDateText(this.model)
-
-            return `${start} 至 ${end} 止`;
-         }
-         return '';
-      },
       endDateText() {
          if(this.model) {
-            let end = getPlanEndDateText(this.model);
-
-            return `至 ${end} 止`;
+            return getPlanEndDateText(this.model);
          }
          return '';
       }
    },
    methods: {
-		select() {
-         this.$emit('select', this.model.id)
-      }
 	}
 }
 </script>
-
-<style scoped>
-.item-price {
-	color: #ee4d2d;
-   font-weight: 400;	
-}
-.price-number{
-	font-size: 155%;
-	max-width: 130px;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-</style>

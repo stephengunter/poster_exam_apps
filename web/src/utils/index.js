@@ -1,6 +1,8 @@
 import { API_URL } from '@/config';
 import { isEmptyObject } from './helper';
 
+export const isBadRequest = (error) => error.status ? error.status === 400 : false;
+
 export const resolveErrorData = (error) => {
    console.log(error);
    if(!error) return null;
@@ -28,16 +30,20 @@ export const activeOptions = () => {
    }];
 }
 
-
-
-export const buildQuery = (url, params) => {
-   if(!params || isEmptyObject(params)) return url;
-   url += '?';
+export const resolveQueryString = (params) => {
+   if(!params || isEmptyObject(params)) return '';
+   let queryString = '';
    for (let field in params) {
       let value = params[field];
-      url += `${field}=${value}&`;
+      queryString += `${field}=${value}&`;
    }
-   return url.substr(0, url.length - 1);
+   return queryString.substr(0, queryString.length - 1);
+}
+
+export const buildQuery = (url, params) => {
+   let queryString = resolveQueryString(params);
+   if(!queryString) return url;
+   return `${url}?${queryString}`;
 }
 
 

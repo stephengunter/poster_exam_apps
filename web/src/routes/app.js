@@ -1,4 +1,5 @@
 import { FOR_ALL, GUEST_ONLY, USER_ONLY } from './route.type';
+import { SUBSCRIBER } from '@/auth/roles.type';
 
 const applinks = [{
    name: 'home',
@@ -73,7 +74,7 @@ const userLinks = [{
    meta: {
       type: USER_ONLY,
       menus: [{
-         key: 'main', show: FOR_ALL
+         key: 'main', show: FOR_ALL, except: SUBSCRIBER
       }],
       icon: 'mdi-wallet-membership',
       title: '訂閱會員'

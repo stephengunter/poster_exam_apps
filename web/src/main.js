@@ -7,9 +7,10 @@ Vue.component(VueQrcode.name, VueQrcode);
 import App from './App.vue';
 import router from './routes';
 import store from './store';
-import vuetify from './plugins/vuetify';
 
+import vuetify from './plugins/vuetify';
 import './plugins/validate';
+
 import '@/events';
 import '@/components';
 import '@/filters';

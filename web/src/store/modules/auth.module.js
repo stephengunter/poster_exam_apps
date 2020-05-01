@@ -8,6 +8,7 @@ import JwtService from '@/services/jwt.service';
 
 import { GOOGLE_AUTH_PARAMS } from '@/config';
 import GoogleAuth from '@/common/googleAuth';
+import { isSubscriber } from '@/utils';
 
 
 import {
@@ -20,14 +21,14 @@ import {
 } from '../actions.type';
 
 import { SET_AUTH, PURGE_AUTH, SET_USER, 
-   SET_ERROR, CLEAR_ERROR, SET_LOADING 
+   SET_LOADING 
 } from '../mutations.type';
 
  
 const state = {
-   errors: new Errors(),
+   isAuthenticated: !!JwtService.getToken(),
    user: null,
-   isAuthenticated: !!JwtService.getToken()
+   
 };
 
 const getters = {
@@ -36,6 +37,10 @@ const getters = {
    },
    isAuthenticated(state) {
      return state.isAuthenticated;
+   },
+   userIsSubscriber(state) {
+      if(state.user) return isSubscriber(state.user);       
+      return false;
    }
 };
 
@@ -148,12 +153,6 @@ const actions = {
 
 
 const mutations = {
-   [SET_ERROR](state, errors) {
-      state.errors.record(errors);
-   },
-   [CLEAR_ERROR](state) {
-      state.errors.clear();   
-   },
    [SET_USER](state, user) {
       if(user) state.user = user;
       else state.user = null;

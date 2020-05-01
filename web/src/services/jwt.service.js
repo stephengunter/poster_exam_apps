@@ -27,6 +27,7 @@ const tokenStatus = () => {
      
    let now = moment.utc();
    let diff = exp.diff(now, 'minutes');
+   
    if(diff <= 0) return -1;  //過期
    if(diff < 30) return 0; //即將到期
    return 1;

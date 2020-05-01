@@ -76,7 +76,6 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { FETCH_NOTE_CATEGORIES } from '@/store/actions.type';
 import { resolveErrorData } from '@/utils';
 
 export default {

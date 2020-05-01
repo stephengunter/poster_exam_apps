@@ -225,6 +225,7 @@ export default {
 			})
 		},
 		onCreatorSubmit(params) {
+			console.log('onCreatorSubmit', params);
 			this.createParams = { ... params };
 			this.createExam(params);
 		},

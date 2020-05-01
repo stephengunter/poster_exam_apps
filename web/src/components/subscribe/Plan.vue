@@ -43,15 +43,22 @@
          </v-row>
       </v-card-title>
       <v-card-text class="subtitle-1" style="text-align: left">
-         <p v-html="model.description">
+          
+         <v-row>
+            <v-col cols="12">
+               <p v-html="model.description">
            
-         </p>
+               </p>
+            </v-col>
+         </v-row>
+         <v-row>
+            <v-col cols="12">
+               <v-btn color="primary" large @click.prevent="select">
+                  我要訂閱
+               </v-btn>
+            </v-col>
+         </v-row>
       </v-card-text>
-      <v-card-actions>
-         <v-btn color="primary" large @click.prevent="select">
-            我要訂閱
-         </v-btn>
-      </v-card-actions>
    </v-card>
 </template>
 

@@ -107,18 +107,21 @@ export default {
 	},
 	methods:{
 		onError(error) {
-			console.log('onError');
 			let confirm = {
 				type: 'error',
 				title: '伺服器暫時無回應，請稍候再試.',
 				text: ''
-			}
-
+			};
 			if(error) {
+				confirm.title = error.title ? error.title : '伺服器暫時無回應，請稍候再試.';
+				confirm.text = error.text ? error.text : '';
+				
 				let status = error.status;
 				if(status) {
 					if(status === 401) {
 						this.onFourZeroOne();
+					}else if(status === 403){
+						this.onForbidden();
 					}else {
 						this.showConfirm(confirm);
 					}
@@ -152,6 +155,18 @@ export default {
 					this.$router.push({ name: 'login', query: { returnUrl: this.$route.path } });
 				}
 			})
+		},
+		onForbidden() {
+			this.showConfirm({
+				type: '',
+				title: '權限不足',
+				text: '此功能限訂閱會員使用',
+				ok: '確定',
+				cancel: '',
+				onOk: () => {
+					this.$router.push({ name: 'subscribes' });
+				}
+			});
 		},
 		onSuccess(msg) {
 			this.success.icon = 'mdi-check-circle';

@@ -1,4 +1,5 @@
 import { FOR_ALL, GUEST_ONLY, USER_ONLY } from '@/routes/route.type';
+import { SUBSCRIBER } from '@/auth/roles.type';
 import { isSubscriber } from '@/utils';
 
 const getMainMenus = (appRoutes, currentRoute, user = null) => {
@@ -23,7 +24,7 @@ const getMainLinks = (routes, user = null) => routes.filter(item => {
 
       if(user) {
          if(isSubscriber(user)) {
-            return mainMenu.show !== GUEST_ONLY;
+            return mainMenu.show !== GUEST_ONLY && mainMenu.except !== SUBSCRIBER;
          }else {
             return mainMenu.show !== GUEST_ONLY;
          }

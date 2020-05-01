@@ -10,7 +10,7 @@
                <thead>
                   <tr v-if="filteredList.length > 0">
                      <th style="width:25%">金額</th>
-                     <th style="width:25%">付款方式</th>
+                     <th style="width:25%">狀態</th>
                      <th style="width:50%">{{ payed ? '付款日期' : '付款截止日' }}</th>
                   </tr>
                   <tr v-else>
@@ -64,6 +64,7 @@ export default {
          return [];
       }
    },
+   
    methods: {
       onFilterChanged() {
          this.$store.commit(SET_LOADING, true);

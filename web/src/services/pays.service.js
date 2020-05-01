@@ -1,7 +1,6 @@
 import BaseService from '@/common/baseService';
-import { API_URL } from '@/config';
 
-const source =`${API_URL}/api/pays`;
+const source =`https://localhost:44356/api/ecpay/store`;
 
 const store = (model) => BaseService.post(source, model);
 

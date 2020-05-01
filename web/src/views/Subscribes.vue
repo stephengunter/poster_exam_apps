@@ -5,9 +5,11 @@
 			/>
       </div>
 		<div v-if="ready">
-			<v-row v-if="!currentSubscribe">
+			<v-row>
 				<v-col cols="12">
-					<subscribe-alert :can_create="canCreate"
+					<subscribe-current v-if="currentSubscribe" :model="currentSubscribe"
+					/>
+					<subscribe-alert v-else :can_create="canCreate"
 					@submit="subscribeNow"
 					/>
 				</v-col>
@@ -16,7 +18,7 @@
 			<v-row>
 				<v-col cols="12">
 					<v-tabs v-model="tab">
-						<v-tab v-for="(tab, index) in tabs" :key="index" @change="onTabChanged(tab.key)">
+						<v-tab v-for="(tab, index) in tabs" :key="index">
 						{{ tab.title }}
 						</v-tab>
 					</v-tabs>
@@ -27,10 +29,8 @@
 							/>
 						</v-tab-item>
 						<v-tab-item>
-							<subscribe-list
-							:list="records"
+							<subscribe-list :list="records"
 							/>
-							
 						</v-tab-item>
 					</v-tabs-items>
 				</v-col>
@@ -38,8 +38,14 @@
 		</div>
 
 		<v-dialog v-model="bill.active" :max-width="bill.maxWidth" persistent>
-			<bill-details v-if="bill.model" :model="bill.model" :payway_options="paywayOptions"
+			<bill-details v-if="bill.model && bill.model.payed" :model="bill.model"
 			 @cancel="cancelSelectBill"
+			/>
+
+			<bill-edit v-if="bill.model && !bill.model.payed" :model="bill.model" :payways="payWays"
+			:allow_cancel="true" @cancel="cancelSelectBill"
+			@begin-pay-failed="onBeginPayFailed"
+			@pay-canceled="onPayCanceled"
 			/>
 		</v-dialog>
    </v-container>
@@ -66,23 +72,23 @@ export default {
 
 			bill: {
 				model: null,
+				payed: false,
             maxWidth: DIALOG_MAX_WIDTH,
             active: false
 			},
 
 			tab: null,
-			selectedTabKey: '',
 			tabs:[{
 				key: 'bills', title: '訂單查詢'
 			},{
 				key: 'records', title: '訂閱紀錄'
 			}],
 
-			paywayOptions: []
+			payWays: []
 		}
 	},
 	computed: {
-		...mapGetters(['loading','currentSubscribe', 'contentMaxWidth']),
+		...mapGetters(['currentSubscribe', 'contentMaxWidth']),
 		...mapState({
 			bills: state => state.subscribes.bills,
 			records: state => state.subscribes.records,
@@ -90,14 +96,29 @@ export default {
 		}),
 	},
 	beforeMount() {
-		this.title = getRouteTitle(this.$route);
-		this.setTitle();
-
-		this.selectedTabKey = this.tabs[0].key;
-
-		this.fetchData();
+		this.init();
 	},
 	methods: {
+		init() {
+			this.ready = false;
+			this.clearBread();
+			this.planId = 0;
+
+			this.bill = {
+				model: null,
+				payed: false,
+            maxWidth: DIALOG_MAX_WIDTH,
+            active: false
+			};
+
+			this.tab = null;
+			this.payWays = [];
+
+			this.title = getRouteTitle(this.$route);
+			this.setTitle();
+
+			this.fetchData();
+		},
 		setTitle() {
 			this.clearBread();
 			this.addBreadItem('', this.title);
@@ -118,7 +139,7 @@ export default {
 			this.$store.dispatch(SUBSCRIBES_INDEX)
 			.then(() => {
 				this.$nextTick(() => {
-					this.init();
+					this.onReady();
 				});
          })
 			.catch(error => {
@@ -128,11 +149,13 @@ export default {
 				this.$store.commit(SET_LOADING, false);
 			});
 		},
+		onReady() {
+			this.ready = true;
+		},
 		onBillSelected(bill) {
 			let id =  bill.id;
 			if(bill.payed) this.billDetails(id);
 			else this.editBill(id);
-			
 		},
 		billDetails(id) {
 			this.$store.dispatch(BILL_DETAILS, id)
@@ -148,7 +171,7 @@ export default {
 		editBill(id) {
 			this.$store.dispatch(EDIT_BILL, id)
 			.then(form => {
-				this.loadPaywayOptions(form.payWays);
+				this.payWays = form.payWays;
 
 				this.bill.model = form.bill;
 				this.bill.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
@@ -162,22 +185,11 @@ export default {
 			this.bill.active = false;
 			this.bill.model = null;
 		},
-		onTabChanged(val) {
-			
-			console.log('onTabChanged', val);
-			console.log('records', this.records);
+		onBeginPayFailed() {
+			this.init();
 		},
-		init() {
-			this.ready = true;
-
-			
-		},
-		loadPaywayOptions(payWays) {
-			if(payWays.length) {
-				this.paywayOptions = payWays.map(item => ({
-					value: item.id, text: item.title
-				})); 
-			}else this.paywayOptions = [];
+		onPayCanceled() {
+			this.cancelSelectBill();
 		}
 	}
 }

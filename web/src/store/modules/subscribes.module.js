@@ -1,10 +1,9 @@
 import SubscribesService from '@/services/subscribes.service';
-import PaysService from '@/services/pays.service';
 import PlansService from '@/services/plans.service';
 import { resolveErrorData } from '@/utils';
 
 import { SUBSCRIBES_INDEX, FETCH_PLANS, CREATE_SUBSCRIBE, 
-   STORE_SUBSCRIBE, STORE_PAY
+   STORE_SUBSCRIBE
 } from '@/store/actions.type';
 
 import { SET_LOADING, SET_PLAN, SET_CURRENT_SUBSCRIBE, SET_BILLS,
@@ -70,13 +69,6 @@ const actions = {
       return new Promise((resolve, reject) => {
          SubscribesService.create()
          .then(model => {
-            // context.commit(SET_CURRENT_SUBSCRIBE, model.current);
-            // context.commit(SET_BILLS, model.bills);
-            // context.commit(SET_SUBSCRIBE_RECORDS, model.records);
-              
-            // context.commit(SET_PLAN, model.plan);
-            //context.commit(SET_PAYWAYS, model.payWays);
-            // context.commit(SET_CAN_CREATE_SUBSCRIBE, model.canCreate);
             resolve(model);
          })
          .catch(error => {
@@ -91,33 +83,17 @@ const actions = {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          SubscribesService.store(model)
-         .then(bill => {
-            resolve(bill);
+         .then(model => {
+            resolve(model);
          })
          .catch(error => {
-            reject(resolveErrorData(error));
-         })
-         .finally(() => { 
-            context.commit(SET_LOADING, false);
-         });
-      });
-   },
-   [STORE_PAY](context, model) {
-      context.commit(SET_LOADING, true);
-      return new Promise((resolve, reject) => {
-         PaysService.store(model)
-         .then(() => {
-            resolve(true);
-         })
-         .catch(error => {
-            reject(resolveErrorData(error));
+            reject(error);
          })
          .finally(() => { 
             context.commit(SET_LOADING, false);
          });
       });
    }
-   
 };
 
 
