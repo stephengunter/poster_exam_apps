@@ -11,6 +11,9 @@ export const GET_MENUS = 'getMenus';
 //Subscribes
 export const FETCH_SUBSCRIBES = 'fetchSubscribes';
 
+//PayApp
+export const FETCH_PAYAPP_REQUESTS = 'fetchPayAppRequests';
+
 //Plans
 export const FETCH_PLANS = 'fetchPlans';
 export const CREATE_PLAN = 'createPlan';

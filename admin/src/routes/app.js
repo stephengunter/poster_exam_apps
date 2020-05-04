@@ -30,6 +30,32 @@ const adminlinks = [
       } 
    },
    {
+      name: 'pays',
+      path: '/pays',
+      view: 'Pays',
+      parent: '',
+      meta: {
+         order: 0,
+         icon: 'mdi-cash-usd-outline',
+         title: '付款',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
+   },
+   {
+      name: 'pay-app',
+      path: '/pay-app',
+      view: 'PayApp',
+      parent: 'pays',
+      meta: {
+         order: 0,
+         icon: 'mdi-apps',
+         title: '應用程式',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
+   },
+   {
       name: 'subscribes',
       path: '/subscribes',
       view: 'Subscribes',

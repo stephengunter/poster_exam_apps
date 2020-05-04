@@ -15,6 +15,10 @@ const getUserMenus = (appRoutes, currentRoute, user) => {
    return getUserLinks(appRoutes, user);
 }
 
+const getFooterMenus = (appRoutes, currentRoute, user) => {
+   return getFooterLinks(appRoutes, user);
+}
+
 
 const getMainLinks = (routes, user = null) => routes.filter(item => {
    let menus = item.meta.menus;
@@ -52,6 +56,27 @@ const getUserLinks = (routes, user) => routes.filter(item => {
    return false;
 });
 
+const getFooterLinks = (routes, user = null) => routes.filter(item => {
+   let menus = item.meta.menus;
+   if(menus && menus.length) {
+      let footerMenu = menus.find(x => x.key === 'footer');
+      if(!footerMenu) return false;
+
+      if(user) {
+         if(isSubscriber(user)) {
+            return footerMenu.show !== GUEST_ONLY && footerMenu.except !== SUBSCRIBER;
+         }else {
+            return footerMenu.show !== GUEST_ONLY;
+         }
+      }else {
+         return footerMenu.show !== USER_ONLY;
+      }
+      
+   }
+   return false;
+});
+
+
 const getSubLinks = (routes, parent) => routes.filter(item => item.parent === parent);
 
-export default { getMainMenus, getUserMenus };
+export default { getMainMenus, getUserMenus, getFooterMenus };

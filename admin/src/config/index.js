@@ -2,7 +2,7 @@ export const PRODUCTION = false;
 export const SITE_URL = PRODUCTION ? 'https://poster-admin.exam-learner.com' : 'https://localhost:8080';
 export const SITE_TITLE = 'PosterExam 管理';
 
-export const API_URL = PRODUCTION ? 'https://poster-api.exam-learner.com/api' : 'https://localhost:44349';
+export const API_URL = PRODUCTION ? 'https://poster-api.exam-learner.com/api' : 'http://localhost:50070';
 
 //AUTH
 export const GOOGLE_AUTH_PARAMS = {

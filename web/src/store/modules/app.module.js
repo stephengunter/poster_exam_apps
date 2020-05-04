@@ -2,7 +2,7 @@ import Errors from '@/common/errors';
 import { FETCH_ACTIONS, LOAD_ACTIONS } from '@/store/actions.type';
 
 import { SET_LOADING, SET_ERROR, CLEAR_ERROR, 
-   SET_DRAWER, SET_MENUS, SET_USER_MENUS, SET_WINDOW_WIDTH,
+   SET_DRAWER, SET_MENUS, SET_FOOTER_MENUS, SET_USER_MENUS, SET_WINDOW_WIDTH,
    SET_RESPONSIVE, TOGGLE_DRAWER, SET_VIEW_ACTIONS, SET_APP_ACTIONS
 } from '@/store/mutations.type';
 
@@ -16,6 +16,7 @@ const initialState = {
    responsive: false,
    drawer: null,
    menus: [],
+   footerMenus: [],
    userMenus: [],
    viewActions: [],
    actions: [],
@@ -34,6 +35,9 @@ const getters = {
    },
    userMenus(state) {
       return state.userMenus;
+   },
+   footerMenus(state) {
+      return state.footerMenus;
    },
    windowWidth(state) {
       return state.windowWidth;
@@ -97,6 +101,9 @@ const mutations = {
    },
    [SET_MENUS](state, menus) {
       state.menus = menus;
+   },
+   [SET_FOOTER_MENUS](state, footerMenus) {
+      state.footerMenus = footerMenus;
    },
    [SET_USER_MENUS](state, userMenus) {
       state.userMenus = userMenus;
