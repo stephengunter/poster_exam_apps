@@ -5,31 +5,7 @@
       
       
       <v-spacer></v-spacer>
-      <v-menu offset-y>
-         <template v-slot:activator="{ on }">
-            <!-- <v-btn icon v-on="on">
-               <v-icon >mdi-bell-outline</v-icon>
-            </v-btn> -->
-            <v-badge  v-on="on" :content="messages" :value="messages"
-            color="green"
-            overlap
-            >
-            <v-icon>mdi-email-outline</v-icon>
-            </v-badge>
-
-            
-         </template>
-         <v-card class="mx-auto" max-width="300" tile >
-            <v-list>
-               <v-list-item>
-                  <v-list-item-content>
-                     <v-list-item-title>title</v-list-item-title>
-                  </v-list-item-content>
-               </v-list-item>
-               <v-divider />
-            </v-list>
-         </v-card>
-      </v-menu>
+      
       <v-menu v-if="appActions.length" offset-y>
          <template v-slot:activator="{ on }">
             <v-btn icon v-on="on">
@@ -47,6 +23,29 @@
                   </v-list-item-content>
                </v-list-item>
                <v-divider v-if="index < appActions.length - 1"></v-divider>
+            </v-list>
+         </v-card>
+      </v-menu>
+      <v-menu v-if="false" offset-y>
+         <template v-slot:activator="{ on }">
+            
+            <v-btn icon v-on="on">
+               <v-badge :content="messages" :value="messages"
+               color="info" overlap
+               >
+                  <v-icon>mdi-email-outline</v-icon>
+               </v-badge>
+            </v-btn>
+            
+         </template>
+         <v-card class="mx-auto" max-width="300" tile >
+            <v-list>
+               <v-list-item two-line>
+                  <v-list-item-content>
+                     <v-list-item-title>Two-line item</v-list-item-title>
+                     <v-list-item-subtitle>Secondary text</v-list-item-subtitle>
+                  </v-list-item-content>
+               </v-list-item>
             </v-list>
          </v-card>
       </v-menu>

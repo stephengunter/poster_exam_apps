@@ -3,10 +3,8 @@
 		<div class="main-container">
 			<router-view />
 		</div>
-		<v-footer color="success" app>
-      	<span class="white--text">&copy; 2020</span>
-			<span class="white--text ml-3">考試學習器</span>
-    	</v-footer>
+		<layout-footer />
+		
 	</v-content>
 </template>
 

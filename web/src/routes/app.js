@@ -25,6 +25,30 @@ const applinks = [{
       title: 'Test'
    } 
 },{
+   name: 'contact',
+   path: '/contact',
+   view: 'Contact',
+   parent: '',
+   meta: {
+      type: FOR_ALL,
+      menus: [{
+         key: 'footer', show: FOR_ALL
+      }],
+      title: '聯絡我們'
+   } 
+},{
+   name: 'notices',
+   path: '/notices',
+   view: 'Notices',
+   parent: '',
+   meta: {
+      type: FOR_ALL,
+      menus: [{
+         key: 'footer', show: FOR_ALL
+      }],
+      title: '公告訊息'
+   } 
+},{
    name: 'rqs',
    path: '/rqs',
    view: 'RQs',

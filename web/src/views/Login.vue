@@ -56,7 +56,7 @@ export default {
 				if(this.returnQuery) this.$router.push({ path: this.returnUrl, query: this.returnQuery });
 				else this.$router.push({ path: this.returnUrl });
 			} 
-         else this.$router.push({ path: '/' });         
+         else this.$router.push({ path: '/' });        
       }
    }
 }

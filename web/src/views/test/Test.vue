@@ -1,12 +1,7 @@
 <template>
 	<v-container>
 		<button @click=beginPay>Pay</button>
-		<v-badge
-          color="green"
-          content="6"
-        >
-          Item Two
-        </v-badge>
+		
 	</v-container>
 </template>
 
