@@ -41,8 +41,8 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { DIALOG_MAX_WIDTH } from '@/config';
-import { buildQuery, resolveQueryString, tryParseInt } from '@/utils';
+import { SITE_URL, DIALOG_MAX_WIDTH } from '@/config';
+import { buildQuery, resolveQueryString, tryParseInt, tryParseJsonObj } from '@/utils';
 
 export default {
    name: 'EcPay',
@@ -93,17 +93,16 @@ export default {
       is_active: 'onActiveChanged'
    },
    beforeMount() {
-      console.log('result', this.result);
       let tokenModel = this.model.tokenModel
       let tradeModel = {
          MerchantID: tokenModel.merchantID,
          SPToken: tokenModel.spToken,
          PaymentType: this.model.paymentType
       }
-      console.log('tradeModel', tradeModel);
+      //console.log('tradeModel', tradeModel);
       this.url = buildQuery(this.model.checkOutURL, tradeModel);
 
-      console.log(this.url);
+      //console.log(this.url);
 
       if(this.check_device) this.setDevice();
       else this.onReady();
@@ -154,8 +153,9 @@ export default {
          this.ready = true;
       },
       onMessage(e) {
-         if(e.origin == this.model.originURL) {
-            this.result = JSON.parse(e.data);
+         if(e.origin != SITE_URL) {
+            let data = tryParseJsonObj(e.data);
+            if(data && data.hasOwnProperty('RtnCode')) this.result = data;
          }
       },
       onCancel() {

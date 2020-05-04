@@ -32,7 +32,14 @@
             </v-col>
          </v-row>
          <v-row v-if="model.id" v-show="!paying">
-            <v-col cols="6">
+            <v-col v-if="model.payInfo" cols="6">
+               <span class="font-weight-thin">ATM繳費帳號</span>
+               <p>
+                  007
+                  1057601295632832
+               </p>
+            </v-col>
+            <v-col v-else cols="6">
                <span class="font-weight-thin">訂單金額</span>
                <p class="item-price mt-1">
                   <span class="mr-1">$</span>
@@ -141,6 +148,8 @@ export default {
       if(this.action) {
          if(this.action === BEGIN_PAY) this.beginPay();
       }
+
+      console.log('this.model', this.model);
    },
    methods: {
 		cancel() {

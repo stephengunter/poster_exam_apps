@@ -4,6 +4,14 @@ export const isSmallScreen = () => window.innerWidth < 991;
 
 export const tryParseInt = (val) => val ? parseInt(val) : 0;
 
+export const tryParseJsonObj = (str) => {
+   try {
+      return JSON.parse(str);
+   } catch (e) {
+      return null   ;
+   }
+}
+
 export const isEmptyObject = (obj) => {
    if (obj == null) return true;
 
