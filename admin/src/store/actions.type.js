@@ -8,6 +8,9 @@ export const LOGOUT = 'logout';
 
 export const GET_MENUS = 'getMenus';
 
+//AppAdmin
+export const FETCH_EXCEPTIONS = 'fetchExceptions';
+
 //Subscribes
 export const FETCH_SUBSCRIBES = 'fetchSubscribes';
 

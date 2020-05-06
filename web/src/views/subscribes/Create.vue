@@ -136,14 +136,16 @@ export default {
 			this.payWays = model.payWays;
 
 			let bill = model.bill;
+			this.edit.model = bill;
+
 			if(bill.id) {
 				//edit bill 支付未完成的帳單
 			}else {
+				
 				this.plan = model.plan;
-				if(this.planId === model.plan.id) bill.planId = this.planId;
+				
+				if(this.planId === model.plan.id) this.onPlanSelected();
 			}
-
-			this.edit.model = bill;
 			
 			this.ready = true;
 		},

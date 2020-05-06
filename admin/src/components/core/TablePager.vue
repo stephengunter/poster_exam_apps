@@ -54,6 +54,10 @@ export default {
          type: Object,
          default: null
       },
+      list_key: {
+         type: String,
+         default: 'viewList'
+      },
       canPage: {
          type: Boolean,
          default: true
@@ -92,7 +96,7 @@ export default {
 		last(){
          if(!this.model) return 0;
          if(!this.model.totalItems) return 0;
-			return this.first + this.model.viewList.length - 1;
+			return this.first + this.model[this.list_key].length - 1;
 		}
 	},   
    methods:{

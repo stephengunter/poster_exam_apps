@@ -17,14 +17,14 @@ const adminlinks = [
       } 
    },
    {
-      name: 'subDashboard',
-      path: '/subdashboard',
-      view: 'SubDashboard',
+      name: 'exceptions',
+      path: '/exceptions',
+      view: 'Exceptions',
       parent: 'dashboard',
       meta: {
          order: 0,
-         icon: 'mdi-city-variant-outline',
-         title: 'SubDashboard',
+         icon: 'mdi-alert-circle',
+         title: 'Exceptions',
          type: ADMIN_ONLY,
          menu: true
       } 
@@ -38,19 +38,6 @@ const adminlinks = [
          order: 0,
          icon: 'mdi-cash-usd-outline',
          title: '付款',
-         type: ADMIN_ONLY,
-         menu: true
-      } 
-   },
-   {
-      name: 'pay-app',
-      path: '/pay-app',
-      view: 'PayApp',
-      parent: 'pays',
-      meta: {
-         order: 0,
-         icon: 'mdi-apps',
-         title: '應用程式',
          type: ADMIN_ONLY,
          menu: true
       } 

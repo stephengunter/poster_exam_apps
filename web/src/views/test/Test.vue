@@ -1,11 +1,14 @@
 <template>
 	<v-container>
-		<button @click=beginPay>Pay</button>
+		<v-btn @click=test>Test</v-btn>
 		
 	</v-container>
 </template>
 
 <script>
+import axios from 'axios';
+import BaseService from '@/common/baseService';
+import { API_URL } from '@/config';
 import { mapState, mapGetters } from 'vuex';
 import { DIALOG_MAX_WIDTH } from '@/config';
 import PaysService from '@/services/pays.service';
@@ -108,8 +111,24 @@ export default {
            console.log('error', error);
          })
 		},
-		cancelPay() {
-			
+		test() {
+			let data = {
+				id: 4,
+				text: 'damn'
+			};
+			const formData = new FormData()
+			Object.keys(data).forEach(key => {
+				formData.append(key, data[key])
+			})
+
+			const request = axios.post(`https://poster-api.exam-learner.com/api/pays`, formData)
+			.then(res => {
+				console.log(res.data)
+			})
+			.catch(err => {
+				console.error(err)
+			})
+
 		}
 	},
 	

@@ -43,7 +43,6 @@
          </v-row>
       </v-card-title>
       <v-card-text class="subtitle-1" style="text-align: left">
-          
          <v-row>
             <v-col cols="12">
                <p v-html="model.description">
@@ -51,7 +50,7 @@
                </p>
             </v-col>
          </v-row>
-         <v-row>
+         <v-row v-if="currentUser && currentUser.email === 'traders.com.tw@gmail.com'">
             <v-col cols="12">
                <v-btn color="primary" large @click.prevent="select">
                   我要訂閱
@@ -63,7 +62,8 @@
 </template>
 
 <script>
-import { getPlanStartDateText, getPlanEndDateText } from '@/utils';
+import { mapState, mapGetters } from 'vuex';
+import { isDev, getPlanStartDateText, getPlanEndDateText } from '@/utils';
 export default {
    name: 'SubscribePlan',
    props: {
@@ -84,7 +84,11 @@ export default {
          default: false
       },
    },
+   mounted() {
+      console.log('currentUser', this.currentUser);
+   },
    computed: {
+      ...mapGetters(['contentMaxWidth', 'currentUser']),
       periodText() {
          if(this.model) {
             let start = getPlanStartDateText(this.model);
