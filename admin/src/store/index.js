@@ -4,6 +4,7 @@ import Vuex from 'vuex';
 import app from './modules/app.module';
 import auth from './modules/auth.module';
 import dashboard from './modules/dashboard.module';
+import messages from './modules/messages.module';
 import plans from './modules/plans.module';
 import users from './modules/users.module';
 import subjects from './modules/subjects.module';
@@ -27,6 +28,7 @@ export default new Vuex.Store({
       app,
       auth,
       dashboard,
+      messages,
       plans,
       users,
       subjects,

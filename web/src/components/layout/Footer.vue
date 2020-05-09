@@ -4,11 +4,11 @@
 			<span class="white--text">&copy; 2020</span>
 			<span class="white--text ml-1">考試學習器</span>
 		</div>
-		<div v-if="false" class="ml-3">
+		<div class="ml-3">
 			<v-btn text @click="linkTo('/contact')">
 				<span class="white--text" style="font-size:1rem">聯絡我們</span>
 			</v-btn>
-			<v-btn text @click="linkTo('/notices')" style="margin-left:1px; padding-left:1px">
+			<v-btn v-show="false" text @click="linkTo('/notices')" style="margin-left:1px; padding-left:1px">
 				<span class="white--text" style="font-size:1rem">公告訊息</span>
 			</v-btn>
 		</div>

@@ -35,8 +35,7 @@
             <v-col v-if="model.payInfo" cols="6">
                <span class="font-weight-thin">ATM繳費帳號</span>
                <p>
-                  007
-                  1057601295632832
+                 
                </p>
             </v-col>
             <v-col v-else cols="6">

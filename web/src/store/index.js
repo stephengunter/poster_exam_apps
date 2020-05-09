@@ -10,6 +10,7 @@ import rqs from './modules/rqs.module';
 import exams from './modules/exams.module';
 import subscribes from './modules/subscribes.module';
 import bills from './modules/bills.module';
+import messages from './modules/messages.module';
 
 Vue.use(Vuex);
 
@@ -23,6 +24,7 @@ export default new Vuex.Store({
       rqs,
       exams,
       subscribes,
-      bills
+      bills,
+      messages
    }
 });

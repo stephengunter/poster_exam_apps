@@ -28,7 +28,6 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
 import { FETCH_EXCEPTIONS } from '@/store/actions.type';
 import { onError } from '@/utils';
 
@@ -72,17 +71,15 @@ export default {
 		},
 		fetchData(){
 			this.typeOptions = [];
-			this.$store.commit(CLEAR_ERROR);
 			this.$store.dispatch(FETCH_EXCEPTIONS, this.params)
 			.then(model => {
 				this.typeOptions = model.typeOptions;
 				this.pagedList = model.pagedList;
+
 				if(this.firstLoad){
 					this.params.page = 1;
 					this.params.start = model.startDateText;
 					this.params.end = model.endDateText;
-
-					
 				}
 
 				this.$nextTick(() => {

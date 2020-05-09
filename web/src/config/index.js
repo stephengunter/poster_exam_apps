@@ -10,6 +10,10 @@ export const GOOGLE_AUTH_PARAMS = {
    scope: 'email'
 };
 
+export const GOOGLE_RECAPTCHA_PARAMS = {
+   sitekey: PRODUCTION ? '6LdhofMUAAAAAMspzS6hyrjth8-vozBZSbQwxwu6' : '6LeWpPMUAAAAAFEPuds36P9BawyiymYtZDo2eynh'  
+};
+
 //UI
 export const DIALOG_MAX_WIDTH = 480;
 

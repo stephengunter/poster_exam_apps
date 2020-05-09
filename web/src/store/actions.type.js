@@ -65,3 +65,6 @@ export const BILL_DETAILS = 'billDetails';
 export const EDIT_BILL = 'editBill';
 export const BEGIN_PAY = 'beginPay';
 export const STORE_PAY = 'storePay';
+
+//Messages
+export const STORE_MESSAGE = 'storeMessage';

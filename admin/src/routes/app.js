@@ -17,6 +17,19 @@ const adminlinks = [
       } 
    },
    {
+      name: 'messages',
+      path: '/messages',
+      view: 'Messages',
+      parent: 'dashboard',
+      meta: {
+         order: 0,
+         icon: 'mdi-mail',
+         title: 'Messages',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
+   },
+   {
       name: 'exceptions',
       path: '/exceptions',
       view: 'Exceptions',

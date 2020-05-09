@@ -2,18 +2,11 @@
 <div>
 	<v-layout row wrap>
 		<v-flex xs6>
-			<v-text-field label="Type" readonly single-line hide-details
-			:value="params.type"
-			@click.prevent="showFilter">
-				<template v-slot:prepend>
-					<v-icon>mdi-filter</v-icon>
-				</template>
-				<template v-slot:append>
-					<a href="#" v-show="params.type" @click.prevent="clearFilter">
-						<v-icon>mdi-close</v-icon>
-					</a>
-				</template>
-			</v-text-field>
+			<v-radio-group v-model="params.status" row>
+				<v-radio v-for="(item, index) in status_options" :key="index"
+				:label="item.text" :value="item.value" 
+				/>
+			</v-radio-group>
 		</v-flex>
 		<v-flex xs6 text-xs-right>
 			<v-btn @click.prevent="onSubmit" class="mx-2" fab small>
@@ -24,21 +17,6 @@
 	<core-date-filter ref="dateFilter" :start="params.start" :end="params.end"
 	@submit="onDateSubmit"
 	/>
-	
-	<v-dialog v-model="filter.active" :max-width="filter.maxWidth">
-		<v-card>
-			<v-card-text>
-				<v-layout row wrap>
-					<v-flex xs12>
-						<v-select label="Type"
-							:items="type_options" v-model="filter.type"
-							@change="onFilterTypeChanged"
-						/>		
-					</v-flex>
-				</v-layout>
-			</v-card-text>
-		</v-card>
-	</v-dialog>
 </div>
 </template>
 
@@ -49,27 +27,21 @@ import { DIALOG_MAX_WIDTH } from '@/config';
 import { onError } from '@/utils';
 
 export default {
-   name: 'ExceptionHeader',
+   name: 'MessageHeader',
    props: {
 		params: {
 			type: Object,
 			default: null
 		},
-		type_options: {
+		status_options: {
 			type: Array,
 			default: null
 		}
 	},
    data () {
 		return {
-			filter: {
-				active: false,
-				maxWidth: DIALOG_MAX_WIDTH,
-				type: ''
-			},
 
 			references: {}
-			
 		}
    },
    computed: {
@@ -84,19 +56,8 @@ export default {
 		this.references = { ...this.$refs };
 	},
    methods: {
-		showFilter() {
-			this.filter.active = true;
-		},
-		clearFilter() {
-			this.params.type = '';
-			this.filter.type = '';
-		},
-		onFilterTypeChanged(val) {
-			this.params.type = val;
-			this.filter.active = false;
-      },
 		onSubmit() {
-			this.dateFilter.onSubmit();       
+			this.dateFilter.onSubmit();        
 		},
 		onDateSubmit({ start, end }) {
 			this.params.start = start;

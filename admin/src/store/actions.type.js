@@ -11,6 +11,11 @@ export const GET_MENUS = 'getMenus';
 //AppAdmin
 export const FETCH_EXCEPTIONS = 'fetchExceptions';
 
+//Messages
+export const FETCH_MESSAGES = 'fetchMessages';
+export const EDIT_MESSAGE = 'editMessage';
+export const UPDATE_MESSAGE = 'updateMessage';
+
 //Subscribes
 export const FETCH_SUBSCRIBES = 'fetchSubscribes';
 
