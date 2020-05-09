@@ -11,7 +11,7 @@ export const GOOGLE_AUTH_PARAMS = {
 };
 
 export const GOOGLE_RECAPTCHA_PARAMS = {
-   sitekey: PRODUCTION ? '6LdhofMUAAAAAMspzS6hyrjth8-vozBZSbQwxwu6' : '6LeWpPMUAAAAAFEPuds36P9BawyiymYtZDo2eynh'  
+   sitekey: PRODUCTION ? '6Leeu_QUAAAAAGZf2QcUPkexxklK3Rkj__qL-Kj7' : '6LeWpPMUAAAAAFEPuds36P9BawyiymYtZDo2eynh'  
 };
 
 //UI
