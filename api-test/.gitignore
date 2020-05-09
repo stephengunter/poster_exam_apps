@@ -55,10 +55,4 @@ typings/
 .yarn-integrity
 
 # next.js build output
-.next
-
-before-after-test/downloads/
-
-before-after-test/mochawesome-report/
-
-basic-test/mochawesome-report/
+.env
