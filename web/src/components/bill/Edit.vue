@@ -34,8 +34,8 @@
          <v-row v-if="model.id" v-show="!paying">
             <v-col v-if="model.payInfo" cols="6">
                <span class="font-weight-thin">ATM繳費帳號</span>
-               <p>
-                 
+               <p v-show="model.payInfo.bankCode && model.payInfo.bankAccount">
+                 <span class="title" v-text="`${model.payInfo.bankCode} - ${model.payInfo.bankAccount}`"></span>                 
                </p>
             </v-col>
             <v-col v-else cols="6">
@@ -47,7 +47,7 @@
             </v-col>
             <v-col cols="6">
                <span class="font-weight-thin">付款截止日</span>
-               <p>
+               <p class="title">
                   {{ model.deadLineText }}
                </p>
             </v-col>

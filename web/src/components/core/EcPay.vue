@@ -85,6 +85,8 @@ export default {
             let rtnCode = tryParseInt(this.result.RtnCode);
             if(paymentType === 'ATM') {
                return rtnCode === 2;  //ATM 取號成功
+            }else if(paymentType === 'CREDIT') {
+               return rtnCode === 1;
             }
          }return false;
       }
@@ -99,7 +101,9 @@ export default {
          SPToken: tokenModel.spToken,
          PaymentType: this.model.paymentType
       }
-      //console.log('tradeModel', tradeModel);
+     
+      console.log('paymentType', this.model.paymentType);
+
       this.url = buildQuery(this.model.checkOutURL, tradeModel);
 
       //console.log(this.url);
@@ -154,7 +158,9 @@ export default {
       },
       onMessage(e) {
          if(e.origin != SITE_URL) {
+            console.log('e.data', e.data);
             let data = tryParseJsonObj(e.data);
+            console.log('dataObj', data);
             if(data && data.hasOwnProperty('RtnCode')) this.result = data;
          }
       },

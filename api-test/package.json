@@ -4,8 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "test": "./node_modules/.bin/mocha ./app/index.js --require @babel/register --timeout 10000 --reporter mochawesome",
-    "report": "start ./mochawesome-report/mochawesome.html"
+    "subscribes": "./node_modules/.bin/mocha ./app/subscribes.js --require @babel/register --timeout 160000 --reporter mochawesome",
+    "report": "start ./mochawesome-report/mochawesome.html",
+    "test": "./node_modules/.bin/mocha ./app/test.js --require @babel/register --timeout 10000"
+    
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
@@ -22,6 +24,7 @@
   "dependencies": {
     "babel-polyfill": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
+    "jwt-decode": "^2.2.0",
     "mochawesome": "^6.1.1",
     "moment": "^2.25.3"
   }
