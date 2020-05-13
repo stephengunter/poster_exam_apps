@@ -1,5 +1,6 @@
 <template>
 <div>
+	
 	<section id="hero">
 		<layout-hero />
 	</section>
@@ -69,10 +70,12 @@ export default {
 		onFourZeroOne() {
 			this.$store.dispatch(CHECK_AUTH).then(user => {
 				if(user){
-					this.$store.dispatch(REFRESH_TOKEN).then(token => {	
+					this.$store.dispatch(REFRESH_TOKEN).then(token => {
 						if(token) {
 							this.$store.dispatch(SUBSCRIBES_INDEX);
-						} 
+						}else {
+							window.location.reload();
+						}
 					})
 				}
 			})

@@ -34,7 +34,7 @@
          <v-row>
             <v-col cols="12">
                <span class="font-weight-thin">付款紀錄</span>
-               <pay-list :list="model.pays"
+               <pay-list :list="payedList"
                />
             </v-col>
          </v-row>
@@ -61,7 +61,11 @@ export default {
 		}
    },
    computed: {
-      
+      payedList() {
+         if(this.model) {
+            return this.model.pays.filter(item => item.money > 0);
+         }return [];
+      }
    },
    methods: {
 		cancel() {

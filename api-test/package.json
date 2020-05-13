@@ -4,7 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "subscribes": "./node_modules/.bin/mocha ./app/subscribes.js --require @babel/register --timeout 160000 --reporter mochawesome",
+    "create-bill": "./node_modules/.bin/mocha ./app/create-bill.js --require @babel/register --timeout 160000 --reporter mochawesome",
+    "pay-atm": "./node_modules/.bin/mocha ./app/pay-atm.js --require @babel/register --timeout 160000 --reporter mochawesome",
+    "pay-credit": "./node_modules/.bin/mocha ./app/pay-credit.js --require @babel/register --timeout 160000 --reporter mochawesome",
+    "pay-removed-bill": "./node_modules/.bin/mocha ./app/pay-removed-bill.js --require @babel/register --timeout 160000 --reporter mochawesome",
     "report": "start ./mochawesome-report/mochawesome.html",
     "test": "./node_modules/.bin/mocha ./app/test.js --require @babel/register --timeout 10000"
     

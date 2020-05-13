@@ -22,6 +22,7 @@ import Menu from '@/common/menu';
 import { SET_MENUS, SET_FOOTER_MENUS, SET_USER_MENUS } from '@/store/mutations.type';
 
 router.beforeEach((to, from, next) => {
+	
 	store.dispatch(CHECK_AUTH).then(user => {
 		
 		if(to.meta.type === FOR_ALL) return authDone(next, to, user);

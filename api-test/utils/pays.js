@@ -25,11 +25,11 @@ export const fakeEcPayATMInfo = (merchantTradeNo) => {
    };
 };
 
-export const fakeEcPayTradeResult = (payInfo, amount) => {
+export const fakeEcPayTradeResult = (pay, amount) => {
    return {
       provider: providerName,
-      payWay: payInfo.payWay,
-      code: payInfo.code,
+      payWay: pay.payWay,
+      code: pay.code,
       tradeNo: fakeTradeNo,
       amount: amount,
       bankCode: '',

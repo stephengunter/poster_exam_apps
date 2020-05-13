@@ -84,9 +84,6 @@ export default {
          default: false
       },
    },
-   mounted() {
-      console.log('currentUser', this.currentUser);
-   },
    computed: {
       ...mapGetters(['contentMaxWidth', 'currentUser']),
       periodText() {

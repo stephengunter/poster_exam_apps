@@ -29,3 +29,12 @@ export const fakePay = (data, callback, expect = 200) => {
    .expect(expect)
    .end(callback)
 };
+
+
+export const removeBill = (data, callback, expect = 200) => {
+   request(API_URL)
+   .post(testAction)      
+   .send(getAdminRequestModel('remove-bill', data))
+   .expect(expect)
+   .end(callback)
+};
