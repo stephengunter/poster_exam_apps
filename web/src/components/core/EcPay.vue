@@ -43,6 +43,8 @@
 import { mapState, mapGetters } from 'vuex';
 import { SITE_URL, DIALOG_MAX_WIDTH } from '@/config';
 import { buildQuery, resolveQueryString, tryParseInt, tryParseJsonObj } from '@/utils';
+import { ATM, CREDIT } from '@/consts';
+import { SET_AUTH_CHANGED } from '@/store/mutations.type';
 
 export default {
    name: 'EcPay',
@@ -83,9 +85,9 @@ export default {
          if(this.result) {
             let paymentType = this.model.paymentType;
             let rtnCode = tryParseInt(this.result.RtnCode);
-            if(paymentType === 'ATM') {
+            if(paymentType === ATM) {
                return rtnCode === 2;  //ATM 取號成功
-            }else if(paymentType === 'CREDIT') {
+            }else if(paymentType === CREDIT) {
                return rtnCode === 1;
             }
          }return false;
@@ -100,20 +102,15 @@ export default {
          MerchantID: tokenModel.merchantID,
          SPToken: tokenModel.spToken,
          PaymentType: this.model.paymentType
-      }
-     
-      console.log('paymentType', this.model.paymentType);
+      };
 
       this.url = buildQuery(this.model.checkOutURL, tradeModel);
-
-      //console.log(this.url);
 
       if(this.check_device) this.setDevice();
       else this.onReady();
       
    },
    mounted(){
-      console.log(this.model);
 		window.addEventListener('message', this.onMessage);
 	},
 	beforeDestroy(){
@@ -158,10 +155,19 @@ export default {
       },
       onMessage(e) {
          if(e.origin != SITE_URL) {
-            console.log('e.data', e.data);
+            //console.log('e.data', e.data);
             let data = tryParseJsonObj(e.data);
-            console.log('dataObj', data);
-            if(data && data.hasOwnProperty('RtnCode')) this.result = data;
+            //console.log('dataObj', data);
+            if(data && data.hasOwnProperty('RtnCode')) this.setResult(data);
+         }
+      },
+      setResult(data) {
+         this.result = data;
+
+         let paymentType = this.model.paymentType;
+         let rtnCode = tryParseInt(data.RtnCode);
+         if(paymentType === CREDIT && rtnCode === 1) {
+            this.$store.commit(SET_AUTH_CHANGED, true);
          }
       },
       onCancel() {
@@ -169,10 +175,9 @@ export default {
          else this.confirm.active = true;
       },
 		cancel() {
-			this.$emit('cancel');
+			this.$emit('cancel', this.hasSuccessResult);
       },
       onActiveChanged(val) {
-         console.log('onActiveChanged', val);
          this.active = val;
       }
 	},

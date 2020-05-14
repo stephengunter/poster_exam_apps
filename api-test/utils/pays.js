@@ -9,12 +9,13 @@ const fakeBankAccount =  '9876543210';
 
 const getExpireDate = () => moment().add(7, 'days').endOf('day').format('YYYY-MM-DD HH:mm:ss');
 
-export const fakeEcPayATMInfo = (merchantTradeNo) => {
+export const fakeEcPayATMInfo = (merchantTradeNo, simulate = false) => {
    return {
       provider: providerName,
       payWay: ATM,
       code: merchantTradeNo,
       tradeNo: fakeTradeNo,
+      simulate: simulate,
       amount: 0,
       bankCode: fakeBankCode,
       bankAccount: fakeBankAccount,
@@ -25,12 +26,13 @@ export const fakeEcPayATMInfo = (merchantTradeNo) => {
    };
 };
 
-export const fakeEcPayTradeResult = (pay, amount) => {
+export const fakeEcPayTradeResult = (pay, amount, simulate = false) => {
    return {
       provider: providerName,
       payWay: pay.payWay,
       code: pay.code,
       tradeNo: fakeTradeNo,
+      simulate: simulate,
       amount: amount,
       bankCode: '',
       bankAccount: '',

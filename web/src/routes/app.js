@@ -1,5 +1,5 @@
 import { FOR_ALL, GUEST_ONLY, USER_ONLY } from './route.type';
-import { SUBSCRIBER } from '@/auth/roles.type';
+import { SUBSCRIBER } from '@/consts';
 
 const applinks = [{
    name: 'home',

@@ -147,8 +147,6 @@ export default {
       if(this.action) {
          if(this.action === BEGIN_PAY) this.beginPay();
       }
-
-      console.log('this.model', this.model);
    },
    methods: {
 		cancel() {
@@ -170,7 +168,7 @@ export default {
 
 			this.$store.dispatch(BEGIN_PAY, this.model)
 			.then(model => {
-            console.log('model', model);   
+            
             this.pay.active = true;
 				this.pay.model = model;
          })
@@ -196,12 +194,15 @@ export default {
 				this.$emit('begin-pay-failed');
          })
       },
-      cancelPay() {
+      cancelPay(success) {
 			this.pay.active = false;
 			setTimeout(() => {
+            this.paying = false;
 				this.pay.model = null;
          }, 500);
-         this.$emit('pay-canceled');
+
+         if(success) this.$emit('pay-success');
+         else this.$emit('pay-canceled');
 		},
 	}
 }

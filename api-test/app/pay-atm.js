@@ -158,7 +158,8 @@ describe('Pay by ATM Test', () => {
       let bill = context.bills[0];
       let payInfo = getRandomItem(bill.pays);   //隨機選一筆ATM付款帳號
       
-      let fakeTradeResult = fakeEcPayTradeResult(payInfo, bill.needPayMoney);
+      let simulate = true;
+      let fakeTradeResult = fakeEcPayTradeResult(payInfo, bill.needPayMoney, simulate);
       context.fakeTradeResult = fakeTradeResult;
 
       let data = JSON.stringify(fakeTradeResult);

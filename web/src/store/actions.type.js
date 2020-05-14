@@ -3,7 +3,6 @@ export const SUBMIT = 'submit';
 export const SELECT = 'select';
 export const CHECK_AUTH = 'checkAuth';
 export const REFRESH_TOKEN = 'refreshToken';
-export const TOKEN_REFRESHED = 'tokenRefreshed';
 
 export const INIT_GOOGLE_SIGNIN = 'initGoogleSignIn';
 export const GOOGLE_SIGNIN = 'googleSignIn';

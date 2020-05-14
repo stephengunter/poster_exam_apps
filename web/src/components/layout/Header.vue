@@ -3,7 +3,6 @@
       <v-app-bar-nav-icon @click.prevent="toggleDrawer" />
       <v-toolbar-title class="site-title">{{ title }}</v-toolbar-title>
       
-      
       <v-spacer></v-spacer>
       
       <v-menu v-if="appActions.length" offset-y>
@@ -101,7 +100,7 @@ export default {
       }
    },
    computed:{
-		...mapGetters(['currentUser', 'appActions', 'userMenus'])
+		...mapGetters(['currentUser', 'appActions', 'userMenus', 'authChanged'])
    },
    methods:{
       toggleDrawer(){

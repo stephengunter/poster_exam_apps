@@ -9,7 +9,7 @@
 				<bill-edit :model="edit.model" :payways="payWays"
 				:action="edit.action" :allow_cancel="false"
 				@begin-pay-failed="onBeginPayFailed"
-				@pay-canceled="onPayCanceled"
+				@pay-success="onPaySuccess" @pay-canceled="onPayCanceled"
 				/>
 			</div>
 			<div v-if="newBill">
@@ -159,22 +159,22 @@ export default {
 			this.edit.action = BEGIN_PAY;
 		},
 		onCreateBillFailed() {
-			setTimeout(() => {
-				this.redirect();
-			}, 500);
+			this.redirect();
 		},
 		onBeginPayFailed() {
-			setTimeout(() => {
-				this.redirect();
-			}, 500);
+			this.redirect();
+		},
+		onPaySuccess() {
+			this.redirect();
 		},
 		onPayCanceled() {
-			setTimeout(() => {
-				this.redirect();
-			}, 500);
+			this.redirect();
 		},
 		redirect() {
-			this.$router.push({ path: '/subscribes' });
+			this.$store.commit(SET_LOADING, true);
+			setTimeout(() => {
+				this.$router.push({ path: '/subscribes' });
+			}, 500);
 		}
 	}
 }

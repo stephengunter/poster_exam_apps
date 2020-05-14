@@ -19,32 +19,40 @@ import JwtService from '@/services/jwt.service';
 import { CHECK_AUTH, REFRESH_TOKEN, FETCH_ACTIONS } from '@/store/actions.type';
 import { FOR_ALL, GUEST_ONLY, USER_ONLY } from '@/routes/route.type';
 import Menu from '@/common/menu';
-import { SET_MENUS, SET_FOOTER_MENUS, SET_USER_MENUS } from '@/store/mutations.type';
+import { SET_MENUS, SET_FOOTER_MENUS, SET_USER_MENUS, SET_AUTH_CHANGED } from '@/store/mutations.type';
 
 router.beforeEach((to, from, next) => {
 	
 	store.dispatch(CHECK_AUTH).then(user => {
-		
+
 		if(to.meta.type === FOR_ALL) return authDone(next, to, user);
 	
 		if(user){
-			let tokenStatus = JwtService.tokenStatus();
-			if(tokenStatus === -1) {
-				//token過期
-				return refreshToken(next, to);
-			}else if(tokenStatus === 0) {
-				//token 即將到期
+			if(store.getters.authChanged) {
+				store.commit(SET_AUTH_CHANGED, false);
 				return refreshToken(next, to);
 			}else {
-				if(to.meta.type === GUEST_ONLY) return redirect(next, { path: '/' });
-				else return authDone(next, to, user);
+				let tokenStatus = JwtService.tokenStatus();
+				if(tokenStatus === -1) {
+					//token過期
+					return refreshToken(next, to);
+				}else if(tokenStatus === 0) {
+					//token 即將到期
+					return refreshToken(next, to);
+				}else {
+					//token正常
+					if(to.meta.type === GUEST_ONLY) return redirect(next, { path: '/' });
+					else return authDone(next, to, user);
+				}
 			}
-			
 		}else{
 			//無token
-			let query = { ...to.query, returnUrl: to.path };
+			
 			if(to.meta.type === GUEST_ONLY) return authDone(next, to, user);
-			else return redirect(next, { path: '/login', query });
+			else {
+				let query = { ...to.query, returnUrl: to.path };
+				return redirect(next, { path: '/login', query });
+			} 
 		}
 	})
 });
@@ -71,7 +79,10 @@ const refreshToken = (next, to) => {
 	store.dispatch(REFRESH_TOKEN)
 	.then(token => {	
 		if(token) return redirect(next, { path: to.path });
-		else return redirect(next, { path: '/login' });
+		else {
+			let query = { ...to.query, returnUrl: to.path };
+			return redirect(next, { path: '/login', query });
+		}
 	})
 }
 

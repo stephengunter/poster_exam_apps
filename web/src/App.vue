@@ -45,7 +45,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { CHECK_AUTH, REFRESH_TOKEN, TOKEN_REFRESHED } from '@/store/actions.type';
+import { CHECK_AUTH, REFRESH_TOKEN } from '@/store/actions.type';
 import { SET_WINDOW_WIDTH, SET_RESPONSIVE, TOGGLE_DRAWER } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
@@ -95,6 +95,7 @@ export default {
 		Bus.$on('warning', this.onWarning);
 		Bus.$on('show-confirm', this.showConfirm);
 		Bus.$on('confirm-login', this.confirmLogin);
+		Bus.$on('re-login', this.reLogin);
 	},
 	mounted(){
 		if(window.innerWidth) this.$store.commit(SET_WINDOW_WIDTH, window.innerWidth);
@@ -135,26 +136,13 @@ export default {
 			}
 		},
 		onFourZeroOne() {
-			this.$store.dispatch(CHECK_AUTH).then(user => {
-				if(user){
-					this.$store.dispatch(REFRESH_TOKEN).then(token => {	
-						if(token) {
-							this.$store.dispatch(CHECK_AUTH);
-							this.showConfirm({
-								type: '',
-								title: '請重新操作',
-								text: '您的驗証剛剛刷新，請重新操作一次'
-							});
-
-							Bus.$emit(TOKEN_REFRESHED);
-						} 
-						else this.$router.push({ name: 'login', query: { returnUrl: this.$route.path } });
-					})
-				}else {
-					//無token
-					this.$router.push({ name: 'login', query: { returnUrl: this.$route.path } });
-				}
-			})
+			this.reLogin(() => {
+				this.showConfirm({
+					type: '',
+					title: '請重新操作',
+					text: '您的驗証剛剛刷新，請重新操作一次'
+				})
+			});
 		},
 		onForbidden() {
 			this.showConfirm({
@@ -167,6 +155,26 @@ export default {
 					this.$router.push({ name: 'subscribes' });
 				}
 			});
+		},
+		reLogin(callback = null) {
+			//重新登入
+			this.$store.dispatch(CHECK_AUTH).then(user => {
+				if(user){
+					this.$store.dispatch(REFRESH_TOKEN).then(token => {	
+						if(token) {
+							this.$store.dispatch(CHECK_AUTH);
+							if(callback) callback();
+						} 
+						else this.redirectToLogin(this.$route.path);
+					})
+				}else {
+					//無token
+					this.redirectToLogin(this.$route.path);
+				}
+			})
+		},
+		redirectToLogin(returnUrl = '/') {
+			this.$router.push({ name: 'login', query: { returnUrl } });
 		},
 		onSuccess(msg) {
 			this.success.icon = 'mdi-check-circle';
@@ -220,8 +228,7 @@ export default {
 			this.loginConfirm.show = true;
 		},
 		loginConfirmed() {
-			let returnUrl = this.loginConfirm.returnUrl;
-			this.$router.push({ path: '/login', query: { returnUrl }});
+			this.redirectToLogin(this.loginConfirm.returnUrl);
 
 			this.loginConfirm.show = false;
 		},

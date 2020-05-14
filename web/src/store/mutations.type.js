@@ -12,9 +12,10 @@ export const SET_FOOTER_MENUS = 'setFooterMenus';
 export const SET_VIEW_ACTIONS = 'setViewActions';
 export const SET_APP_ACTIONS = 'setAppActions';
 
-
+//Auth
 export const PURGE_AUTH = 'logOut';
 export const SET_AUTH = 'setAuth';
+export const SET_AUTH_CHANGED = 'setAuthChanged';
 export const SET_USER = 'setUser';
 
 export const SET_ERROR = 'setError';

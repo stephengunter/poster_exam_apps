@@ -45,7 +45,7 @@
 			<bill-edit v-if="bill.model && !bill.model.payed" :model="bill.model" :payways="payWays"
 			:allow_cancel="true" @cancel="cancelSelectBill"
 			@begin-pay-failed="onBeginPayFailed"
-			@pay-canceled="onPayCanceled"
+			@pay-success="onPaySuccess" @pay-canceled="onPayCanceled"
 			/>
 		</v-dialog>
    </v-container>
@@ -55,7 +55,7 @@
 import { mapState, mapGetters } from 'vuex';
 import { resolveErrorData, getRouteTitle } from '@/utils';
 import { SUBSCRIBES_INDEX, FETCH_PLANS, EDIT_BILL, BILL_DETAILS } from '@/store/actions.type';
-import { SET_LOADING } from '@/store/mutations.type';
+import { SET_LOADING, SET_AUTH_CHANGED } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
 export default {
@@ -189,7 +189,18 @@ export default {
 			this.init();
 		},
 		onPayCanceled() {
+			this.init();
+		},
+		onPaySuccess() {
 			this.cancelSelectBill();
+
+			this.$store.commit(SET_LOADING, true);
+			setTimeout(() => {
+				Bus.$emit('re-login', () => {
+					this.$store.commit(SET_AUTH_CHANGED, false);
+					this.init();
+				})
+			}, 500);
 		}
 	}
 }

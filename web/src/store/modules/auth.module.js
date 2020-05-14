@@ -1,5 +1,4 @@
 import jwtDecode from 'jwt-decode';
-import Errors from '@/common/errors';
 import BaseService from '@/common/baseService';
 
 import AuthService from '@/services/auth.service';
@@ -20,7 +19,7 @@ import {
    LOGOUT
 } from '../actions.type';
 
-import { SET_AUTH, PURGE_AUTH, SET_USER, 
+import { SET_AUTH, SET_AUTH_CHANGED, PURGE_AUTH, SET_USER, 
    SET_LOADING 
 } from '../mutations.type';
 
@@ -28,6 +27,7 @@ import { SET_AUTH, PURGE_AUTH, SET_USER,
 const state = {
    isAuthenticated: !!JwtService.getToken(),
    user: null,
+   changed: false
    
 };
 
@@ -38,6 +38,9 @@ const getters = {
    isAuthenticated(state) {
      return state.isAuthenticated;
    },
+   authChanged(state) {
+      return state.changed;
+    },
    userIsSubscriber(state) {
       if(state.user) return isSubscriber(state.user);       
       return false;
@@ -136,7 +139,6 @@ const actions = {
                resolve(true);
             })
             .catch(err => {
-               console.error(err);
                context.commit(PURGE_AUTH);
                resolve(false);           
             })
@@ -169,14 +171,14 @@ const mutations = {
       };
 
       state.isAuthenticated = true;
-      state.errors = new Errors();
-      
+   },
+   [SET_AUTH_CHANGED](state, val) {
+      state.changed = val;
    },
    [PURGE_AUTH](state) {
       state.isAuthenticated = false;
       state.user = null;
-    
-      state.errors = new Errors();
+      
       JwtService.destroyToken();
       BaseService.setHeader(null);
    }
