@@ -10,6 +10,7 @@ import store from './store';
 
 import vuetify from './plugins/vuetify';
 import './plugins/validate';
+import './plugins/scroll-loader';
 
 import '@/events';
 import '@/components';

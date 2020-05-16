@@ -163,7 +163,7 @@ export default {
 		},
 		onSubmit() {
 			
-			this.isValid = false,
+			this.isValid = false;
 			this.action = 'submit';
          this.$validator.validate().then(valid => {
 				if(valid) this.htmlEditor.version += 1;
@@ -189,7 +189,7 @@ export default {
 						this.showPreview(content);
 					}
 				}else {
-					this.isValid = false,
+					this.isValid = false;
 					this.errors.add({
 						field: 'content',
 						msg: '必須填寫內容'

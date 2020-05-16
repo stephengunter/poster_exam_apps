@@ -16,11 +16,17 @@ export const FETCH_MESSAGES = 'fetchMessages';
 export const EDIT_MESSAGE = 'editMessage';
 export const UPDATE_MESSAGE = 'updateMessage';
 
+//Notices
+export const FETCH_NOTICES = 'fetchNotices';
+export const CREATE_NOTICE = 'createNotice';
+export const EDIT_NOTICE = 'editNotice';
+export const STORE_NOTICE = 'storeNotice';
+export const OFF_NOTICE = 'offNotice';
+export const UPDATE_NOTICE = 'updateNotice';
+export const DELETE_NOTICE = 'deleteNotice';
+
 //Subscribes
 export const FETCH_SUBSCRIBES = 'fetchSubscribes';
-
-//PayApp
-export const FETCH_PAYAPP_REQUESTS = 'fetchPayAppRequests';
 
 //Plans
 export const FETCH_PLANS = 'fetchPlans';

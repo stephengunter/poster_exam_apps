@@ -26,6 +26,11 @@ export const SET_RQS_PAGE_MODE = 'setRQsPageMode';
 export const SET_RQS_MODEL = 'setRQsModel';
 
 
+//Notices
+export const SET_NOTICES = 'setNotices';
+export const SET_NOTICES_PARAMS = 'setNoticesParams';
+export const SET_NOTICE = 'setNotice';
+
 //Notes
 export const SET_NOTE_CATEGORIES = 'setNoteCategories';
 export const SET_NOTES = 'setNotes';

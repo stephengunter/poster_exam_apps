@@ -194,4 +194,16 @@ export default {
   color: white;
 }
 
+.iframe-window {
+   background: rgba(0, 0, 0, 0.00392157);
+   border: 0px none transparent;
+   overflow-x: hidden;
+   overflow-y: auto;
+   visibility: visible;
+   padding: 0px; -webkit-tap-highlight-color: transparent; 
+   
+   width: 100%;
+   min-height: 480px;
+}
+
 </style>

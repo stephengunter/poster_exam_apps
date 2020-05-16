@@ -14,6 +14,13 @@ export const FETCH_ACTIONS = 'fetchActions';
 export const LOAD_ACTIONS = 'loadActions';
 export const ACTION_SELECTED = 'actionSelected';
 
+//Messages
+export const STORE_MESSAGE = 'storeMessage';
+
+//Notices
+export const FETCH_NOTICES = 'fetchNotices';
+export const NOTICE_DETAILS = 'noticeDetails';
+
 //Notes
 export const FETCH_NOTE_CATEGORIES = 'fetchNoteCategories';
 export const FETCH_NOTES = 'fetchNotes';
@@ -65,5 +72,3 @@ export const EDIT_BILL = 'editBill';
 export const BEGIN_PAY = 'beginPay';
 export const STORE_PAY = 'storePay';
 
-//Messages
-export const STORE_MESSAGE = 'storeMessage';

@@ -312,4 +312,10 @@ html {
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
+
+.article-img {
+	display: block;
+	max-width:  100%;
+	height: auto;
+}
 </style>

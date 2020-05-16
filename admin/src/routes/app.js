@@ -30,6 +30,19 @@ const adminlinks = [
       } 
    },
    {
+      name: 'notices',
+      path: '/notices',
+      view: 'Notices',
+      parent: 'dashboard',
+      meta: {
+         order: 0,
+         icon: 'mdi-bulletin-board',
+         title: '公告訊息',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
+   },
+   {
       name: 'exceptions',
       path: '/exceptions',
       view: 'Exceptions',

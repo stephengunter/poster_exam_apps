@@ -49,6 +49,17 @@ const applinks = [{
       title: '公告訊息'
    } 
 },{
+   name: 'notice-details',
+   path: '/notices/:id/:user?',
+   view: 'NoticeDetails',
+   props: true,
+   parent: 'notices',
+   meta: {
+      type: FOR_ALL,
+      menus: [],
+      title: '公告訊息'
+   } 
+},{
    name: 'rqs',
    path: '/rqs',
    view: 'RQs',
