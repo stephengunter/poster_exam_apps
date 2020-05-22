@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 
 import app from './modules/app.module';
 import auth from './modules/auth.module';
+import notifications from './modules/notifications.module';
 import messages from './modules/messages.module';
 import notices from './modules/notices.module';
 import notes from './modules/notes.module';
@@ -19,6 +20,7 @@ export default new Vuex.Store({
    modules: {
       app,
       auth,
+      notifications,
       messages,
       notices,
       notes,

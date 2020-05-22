@@ -1,6 +1,7 @@
 <template>
    <v-row no-gutters>
-		<v-img :src="require('@/assets/hero_a.jpg')" :min-height="'calc(100vh - ' + $vuetify.application.top + 'px)'">
+		<!-- :min-height="'calc(100vh - ' + $vuetify.application.top + 'px)'" -->
+		<v-img :src="require('@/assets/hero_a.jpg')" :min-height="'calc(100vh - 240px)'">
 			<v-container fill-height>
 				<v-row align="center" class="white--text mx-auto" justify="center">
 					<v-col class="white--text text-center" cols="12" tag="h1">
@@ -19,11 +20,6 @@
 
 <script>
 export default {
-	name: 'Hero',
-	data() {
-		return {
-
-		}
-	}
+	name: 'Hero'
 }
 </script>

@@ -1,7 +1,7 @@
 import Errors from '@/common/errors';
 import { FETCH_ACTIONS, LOAD_ACTIONS } from '@/store/actions.type';
 
-import { SET_LOADING, SET_ERROR, CLEAR_ERROR, 
+import { SET_CURRENT_PAGE, SET_LOADING, SET_ERROR, CLEAR_ERROR, 
    SET_DRAWER, SET_MENUS, SET_FOOTER_MENUS, SET_USER_MENUS, SET_WINDOW_WIDTH,
    SET_RESPONSIVE, TOGGLE_DRAWER, SET_VIEW_ACTIONS, SET_APP_ACTIONS
 } from '@/store/mutations.type';
@@ -9,6 +9,7 @@ import { SET_LOADING, SET_ERROR, CLEAR_ERROR,
 import { fetchViewActions } from '@/utils';
 
 const initialState = {
+   currentPage: null,
    loading: false,
    loadingText: '',
    sideBarWidth: 260,
@@ -27,6 +28,9 @@ export const state = { ...initialState };
 
 
 const getters = {
+   currentPage(state) {
+      return state.currentPage;
+   },
    loading(state) {
       return state.loading;
    },
@@ -82,6 +86,9 @@ const actions = {
 
 
 const mutations = {
+   [SET_CURRENT_PAGE](state, page) {
+      state.currentPage = page;
+   },
    [SET_LOADING](state, loading, text = '') {
       state.loading = loading;
       if(loading) state.loadingText = text;

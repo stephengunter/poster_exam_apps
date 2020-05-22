@@ -80,7 +80,8 @@ export default {
             cancel_text: '取消',
             on_ok: null,
             on_cancel: null
-         },
+			}			
+			
 		}
 	},
 	computed:{
@@ -104,7 +105,7 @@ export default {
 		window.addEventListener('resize', this.onResponsiveInverted);
 	},
 	beforeDestroy(){
-      window.removeEventListener('resize', this.onResponsiveInverted)
+		window.removeEventListener('resize', this.onResponsiveInverted);
 	},
 	methods:{
 		onError(error) {

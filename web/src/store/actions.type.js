@@ -21,6 +21,13 @@ export const STORE_MESSAGE = 'storeMessage';
 export const FETCH_NOTICES = 'fetchNotices';
 export const NOTICE_DETAILS = 'noticeDetails';
 
+//Notifications
+export const NOTIFICATIONS = 'notifications';
+export const FETCH_NOTIFICATION_ITEMS = 'fetchNotificationItems';
+export const FETCH_NOTIFICATIONS = 'fetchNotifications';
+export const NOTIFICATION_DETAILS = 'notificationDetails';
+export const CLEAR_NOTIFICATIONS = 'clearNotifications';
+
 //Notes
 export const FETCH_NOTE_CATEGORIES = 'fetchNoteCategories';
 export const FETCH_NOTES = 'fetchNotes';

@@ -75,6 +75,43 @@ const applinks = [{
 }];
 
 const userLinks = [{
+   name: 'subscribes',
+   path: '/subscribes',
+   view: 'Subscribes',
+   parent: '',
+   meta: {
+      type: USER_ONLY,
+      menus: [{
+         key: 'user', show: USER_ONLY
+      }],
+      icon: 'mdi-wallet-membership',
+      title: '我的訂閱'
+   } 
+},{
+   name: 'notifications',
+   path: '/notifications',
+   view: 'Notifications',
+   parent: '',
+   meta: {
+      type: USER_ONLY,
+      menus: [{
+         key: 'user', show: USER_ONLY
+      }],
+      icon: 'mdi-email-outline',
+      title: '訊息通知'
+   } 
+},{
+   name: 'notification-details',
+   path: '/notifications/:id',
+   view: 'NotificationDetails',
+   props: true,
+   parent: 'notifications',
+   meta: {
+      type: FOR_ALL,
+      menus: [],
+      title: '訊息通知'
+   } 
+},{
    name: 'notes',
    path: '/notes',
    view: 'Notes',
@@ -113,19 +150,6 @@ const userLinks = [{
       }],
       icon: 'mdi-wallet-membership',
       title: '訂閱會員'
-   } 
-},{
-   name: 'subscribes',
-   path: '/subscribes',
-   view: 'Subscribes',
-   parent: '',
-   meta: {
-      type: USER_ONLY,
-      menus: [{
-         key: 'user', show: USER_ONLY
-      }],
-      icon: 'mdi-wallet-membership',
-      title: '我的訂閱'
    } 
 }];
 

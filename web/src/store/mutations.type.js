@@ -1,4 +1,5 @@
 //App
+export const SET_CURRENT_PAGE = 'setCurrentPage';
 export const SET_LOADING = 'setLoading';
 export const SET_WINDOW_WIDTH = 'setWindowWidth';
 export const SET_RESPONSIVE = 'setResponsive';
@@ -30,6 +31,12 @@ export const SET_RQS_MODEL = 'setRQsModel';
 export const SET_NOTICES = 'setNotices';
 export const SET_NOTICES_PARAMS = 'setNoticesParams';
 export const SET_NOTICE = 'setNotice';
+
+//Notifications
+export const SET_NOTIFICATION_ITEMS = 'setNotificationItems';
+export const SET_NOTIFICATIONS = 'setNotifications';
+export const SET_NOTIFICATIONS_PARAMS = 'setNotificationsParams';
+export const SET_NOTIFICATION = 'setNotification';
 
 //Notes
 export const SET_NOTE_CATEGORIES = 'setNoteCategories';

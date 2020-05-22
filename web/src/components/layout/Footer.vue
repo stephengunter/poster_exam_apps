@@ -8,7 +8,7 @@
 			<v-btn text @click="linkTo('/contact')">
 				<span class="white--text" style="font-size:1rem">聯絡我們</span>
 			</v-btn>
-			<v-btn v-show="false" text @click="linkTo('/notices')" style="margin-left:1px; padding-left:1px">
+			<v-btn text @click="linkTo('/notices')" style="margin-left:1px; padding-left:1px">
 				<span class="white--text" style="font-size:1rem">公告訊息</span>
 			</v-btn>
 		</div>

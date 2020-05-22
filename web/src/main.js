@@ -20,7 +20,9 @@ import JwtService from '@/services/jwt.service';
 import { CHECK_AUTH, REFRESH_TOKEN, FETCH_ACTIONS } from '@/store/actions.type';
 import { FOR_ALL, GUEST_ONLY, USER_ONLY } from '@/routes/route.type';
 import Menu from '@/common/menu';
-import { SET_MENUS, SET_FOOTER_MENUS, SET_USER_MENUS, SET_AUTH_CHANGED } from '@/store/mutations.type';
+import { SET_CURRENT_PAGE, SET_MENUS, SET_FOOTER_MENUS, SET_USER_MENUS,
+	SET_AUTH_CHANGED
+} from '@/store/mutations.type';
 
 router.beforeEach((to, from, next) => {
 	
@@ -57,6 +59,10 @@ router.beforeEach((to, from, next) => {
 		}
 	})
 });
+
+router.afterEach((to, from) => {
+	store.commit(SET_CURRENT_PAGE, to);
+})
 
 const redirect = (next, route) => next(route);
 

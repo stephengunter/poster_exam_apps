@@ -6,58 +6,59 @@
       </div>
 		<v-card v-if="list.length">
 			<v-list>
-				<v-list-item v-for="(item, index) in list" :key="index">
-					<v-list-item-icon v-if="item.top">
-						<v-chip  small color="orange" text-color="white">
-							置頂<v-icon small right>mdi-star</v-icon>
-						</v-chip>
-					</v-list-item-icon>
+				<v-list-item v-for="(item, index) in list" :key="index" @click.prevent="select(item)">
 					<v-list-item-content>
-						<router-link :to="`/notices/${item.id}`" class="a-btn">
-							<v-list-item-title v-text="item.title"></v-list-item-title>
-						</router-link> 
+                  <v-list-item-title v-text="item.notice.title"></v-list-item-title>
 					</v-list-item-content>
 					<v-list-item-action>
                 <v-list-item-action-text>
-						 <core-time-ago :val="item.lastUpdated" />
+						 <core-time-ago :val="item.notice.lastUpdated" />
 					 </v-list-item-action-text>
               </v-list-item-action>
 				</v-list-item>
 			</v-list>
-			<scroll-loader :loader-method="loadMore" :loader-disable="!hasNextPage">
-			</scroll-loader>
+			
+			
 		</v-card>
-      
+		<scroll-loader :loader-method="loadMore" :loader-disable="!hasNextPage">
+			<div v-show="loading" class="text-center">
+				<v-progress-circular color="info" indeterminate size="36">
+				</v-progress-circular>
+			</div>
+		</scroll-loader>
    </v-container>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { FETCH_NOTICES } from '@/store/actions.type';
+import { FETCH_NOTIFICATION_ITEMS, FETCH_NOTIFICATIONS, CLEAR_NOTIFICATIONS
+ } from '@/store/actions.type';
 import { onError, getRouteTitle } from '@/utils';
-import { SET_NOTICE } from '@/store/mutations.type';
+import { SET_NOTIFICATION } from '@/store/mutations.type';
 
 
 export default {
-	name: 'NoticesView',
+	name: 'NotificationsView',
 	data(){
 		return {
 			bread: {
             items: []
 			},
 			page: 1,
-			pageSize: 15,
+			pageSize: 12,
 			  
 			scroller: {
 				disable: true
-			}
+			},
+
+			loading: false
 		}
 	},
 	computed: {
 		...mapState({
-			params: state => state.notices.params,
-			list: state => state.notices.list,
-			pagedList: state => state.notices.pagedList
+			params: state => state.notifications.params,
+			list: state => state.notifications.list,
+			pagedList: state => state.notifications.pagedList
 		}),
 		hasNextPage() {
 			if(this.pagedList) return this.pagedList.hasNextPage;
@@ -65,14 +66,13 @@ export default {
 		}
 	},
 	beforeMount() {
-		this.$store.commit(SET_NOTICE, null);
+		this.$store.commit(SET_NOTIFICATION, null);
 
 		if(this.list.length) {
 			if(this.params) {
 				this.page =  this.params.page;
 				this.pageSize =  this.params.pageSize;
 			}
-			
 		}else {
 			this.fetchData();
 		}
@@ -95,16 +95,34 @@ export default {
          });
 		},
 		loadMore() {
-			this.page += 1;
-			this.fetchData();
+			this.loading = true;
+			let ids = this.pagedList.viewList.map(item => item.id);
+			if(ids.length) {
+				this.$store.dispatch(CLEAR_NOTIFICATIONS, ids)
+				.then(() => {
+					this.page += 1;
+					this.fetchData();
+				})
+				.catch(error => {
+					this.loading = false;
+					Bus.$emit('errors');
+				})
+			}
 		},
 		fetchData() {
+			this.loading = true;
 			let params = { page: this.page, pageSize: this.pageSize };
 			
-			this.$store.dispatch(FETCH_NOTICES, params)
+			this.$store.dispatch(FETCH_NOTIFICATIONS, params)
 			.catch(error => {
 				onError(error);
 			})
+			.finally(() => { 
+				this.loading = false;
+			});
+		},
+		select(item) {
+			this.$router.push({ name: 'notification-details', params: { id: item.id }})
 		}
    }
 }

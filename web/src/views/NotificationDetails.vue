@@ -6,13 +6,13 @@
       </div>
 		<v-card v-if="model">
 			<v-card-title class="font-weight-black">
-				<span style="font-size:1.2em">{{ model.title }}</span>
+				<span style="font-size:1.2em">{{ model.notice.title }}</span>
 				
 				<v-spacer />
-				<span class="subtitle-1">{{ model.lastUpdatedText }}</span>
+				<span class="subtitle-1">{{ model.notice.lastUpdatedText }}</span>
 			</v-card-title>
 			<v-card-text>
-				<div v-html="model.content">
+				<div v-html="model.notice.content">
 			
 				</div>
 			</v-card-text>
@@ -29,12 +29,12 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { NOTICE_DETAILS } from '@/store/actions.type';
+import { NOTIFICATION_DETAILS } from '@/store/actions.type';
 import { tryParseInt, onError, getRouteTitle } from '@/utils';
 
 export default {
-	name: 'NoticeDetailsView',
-	props: ['id', 'user'],
+	name: 'NotificationDetailsView',
+	props: ['id'],
 	data() {
 		return {
 			bread: {
@@ -45,11 +45,11 @@ export default {
 	},
 	computed: {
 		...mapState({
-			model: state => state.notices.model
+			model: state => state.notifications.model
 		}),
 		canBack() {
 			if(this.prevRoute) {
-				return this.prevRoute.name && this.prevRoute.name === 'notices';
+				return this.prevRoute.name && this.prevRoute.name === 'notifications';
 			} return false;
 		}
 	},
@@ -80,9 +80,8 @@ export default {
 		},
 		fetchData() {
 			let id = tryParseInt(this.id);
-			let user = this.user ? String(this.user) : '';
-			
-			this.$store.dispatch(NOTICE_DETAILS, { id, user })
+		
+			this.$store.dispatch(NOTIFICATION_DETAILS, id)
 			.then(model => {
 				
 			})
@@ -92,7 +91,7 @@ export default {
 		},
 		back() {
 			if(window.history.length) this.$router.go(-1);
-			else this.$router.push({ name: 'notices' });
+			else this.$router.push({ name: 'notifications' });
 		}
    }
 }
