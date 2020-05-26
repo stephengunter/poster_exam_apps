@@ -69,7 +69,7 @@ const actions = {
    },
    [LOAD_ACTIONS](context, blocks) {
       let viewActions =  context.state.viewActions;
-      
+
       let actions = [];
       blocks.forEach(block => {
          let blockActions = [];

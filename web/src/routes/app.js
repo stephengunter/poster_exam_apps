@@ -139,6 +139,38 @@ const userLinks = [{
       title: '模擬測驗'
    } 
 },{
+   name: 'exam-new',
+   path: '/exams/new',
+   view: 'ExamNew',
+   parent: 'exams',
+   meta: {
+      type: USER_ONLY,
+      menus: [],
+      title: '模擬測驗'
+   } 
+},{
+   name: 'exam-edit',
+   path: '/exams/edit/:id',
+   view: 'ExamEdit',
+   props: true,
+   parent: 'exams',
+   meta: {
+      type: USER_ONLY,
+      menus: [],
+      title: '模擬測驗'
+   } 
+},{
+   name: 'exam-details',
+   path: '/exams/:id',
+   view: 'ExamDetails',
+   props: true,
+   parent: 'exams',
+   meta: {
+      type: USER_ONLY,
+      menus: [],
+      title: '模擬測驗'
+   } 
+},{
    name: 'subscribes-create',
    path: '/subscribes/create',
    view: 'subscribes/Create',

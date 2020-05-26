@@ -48,9 +48,11 @@ export const SET_QUESTIONS = 'setQuestions';
 //Exams
 export const SET_EXAM_INDEX_MODEL = 'setExamIndexModel';
 export const SET_EXAM_PAGE_MODE = 'setExamPageMode';
+export const SET_EXAM_CREATE_PARAMS = 'setExamCreateParams';
 export const SET_EXAMS = 'setExams';
 export const SET_EXAM = 'setExam';
 export const SET_EXAM_TITLE = 'setExamTitle';
+export const SET_EXAM_RESERVED = 'setExamReserved';
 export const SET_EXAM_ACTIONS = 'setExamActions';
 
 //Subscribes

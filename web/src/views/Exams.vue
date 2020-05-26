@@ -1,22 +1,12 @@
 <template>
 	<v-container>
 		<exam-header ref="examHeader"
-		:title="title"
-		:fetch_params="fetchParams" :create_params="createParams" 
-		@filter-submit="onFilterSubmit" @creator-submit="onCreatorSubmit"
+		:title="title" :fetch_params="fetchParams"
+		@filter-submit="onFilterSubmit"
 		/>
-		<div v-show="examIndexMode">
-			<exam-table ref="examTable" :init_params="fetchParams" :model="pagedList" 
-			@options-changed="onTableOptionChanged" @selected="onTableSelected"
-			/>
-		</div>
-
-		<div v-show="examEditMode">
-         <exam-edit ref="examEdit" :exam="exam" :actions="examActions"
-			@leave="setMode('index')" @aborted="setMode('index')"
-			@saved="onExamSaved" @stored="onExamStored"
-         /> 
-      </div>
+		<exam-table ref="examTable" :init_params="fetchParams" :model="pagedList" 
+		@options-changed="onTableOptionChanged" @selected="onTableSelected"
+		/>
 
 		<v-dialog v-model="summary.active" :max-width="summary.maxWidth">
          <exam-summary v-if="summary.active" :model="summary.model" 
@@ -25,15 +15,15 @@
 				<v-card-actions>
 					<v-btn @click="onRemoveExam(summary.model)" color="error">刪除</v-btn>
 					<v-spacer />
-					<v-btn v-if="summary.model.isComplete" @click="readExam(summary.model)" color="primary">閱讀解析</v-btn>
-					<v-btn v-else @click="editExam(summary.model)" color="success">繼續作答</v-btn>
+					<v-btn v-if="summary.model.isComplete" @click="readExam(summary.model.id)" color="primary">閱讀解析</v-btn>
+					<v-btn v-else @click="editExam(summary.model.id)" color="success">繼續作答</v-btn>
 				</v-card-actions>
          </exam-summary>
       </v-dialog>
 
 		<v-dialog v-model="save.active" :max-width="save.maxWidth" persistent>
-			<exam-save :exam="save.model" 
-			@save="updateExamTitle" @cancel="save.active = false"
+			<exam-save v-if="save.active" :model="save.model" 
+			@save="updateExamTitle" @cancel="onSaveCanceled"
 			/>
 		</v-dialog>
 	</v-container>
@@ -44,13 +34,11 @@ import pick from 'lodash/pick';
 import isEqual from 'lodash/isEqual';
 import { mapState, mapGetters } from 'vuex';
 import { LOAD_ACTIONS, ACTION_SELECTED,
-	NEW_EXAM, EDIT_EXAM, FETCH_EXAMS, FILTER_EXAMS,
-	STORE_EXAM, SAVE_EXAM, ABORT_EXAM, CREATE_EXAM, READ_EXAM,
+	NEW_EXAM, FETCH_EXAMS, FILTER_EXAMS, ABORT_EXAM,
 	EXAM_RECORDS, EXAM_SUMMARY, DELETE_EXAM, UPDATE_EXAM	
 } from '@/store/actions.type';
-import { SET_EXAM_PAGE_MODE, SET_APP_ACTIONS, SET_EXAM_TITLE } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
-import { showConfirm, resolveErrorData, getRouteTitle, todayString } from '@/utils';
+import { showConfirm, resolveErrorData, getRouteTitle } from '@/utils';
 import Exam from '@/models/exam';
 
 
@@ -59,20 +47,9 @@ export default {
 	data() {
 		return {
 			title: '',
-			modeOptions: [{
-				name: 'index',
-				text: '紀錄'
-			},{
-				name: 'create',
-				text: '新測驗'
-			},{
-				name: 'edit',
-				text: '模擬測驗'
-			}],
-
-			params: {
-				rootRecruitId: 0
-			},
+			// params: {
+			// 	rootRecruitId: 0
+			// },
 
 			fetchParams: {
 				status: -1,
@@ -81,13 +58,6 @@ export default {
 				desc: true,
 				page: -1,
 				pageSize: 10
-			},
-
-			createParams: {
-				recruit: 0,
-				type: -1,
-				rtype: -1,
-				subject: 0				
 			},
 
 			summary: {
@@ -100,19 +70,18 @@ export default {
             model: null,
             maxWidth: DIALOG_MAX_WIDTH,
             active: false,
-            callback: null
-			},
+            callback: null,
+            on_ok: null
+         },
 			
 			references: {}
 		}
 	},
 	computed: {
-		...mapGetters(['exam', 'examIndexMode', 'examCreateMode', 'examEditMode', 
-		'responsive','contentMaxWidth'
+		...mapGetters(['exam', 'responsive','contentMaxWidth'
 		]),
 		...mapState({
 			indexModel: state => state.exams.indexModel,
-			mode: state => state.exams.mode,
 			pagedList: state => state.exams.pagedList,
 			examActions: state => state.exams.actions,
 		}),
@@ -125,13 +94,7 @@ export default {
 			if(this.$refs.examTable) return this.$refs.examTable;
 			else if (this.references.examTable) return this.references.examTable;
 			return null;
-		},
-		examEdit() {
-			if(this.$refs.examEdit) return this.$refs.examEdit;
-			else if (this.references.examEdit) return this.references.examEdit;
-			return null;
 		}
-
 	},
 	created(){
 		Bus.$on(ACTION_SELECTED, this.onActionSelected);
@@ -143,51 +106,25 @@ export default {
 	methods: {
 		init() {
 			this.title = getRouteTitle(this.$route);
-			this.setMode('index');
-		},
-		setMode(name) {
-			let mode = this.modeOptions.find(item => item.name === name);
-			this.$store.commit(SET_EXAM_PAGE_MODE, mode);
-
+			this.fetchExams();
+			this.setActions();
 			this.$nextTick(() => {
-				if(this.examIndexMode) {
-					this.fetchExams();
-				}else if(this.examCreateMode) {
-					
-				}else if(this.examEditMode) {
-					this.examEdit.init();
-				}
-
-				this.setActions();
 				this.examHeader.init();
-         })
+			});
+			
 		},
 		setActions() {
 			let blocks = [];
          let types = [];
-         if(this.examIndexMode) {
-				types = [FILTER_EXAMS, NEW_EXAM];
-				blocks.push(types);
-         }else if(this.examCreateMode) {
-				types = [NEW_EXAM];
-				blocks.push(types);
-         }else if(this.examEditMode) {
-				blocks.push([EXAM_RECORDS, EXAM_SUMMARY]);
-				blocks.push(this.examActions.map(item => item.name));
-			}
-
+         types = [FILTER_EXAMS, NEW_EXAM];
+			blocks.push(types);
 			this.$store.dispatch(LOAD_ACTIONS, blocks);
 		},
 		onActionSelected(name) {
-			if(this.examEditMode) {
-				this.examEdit.handleAction(name);
-				return;
-			}
-
          if(name === FILTER_EXAMS) {
             this.examHeader.launchFilter();         
          }else if(name === NEW_EXAM) {
-            this.examHeader.launchCreator();     
+            this.$router.push({ path: '/exams/new' });
          }
       },
 		onFilterSubmit(params) {
@@ -224,11 +161,6 @@ export default {
             Bus.$emit('errors', resolveErrorData(error));
 			})
 		},
-		onCreatorSubmit(params) {
-			console.log('onCreatorSubmit', params);
-			this.createParams = { ... params };
-			this.createExam(params);
-		},
 		onTableSelected(item) {
 			this.showSummary(item);
 		},
@@ -241,83 +173,45 @@ export default {
 			this.summary.active = false;
 			this.summary.model = null;
 		},
-		createExam(params) {
-			this.setMode('create');
-			
-         this.$store.dispatch(CREATE_EXAM, params)
-         .then(exam => {
-				let bread =  this.examHeader.getBread();
-				let title = bread.items[bread.items.length - 1].text;
-				title = `${title}_${todayString().replace(/-/g,'')}`;
-				
-				this.$store.commit(SET_EXAM_TITLE, title);
-				
-				this.setMode('edit');
-         })
-			.catch(error => {
-            Bus.$emit('errors', resolveErrorData(error));
-			})
-		},
 		editExamTitle(model) {
+			this.hideSummary();
 			this.save = {
 				model: { ... model },
 				maxWidth: this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH,
 				active: true,
+				on_ok: null,
 				callback: null
-			};			
+			};	
+					
 		},
 		updateExamTitle() {
 			let model = this.save.model;
 			this.$store.dispatch(UPDATE_EXAM, model)
          .then(() => {
-				this.save.active = false;
+				this.onSaveCanceled();
 				this.fetchExams();
          })
 			.catch(error => {
             Bus.$emit('errors', resolveErrorData(error));
 			})
 		},
-		editExam(model) {
+		onSaveCanceled() {
+         this.save = {
+            model: null,
+            maxWidth: DIALOG_MAX_WIDTH,
+            active: false,
+            on_ok: null,
+            callback: null
+         };
+      },
+		editExam(id) {
+			this.$router.push({ path: `/exams/edit/${id}` });
 			this.hideSummary();
-			//繼續作答
-			let id = model.id;
-         this.$store.dispatch(EDIT_EXAM, id)
-         .then(exam => {
-				this.setMode('edit');
-         })
-			.catch(error => {
-            Bus.$emit('errors', resolveErrorData(error));
-			})
 		},
-		readExam(model) {
+		readExam(id) {
+			this.$router.push({ path: `/exams/${id}` });
 			this.hideSummary();
-			
-			let id = model.id;
-         this.$store.dispatch(READ_EXAM, id)
-         .then(exam => {
-				this.setMode('edit');
-         })
-			.catch(error => {
-            Bus.$emit('errors', resolveErrorData(error));
-			})
 		},
-		onExamSaved() {
-			if(this.examEditMode) {
-				this.examHeader.setTitle();
-			}
-		},
-		onExamStored() {
-			//交券完畢, 回index模式
-			//設定搜尋條件為'已完成'
-			this.fetchParams.status = 1;
-			this.fetchParams.sortBy = 'lastUpdated';
-			this.fetchParams.desc = true;
-			this.fetchParams.page = 1;
-
-			this.examTable.init();
-
-			this.setMode('index');
-		},	
 		onRemoveExam(model) {
 			showConfirm({
             type: 'error', 

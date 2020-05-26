@@ -43,7 +43,7 @@ const actions = [
    title: '選擇模式',
    description: ''
 },{
-   views: ['rqs','exams'],
+   views: ['rqs' , 'exams' , 'exam-new', 'exam-edit'],
    name: SAVE_EXAM,
    order: 1,
    type: SUBMIT,
@@ -52,7 +52,7 @@ const actions = [
    color: 'info',
    description: '存檔，保留此試券，下次繼續'
 },{
-   views: ['rqs','exams'],
+   views: ['rqs' , 'exams' , 'exam-new', 'exam-edit'],
    name: STORE_EXAM,
    order: 2,
    type: SUBMIT,
@@ -61,7 +61,7 @@ const actions = [
    color: 'success',
    description: '交券，計分與存檔'
 },{
-   views: ['rqs','exams'],
+   views: ['rqs','exams', 'exam-new', 'exam-edit'],
    name: ABORT_EXAM,
    order: 1,
    type: CANCEL,
@@ -81,7 +81,7 @@ const actions = [
    description: '篩選測驗紀錄'
    
 },{
-   views: ['exams'],
+   views: ['exams', 'exam-new', 'exam-edit', 'exam-details'],
    name: EXAM_RECORDS,
    order: 0,
    type: SELECT,
@@ -89,7 +89,7 @@ const actions = [
    title: '測驗紀錄',
    description: '測驗紀錄'
 },{
-   views: ['rqs','exams'],
+   views: ['rqs' , 'exams', 'exam-new', 'exam-edit', 'exam-details'],
    name: EXAM_SUMMARY,
    order: 0,
    type: SELECT,
@@ -105,7 +105,7 @@ const actions = [
    title: '新測驗',
    description: '開始新的模擬測驗'
 },{
-   views: ['exams'],
+   views: ['exams', 'exam-edit', 'exam-details'],
    name: DELETE_EXAM,
    order: 5,
    type: CANCEL,

@@ -53,6 +53,7 @@ export const FETCH_RQS = 'fetchRQs';
 //Exams
 export const EXAM_RECORDS = 'examRecords';
 export const NEW_EXAM = 'newExam';
+export const INIT_EXAMS = 'initExams';
 export const CREATE_EXAM = 'createExam';
 export const EDIT_EXAM = 'editExam';
 export const LEAVE_EXAM = 'leaveExam';
