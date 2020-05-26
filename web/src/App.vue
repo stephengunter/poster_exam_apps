@@ -319,4 +319,14 @@ html {
 	max-width:  100%;
 	height: auto;
 }
+.article-imgDesc {
+	display : block;
+	color: darkorange;
+	margin-top: 1em;
+}
+.inline-emoji {
+	height: 24px;
+	margin: 3px;
+	vertical-align: middle;
+}
 </style>

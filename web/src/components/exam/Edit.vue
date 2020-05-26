@@ -156,6 +156,8 @@ export default {
 			})
       },
       saveExam(callback = null) {
+         // console.log('callback', callback);
+         // console.log('exam', this.exam);
          if(!this.exam.reserved && !this.save.active) {
             //第一次存檔
             this.save = {
@@ -167,6 +169,8 @@ export default {
             }
             return;
          }
+
+         // console.log('not first');
 
          if(this.save.active) {
             this.save.active = false;
@@ -191,9 +195,10 @@ export default {
          this.exam.title = this.save.model.title;
          this.save = {
             model: null,
-            maxWidth: this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH,
+            maxWidth: DIALOG_MAX_WIDTH,
             active: false,
-            callback: null
+            callback: null,
+            on_ok: null
          };
       },
       onStoreExam() {

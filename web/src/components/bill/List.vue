@@ -64,7 +64,6 @@ export default {
          return [];
       }
    },
-   
    methods: {
       onFilterChanged() {
          this.$store.commit(SET_LOADING, true);

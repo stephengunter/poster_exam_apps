@@ -42,6 +42,7 @@ export default {
 	name: 'NoticesView',
 	data(){
 		return {
+			title: '',
 			bread: {
             items: []
 			},

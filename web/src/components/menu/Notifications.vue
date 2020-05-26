@@ -15,6 +15,7 @@
                <v-list-item v-for="(item, index) in items" :key="index" @click.prevent="select(item)">
                   <v-list-item-content>
                      <v-list-item-title v-text="item.notice.title"></v-list-item-title>
+                     <v-list-item-subtitle class="mt-1" v-text="plainText(item.notice.content)"></v-list-item-subtitle>
                   </v-list-item-content>
                   <v-list-item-action>
                   <v-list-item-action-text>
@@ -39,6 +40,7 @@ import { mapState, mapGetters } from 'vuex';
 import { NOTIFICATIONS, FETCH_NOTIFICATION_ITEMS, CLEAR_NOTIFICATIONS } from '@/store/actions.type';
 import { SET_AUTH_CHANGED } from '@/store/mutations.type';
 import { API_URL, DIALOG_MAX_WIDTH } from '@/config';
+import { removeTags } from '@/utils';
 import Hub from '@/models/hub';
 
 export default {
@@ -94,6 +96,9 @@ export default {
 					this.fetchData();
 				});
          }
+      },
+      plainText(str) {
+			return removeTags(str).trim();
 		},
       onCurrentPageChanged(newVal, oldVal) {
          if(oldVal) return;
