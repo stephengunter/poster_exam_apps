@@ -12,6 +12,7 @@ import { SET_LOADING, SET_EXAM_INDEX_MODEL, SET_EXAM_CREATE_PARAMS,
 const initialState = {
    indexModel: null,
    pagedList: null,
+   list: [],
    createParams: { recruit: 0 },
    exam: null,
    actions: [],
@@ -51,8 +52,10 @@ const actions = {
       context.commit(SET_EXAM, null);
    },
    [FETCH_EXAMS](context, params) {
+      if(params.page <= 1) context.commit(SET_EXAMS, null);
       let firstLoad = params.page < 0;
-      context.commit(SET_LOADING, true);
+      if(params.page <= 1) context.commit(SET_LOADING, true);
+      
       return new Promise((resolve, reject) => {
          ExamsService.fetch(params)
             .then(model => {
@@ -64,7 +67,7 @@ const actions = {
                reject(error);
             })
             .finally(() => { 
-               context.commit(SET_LOADING, false);
+               if(params.page <= 1) context.commit(SET_LOADING, false);
             });
       });
    },
@@ -249,7 +252,16 @@ const mutations = {
       state.createParams = params;
    },
    [SET_EXAMS](state, pagedList) {
-      state.pagedList = pagedList;
+      if(pagedList) {
+         state.pagedList = pagedList;
+         let viewList = pagedList.viewList;
+         if(viewList && viewList.length) {
+            state.list = state.list.concat(viewList);
+         }
+      }else {
+         state.pagedList = null;
+         state.list = [];
+      }
    },
    [SET_EXAM](state, exam) {
       if(exam) state.exam = exam;

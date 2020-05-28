@@ -14,6 +14,7 @@ export const GET_MENUS = 'getMenus';
 export const FETCH_ACTIONS = 'fetchActions';
 export const LOAD_ACTIONS = 'loadActions';
 export const ACTION_SELECTED = 'actionSelected';
+export const SCROLL_TOP = 'scrollTop';
 
 //Messages
 export const STORE_MESSAGE = 'storeMessage';

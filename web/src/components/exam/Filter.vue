@@ -1,18 +1,12 @@
 <template>
    <v-card>
-      <v-card-title>
-         <h3>{{ title }}</h3>
-         <v-spacer />
-         <a href="#" v-if="allow_cancel" @click.prevent="cancel" class="a-btn">
-            <v-icon>mdi-window-close</v-icon>
-         </a>
-      </v-card-title>
       <v-card-text>
-         <v-row>
+         <core-close-icon-button v-if="allow_cancel" @close="cancel" />
+         <v-row dense>
             <v-col cols="12" md="6">
-               <v-radio-group v-model="params.status" label="狀態">
+               <v-radio-group v-model="params.status" label="狀態" @change="onStatusChanged">
                   <v-radio  v-for="(item, index) in status_options" :key="index"
-                  :label="item.text" :value="item.value" 
+                  :label="item.text" :value="item.value"
                   />
                </v-radio-group>
 
@@ -23,7 +17,12 @@
                   :label="item.text" :value="item.value" 
                   />
                </v-radio-group>
-
+            </v-col>
+            <v-col cols="12">
+               <v-select label="排序" :items="sortOptions" 
+               v-model="params.sortBy" :append-outer-icon="descIcon"
+               @click:append-outer="switchDesc"
+               />
             </v-col>
 			</v-row>
       </v-card-text>
@@ -42,7 +41,7 @@ export default {
    props: {
       title: {
          type: String,
-         default: '測驗紀錄'
+         default: '篩選'
       },
       init_params: {
          type: Object,
@@ -67,36 +66,42 @@ export default {
 		}
    },
    computed: {
-      selectedSubject() {
-         if(this.subject_options && this.params.subject > 0) {
-            return this.subject_options.find(item => item.value === this.params.subject);
-         }     
-         return null;
-      },
-      selectedStatus() {
-         if(this.status_options && this.params.status > -1) {
-            return this.status_options.find(item => item.value === this.params.status);
-         }     
-         return null;
-      }
-   },
+		sortOptions() {
+         if(!this.params) return [];
+
+			let items = [{
+            value: 'lastUpdated', text: '最後更新'
+         }];
+         if(this.params.status > 0) items.push({ value: 'score', text: '得分' });
+
+         return items;	
+		},
+		descIcon() {
+         if(!this.params) return '';
+
+			if(this.params.desc) return 'mdi-arrow-down';
+			else return 'mdi-arrow-up';
+		}
+	},
 	beforeMount() {
       this.init();
 	},
 	methods: {
 		init() {
-			let params = { ...this.init_params };
-         this.params = params;
+         this.params = { ...this.init_params };
       },
       cancel() {
          this.$emit('cancel');
       },
+      onStatusChanged(val) {
+         if(val < 1) this.params.sortBy = 'lastUpdated';
+         
+      },
+		switchDesc() {
+			this.params.desc = !this.params.desc;
+		},
       submit() {
-         let model = {
-            subject: this.selectedSubject,
-            status: this.selectedStatus
-         };
-         this.$emit('submit', this.params, model);
+         this.$emit('submit', this.params);
       }
 	}
 }

@@ -1,6 +1,5 @@
 import queryString from 'query-string';
 import { API_URL } from '@/config';
-import { isEmptyObject } from './helper';
 
 export const isBadRequest = (error) => error.status ? error.status === 400 : false;
 

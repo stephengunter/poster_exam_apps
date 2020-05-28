@@ -1,5 +1,5 @@
 import Errors from '@/common/errors';
-import { INIT, FETCH_ACTIONS, LOAD_ACTIONS } from '@/store/actions.type';
+import { INIT, FETCH_ACTIONS, LOAD_ACTIONS, SCROLL_TOP } from '@/store/actions.type';
 
 import { SET_CURRENT_PAGE, SET_BREAD_ITEMS, SET_LOADING, SET_ERROR, CLEAR_ERROR, 
    SET_DRAWER, SET_MENUS, SET_FOOTER_MENUS, SET_USER_MENUS, SET_WINDOW_WIDTH,
@@ -91,6 +91,11 @@ const actions = {
       });
 
       context.commit(SET_APP_ACTIONS, actions);
+   },
+   [SCROLL_TOP](context) {
+      var element = document.getElementById('app-container');
+      if(!element) return;
+      element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest'});
    },
 }
 

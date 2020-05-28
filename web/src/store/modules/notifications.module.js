@@ -100,7 +100,6 @@ const mutations = {
       state.params = params;
    },
    [SET_NOTIFICATIONS](state, pagedList) {
-      
       if(pagedList) {
          state.pagedList = pagedList;
          let viewList = pagedList.viewList;

@@ -20,7 +20,7 @@
    </div>
 
    <v-dialog v-model="filter.active" :max-width="filter.maxWidth" persistent>
-      <exam-filter v-if="filter.active" :init_params="fetchParams"
+      <exam-filter v-if="filter.active" :init_params="params"
       :status_options="statusOptions" :subject_options="subjectOptions"
       @submit="submitFilter" @cancel="filter.active = false;"
       />
@@ -33,12 +33,13 @@
 import { mapState, mapGetters } from 'vuex';
 import { FILTER_EXAMS, ACTION_SELECTED } from '@/store/actions.type';
 import { SET_BREAD_ITEMS } from '@/store/mutations.type';
+import { tryParseInt } from '@/utils';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
 export default {
    name: 'ExamHeader',
    props: {
-      fetch_params: {
+      init_params: {
 			type: Object,
 			default: null
       },
@@ -49,18 +50,17 @@ export default {
    },
    data() {
 		return {
-         fetchParams: {},
+         params: {},
 
          filter: {
             active: false,
             maxWidth: DIALOG_MAX_WIDTH,
-            selected: false,
-            model: null
+            selected: false
          }
 		}
    },
    computed: {
-      ...mapGetters(['exam', 'responsive','contentMaxWidth'
+      ...mapGetters(['responsive','contentMaxWidth'
       ]),
       ...mapState({
          indexModel: state => state.exams.indexModel
@@ -72,11 +72,23 @@ export default {
       subjectOptions() {
          if(this.indexModel) return this.indexModel.subjectOptions;
          return [];
+      },
+      selectedSubject() {
+         if(this.subjectOptions && this.params.subject > 0) {
+            return this.subjectOptions.find(item => item.value === this.params.subject);
+         }     
+         return null;
+      },
+      selectedStatus() {
+         if(this.statusOptions && this.params.status > -1) {
+            return this.statusOptions.find(item => item.value === this.params.status);
+         }     
+         return null;
       }
    },
    methods: {
       init() {
-         this.fetchParams = { ...this.fetch_params };
+         this.params = { ...this.init_params };
 
          this.filter =  {
             active: false,
@@ -87,88 +99,46 @@ export default {
          this.setTitle();
       },
       setTitle() {
+         
          let items = [{
             action: FILTER_EXAMS, text: this.title
          }];
+         
+         if(this.selectedSubject) {
+            items.push({
+               action: FILTER_EXAMS, text: this.selectedSubject.text
+            }); 
+         }
 
-         if(this.filter.model) {
-            let selectedSubject = this.filter.model.subject;
-            if(selectedSubject) {
-               items.push({
-                  action: FILTER_EXAMS, text: selectedSubject.text
-               }); 
-            }
-
-            let selectedStatus = this.filter.model.status;
-            if(selectedStatus) {
-               items.push({
-                  action: FILTER_EXAMS, text: selectedStatus.text
-               });  
-            }
+         if(this.selectedStatus) {
+            items.push({
+               action: FILTER_EXAMS, text: this.selectedStatus.text
+            }); 
          }
 
          this.$store.commit(SET_BREAD_ITEMS, items);
-
-         // if(this.examIndexMode) {
-         //    let action = FILTER_EXAMS;
-         //    this.addBreadItem(action, this.title);
-
-         //    if(!this.filter.model) return;
-
-         //    let selectedSubject = this.filter.model.subject;
-         //    if(selectedSubject) {
-         //       this.addBreadItem(action, selectedSubject.text);   
-         //    }
-
-         //    let selectedStatus = this.filter.model.status;
-         //    if(selectedStatus) {
-         //       this.addBreadItem(action, selectedStatus.text);   
-         //    }
-
-         // }else if(this.examEditMode) {
-         //    this.addBreadItem(EXAM_RECORDS, this.title);
-
-         //    if(this.exam) {
-         //       this.addBreadItem(EXAM_SUMMARY, this.exam.title ? this.exam.title : '無存檔名稱');
-         //    }
-
-         // }else if(this.examCreateMode) {
-         //    this.addBreadItem(NEW_EXAM, '新測驗');
-
-         //    let titleTextList = [];
-         //    let type = this.creator.model.type;
-         //    titleTextList.push(type.text);
-
-         //    let recruit = this.creator.model.recruit;
-         //    if(recruit) {
-         //       let rootRecruit = this.creator.model.rootRecruit;
-         //       titleTextList.push(rootRecruit.title);
-         //    }
-            
-         //    let subject = this.creator.model.subject;
-         //    titleTextList.push(subject.text);
-
-         //    let title = titleTextList.join('_');
-         //    this.addBreadItem(NEW_EXAM, title);
-         // }
          
       },
       onBreadSelected(item) {
          Bus.$emit(ACTION_SELECTED, item.action);
       },
       launchFilter(reset = true) {
-         if(reset)  this.fetchParams = { ...this.fetch_params };
+         if(reset)  this.params = { ...this.init_params };
         
          this.filter.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
 			this.filter.active = true;
       },
-      submitFilter(params, model) {
-         this.fetchParams = { ...params };
-         this.$emit('filter-submit', params);
-         this.filter.model = model;
-
+      submitFilter(params) {
+         this.params = { ...params };
          this.setTitle();
          this.filter.active = false;
+         this.$emit('filter-submit', params);
+         // this.$nextTick(() => {
+         //    this.$emit('filter-submit', params);
+         //    this.setTitle();
+         //    this.filter.active = false;
+         // })
+         
       }
    }
 }

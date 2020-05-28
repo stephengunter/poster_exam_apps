@@ -1,13 +1,24 @@
 <template>
 	<v-container>
 		<exam-header ref="examHeader"
-		:title="title" :fetch_params="fetchParams"
+		:title="title" :init_params="params"
 		@filter-submit="onFilterSubmit"
 		/>
 		
-		<exam-table ref="examTable" :init_params="fetchParams" :model="pagedList" 
-		@options-changed="onTableOptionChanged" @selected="onTableSelected"
-		/>
+      <v-card v-show="list.length">
+			<exam-list v-if="responsive" :list="list" :params="params"
+			@selected="onSelected"
+			/>
+			<exam-table v-else :list="list" :params="params"
+			@selected="onSelected"
+			/>
+   	</v-card>
+		<scroll-loader :loader-method="loadMore" :loader-disable="!hasNextPage">
+			<div v-show="loading" class="text-center">
+				<v-progress-circular color="info" indeterminate size="36">
+				</v-progress-circular>
+			</div>
+		</scroll-loader>
 
 		<v-dialog v-model="summary.active" :max-width="summary.maxWidth">
          <exam-summary v-if="summary.active" :model="summary.model" 
@@ -31,15 +42,16 @@
 </template>
 
 <script>
-import pick from 'lodash/pick';
-import isEqual from 'lodash/isEqual';
 import { mapState, mapGetters } from 'vuex';
-import { LOAD_ACTIONS, ACTION_SELECTED,
+import { LOAD_ACTIONS, ACTION_SELECTED, SCROLL_TOP,
 	NEW_EXAM, FETCH_EXAMS, FILTER_EXAMS, ABORT_EXAM,
 	EXAM_RECORDS, EXAM_SUMMARY, DELETE_EXAM, UPDATE_EXAM	
 } from '@/store/actions.type';
+import { SET_LOADING } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
-import { showConfirm, resolveErrorData, getRouteTitle } from '@/utils';
+import { tryParseInt, isTrue, isEmptyObject, onError, 
+showConfirm, resolveErrorData, resolveQueryString
+} from '@/utils';
 import Exam from '@/models/exam';
 
 
@@ -49,18 +61,22 @@ export default {
 		return {
 			pageName: 'exams',
          title: '',
-			// params: {
-			// 	rootRecruitId: 0
-			// },
-
-			fetchParams: {
+			
+			params: {
 				status: -1,
 				subject: -1,
 				sortBy: 'lastUpdated',
-				desc: true,
-				page: -1,
-				pageSize: 10
+				desc: true
 			},
+
+			page: -1,
+			pageSize: 10,
+
+			scroller: {
+				disable: true
+			},
+
+			loading: false,
 
 			summary: {
 				active: false,
@@ -84,6 +100,7 @@ export default {
 		]),
 		...mapState({
 			indexModel: state => state.exams.indexModel,
+			list: state => state.exams.list,
 			pagedList: state => state.exams.pagedList,
 			examActions: state => state.exams.actions,
 		}),
@@ -92,30 +109,53 @@ export default {
 			else if (this.references.examHeader) return this.references.examHeader;
 			return null;
 		},
-		examTable() {
-			if(this.$refs.examTable) return this.$refs.examTable;
-			else if (this.references.examTable) return this.references.examTable;
-			return null;
+		hasNextPage() {
+			if(this.pagedList) return this.pagedList.hasNextPage;
+			return false;
 		}
 	},
 	created(){
 		Bus.$on(ACTION_SELECTED, this.onActionSelected);
 	},
+	beforeMount() {
+		this.title = '測驗紀錄';
+		this.pageName = this.$route.name;
+		this.resolveQuery();
+	},
 	mounted() {
 		this.references = { ...this.$refs };
 		this.init();
 	},
+	watch:{
+		$route (to, from){
+			if(to.name === this.pageName && from.name === this.pageName) {
+				this.resolveQuery();
+				this.init();
+			}
+		}
+	}, 
 	methods: {
+		resolveQuery() {
+			let query = this.$route.query;
+			if(query && !isEmptyObject(query)) {
+				let keys = [];
+				let numFields = ['status', 'subject'];
+				for (let field in this.params) {
+					if(query.hasOwnProperty(field)) {
+						if(numFields.includes(field)) this.params[field] = tryParseInt(query[field]);
+						else if(field === 'desc') this.params[field] = isTrue(query[field]);
+						else this.params[field] = query[field];
+					} 
+				}
+			}
+		},
 		init() {
-			this.pageName = this.$route.name;
-			this.title = getRouteTitle(this.$route);
+			this.examHeader.init();
 
-			this.fetchExams();
+			if(this.indexModel) this.page = 1;
+			
+			this.fetchData();
 			this.setActions();
-
-			this.$nextTick(() => {
-				this.examHeader.init();
-			});
 			
 		},
 		setActions() {
@@ -135,40 +175,42 @@ export default {
          }
       },
 		onFilterSubmit(params) {
-			this.fetchParams = { ... params };
-			this.fetchExams(params);
+			this.params = { ...params };
+			this.onParamsChanged();
 		},
-		onTableOptionChanged(options) {
-			if(this.fetchParams.page < 0) return;
-			let origin = pick(this.fetchParams, 'page', 'pageSize', 'sortBy', 'desc');
-		
-			//判斷是否參數有變
-			
-			if(isEqual(origin, options)) return;
-
-			this.fetchParams.page = options.page;
-			this.fetchParams.pageSize = options.pageSize;
-			this.fetchParams.sortBy = options.sortBy;
-			this.fetchParams.desc = options.desc;
-			
-			this.$nextTick(() => {
-				this.fetchExams(this.fetchParams);
-         });
-
+		onParamsChanged() {
+			this.$store.commit(SET_LOADING, true);
+			this.$router.push({ name: 'exams', query: this.params });
 		},
-		fetchExams(params) {
+		fetchData(params) {
 			this.hideSummary();
 
-			if(!params) params = this.fetchParams;
-         this.$store.dispatch(FETCH_EXAMS, params)
+			this.loading = true;
+			if(!params) params = this.params;
+			let page = this.page;
+			let pageSize = this.pageSize;
+
+         this.$store.dispatch(FETCH_EXAMS, {...params, page, pageSize })
          .then(model => {
-				if(this.fetchParams.page < 0) this.fetchParams.page = 1;
+				if(this.page < 0) this.page = 1;
+				if(this.page === 1) this.$store.dispatch(SCROLL_TOP);
+				this.$nextTick(() => {
+					this.examHeader.setTitle();
+				});
          })
 			.catch(error => {
-            Bus.$emit('errors', resolveErrorData(error));
+            onError(error);
 			})
+			.finally(() => { 
+				this.loading = false;
+			});
 		},
-		onTableSelected(item) {
+		loadMore() {
+			this.loading = true;
+			this.page += 1;
+			this.fetchData();
+		},
+		onSelected(item) {
 			this.showSummary(item);
 		},
 		showSummary(item) {
@@ -191,12 +233,16 @@ export default {
 			};	
 					
 		},
+		refresh() {
+			this.page = 1;
+			this.fetchData();
+		},
 		updateExamTitle() {
 			let model = this.save.model;
 			this.$store.dispatch(UPDATE_EXAM, model)
          .then(() => {
 				this.onSaveCanceled();
-				this.fetchExams();
+				this.refresh();
          })
 			.catch(error => {
             Bus.$emit('errors', resolveErrorData(error));
@@ -232,13 +278,12 @@ export default {
 			let id = model.id;
          this.$store.dispatch(ABORT_EXAM, id)
          .then(() => {
-				this.fetchExams();
+				this.refresh();
          })
 			.catch(error => {
             Bus.$emit('errors', resolveErrorData(error));
 			})
 		}
-		
 	}
 }
 </script>
