@@ -1,22 +1,21 @@
 <template>
    <v-container>
       <div class="mb-2">
-			<core-bread :items="bread.items"
-			/>
+			<core-bread @selected="onBreadSelected" />
       </div>
 		<core-error-list v-if="hasErrors" />
 		<div v-show="exam">
          <exam-edit ref="examEdit" :exam="exam" :actions="examActions"
-			@aborted="onDeleted"
+			@aborted="onDeleted" @stored="onStored"
          /> 
       </div>
       
 		<v-dialog v-model="creator.active" :max-width="creator.maxWidth" persistent>
-			<exam-creator v-if="creator.active"  :init_params="params" :allow_cancel="false"
+			<exam-creator :init_params="params" :allow_cancel="canBack"
 			:type_options="typeOptions" :recruit_type_options="rTypeOptions"
 			:year_options="yearOptions" :subject_options="subjectOptions"
 			:year_recruits="yearRecruits"
-			@submit="onCreatorSubmit" @cancel="creator.active = false;"
+			@submit="onCreatorSubmit" @cancel="onCreatorCancel"
 			/>
 		</v-dialog>
    </v-container>
@@ -25,10 +24,10 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { INIT_EXAMS, CREATE_EXAM, EXAM_RECORDS, EXAM_SUMMARY,
-	LOAD_ACTIONS, ACTION_SELECTED
+	LOAD_ACTIONS, ACTION_SELECTED, LEAVE_EXAM
 } from '@/store/actions.type';
-import { SET_LOADING, CLEAR_ERROR, SET_ERROR, 
-	SET_EXAM_CREATE_PARAMS, SET_EXAM_TITLE
+import { SET_BREAD_ITEMS, SET_LOADING, CLEAR_ERROR, SET_ERROR, 
+	SET_EXAM_CREATE_PARAMS, SET_EXAM
 } from '@/store/mutations.type';
 import { onError, getRouteTitle, todayString } from '@/utils';
 import { DIALOG_MAX_WIDTH } from '@/config';
@@ -37,10 +36,10 @@ export default {
 	name: 'ExamNewView',
 	data() {
 		return {
-			bread: {
-            items: []
-			},
-			prevRoute: null,
+			pageName: 'exam-new',
+			title: '',
+
+			canBack: false,
 			references: {},
 
 			params: {
@@ -51,9 +50,8 @@ export default {
 			},
 
 			creator: {
-            active: false,
+				active: false,
             maxWidth: DIALOG_MAX_WIDTH,
-            selected: false,
             model: null
          },
 		}
@@ -64,7 +62,7 @@ export default {
 			createParams: state => state.exams.createParams,
 			examActions: state => state.exams.actions
 		}),
-		...mapGetters(['exam', 'errorList','contentMaxWidth']),
+		...mapGetters(['exam', 'breadItems', 'errorList','contentMaxWidth']),
       typeOptions() {
          if(this.indexModel) return this.indexModel.examTypeOptions;
          return [];
@@ -97,62 +95,92 @@ export default {
 		hasErrors(){
          if(!this.errorList) return false; 
          return this.errorList.any();
-      },
-		canBack() {
-			if(this.prevRoute && this.prevRoute.name) {
-				let name = this.prevRoute.name;
-				return name === 'exams';
-			} return false;
-		}
+      }
 	},
-	beforeRouteEnter(to, from, next) {
+	beforeRouteEnter(to, fromRoute, next) {
 		next(vm => {
-			vm.prevRoute = from
+			vm.canBack = fromRoute && fromRoute.name === 'exams';
 		});
 	},
+	beforeRouteLeave(to, from, next) {
+      //檢查是否有未存檔的測驗
+      this.examEdit.handleAction(LEAVE_EXAM, next);
+   },
 	created(){
 		Bus.$on(ACTION_SELECTED, this.onActionSelected);
 	},
 	beforeMount() {
-		if(this.createParams) {
-			this.params = { ...this.createParams };
+		let autoCreate = false;
+		if(this.createParams && this.createParams.recruit) {
+			this.params.recruit = this.createParams.recruit;
+			autoCreate = true;
+
 			this.$nextTick(() => {
 				this.$store.commit(SET_EXAM_CREATE_PARAMS, null);
 			});
-		}else {
-			if(this.indexModel) {
-				this.launchCreator();
-			}else {
-				this.$store.dispatch(INIT_EXAMS)
-				.then(() => {
-					this.$nextTick(() => {
-						this.launchCreator();
-					})
-				})
-				.catch(error => {
-					onError(error);
-				})
-			}
 		}
 
+		if(this.indexModel) {
+			if(autoCreate) this.createExam();
+			else this.launchCreator();			
+		}else {
+			this.initExams(autoCreate);
+		}
+
+		this.pageName = this.$route.name;
 		this.title = getRouteTitle(this.$route);
-		this.addBreadItem('', this.title);
-		this.addBreadItem('', '新測驗');
+		let items = [{
+			action: '', text: this.title
+		},{
+			action: '', text: '新測驗'
+		}];
+		this.$store.commit(SET_BREAD_ITEMS, items);
 	},
 	mounted() {
 		this.references = { ...this.$refs };
 	},
+   beforeDestroy() {
+      this.$store.commit(SET_EXAM, null);
+   },
 	methods: {
+		setTitle() {
+			let items = [{
+				action: EXAM_RECORDS, text: this.title
+			}];
+
+			if(this.exam) {
+				items.push({
+					action: EXAM_SUMMARY, text: this.exam.title ? this.exam.title : '無存檔名稱'
+				});
+			}
+			this.$store.commit(SET_BREAD_ITEMS, items);
+		},
+		initExams(autoCreate) {
+			this.$store.dispatch(INIT_EXAMS)
+			.then(() => {
+				this.$nextTick(() => {
+					if(autoCreate) this.createExam();
+					else this.launchCreator();
+				})
+			})
+			.catch(error => {
+				onError(error);
+			})
+		},
 		launchCreator() {
          this.creator.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
 			this.creator.active = true;
+		},
+		onCreatorCancel() {
+			this.creator.active = false;
+			this.$store.commit(SET_LOADING, true);
+			this.goExamsPage();
 		},
 		onCreatorSubmit(params, model) {
 			this.params = { ...params };
 
          this.creator.model = model;
 			this.creator.active = false;
-			this.setTitle();
 
 			this.createExam(params);
 		},
@@ -162,17 +190,10 @@ export default {
          this.$store.dispatch(CREATE_EXAM, params)
          .then(() => {
 				this.$nextTick(() => {
-					
+					this.setTitle();
 					this.examEdit.init();
 					this.setActions();
 				});
-
-				let bread =  this.bread;
-				let title = bread.items[bread.items.length - 1].text;
-				title = `${title}_${todayString().replace(/-/g,'')}`;
-				
-				this.$store.commit(SET_EXAM_TITLE, title);
-				
          })
 			.catch(error => {
             if(error.status) {
@@ -182,34 +203,6 @@ export default {
 				}
 			})
 		},
-      setTitle() {
-			this.clearBread();
-			this.addBreadItem('', this.title);
-		
-			let titleTextList = [];
-			let type = this.creator.model.type;
-			titleTextList.push(type.text);
-
-			let recruit = this.creator.model.recruit;
-			if(recruit) {
-				let rootRecruit = this.creator.model.rootRecruit;
-				titleTextList.push(rootRecruit.title);
-			}
-			
-			let subject = this.creator.model.subject;
-			titleTextList.push(subject.text);
-
-			let title = titleTextList.join('_');
-			this.addBreadItem('', title);
-		},
-		clearBread() {
-         this.bread.items = [];
-      },
-		addBreadItem(action ,text) {
-         this.bread.items.push({
-            action, text
-         });
-		},
 		setActions() {
 			let blocks = [];
          blocks.push([EXAM_RECORDS, EXAM_SUMMARY]);
@@ -217,20 +210,25 @@ export default {
 
 			this.$store.dispatch(LOAD_ACTIONS, blocks);
 		},
+		onBreadSelected(item) {
+			this.onActionSelected(item.action);
+		},
 		onActionSelected(name) {
+			if(this.$route.name !== this.pageName) return;
+			
 			if(name === EXAM_RECORDS) this.goExamsPage();
 			else this.examEdit.handleAction(name);
 		},
 		onDeleted() {
 			this.goExamsPage();
 		},
+		onStored(id) {
+			//交券完成
+			this.$router.push({ path: `/exams/${id}` });
+		},
 		goExamsPage() {
-			if(this.canBack) {
-				if(window.history.length) this.$router.go(-1);
-				else this.$router.push({ name: 'exams' });
-			}else {
-				this.$router.push({ name: 'exams' });
-			}
+			if(this.canBack && window.history.length) this.$router.go(-1);
+			else this.$router.push({ name: 'exams' });
 		}
    }
 }

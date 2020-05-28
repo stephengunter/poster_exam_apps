@@ -7,13 +7,6 @@
       <div v-show="rqReadMode">
          <rq-read ref="rqRead" :model="model" />
       </div>
-      <div v-show="rqExamMode">
-         <exam-edit ref="examEdit" :exam="exam" :actions="examActions"
-         @aborted="onExamAborted" @leave="onLeaveExam"
-         @stored="onExamStored"
-         /> 
-      </div>
-      
    </v-container>
 </template>
 
@@ -24,7 +17,8 @@ import {
    RQS_INDEX, FETCH_RQS, SELECT_RQS_MODE, CREATE_EXAM,
    STORE_EXAM, SAVE_EXAM, ABORT_EXAM, LEAVE_EXAM 
 } from '@/store/actions.type';
-import { SET_RQS_PAGE_MODE, SET_APP_ACTIONS, SET_EXAM_TITLE } from '@/store/mutations.type';
+import { SET_RQS_PAGE_MODE, SET_APP_ACTIONS, SET_EXAM_TITLE,
+SET_EXAM_CREATE_PARAMS, SET_LOADING } from '@/store/mutations.type';
 
 import { resolveErrorData, getRouteTitle, todayString } from '@/utils';
 import { DIALOG_MAX_WIDTH } from '@/config';
@@ -33,6 +27,7 @@ export default {
    name: 'RQsView',
    data() {
 		return {
+         pageName: 'rqs',
          title: '',
 
          params: {
@@ -50,15 +45,6 @@ export default {
 
          references: {}
 		}
-   },
-   beforeRouteLeave(to, from, next) {
-      //檢查是否有未存檔的測驗
-      if(this.rqExamMode) {
-         this.examEdit.handleAction(LEAVE_EXAM, next);
-         return;
-      }else {
-         next();
-      }
    },
    computed: {
       ...mapGetters(['exam', 'rqReadMode', 'rqExamMode', 
@@ -80,11 +66,6 @@ export default {
 			else if (this.references.rqRead) return this.references.rqRead;
 			return null;
 		},
-      examEdit() {
-			if(this.$refs.examEdit) return this.$refs.examEdit;
-			else if (this.references.examEdit) return this.references.examEdit;
-			return null;
-		},
       firstLoad() {
          return this.params.mode < 0;
       }
@@ -104,7 +85,8 @@ export default {
          };
 
          this.rqHeader.init();
-
+         
+         this.pageName = this.$route.name;
          let title = getRouteTitle(this.$route);
          this.title = title;
          
@@ -119,10 +101,12 @@ export default {
       setMode(val) {
          this.$store.commit(SET_RQS_PAGE_MODE, val);
          this.$nextTick(() => {
-				if(this.rqReadMode) this.fetchData(this.params);
-            else if(this.rqExamMode) this.createExam(this.params);  
-
-				this.setActions();
+				if(this.rqReadMode) {
+               this.fetchData(this.params);
+               this.setActions();
+            }else if(this.rqExamMode) {
+               this.createExam(this.params)
+            }
          })
       },
       onSelectionSubmit() {
@@ -145,25 +129,9 @@ export default {
 			})
       },
       createExam(params) {
-        
-         let model = this.rqHeader.getModel();
-         
-         let items = [model.mode.text, model.rootRecruit.title, model.subject.text];
-
-         this.$store.dispatch(CREATE_EXAM, { recruit: params.recruit })
-         .then(exam => {
-            let title = `${items.join('_')}_${todayString().replace(/-/g,'')}`;
-            this.$store.commit(SET_EXAM_TITLE, title);
-
-            this.$nextTick(() => {
-               this.rqHeader.setTitle();
-               this.setActions();
-            	this.examEdit.init();
-         	})
-         })
-			.catch(error => {
-            Bus.$emit('errors', resolveErrorData(error));
-			})
+         this.$store.commit(SET_LOADING, true);
+         this.$store.commit(SET_EXAM_CREATE_PARAMS, { recruit: params.recruit });
+         this.$router.push({ path: '/exams/new' });
       },
       setActions() {
          let blocks = [];
@@ -171,36 +139,18 @@ export default {
          if(this.rqReadMode) {
             types = [SELECT_RQS_MODE];
             blocks.push(types);
-         }else if(this.rqExamMode) {
-				blocks.push([RQS_INDEX, EXAM_SUMMARY]);
-				blocks.push(this.examActions.map(item => item.name));
+            this.$store.dispatch(LOAD_ACTIONS, blocks);
          }
-
-         this.$store.dispatch(LOAD_ACTIONS, blocks);
       },
       onActionSelected(name) {
-         if(this.rqExamMode) {
-            this.examEdit.handleAction(name);
-            return;
-         }
+         if(this.$route.name !== this.pageName) return;
 
          if(name === SELECT_RQS_MODE || name === RQS_INDEX) {
             this.rqHeader.selectMode();            
          }else {
             
          }
-      },
-      onExamAborted() {
-         this.init();
-      },
-      onLeaveExam() {
-         this.init();
-      },
-      onExamStored() {
-         //交券成功，跳轉至測驗紀錄
-         this.$router.push({ name: 'exams' });
-      }
-      
+      }      
 	}
 }
 </script>

@@ -4,6 +4,7 @@
 		:title="title" :fetch_params="fetchParams"
 		@filter-submit="onFilterSubmit"
 		/>
+		
 		<exam-table ref="examTable" :init_params="fetchParams" :model="pagedList" 
 		@options-changed="onTableOptionChanged" @selected="onTableSelected"
 		/>
@@ -46,7 +47,8 @@ export default {
 	name: 'ExamView',
 	data() {
 		return {
-			title: '',
+			pageName: 'exams',
+         title: '',
 			// params: {
 			// 	rootRecruitId: 0
 			// },
@@ -105,9 +107,12 @@ export default {
 	},
 	methods: {
 		init() {
+			this.pageName = this.$route.name;
 			this.title = getRouteTitle(this.$route);
+
 			this.fetchExams();
 			this.setActions();
+
 			this.$nextTick(() => {
 				this.examHeader.init();
 			});
@@ -121,6 +126,8 @@ export default {
 			this.$store.dispatch(LOAD_ACTIONS, blocks);
 		},
 		onActionSelected(name) {
+			if(this.$route.name !== this.pageName) return;
+			
          if(name === FILTER_EXAMS) {
             this.examHeader.launchFilter();         
          }else if(name === NEW_EXAM) {

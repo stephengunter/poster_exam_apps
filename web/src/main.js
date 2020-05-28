@@ -17,7 +17,7 @@ import '@/components';
 import '@/filters';
 
 import JwtService from '@/services/jwt.service';
-import { CHECK_AUTH, REFRESH_TOKEN, FETCH_ACTIONS } from '@/store/actions.type';
+import { INIT, CHECK_AUTH, REFRESH_TOKEN, FETCH_ACTIONS } from '@/store/actions.type';
 import { FOR_ALL, GUEST_ONLY, USER_ONLY } from '@/routes/route.type';
 import Menu from '@/common/menu';
 import { SET_CURRENT_PAGE, SET_MENUS, SET_FOOTER_MENUS, SET_USER_MENUS,
@@ -25,7 +25,7 @@ import { SET_CURRENT_PAGE, SET_MENUS, SET_FOOTER_MENUS, SET_USER_MENUS,
 } from '@/store/mutations.type';
 
 router.beforeEach((to, from, next) => {
-	
+
 	store.dispatch(CHECK_AUTH).then(user => {
 
 		if(to.meta.type === FOR_ALL) return authDone(next, to, user);
@@ -67,6 +67,7 @@ router.afterEach((to, from) => {
 const redirect = (next, route) => next(route);
 
 const authDone = (next, to, user = null) => {
+
 	let mainMenus = Menu.getMainMenus(router.options.routes, to, user);
 	store.commit(SET_MENUS, mainMenus);
 
@@ -77,7 +78,8 @@ const authDone = (next, to, user = null) => {
 		let userMenus = Menu.getUserMenus(router.options.routes, to, user);
 		store.commit(SET_USER_MENUS, userMenus);
 	}
-	
+
+	store.dispatch(INIT);
 	store.dispatch(FETCH_ACTIONS, to);
 	return next();
 }

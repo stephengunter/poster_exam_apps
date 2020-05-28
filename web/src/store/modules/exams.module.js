@@ -1,7 +1,7 @@
 import ExamsService from '@/services/exams.service';
 import { resolveErrorData, examActions } from '@/utils';
 
-import { FETCH_EXAMS, INIT_EXAMS, CREATE_EXAM, STORE_EXAM, 
+import { INIT, FETCH_EXAMS, INIT_EXAMS, CREATE_EXAM, STORE_EXAM, 
    UPDATE_EXAM, READ_EXAM, SAVE_EXAM, ABORT_EXAM, EDIT_EXAM, LOAD_EXAM_SUMMARY
 } from '@/store/actions.type';
 
@@ -12,7 +12,7 @@ import { SET_LOADING, SET_EXAM_INDEX_MODEL, SET_EXAM_CREATE_PARAMS,
 const initialState = {
    indexModel: null,
    pagedList: null,
-   createParams: null,
+   createParams: { recruit: 0 },
    exam: null,
    actions: [],
    hasAnswers: [],
@@ -47,6 +47,9 @@ const setExam = (context, exam) => {
 }
 
 const actions = {
+   [INIT](context) {
+      context.commit(SET_EXAM, null);
+   },
    [FETCH_EXAMS](context, params) {
       let firstLoad = params.page < 0;
       context.commit(SET_LOADING, true);

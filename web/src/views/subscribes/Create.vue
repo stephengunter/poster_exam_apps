@@ -1,8 +1,7 @@
 <template>
    <v-container>
       <div class="mb-2">
-			<core-bread :items="bread.items"
-			/>
+			<core-bread />
       </div>
 		<div v-if="ready">
 			<div v-if="existingBill">
@@ -38,7 +37,7 @@
 import { mapState, mapGetters } from 'vuex';
 import { isBadRequest, getRouteTitle, uuid } from '@/utils';
 import { CREATE_SUBSCRIBE, BEGIN_PAY } from '@/store/actions.type';
-import { SET_LOADING } from '@/store/mutations.type';
+import { SET_BREAD_ITEMS, SET_LOADING } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
 export default {
@@ -47,9 +46,6 @@ export default {
 		return {
 			title: '',
 			ready: false,
-         bread: {
-            items: []
-			},
 
 			plan: null,
 			planId: 0,
@@ -107,20 +103,19 @@ export default {
 	},
 	methods: {
 		setTitle() {
-			this.clearBread();
-			this.addBreadItem('', this.title);
+			let items = [{
+            action: '', text: this.title
+         }];
 
 			if(this.newBill) {
-				if(this.planSelected) this.addBreadItem('', '確認訂單');
+				if(this.planSelected) {
+					items.push({
+						action: '', text: '確認訂單'
+					});
+				}
 			}
-		},
-		clearBread() {
-         this.bread.items = [];
-      },
-		addBreadItem(action ,text) {
-         this.bread.items.push({
-            action, text
-         });
+
+			this.$store.commit(SET_BREAD_ITEMS, items);
 		},
 		fetchData() {
 			this.$store.dispatch(CREATE_SUBSCRIBE)

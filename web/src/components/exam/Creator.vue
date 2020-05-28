@@ -87,6 +87,10 @@ export default {
          type: Boolean,
          default: true
       },
+      auto: {
+         type: Boolean,
+         default: false
+      },
    },
    data() {
 		return {
@@ -123,12 +127,13 @@ export default {
          return null;
       }
    },
-	beforeMount() {
+   beforeMount() {
       this.init();
-	},
+   },
 	methods: {
 		init() {
          this.params = { ...this.init_params };
+
          if(this.params.type < 1) this.setType(this.type_options[0]);
          else this.setType(this.selectedType);
       },

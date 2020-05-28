@@ -1,8 +1,7 @@
 <template>
    <div class="mb-2">
-      <core-bread :items="bread.items"
-      @selected="onBreadSelected"
-      />
+      <core-bread @selected="onBreadSelected" />
+      
       <v-dialog v-model="selector.active" :max-width="selector.maxWidth" persistent>
          <v-card>
             <v-card-title>
@@ -55,6 +54,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { RQS_INDEX, SELECT_RQS_MODE, EXAM_SUMMARY, ACTION_SELECTED } from '@/store/actions.type';
+import { SET_BREAD_ITEMS } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
 import { isEmptyObject, getListText } from '@/utils';
 
@@ -85,10 +85,6 @@ export default {
             active: false,
             maxWidth: DIALOG_MAX_WIDTH,
             selected: false
-         },
-
-         bread: {
-            items: []
          }
 		}
    },
@@ -131,10 +127,6 @@ export default {
    },
    methods: {
       init() {
-         this.bread = {
-            items: [],
-            text: ''
-         };
          this.selector =  {
             active: false,
             maxWidth: DIALOG_MAX_WIDTH,
@@ -171,36 +163,22 @@ export default {
 			}
 			return '';
       },
-      getBread() {
-         return this.bread;
-      },
       onBreadSelected(item) {
          Bus.$emit(ACTION_SELECTED, item.action);
       },
-      clearBread() {
-         this.bread.items = [];
-      },
-      addBreadItem(action ,text) {
-         this.bread.items.push({
-            action, text
-         });
-      },
       setTitle() {
-         this.clearBread();
+         let items = [{
+            action: SELECT_RQS_MODE, text: this.title
+         }];
 
          if(this.rqReadMode) {
-            this.addBreadItem(SELECT_RQS_MODE, this.title);
-            // 閱讀, 108年度, 專業科目1
-            let selectedList = [this.selectedMode.text, this.selectedRootRecruit.title, this.selectedSubject.text];
-            this.addBreadItem(SELECT_RQS_MODE, selectedList.join('_'));
-
-         }else if(this.rqExamMode) {
-            this.addBreadItem(RQS_INDEX, this.title);
-
-            let examTitle = '無存檔名稱';
-            if(this.exam && this.exam.title) examTitle = this.exam.title;
-            this.addBreadItem(EXAM_SUMMARY, examTitle);
+            let selectedList = [this.selectedRootRecruit.title, this.selectedSubject.text];
+            
+            items.push({
+               action: SELECT_RQS_MODE, text: selectedList.join('_')
+            }); 
          }
+         this.$store.commit(SET_BREAD_ITEMS, items);
          
       },
 		selectMode() {
@@ -248,8 +226,6 @@ export default {
       getModel() {
          return this.model;
       }
-      
-
    }
 }
 </script>

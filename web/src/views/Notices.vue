@@ -1,8 +1,7 @@
 <template>
    <v-container>
       <div class="mb-2">
-			<core-bread :items="bread.items"
-			/>
+			<core-bread />
       </div>
 		<v-card v-if="list.length">
 			<v-list>
@@ -35,16 +34,13 @@
 import { mapState, mapGetters } from 'vuex';
 import { FETCH_NOTICES } from '@/store/actions.type';
 import { onError, getRouteTitle } from '@/utils';
-import { SET_NOTICE } from '@/store/mutations.type';
+import { SET_BREAD_ITEMS, SET_NOTICE } from '@/store/mutations.type';
 
 
 export default {
 	name: 'NoticesView',
 	data(){
 		return {
-			bread: {
-            items: []
-			},
 			page: 1,
 			pageSize: 15,
 			  
@@ -83,16 +79,10 @@ export default {
 	},
 	methods: {
       setTitle() {
-			this.clearBread();
-			this.addBreadItem('', this.title);
-		},
-		clearBread() {
-         this.bread.items = [];
-      },
-		addBreadItem(action ,text) {
-         this.bread.items.push({
-            action, text
-         });
+			let items = [{
+				action: '', text: this.title
+			}];
+			this.$store.commit(SET_BREAD_ITEMS, items);
 		},
 		loadMore() {
 			this.page += 1;

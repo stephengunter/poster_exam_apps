@@ -41,7 +41,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { EXAM_SUMMARY, STORE_EXAM, SAVE_EXAM, 
+import { EXAM_SUMMARY, STORE_EXAM, SAVE_EXAM,
    ABORT_EXAM, DELETE_EXAM, EXAM_RECORDS, LEAVE_EXAM,
    LOAD_EXAM_SUMMARY, SELECT_RQS_MODE, RQS_INDEX
 } from '@/store/actions.type';
@@ -117,7 +117,6 @@ export default {
    },
    methods: {
       init() {
-         console.log('init edit');
          this.stored = false;
          this.answerChangeds = 0;
 
@@ -273,7 +272,7 @@ export default {
             this.stored = true;
 
             Bus.$emit('success');
-            this.$emit('stored');
+            this.$emit('stored', this.exam.id);
          })
 			.catch(error => {
             Bus.$emit('errors', error);
@@ -284,6 +283,10 @@ export default {
          this.summary.active = true;
       },
       onLeaveExam(callback = null) {
+         if(!this.exam) {
+            this.leaveExam(callback);
+            return;
+         } 
          let vm = this;
          if(vm.exam.isComplete || vm.stored) {
             vm.leaveExam(callback);

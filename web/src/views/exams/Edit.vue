@@ -1,14 +1,12 @@
 <template>
    <v-container>
-		
       <div class="mb-2">
-			<core-bread :items="bread.items"
-			/>
+			<core-bread @selected="onBreadSelected" />
       </div>
 		<core-error-list v-if="hasErrors" />
 		<div v-show="exam">
          <exam-edit ref="examEdit" :exam="exam" :actions="examActions"
-			@aborted="onDeleted"
+			@aborted="onDeleted"  @stored="onStored"
          /> 
       </div>
       
@@ -18,9 +16,10 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { EDIT_EXAM, EXAM_RECORDS, EXAM_SUMMARY,
+import { EDIT_EXAM, EXAM_RECORDS, EXAM_SUMMARY, LEAVE_EXAM,
 LOAD_ACTIONS, ACTION_SELECTED } from '@/store/actions.type';
-import { SET_LOADING, CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
+import { SET_BREAD_ITEMS, SET_LOADING, CLEAR_ERROR,
+SET_EXAM, SET_ERROR } from '@/store/mutations.type';
 import { tryParseInt, getRouteTitle } from '@/utils';
 
 export default {
@@ -28,9 +27,9 @@ export default {
 	props: ['id'],
 	data() {
 		return {
-			bread: {
-            items: []
-			},
+			pageName: 'exam-edit',
+			title: '',
+
 			prevRoute: null,
 			references: {}
 		}
@@ -48,23 +47,22 @@ export default {
 		hasErrors(){
          if(!this.errorList) return false; 
          return this.errorList.any();
-      },
-		canBack() {
-			if(this.prevRoute && this.prevRoute.name) {
-				let name = this.prevRoute.name;
-				return name === 'exams';
-			} return false;
-		}
+      }
 	},
 	beforeRouteEnter(to, from, next) {
 		next(vm => {
 			vm.prevRoute = from
 		});
 	},
+	beforeRouteLeave(to, from, next) {
+      //檢查是否有未存檔的測驗
+      this.examEdit.handleAction(LEAVE_EXAM, next);
+   },
 	created(){
 		Bus.$on(ACTION_SELECTED, this.onActionSelected);
 	},
 	beforeMount() {
+		this.pageName = this.$route.name;
 		this.title = getRouteTitle(this.$route);
 		this.setTitle();
 
@@ -73,18 +71,20 @@ export default {
 	mounted() {
 		this.references = { ...this.$refs };
 	},
+	beforeDestroy() {
+      this.$store.commit(SET_EXAM, null);
+   },
 	methods: {
       setTitle() {
-			this.clearBread();
-			this.addBreadItem('', this.title);
-		},
-		clearBread() {
-         this.bread.items = [];
-      },
-		addBreadItem(action ,text) {
-         this.bread.items.push({
-            action, text
-         });
+			let items = [{
+				action: EXAM_RECORDS, text: this.title
+			}];
+			if(this.exam) {
+				items.push({
+					action: EXAM_SUMMARY, text: this.exam.title ? this.exam.title : '無存檔名稱'
+				});
+			}
+			this.$store.commit(SET_BREAD_ITEMS, items);
 		},
 		fetchData() {
 			this.$store.commit(CLEAR_ERROR);
@@ -93,11 +93,9 @@ export default {
          this.$store.dispatch(EDIT_EXAM, id)
          .then(() => {
 				this.$nextTick(() => {
-					
 					this.examEdit.init();
 					this.setActions();
-
-					this.addBreadItem('', this.exam.title ? this.exam.title : '無存檔名稱');
+					this.setTitle();
 				})
          })
 			.catch(error => {
@@ -116,20 +114,24 @@ export default {
 
 			this.$store.dispatch(LOAD_ACTIONS, blocks);
 		},
+		onBreadSelected(item) {
+			this.onActionSelected(item.action);
+		},
 		onActionSelected(name) {
+			if(this.$route.name !== this.pageName) return;
+
 			if(name === EXAM_RECORDS) this.goExamsPage();
 			else this.examEdit.handleAction(name);
 		},
 		onDeleted() {
 			this.goExamsPage();
 		},
+		onStored(id) {
+			//交券完成
+			this.$router.push({ path: `/exams/${id}` });
+		},
 		goExamsPage() {
-			if(this.canBack) {
-				if(window.history.length) this.$router.go(-1);
-				else this.$router.push({ name: 'exams' });
-			}else {
-				this.$router.push({ name: 'exams' });
-			}
+			this.$router.push({ name: 'exams' });
 		}
    }
 }

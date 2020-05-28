@@ -1,8 +1,6 @@
 <template>
    <div class="mb-2">
-      <core-bread :items="bread.items"
-      @selected="onBreadSelected"
-      />
+      <core-bread @selected="onBreadSelected" />
       
       <v-dialog v-model="category.active" :max-width="category.maxWidth" :persistent="true">
 			<note-category
@@ -21,6 +19,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { FETCH_NOTE_CATEGORIES, NOTE_CATEGORY, ACTION_SELECTED } from '@/store/actions.type';
+import { SET_BREAD_ITEMS } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH,  NOTES_SETTINGS} from '@/config';
 import { resolveErrorData } from '@/utils';
 
@@ -65,11 +64,7 @@ export default {
          
          tree: {
             items: []
-			},
-
-			bread: {
-            items: []
-			},
+			}
 		}
    },
    computed: {
@@ -155,31 +150,29 @@ export default {
 			});
 		},
 		setTitle() {
+			let items = [{
+            action: NOTE_CATEGORY, text: this.title
+         },{
+				action: NOTE_CATEGORY, text: this.rootSubject.text
+			}];
 			
-			this.clearBread();
-			this.addBreadItem(NOTE_CATEGORY, this.title);
-			this.addBreadItem(NOTE_CATEGORY, this.rootSubject.text);
+			// this.addBreadItem(NOTE_CATEGORY, this.title);
+			// this.addBreadItem(NOTE_CATEGORY, this.rootSubject.text);
 			
 			if(this.params.keyword) {
-				if(this.subject) this.addBreadItem(NOTE_CATEGORY, this.subject.text);
-				this.addBreadItem(NOTE_CATEGORY, `搜尋：${this.params.keyword}` );
+				if(this.subject) items.push({ action: NOTE_CATEGORY, text: this.subject.text });
+				items.push({ action: NOTE_CATEGORY, text: `搜尋：${this.params.keyword}` });
 			}else {
 				
-				this.addBreadItem(NOTE_CATEGORY, this.subject.text);
-				if(this.term) this.addBreadItem(NOTE_CATEGORY, this.term.text);
+				items.push({ action: NOTE_CATEGORY, text: this.subject.text });
+				if(this.term) items.push({ action: NOTE_CATEGORY, text: this.term.text });
 
 				let mode = this.modeOptions.find(item => item.value === this.params.mode);
-				if(mode)this.addBreadItem(NOTE_CATEGORY, mode.text);
+				if(mode) items.push({ action: NOTE_CATEGORY, text: mode.text });
 			}
+
+			this.$store.commit(SET_BREAD_ITEMS, items);
 			
-      },
-		clearBread() {
-         this.bread.items = [];
-      },
-      addBreadItem(action ,text) {
-         this.bread.items.push({
-            action, text
-         });
       },
 		onBreadSelected(item) {
 			Bus.$emit(ACTION_SELECTED, item.action);

@@ -1,5 +1,6 @@
 //App
 export const SET_CURRENT_PAGE = 'setCurrentPage';
+export const SET_BREAD_ITEMS = 'setBreadItems';
 export const SET_LOADING = 'setLoading';
 export const SET_WINDOW_WIDTH = 'setWindowWidth';
 export const SET_RESPONSIVE = 'setResponsive';

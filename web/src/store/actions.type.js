@@ -9,6 +9,7 @@ export const GOOGLE_SIGNIN = 'googleSignIn';
 export const LOGIN = 'login';
 export const LOGOUT = 'logout';
 
+export const INIT = 'init';
 export const GET_MENUS = 'getMenus';
 export const FETCH_ACTIONS = 'fetchActions';
 export const LOAD_ACTIONS = 'loadActions';

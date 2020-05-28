@@ -1,16 +1,12 @@
 <template>
 <div>
    <div class="mb-2" v-if="responsive">
-      <core-bread :items="bread.items"
-      @selected="onBreadSelected"
-      />
+      <core-bread @selected="onBreadSelected" />
    </div>
    <div v-else>
       <v-row>
 			<v-col cols="8">
-            <core-bread :items="bread.items"
-            @selected="onBreadSelected"
-            />
+            <core-bread @selected="onBreadSelected" />
 			</v-col>
 			<v-col cols="4" class="text-right">
             <router-link to="/exams/new" class="a-btn">
@@ -36,6 +32,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { FILTER_EXAMS, ACTION_SELECTED } from '@/store/actions.type';
+import { SET_BREAD_ITEMS } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
 export default {
@@ -59,11 +56,7 @@ export default {
             maxWidth: DIALOG_MAX_WIDTH,
             selected: false,
             model: null
-         },
-
-			bread: {
-            items: []
-			},
+         }
 		}
    },
    computed: {
@@ -83,13 +76,8 @@ export default {
    },
    methods: {
       init() {
-         
          this.fetchParams = { ...this.fetch_params };
 
-         this.bread = {
-            items: [],
-            text: ''
-         };
          this.filter =  {
             active: false,
             maxWidth: DIALOG_MAX_WIDTH,
@@ -97,33 +85,29 @@ export default {
          };
 
          this.setTitle();
-			
-      },
-      clearBread() {
-         this.bread.items = [];
-      },
-      addBreadItem(action ,text) {
-         this.bread.items.push({
-            action, text
-         });
       },
       setTitle() {
-         this.clearBread();
+         let items = [{
+            action: FILTER_EXAMS, text: this.title
+         }];
 
-         let action = FILTER_EXAMS;
-         this.addBreadItem(action, this.title);
+         if(this.filter.model) {
+            let selectedSubject = this.filter.model.subject;
+            if(selectedSubject) {
+               items.push({
+                  action: FILTER_EXAMS, text: selectedSubject.text
+               }); 
+            }
 
-         if(!this.filter.model) return;
-
-         let selectedSubject = this.filter.model.subject;
-         if(selectedSubject) {
-            this.addBreadItem(action, selectedSubject.text);   
+            let selectedStatus = this.filter.model.status;
+            if(selectedStatus) {
+               items.push({
+                  action: FILTER_EXAMS, text: selectedStatus.text
+               });  
+            }
          }
 
-         let selectedStatus = this.filter.model.status;
-         if(selectedStatus) {
-            this.addBreadItem(action, selectedStatus.text);   
-         }
+         this.$store.commit(SET_BREAD_ITEMS, items);
 
          // if(this.examIndexMode) {
          //    let action = FILTER_EXAMS;
@@ -168,9 +152,6 @@ export default {
          //    this.addBreadItem(NEW_EXAM, title);
          // }
          
-      },
-      getBread() {
-         return this.bread;
       },
       onBreadSelected(item) {
          Bus.$emit(ACTION_SELECTED, item.action);

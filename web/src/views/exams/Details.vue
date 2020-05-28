@@ -1,8 +1,7 @@
 <template>
    <v-container>
       <div class="mb-2">
-			<core-bread :items="bread.items"
-			/>
+			<core-bread @selected="onBreadSelected" />
       </div>
 		<div v-show="exam">
          <exam-edit ref="examEdit" :exam="exam" :actions="examActions"
@@ -15,7 +14,9 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { READ_EXAM, EXAM_RECORDS, EXAM_SUMMARY,
-LOAD_ACTIONS, ACTION_SELECTED } from '@/store/actions.type';
+	LOAD_ACTIONS, ACTION_SELECTED
+} from '@/store/actions.type';
+import { SET_BREAD_ITEMS } from '@/store/mutations.type';
 import { tryParseInt, onError, getRouteTitle } from '@/utils';
 
 export default {
@@ -23,9 +24,9 @@ export default {
 	props: ['id'],
 	data() {
 		return {
-			bread: {
-            items: []
-			},
+			pageName: 'exam-details',
+			title: '',
+			
 			prevRoute: null,
 			references: {}
 		}
@@ -39,12 +40,6 @@ export default {
 			if(this.$refs.examEdit) return this.$refs.examEdit;
 			else if (this.references.examEdit) return this.references.examEdit;
 			return null;
-		},
-		canBack() {
-			if(this.prevRoute && this.prevRoute.name) {
-				let name = this.prevRoute.name;
-				return name === 'exams';
-			} return false;
 		}
 	},
 	beforeRouteEnter(to, from, next) {
@@ -56,6 +51,7 @@ export default {
 		Bus.$on(ACTION_SELECTED, this.onActionSelected);
 	},
 	beforeMount() {
+		this.pageName = this.$route.name;
 		this.title = getRouteTitle(this.$route);
 		this.setTitle();
 
@@ -66,27 +62,24 @@ export default {
 	},
 	methods: {
       setTitle() {
-			this.clearBread();
-			this.addBreadItem('', this.title);
-		},
-		clearBread() {
-         this.bread.items = [];
-      },
-		addBreadItem(action ,text) {
-         this.bread.items.push({
-            action, text
-         });
+			let items = [{
+				action: EXAM_RECORDS, text: this.title
+			}];
+			if(this.exam) {
+				items.push({
+					action: EXAM_SUMMARY, text: this.exam.title ? this.exam.title : '無存檔名稱'
+				});
+			}
+			this.$store.commit(SET_BREAD_ITEMS, items);
 		},
 		fetchData() {
 			let id = tryParseInt(this.id);
          this.$store.dispatch(READ_EXAM, id)
          .then(() => {
 				this.$nextTick(() => {
-					
 					this.examEdit.init();
 					this.setActions();
-
-					this.addBreadItem('', this.exam.title ? this.exam.title : '無存檔名稱');
+					this.setTitle();
 				})
          })
 			.catch(error => {
@@ -100,7 +93,12 @@ export default {
 
 			this.$store.dispatch(LOAD_ACTIONS, blocks);
 		},
+		onBreadSelected(item) {
+			this.onActionSelected(item.action);
+		},
 		onActionSelected(name) {
+			if(this.$route.name !== this.pageName) return;
+
 			if(name === EXAM_RECORDS) this.goExamsPage();
 			else this.examEdit.handleAction(name);
 		},
@@ -108,12 +106,7 @@ export default {
 			this.goExamsPage();
 		},
 		goExamsPage() {
-			if(this.canBack) {
-				if(window.history.length) this.$router.go(-1);
-				else this.$router.push({ name: 'exams' });
-			}else {
-				this.$router.push({ name: 'exams' });
-			}
+			this.$router.push({ name: 'exams' });
 		}
    }
 }
