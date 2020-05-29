@@ -1,18 +1,19 @@
 import ExamsService from '@/services/exams.service';
 import { resolveErrorData, examActions } from '@/utils';
 
-import { FETCH_EXAMS, CREATE_EXAM, STORE_EXAM, UPDATE_EXAM, READ_EXAM,
-   SAVE_EXAM, ABORT_EXAM, EDIT_EXAM, LOAD_EXAM_SUMMARY
+import { INIT, FETCH_EXAMS, INIT_EXAMS, CREATE_EXAM, STORE_EXAM, 
+   UPDATE_EXAM, READ_EXAM, SAVE_EXAM, ABORT_EXAM, EDIT_EXAM, LOAD_EXAM_SUMMARY
 } from '@/store/actions.type';
 
-import { SET_LOADING, SET_EXAM_PAGE_MODE, SET_EXAM_INDEX_MODEL,
-   SET_EXAMS, SET_EXAM, SET_EXAM_TITLE, SET_EXAM_ACTIONS
+import { SET_LOADING, SET_EXAM_INDEX_MODEL, SET_EXAM_CREATE_PARAMS,
+   SET_EXAMS, SET_EXAM, SET_EXAM_TITLE, SET_EXAM_RESERVED, SET_EXAM_ACTIONS
 } from '@/store/mutations.type';
 
 const initialState = {
    indexModel: null,
-   mode: null,
    pagedList: null,
+   list: [],
+   createParams: { recruit: 0 },
    exam: null,
    actions: [],
    hasAnswers: [],
@@ -31,15 +32,6 @@ export const state = { ...initialState };
 const getters = {
    exam(state) {
       return state.exam;
-   },
-   examIndexMode(state) {
-      return state.mode && state.mode.name === 'index';
-   },
-   examCreateMode(state) {
-      return state.mode && state.mode.name === 'create';
-   },
-   examEditMode(state) {
-      return state.mode && state.mode.name === 'edit';
    }
 };
 
@@ -56,14 +48,35 @@ const setExam = (context, exam) => {
 }
 
 const actions = {
+   [INIT](context) {
+      context.commit(SET_EXAM, null);
+   },
    [FETCH_EXAMS](context, params) {
+      if(params.page <= 1) context.commit(SET_EXAMS, null);
       let firstLoad = params.page < 0;
-      context.commit(SET_LOADING, true);
+      if(params.page <= 1) context.commit(SET_LOADING, true);
+      
       return new Promise((resolve, reject) => {
          ExamsService.fetch(params)
             .then(model => {
                if(firstLoad)  context.commit(SET_EXAM_INDEX_MODEL, model);
                context.commit(SET_EXAMS, model.pagedList);
+               resolve(model);
+            })
+            .catch(error => {
+               reject(error);
+            })
+            .finally(() => { 
+               if(params.page <= 1) context.commit(SET_LOADING, false);
+            });
+      });
+   },
+   [INIT_EXAMS](context) {
+      context.commit(SET_LOADING, true);
+      return new Promise((resolve, reject) => {
+         ExamsService.init()
+            .then(model => {
+               context.commit(SET_EXAM_INDEX_MODEL, model);
                resolve(model);
             })
             .catch(error => {
@@ -98,6 +111,8 @@ const actions = {
       return new Promise((resolve, reject) => {
          ExamsService.save(model.id, model)
          .then(() => {
+            context.commit(SET_EXAM_RESERVED, true);
+            context.commit(SET_EXAM_TITLE, model.title);
             resolve(true);
          })
          .catch(error => {
@@ -233,17 +248,41 @@ const mutations = {
    [SET_EXAM_INDEX_MODEL](state, model) {
       state.indexModel = model;
    },
-   [SET_EXAM_PAGE_MODE](state, mode) {
-      state.mode = mode;
+   [SET_EXAM_CREATE_PARAMS](state, params) {
+      state.createParams = params;
    },
    [SET_EXAMS](state, pagedList) {
-      state.pagedList = pagedList;
+      if(pagedList) {
+         state.pagedList = pagedList;
+         let viewList = pagedList.viewList;
+         if(viewList && viewList.length) {
+            state.list = state.list.concat(viewList);
+         }
+      }else {
+         state.pagedList = null;
+         state.list = [];
+      }
    },
    [SET_EXAM](state, exam) {
-      state.exam = exam;
+      if(exam) state.exam = exam;
+      else {
+         state.exam = null;
+         state.hasAnswers = [];
+         state.noAnswers = [];
+         state.summary = {
+            hasAnswers: [],
+            noAnswers: [],
+            corrects: [],
+            wrongs: []
+         };
+      }
+      
    },
    [SET_EXAM_TITLE](state, title) {
       state.exam.title = title;
+   },
+   [SET_EXAM_RESERVED](state, val) {
+      state.exam.reserved = val;
    },
    [SET_EXAM_ACTIONS](state, actions) {
       state.actions = actions;

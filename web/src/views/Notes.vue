@@ -50,6 +50,7 @@ export default {
    name: 'NotesView',
    data() {
 		return {
+			pageName: 'notes',
 			title: '',
          params: {
 				mode: 0,
@@ -135,8 +136,9 @@ export default {
    },
 	methods: {
 		init() {
-         let title = getRouteTitle(this.$route);
-			this.title = title;
+			this.pageName = this.$route.name;
+			this.title = getRouteTitle(this.$route);
+			
 			this.setActions();
 		},
 		setActions() {
@@ -180,6 +182,8 @@ export default {
 			}
 		},
 		onActionSelected(name) {
+			if(this.$route.name !== this.pageName) return;
+			
 			if(name === NOTE_CATEGORY) this.noteHeader.showCategory();
 			else if(name === SEE_QUESTIONS) this.seeQuestions();
 		},

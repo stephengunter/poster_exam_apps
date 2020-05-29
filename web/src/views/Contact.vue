@@ -2,8 +2,7 @@
    <v-container>
 		<div v-if="saved">
 			<div class="mb-2">
-				<core-bread :items="bread.items"
-				/>
+				<core-bread />
 			</div>
 			<v-row>
 				<v-col cols="12">
@@ -79,15 +78,12 @@ import sanitizeHtml from 'sanitize-html';
 import { mapState, mapGetters } from 'vuex';
 import { STORE_MESSAGE } from '@/store/actions.type';
 import { isBadRequest, resolveErrorData, getRouteTitle } from '@/utils';
-import { SET_ERROR, CLEAR_ERROR } from '@/store/mutations.type';
+import { SET_BREAD_ITEMS, SET_ERROR, CLEAR_ERROR } from '@/store/mutations.type';
 
 export default {
 	name: 'ContactView',
 	data(){
 		return {
-			bread: {
-            items: []
-			},
 
 			model: {
 				message: {
@@ -123,16 +119,10 @@ export default {
 	},
 	methods: {
 		setTitle() {
-			this.clearBread();
-			this.addBreadItem('', this.title);
-		},
-		clearBread() {
-         this.bread.items = [];
-      },
-		addBreadItem(action ,text) {
-         this.bread.items.push({
-            action, text
-         });
+			let items = [{
+				action: '', text: this.title
+			}];
+			this.$store.commit(SET_BREAD_ITEMS, items);
 		},
 		getErrMsg(key){
 			let err = this.errors.collect(key);

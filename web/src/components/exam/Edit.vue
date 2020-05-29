@@ -17,8 +17,8 @@
    </v-dialog>
    
    <v-dialog v-model="save.active" :max-width="save.maxWidth" persistent>
-      <exam-save v-if="save.active" :exam="exam" :on_ok="save.on_ok"
-      @save="saveExam" @cancel="onSaveCanceled"
+      <exam-save v-if="save.active" :model="save.model" :on_ok="save.on_ok"
+      @save="submitSave" @cancel="onSaveCanceled"
       />
    </v-dialog>
 
@@ -41,7 +41,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { EXAM_SUMMARY, STORE_EXAM, SAVE_EXAM, 
+import { EXAM_SUMMARY, STORE_EXAM, SAVE_EXAM,
    ABORT_EXAM, DELETE_EXAM, EXAM_RECORDS, LEAVE_EXAM,
    LOAD_EXAM_SUMMARY, SELECT_RQS_MODE, RQS_INDEX
 } from '@/store/actions.type';
@@ -112,10 +112,34 @@ export default {
          return []; 
       }
    },
+   beforeMount() {
+      this.init();
+   },
    methods: {
       init() {
          this.stored = false;
-         this.$store.dispatch(LOAD_EXAM_SUMMARY);
+         this.answerChangeds = 0;
+
+         this.showPhoto = {
+				active: false,
+				model: null,
+				maxWidth: DIALOG_MAX_WIDTH
+         };
+
+         this.save = {
+            model: null,
+            maxWidth: DIALOG_MAX_WIDTH,
+            active: false,
+            callback: null,
+            on_ok: null
+         };
+
+         this.summary = {
+				active: false,
+				maxWidth: DIALOG_MAX_WIDTH
+         };
+
+         if(this.exam) this.$store.dispatch(LOAD_EXAM_SUMMARY);
       },
       onAnswerChanged() {
          this.answerChangeds += 1;
@@ -156,9 +180,10 @@ export default {
 			})
       },
       saveExam(callback = null) {
-         // console.log('callback', callback);
-         // console.log('exam', this.exam);
-         if(!this.exam.reserved && !this.save.active) {
+         if(this.exam.reserved) {
+            //曾經存檔過
+            this.submitSave(callback);
+         }else {
             //第一次存檔
             this.save = {
                model: { ... this.exam },
@@ -166,20 +191,21 @@ export default {
                active: true,
                on_ok: null,
                callback
-            }
-            return;
+            };
          }
-
-         // console.log('not first');
-
+      },
+      submitSave(callback = null) {
+         let model = null;
          if(this.save.active) {
-            this.save.active = false;
             callback = this.save.callback;
+            model = this.save.model;
+         }else {
+            model = this.exam;
          }
-         
-         this.$store.dispatch(SAVE_EXAM, this.exam)
+
+         this.$store.dispatch(SAVE_EXAM, model)
          .then(() => {
-            this.exam.reserved = true;
+            this.onSaveCanceled();
             this.answerChangeds = 0;
 
             Bus.$emit('success');
@@ -191,14 +217,12 @@ export default {
 			})
       },
       onSaveCanceled() {
-         //還原修改前資料
-         this.exam.title = this.save.model.title;
          this.save = {
             model: null,
             maxWidth: DIALOG_MAX_WIDTH,
             active: false,
-            callback: null,
-            on_ok: null
+            on_ok: null,
+            callback: null
          };
       },
       onStoreExam() {
@@ -215,32 +239,40 @@ export default {
             });
             return;
          }else {
-            //交券
             this.storeExam();
          }
       },
       storeExam() {
          let vm = this;
-         if(!this.exam.reserved && !this.save.active) {
+         if(vm.exam.reserved) {
+            //曾經存檔過
+            vm.submitStore();
+         }else {
             //第一次存檔
-            this.save = {
-               model: { ... this.exam },
-               maxWidth: this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH,
+            vm.save = {
+               model: { ... vm.exam },
+               maxWidth: vm.contentMaxWidth ? vm.contentMaxWidth : DIALOG_MAX_WIDTH,
                active: true,
-               on_ok: vm.storeExam,
-               callback: null
-            }
-            return;
+               on_ok: () => {
+                  vm.submitStore();
+               },
+               callback: null,
+            };
          }
-
-         //將存檔視窗關閉
-         if(this.save.active) this.save.active = false;
+      },
+      submitStore() {
          
+         if(this.save.active) this.exam.title = this.save.model.title;
+
          this.$store.dispatch(STORE_EXAM, this.exam)
          .then(() => {
+            this.onSaveCanceled();
+            this.answerChangeds = 0;
+
             this.stored = true;
+
             Bus.$emit('success');
-            this.$emit('stored');
+            this.$emit('stored', this.exam.id);
          })
 			.catch(error => {
             Bus.$emit('errors', error);
@@ -251,6 +283,10 @@ export default {
          this.summary.active = true;
       },
       onLeaveExam(callback = null) {
+         if(!this.exam) {
+            this.leaveExam(callback);
+            return;
+         } 
          let vm = this;
          if(vm.exam.isComplete || vm.stored) {
             vm.leaveExam(callback);

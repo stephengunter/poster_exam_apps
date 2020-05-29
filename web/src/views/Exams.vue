@@ -1,22 +1,24 @@
 <template>
 	<v-container>
 		<exam-header ref="examHeader"
-		:title="title"
-		:fetch_params="fetchParams" :create_params="createParams" 
-		@filter-submit="onFilterSubmit" @creator-submit="onCreatorSubmit"
+		:title="title" :init_params="params"
+		@filter-submit="onFilterSubmit"
 		/>
-		<div v-show="examIndexMode">
-			<exam-table ref="examTable" :init_params="fetchParams" :model="pagedList" 
-			@options-changed="onTableOptionChanged" @selected="onTableSelected"
+		
+      <v-card v-show="list.length">
+			<exam-list v-if="responsive" :list="list" :params="params"
+			@selected="onSelected"
 			/>
-		</div>
-
-		<div v-show="examEditMode">
-         <exam-edit ref="examEdit" :exam="exam" :actions="examActions"
-			@leave="setMode('index')" @aborted="setMode('index')"
-			@saved="onExamSaved" @stored="onExamStored"
-         /> 
-      </div>
+			<exam-table v-else :list="list" :params="params"
+			@selected="onSelected"
+			/>
+   	</v-card>
+		<scroll-loader :loader-method="loadMore" :loader-disable="!hasNextPage">
+			<div v-show="loading" class="text-center">
+				<v-progress-circular color="info" indeterminate size="36">
+				</v-progress-circular>
+			</div>
+		</scroll-loader>
 
 		<v-dialog v-model="summary.active" :max-width="summary.maxWidth">
          <exam-summary v-if="summary.active" :model="summary.model" 
@@ -25,32 +27,31 @@
 				<v-card-actions>
 					<v-btn @click="onRemoveExam(summary.model)" color="error">刪除</v-btn>
 					<v-spacer />
-					<v-btn v-if="summary.model.isComplete" @click="readExam(summary.model)" color="primary">閱讀解析</v-btn>
-					<v-btn v-else @click="editExam(summary.model)" color="success">繼續作答</v-btn>
+					<v-btn v-if="summary.model.isComplete" @click="readExam(summary.model.id)" color="primary">閱讀解析</v-btn>
+					<v-btn v-else @click="editExam(summary.model.id)" color="success">繼續作答</v-btn>
 				</v-card-actions>
          </exam-summary>
       </v-dialog>
 
 		<v-dialog v-model="save.active" :max-width="save.maxWidth" persistent>
-			<exam-save :exam="save.model" 
-			@save="updateExamTitle" @cancel="save.active = false"
+			<exam-save v-if="save.active" :model="save.model" 
+			@save="updateExamTitle" @cancel="onSaveCanceled"
 			/>
 		</v-dialog>
 	</v-container>
 </template>
 
 <script>
-import pick from 'lodash/pick';
-import isEqual from 'lodash/isEqual';
 import { mapState, mapGetters } from 'vuex';
-import { LOAD_ACTIONS, ACTION_SELECTED,
-	NEW_EXAM, EDIT_EXAM, FETCH_EXAMS, FILTER_EXAMS,
-	STORE_EXAM, SAVE_EXAM, ABORT_EXAM, CREATE_EXAM, READ_EXAM,
+import { LOAD_ACTIONS, ACTION_SELECTED, SCROLL_TOP,
+	NEW_EXAM, FETCH_EXAMS, FILTER_EXAMS, ABORT_EXAM,
 	EXAM_RECORDS, EXAM_SUMMARY, DELETE_EXAM, UPDATE_EXAM	
 } from '@/store/actions.type';
-import { SET_EXAM_PAGE_MODE, SET_APP_ACTIONS, SET_EXAM_TITLE } from '@/store/mutations.type';
+import { SET_LOADING } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
-import { showConfirm, resolveErrorData, getRouteTitle, todayString } from '@/utils';
+import { tryParseInt, isTrue, isEmptyObject, onError, 
+showConfirm, resolveErrorData, resolveQueryString
+} from '@/utils';
 import Exam from '@/models/exam';
 
 
@@ -58,37 +59,24 @@ export default {
 	name: 'ExamView',
 	data() {
 		return {
-			title: '',
-			modeOptions: [{
-				name: 'index',
-				text: '紀錄'
-			},{
-				name: 'create',
-				text: '新測驗'
-			},{
-				name: 'edit',
-				text: '模擬測驗'
-			}],
-
+			pageName: 'exams',
+         title: '',
+			
 			params: {
-				rootRecruitId: 0
-			},
-
-			fetchParams: {
 				status: -1,
 				subject: -1,
 				sortBy: 'lastUpdated',
-				desc: true,
-				page: -1,
-				pageSize: 10
+				desc: true
 			},
 
-			createParams: {
-				recruit: 0,
-				type: -1,
-				rtype: -1,
-				subject: 0				
+			page: -1,
+			pageSize: 10,
+
+			scroller: {
+				disable: true
 			},
+
+			loading: false,
 
 			summary: {
 				active: false,
@@ -100,19 +88,19 @@ export default {
             model: null,
             maxWidth: DIALOG_MAX_WIDTH,
             active: false,
-            callback: null
-			},
+            callback: null,
+            on_ok: null
+         },
 			
 			references: {}
 		}
 	},
 	computed: {
-		...mapGetters(['exam', 'examIndexMode', 'examCreateMode', 'examEditMode', 
-		'responsive','contentMaxWidth'
+		...mapGetters(['exam', 'responsive','contentMaxWidth'
 		]),
 		...mapState({
 			indexModel: state => state.exams.indexModel,
-			mode: state => state.exams.mode,
+			list: state => state.exams.list,
 			pagedList: state => state.exams.pagedList,
 			examActions: state => state.exams.actions,
 		}),
@@ -121,115 +109,108 @@ export default {
 			else if (this.references.examHeader) return this.references.examHeader;
 			return null;
 		},
-		examTable() {
-			if(this.$refs.examTable) return this.$refs.examTable;
-			else if (this.references.examTable) return this.references.examTable;
-			return null;
-		},
-		examEdit() {
-			if(this.$refs.examEdit) return this.$refs.examEdit;
-			else if (this.references.examEdit) return this.references.examEdit;
-			return null;
+		hasNextPage() {
+			if(this.pagedList) return this.pagedList.hasNextPage;
+			return false;
 		}
-
 	},
 	created(){
 		Bus.$on(ACTION_SELECTED, this.onActionSelected);
+	},
+	beforeMount() {
+		this.title = '測驗紀錄';
+		this.pageName = this.$route.name;
+		this.resolveQuery();
 	},
 	mounted() {
 		this.references = { ...this.$refs };
 		this.init();
 	},
+	watch:{
+		$route (to, from){
+			if(to.name === this.pageName && from.name === this.pageName) {
+				this.resolveQuery();
+				this.init();
+			}
+		}
+	}, 
 	methods: {
-		init() {
-			this.title = getRouteTitle(this.$route);
-			this.setMode('index');
-		},
-		setMode(name) {
-			let mode = this.modeOptions.find(item => item.name === name);
-			this.$store.commit(SET_EXAM_PAGE_MODE, mode);
-
-			this.$nextTick(() => {
-				if(this.examIndexMode) {
-					this.fetchExams();
-				}else if(this.examCreateMode) {
-					
-				}else if(this.examEditMode) {
-					this.examEdit.init();
+		resolveQuery() {
+			let query = this.$route.query;
+			if(query && !isEmptyObject(query)) {
+				let keys = [];
+				let numFields = ['status', 'subject'];
+				for (let field in this.params) {
+					if(query.hasOwnProperty(field)) {
+						if(numFields.includes(field)) this.params[field] = tryParseInt(query[field]);
+						else if(field === 'desc') this.params[field] = isTrue(query[field]);
+						else this.params[field] = query[field];
+					} 
 				}
+			}
+		},
+		init() {
+			this.examHeader.init();
 
-				this.setActions();
-				this.examHeader.init();
-         })
+			if(this.indexModel) this.page = 1;
+			
+			this.fetchData();
+			this.setActions();
+			
 		},
 		setActions() {
 			let blocks = [];
          let types = [];
-         if(this.examIndexMode) {
-				types = [FILTER_EXAMS, NEW_EXAM];
-				blocks.push(types);
-         }else if(this.examCreateMode) {
-				types = [NEW_EXAM];
-				blocks.push(types);
-         }else if(this.examEditMode) {
-				blocks.push([EXAM_RECORDS, EXAM_SUMMARY]);
-				blocks.push(this.examActions.map(item => item.name));
-			}
-
+         types = [FILTER_EXAMS, NEW_EXAM];
+			blocks.push(types);
 			this.$store.dispatch(LOAD_ACTIONS, blocks);
 		},
 		onActionSelected(name) {
-			if(this.examEditMode) {
-				this.examEdit.handleAction(name);
-				return;
-			}
-
+			if(this.$route.name !== this.pageName) return;
+			
          if(name === FILTER_EXAMS) {
             this.examHeader.launchFilter();         
          }else if(name === NEW_EXAM) {
-            this.examHeader.launchCreator();     
+            this.$router.push({ path: '/exams/new' });
          }
       },
 		onFilterSubmit(params) {
-			this.fetchParams = { ... params };
-			this.fetchExams(params);
+			this.params = { ...params };
+			this.onParamsChanged();
 		},
-		onTableOptionChanged(options) {
-			if(this.fetchParams.page < 0) return;
-			let origin = pick(this.fetchParams, 'page', 'pageSize', 'sortBy', 'desc');
-		
-			//判斷是否參數有變
-			
-			if(isEqual(origin, options)) return;
-
-			this.fetchParams.page = options.page;
-			this.fetchParams.pageSize = options.pageSize;
-			this.fetchParams.sortBy = options.sortBy;
-			this.fetchParams.desc = options.desc;
-			
-			this.$nextTick(() => {
-				this.fetchExams(this.fetchParams);
-         });
-
+		onParamsChanged() {
+			this.$store.commit(SET_LOADING, true);
+			this.$router.push({ name: 'exams', query: this.params });
 		},
-		fetchExams(params) {
+		fetchData(params) {
 			this.hideSummary();
 
-			if(!params) params = this.fetchParams;
-         this.$store.dispatch(FETCH_EXAMS, params)
+			this.loading = true;
+			if(!params) params = this.params;
+			let page = this.page;
+			let pageSize = this.pageSize;
+
+         this.$store.dispatch(FETCH_EXAMS, {...params, page, pageSize })
          .then(model => {
-				if(this.fetchParams.page < 0) this.fetchParams.page = 1;
+				if(this.page < 0) this.page = 1;
+				if(this.page === 1) this.$store.dispatch(SCROLL_TOP);
+				this.$nextTick(() => {
+					this.examHeader.setTitle();
+				});
          })
 			.catch(error => {
-            Bus.$emit('errors', resolveErrorData(error));
+            onError(error);
 			})
+			.finally(() => { 
+				this.loading = false;
+			});
 		},
-		onCreatorSubmit(params) {
-			console.log('onCreatorSubmit', params);
-			this.createParams = { ... params };
-			this.createExam(params);
+		loadMore() {
+			this.loading = true;
+			this.page += 1;
+			this.fetchData();
 		},
-		onTableSelected(item) {
+		onSelected(item) {
 			this.showSummary(item);
 		},
 		showSummary(item) {
@@ -241,83 +222,49 @@ export default {
 			this.summary.active = false;
 			this.summary.model = null;
 		},
-		createExam(params) {
-			this.setMode('create');
-			
-         this.$store.dispatch(CREATE_EXAM, params)
-         .then(exam => {
-				let bread =  this.examHeader.getBread();
-				let title = bread.items[bread.items.length - 1].text;
-				title = `${title}_${todayString().replace(/-/g,'')}`;
-				
-				this.$store.commit(SET_EXAM_TITLE, title);
-				
-				this.setMode('edit');
-         })
-			.catch(error => {
-            Bus.$emit('errors', resolveErrorData(error));
-			})
-		},
 		editExamTitle(model) {
+			this.hideSummary();
 			this.save = {
 				model: { ... model },
 				maxWidth: this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH,
 				active: true,
+				on_ok: null,
 				callback: null
-			};			
+			};	
+					
+		},
+		refresh() {
+			this.page = 1;
+			this.fetchData();
 		},
 		updateExamTitle() {
 			let model = this.save.model;
 			this.$store.dispatch(UPDATE_EXAM, model)
          .then(() => {
-				this.save.active = false;
-				this.fetchExams();
+				this.onSaveCanceled();
+				this.refresh();
          })
 			.catch(error => {
             Bus.$emit('errors', resolveErrorData(error));
 			})
 		},
-		editExam(model) {
+		onSaveCanceled() {
+         this.save = {
+            model: null,
+            maxWidth: DIALOG_MAX_WIDTH,
+            active: false,
+            on_ok: null,
+            callback: null
+         };
+      },
+		editExam(id) {
+			this.$router.push({ path: `/exams/edit/${id}` });
 			this.hideSummary();
-			//繼續作答
-			let id = model.id;
-         this.$store.dispatch(EDIT_EXAM, id)
-         .then(exam => {
-				this.setMode('edit');
-         })
-			.catch(error => {
-            Bus.$emit('errors', resolveErrorData(error));
-			})
 		},
-		readExam(model) {
+		readExam(id) {
+			this.$router.push({ path: `/exams/${id}` });
 			this.hideSummary();
-			
-			let id = model.id;
-         this.$store.dispatch(READ_EXAM, id)
-         .then(exam => {
-				this.setMode('edit');
-         })
-			.catch(error => {
-            Bus.$emit('errors', resolveErrorData(error));
-			})
 		},
-		onExamSaved() {
-			if(this.examEditMode) {
-				this.examHeader.setTitle();
-			}
-		},
-		onExamStored() {
-			//交券完畢, 回index模式
-			//設定搜尋條件為'已完成'
-			this.fetchParams.status = 1;
-			this.fetchParams.sortBy = 'lastUpdated';
-			this.fetchParams.desc = true;
-			this.fetchParams.page = 1;
-
-			this.examTable.init();
-
-			this.setMode('index');
-		},	
 		onRemoveExam(model) {
 			showConfirm({
             type: 'error', 
@@ -331,13 +278,12 @@ export default {
 			let id = model.id;
          this.$store.dispatch(ABORT_EXAM, id)
          .then(() => {
-				this.fetchExams();
+				this.refresh();
          })
 			.catch(error => {
             Bus.$emit('errors', resolveErrorData(error));
 			})
 		}
-		
 	}
 }
 </script>

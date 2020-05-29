@@ -5,6 +5,8 @@ const source =`${API_URL}/api/exams`;
 
 const fetch = (params) => BaseService.fetch(source, params);
 
+const init = () => BaseService.fetch(`${source}/init`);
+
 const create = (params) => BaseService.fetch(`${source}/create`, params);
 
 const abort = (id) => BaseService.remove(`${source}/${id}`);
@@ -19,4 +21,4 @@ const store = (model) => BaseService.post(source, model);
 
 const details = (id) => BaseService.fetch(`${source}/${id}`);
 
-export default { fetch, create, abort, save, edit, update, store, details };
+export default { fetch, init, create, abort, save, edit, update, store, details };

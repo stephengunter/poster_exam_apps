@@ -1,8 +1,7 @@
 <template>
    <v-container>
       <div class="mb-2">
-			<core-bread :items="bread.items"
-			/>
+			<core-bread />
       </div>
 		<v-card v-if="model">
 			<v-card-title class="font-weight-black">
@@ -30,6 +29,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { NOTIFICATION_DETAILS } from '@/store/actions.type';
+import { SET_BREAD_ITEMS } from '@/store/mutations.type';
 import { tryParseInt, onError, getRouteTitle } from '@/utils';
 
 export default {
@@ -37,9 +37,6 @@ export default {
 	props: ['id'],
 	data() {
 		return {
-			bread: {
-            items: []
-			},
 			prevRoute: null
 		}
 	},
@@ -59,7 +56,6 @@ export default {
 		});
 	},
 	beforeMount() {
-		
 		this.title = getRouteTitle(this.$route);
 		this.setTitle();
 
@@ -67,16 +63,10 @@ export default {
 	},
 	methods: {
       setTitle() {
-			this.clearBread();
-			this.addBreadItem('', this.title);
-		},
-		clearBread() {
-         this.bread.items = [];
-      },
-		addBreadItem(action ,text) {
-         this.bread.items.push({
-            action, text
-         });
+			let items = [{
+				action: '', text: this.title
+			}];
+			this.$store.commit(SET_BREAD_ITEMS, items);
 		},
 		fetchData() {
 			let id = tryParseInt(this.id);

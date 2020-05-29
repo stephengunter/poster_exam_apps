@@ -1,5 +1,5 @@
+import queryString from 'query-string';
 import { API_URL } from '@/config';
-import { isEmptyObject } from './helper';
 
 export const isBadRequest = (error) => error.status ? error.status === 400 : false;
 
@@ -30,19 +30,12 @@ export const activeOptions = () => {
    }];
 }
 
-export const resolveQueryString = (params) => {
-   if(!params || isEmptyObject(params)) return '';
-   let queryString = '';
-   for (let field in params) {
-      let value = params[field];
-      queryString += `${field}=${value}&`;
-   }
-   return queryString.substr(0, queryString.length - 1);
-}
+export const resolveQueryString = (params) => queryString.stringify(params);
 
 export const buildQuery = (url, params) => {
    let queryString = resolveQueryString(params);
    if(!queryString) return url;
+  
    return `${url}?${queryString}`;
 }
 

@@ -1,12 +1,12 @@
 <template>
    <ul :class="class_name">
-      <li v-for="(item, index) in items" :key="index">
+      <li v-for="(item, index) in breadItems" :key="index">
          <a v-if="item.action" href="#" @click.prevent="selected(item)">
             {{ item.text }}
          </a>
          <span v-else>{{ item.text }}</span>
           
-         <v-icon v-if="index < items.length - 1" class="pb-1 ml-1 mr-1" size="16">
+         <v-icon v-if="index < breadItems.length - 1" class="pb-1 ml-1 mr-1" size="16">
             mdi-chevron-right
          </v-icon>
       </li>
@@ -14,17 +14,17 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 export default {
    name: 'Bread',
    props: {
-      items : {
-         type: Array,
-         default: null
-      },
       class_name : {
          type: String,
          default: ''
       }
+   },
+   computed: {
+      ...mapGetters(['breadItems']),
    },
    methods: {
       selected(item) {

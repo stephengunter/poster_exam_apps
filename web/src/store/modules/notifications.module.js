@@ -26,7 +26,6 @@ const getters = {
 
 const actions = {
    [FETCH_NOTIFICATION_ITEMS](context) {
-      context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          NotificationsService.fetch({ page: -1 })
          .then(model => {
@@ -36,9 +35,6 @@ const actions = {
          .catch(error => {
             reject(error);
          })
-         .finally(() => { 
-            context.commit(SET_LOADING, false);
-         });
       });
    },
    [FETCH_NOTIFICATIONS](context, params) {
@@ -104,7 +100,6 @@ const mutations = {
       state.params = params;
    },
    [SET_NOTIFICATIONS](state, pagedList) {
-      
       if(pagedList) {
          state.pagedList = pagedList;
          let viewList = pagedList.viewList;

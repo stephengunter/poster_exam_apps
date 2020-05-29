@@ -1,7 +1,7 @@
 import Errors from '@/common/errors';
-import { FETCH_ACTIONS, LOAD_ACTIONS } from '@/store/actions.type';
+import { INIT, FETCH_ACTIONS, LOAD_ACTIONS, SCROLL_TOP } from '@/store/actions.type';
 
-import { SET_CURRENT_PAGE, SET_LOADING, SET_ERROR, CLEAR_ERROR, 
+import { SET_CURRENT_PAGE, SET_BREAD_ITEMS, SET_LOADING, SET_ERROR, CLEAR_ERROR, 
    SET_DRAWER, SET_MENUS, SET_FOOTER_MENUS, SET_USER_MENUS, SET_WINDOW_WIDTH,
    SET_RESPONSIVE, TOGGLE_DRAWER, SET_VIEW_ACTIONS, SET_APP_ACTIONS
 } from '@/store/mutations.type';
@@ -10,6 +10,7 @@ import { fetchViewActions } from '@/utils';
 
 const initialState = {
    currentPage: null,
+   breadItems: [],
    loading: false,
    loadingText: '',
    sideBarWidth: 260,
@@ -30,6 +31,9 @@ export const state = { ...initialState };
 const getters = {
    currentPage(state) {
       return state.currentPage;
+   },
+   breadItems(state) {
+      return state.breadItems;
    },
    loading(state) {
       return state.loading;
@@ -62,6 +66,13 @@ const getters = {
 };
 
 const actions = {
+   [INIT](context) {
+      context.commit(SET_LOADING, false);
+      context.commit(CLEAR_ERROR);
+      context.commit(SET_CURRENT_PAGE, null);
+      context.commit(SET_BREAD_ITEMS, []);
+      
+   },
    [FETCH_ACTIONS](context, route) {
       context.commit(SET_APP_ACTIONS, []);
       let viewActions = fetchViewActions(route.name);
@@ -69,7 +80,7 @@ const actions = {
    },
    [LOAD_ACTIONS](context, blocks) {
       let viewActions =  context.state.viewActions;
-      
+
       let actions = [];
       blocks.forEach(block => {
          let blockActions = [];
@@ -81,6 +92,11 @@ const actions = {
 
       context.commit(SET_APP_ACTIONS, actions);
    },
+   [SCROLL_TOP](context) {
+      var element = document.getElementById('app-container');
+      if(!element) return;
+      element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest'});
+   },
 }
 
 
@@ -88,6 +104,9 @@ const actions = {
 const mutations = {
    [SET_CURRENT_PAGE](state, page) {
       state.currentPage = page;
+   },
+   [SET_BREAD_ITEMS](state, items) {
+      state.breadItems = items;
    },
    [SET_LOADING](state, loading, text = '') {
       state.loading = loading;

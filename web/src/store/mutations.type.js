@@ -1,5 +1,6 @@
 //App
 export const SET_CURRENT_PAGE = 'setCurrentPage';
+export const SET_BREAD_ITEMS = 'setBreadItems';
 export const SET_LOADING = 'setLoading';
 export const SET_WINDOW_WIDTH = 'setWindowWidth';
 export const SET_RESPONSIVE = 'setResponsive';
@@ -48,9 +49,11 @@ export const SET_QUESTIONS = 'setQuestions';
 //Exams
 export const SET_EXAM_INDEX_MODEL = 'setExamIndexModel';
 export const SET_EXAM_PAGE_MODE = 'setExamPageMode';
+export const SET_EXAM_CREATE_PARAMS = 'setExamCreateParams';
 export const SET_EXAMS = 'setExams';
 export const SET_EXAM = 'setExam';
 export const SET_EXAM_TITLE = 'setExamTitle';
+export const SET_EXAM_RESERVED = 'setExamReserved';
 export const SET_EXAM_ACTIONS = 'setExamActions';
 
 //Subscribes

@@ -9,7 +9,7 @@
       :actions = "appActions"
       />
 
-      <menu-notifications v-if="currentUser"
+      <menu-notifications v-if="false"
       />
       
       <div class="ml-1">

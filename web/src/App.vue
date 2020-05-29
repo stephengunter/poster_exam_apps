@@ -1,5 +1,5 @@
 <template>
-   <v-app>
+   <v-app id="app-container">
 		<layout-drawer />
 		<layout-header />
 		<layout-container />

@@ -1,11 +1,11 @@
 <template>
-   <v-card v-if="exam">
+   <v-card v-if="model">
       <v-card-title>測驗存檔</v-card-title>
       <v-card-text>
          <v-container>
             <v-row>
                <v-col cols="12">
-                  <v-textarea v-model="exam.title" label="存檔名稱" outlined auto-grow
+                  <v-textarea v-model="model.title" label="存檔名稱" outlined auto-grow
                   v-validate="{ required: true }"
                   :error-messages="getErrMsg('title')"
                   name="title"
@@ -34,7 +34,7 @@ import { mapState, mapGetters } from 'vuex';
 export default {
    name: 'ExamSave',
    props: {
-      exam: {
+      model: {
          type: Object,
          default: null
       },

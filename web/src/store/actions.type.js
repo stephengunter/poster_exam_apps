@@ -9,10 +9,12 @@ export const GOOGLE_SIGNIN = 'googleSignIn';
 export const LOGIN = 'login';
 export const LOGOUT = 'logout';
 
+export const INIT = 'init';
 export const GET_MENUS = 'getMenus';
 export const FETCH_ACTIONS = 'fetchActions';
 export const LOAD_ACTIONS = 'loadActions';
 export const ACTION_SELECTED = 'actionSelected';
+export const SCROLL_TOP = 'scrollTop';
 
 //Messages
 export const STORE_MESSAGE = 'storeMessage';
@@ -53,6 +55,7 @@ export const FETCH_RQS = 'fetchRQs';
 //Exams
 export const EXAM_RECORDS = 'examRecords';
 export const NEW_EXAM = 'newExam';
+export const INIT_EXAMS = 'initExams';
 export const CREATE_EXAM = 'createExam';
 export const EDIT_EXAM = 'editExam';
 export const LEAVE_EXAM = 'leaveExam';

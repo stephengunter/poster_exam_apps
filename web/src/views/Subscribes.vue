@@ -1,8 +1,7 @@
 <template>
    <v-container>
       <div class="mb-2">
-			<core-bread :items="bread.items"
-			/>
+			<core-bread />
       </div>
 		<div v-if="ready">
 			<v-row>
@@ -55,7 +54,7 @@
 import { mapState, mapGetters } from 'vuex';
 import { resolveErrorData, getRouteTitle } from '@/utils';
 import { SUBSCRIBES_INDEX, FETCH_PLANS, EDIT_BILL, BILL_DETAILS } from '@/store/actions.type';
-import { SET_LOADING, SET_AUTH_CHANGED } from '@/store/mutations.type';
+import { SET_BREAD_ITEMS, SET_LOADING, SET_AUTH_CHANGED } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
 export default {
@@ -65,9 +64,7 @@ export default {
 		  
 			title: '',
 			ready: false,
-         bread: {
-            items: []
-			},
+
 			planId: 0,
 
 			bill: {
@@ -101,7 +98,6 @@ export default {
 	methods: {
 		init() {
 			this.ready = false;
-			this.clearBread();
 			this.planId = 0;
 
 			this.bill = {
@@ -120,16 +116,10 @@ export default {
 			this.fetchData();
 		},
 		setTitle() {
-			this.clearBread();
-			this.addBreadItem('', this.title);
-		},
-		clearBread() {
-         this.bread.items = [];
-      },
-		addBreadItem(action ,text) {
-         this.bread.items.push({
-            action, text
-         });
+			let items = [{
+            action: '', text: this.title
+         }];
+			this.$store.commit(SET_BREAD_ITEMS, items);
 		},
 		subscribeNow() {
 			this.$router.push({ path: '/subscribes/create' });

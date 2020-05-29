@@ -17,8 +17,18 @@ const applinks = [{
 },{
    name: 'test',
    path: '/test',
-   view: 'test/Test',
+   view: 'test/Index',
    parent: '',
+   meta: {
+      type: FOR_ALL,
+      menus: [],
+      title: 'Test'
+   } 
+},{
+   name: 'test-details',
+   path: '/test/details',
+   view: 'test/Details',
+   parent: 'test',
    meta: {
       type: FOR_ALL,
       menus: [],
@@ -51,7 +61,7 @@ const applinks = [{
 },{
    name: 'notice-details',
    path: '/notices/:id/:user?',
-   view: 'NoticeDetails',
+   view: 'notices/Details',
    props: true,
    parent: 'notices',
    meta: {
@@ -117,7 +127,7 @@ const userLinks = [{
 },{
    name: 'notification-details',
    path: '/notifications/:id',
-   view: 'NotificationDetails',
+   view: 'notifications/Details',
    props: true,
    parent: 'notifications',
    meta: {
@@ -150,6 +160,38 @@ const userLinks = [{
          key: 'main', show: FOR_ALL, order: 3
       }],
       icon: 'mdi-file-document-edit-outline',
+      title: '模擬測驗'
+   } 
+},{
+   name: 'exam-new',
+   path: '/exams/new',
+   view: 'exams/New',
+   parent: 'exams',
+   meta: {
+      type: USER_ONLY,
+      menus: [],
+      title: '模擬測驗'
+   } 
+},{
+   name: 'exam-edit',
+   path: '/exams/edit/:id',
+   view: 'exams/Edit',
+   props: true,
+   parent: 'exams',
+   meta: {
+      type: USER_ONLY,
+      menus: [],
+      title: '模擬測驗'
+   } 
+},{
+   name: 'exam-details',
+   path: '/exams/:id',
+   view: 'exams/Details',
+   props: true,
+   parent: 'exams',
+   meta: {
+      type: USER_ONLY,
+      menus: [],
       title: '模擬測驗'
    } 
 },{
