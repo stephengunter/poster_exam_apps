@@ -59,6 +59,15 @@ export const getListText = (items, splitText = ' > ') => {
    return text;
 }
 
+export const removeTags = (str) => {
+   if((str === null) || (str === '')) return false;
+   else {
+      str = str.toString();
+      return str.replace( /(<([^>]+)>)/ig, '');
+   }   
+      
+}
+
 export const todayString = () => new Date().toJSON().slice(0,10);
 
 export const cnNumbers = ['零','一','二','三','四','五','六','七','八','九','十'];

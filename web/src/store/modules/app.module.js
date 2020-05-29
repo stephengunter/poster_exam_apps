@@ -107,6 +107,14 @@ const mutations = {
       state.drawer = !state.drawer;
    },
    [SET_MENUS](state, menus) {
+      menus.sort((a, b) => {
+         let menuA = a.meta.menus.find(x => x.key === 'main');
+         let menuB = b.meta.menus.find(x => x.key === 'main');
+
+         if(menuA.order > menuB.order) return 1;
+         if(menuB.order > menuA.order) return -1;
+         return 0;
+      })
       state.menus = menus;
    },
    [SET_FOOTER_MENUS](state, footerMenus) {

@@ -9,7 +9,7 @@ const applinks = [{
    meta: {
       type: FOR_ALL,
       menus: [{
-         key: 'main', show: FOR_ALL
+         key: 'main', show: FOR_ALL, order: 0
       }],
       icon: 'mdi-home',
       title: '首頁'
@@ -64,13 +64,27 @@ const applinks = [{
    path: '/rqs',
    view: 'RQs',
    parent: '',
+   order: 1,
    meta: {
       type: FOR_ALL,
       menus: [{
-         key: 'main', show: FOR_ALL
+         key: 'main', show: FOR_ALL, order: 1
       }],
       icon: 'mdi-database',
       title: '歷屆試題'
+   } 
+},{
+   name: 'manuals',
+   path: '/manuals',
+   view: 'Manuals',
+   parent: '',
+   meta: {
+      type: FOR_ALL,
+      menus: [{
+         key: 'main', show: FOR_ALL, order: 4
+      }],
+      icon: 'mdi-book-open',
+      title: '使用說明'
    } 
 }];
 
@@ -119,7 +133,7 @@ const userLinks = [{
    meta: {
       type: USER_ONLY,
       menus: [{
-         key: 'main', show: FOR_ALL
+         key: 'main', show: FOR_ALL, order: 3
       }],
       icon: 'mdi-notebook-outline',
       title: '讀書筆記'
@@ -133,7 +147,7 @@ const userLinks = [{
    meta: {
       type: USER_ONLY,
       menus: [{
-         key: 'main', show: FOR_ALL
+         key: 'main', show: FOR_ALL, order: 3
       }],
       icon: 'mdi-file-document-edit-outline',
       title: '模擬測驗'
@@ -146,7 +160,7 @@ const userLinks = [{
    meta: {
       type: USER_ONLY,
       menus: [{
-         key: 'main', show: FOR_ALL, except: SUBSCRIBER
+         key: 'main', show: FOR_ALL, except: SUBSCRIBER, order: 5
       }],
       icon: 'mdi-wallet-membership',
       title: '訂閱會員'
@@ -161,7 +175,7 @@ const guestLinks = [{
    meta: {
       type: GUEST_ONLY,
       menus: [{
-         key: 'main', show: GUEST_ONLY
+         key: 'main', show: GUEST_ONLY, order: 6
       }],
       icon: 'mdi-login-variant',
       title: '登入',

@@ -5,10 +5,11 @@
 			/>
       </div>
 		<v-card v-if="list.length">
-			<v-list>
+			<v-list  three-line>
 				<v-list-item v-for="(item, index) in list" :key="index" @click.prevent="select(item)">
 					<v-list-item-content>
                   <v-list-item-title v-text="item.notice.title"></v-list-item-title>
+						<v-list-item-subtitle class="mt-1" v-text="plainText(item.notice.content)"></v-list-item-subtitle>
 					</v-list-item-content>
 					<v-list-item-action>
                 <v-list-item-action-text>
@@ -33,7 +34,7 @@
 import { mapState, mapGetters } from 'vuex';
 import { FETCH_NOTIFICATION_ITEMS, FETCH_NOTIFICATIONS, CLEAR_NOTIFICATIONS
  } from '@/store/actions.type';
-import { onError, getRouteTitle } from '@/utils';
+import { onError, getRouteTitle, removeTags } from '@/utils';
 import { SET_NOTIFICATION } from '@/store/mutations.type';
 
 
@@ -93,6 +94,9 @@ export default {
          this.bread.items.push({
             action, text
          });
+		},
+		plainText(str) {
+			return removeTags(str).trim();
 		},
 		loadMore() {
 			this.loading = true;
