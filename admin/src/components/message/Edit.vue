@@ -28,10 +28,9 @@
 						/>
 					</v-flex>
 					<v-flex xs12>
-						<core-html-editor :content="htmlEditor.content" :version="htmlEditor.version"
-						@submit="onHtmlEditorSubmit" @content-changed="onHtmlContentChanged"
+						<core-html-editor v-model="reply.text"
+						 @changed="onHtmlContentChanged"
 						/>
-
 						<core-error-text :text="getErrMsg('content')" />
 
 						<v-btn @click.prevent="onPreview" fab small>
@@ -104,11 +103,6 @@ export default {
 			reply: null,
 
 			isValid: false,
-
-			htmlEditor: {
-				content: '',
-				version: 0
-			},
 			
 			action: '',
 
@@ -128,8 +122,6 @@ export default {
 		this.reply = {
 			...returnContent
 		};
-
-		this.htmlEditor.content = returnContent.text ? returnContent.text : '';
 
 		this.preview.content = returnContent.template;
 
@@ -155,29 +147,19 @@ export default {
 		},
 		onPreview() {
 			this.action = 'preview';
-			this.htmlEditor.version += 1;
+			this.showPreview(this.reply.text);
 		},
 		cancelPreview() {
 			this.action = '';
 			this.preview.active = false;
 		},
 		onSubmit() {
-			
 			this.isValid = false;
 			this.action = 'submit';
          this.$validator.validate().then(valid => {
-				if(valid) this.htmlEditor.version += 1;
-				else this.isValid = false;
-         });         
-		},
-		onHtmlContentChanged() {
-			this.errors.remove('content');
-		},
-		onHtmlEditorSubmit(content) {
-			
-			if(this.action === 'preview') {
-				this.showPreview(content);
-			}else {
+				if(!valid) return;
+
+				let content = this.reply.text;
 				if(content && content != `<p></p>`) {
 					if(this.reply.draft) {
 						//儲存草稿
@@ -195,7 +177,10 @@ export default {
 						msg: '必須填寫內容'
 					});
 				}
-			}
+         });         
+		},
+		onHtmlContentChanged() {
+			this.errors.remove('content');
 		},
 		showPreview(content) {
 			this.preview.title = this.reply.subject;

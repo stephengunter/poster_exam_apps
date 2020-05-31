@@ -197,6 +197,18 @@ const adminlinks = [
          type: ADMIN_ONLY,
          menu: true
       } 
+   },{
+      name: 'manuals',
+      path: '/manuals',
+      view: 'Manuals',
+      parent: '',
+      meta: {
+         order: 0,
+         icon: 'mdi-book-open',
+         title: '手冊',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
    },
    {
       name: 'db',

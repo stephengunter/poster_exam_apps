@@ -83,20 +83,22 @@ const applinks = [{
       icon: 'mdi-database',
       title: '歷屆試題'
    } 
-},{
-   name: 'manuals',
-   path: '/manuals',
-   view: 'Manuals',
-   parent: '',
-   meta: {
-      type: FOR_ALL,
-      menus: [{
-         key: 'main', show: FOR_ALL, order: 4
-      }],
-      icon: 'mdi-book-open',
-      title: '使用說明'
-   } 
-}];
+},
+// {
+//    name: 'manuals',
+//    path: '/manuals',
+//    view: 'Manuals',
+//    parent: '',
+//    meta: {
+//       type: FOR_ALL,
+//       menus: [{
+//          key: 'main', show: FOR_ALL, order: 4
+//       }],
+//       icon: 'mdi-book-open',
+//       title: '使用說明'
+//    } 
+// }
+];
 
 const userLinks = [{
    name: 'subscribes',

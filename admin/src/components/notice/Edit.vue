@@ -21,14 +21,15 @@
 					</v-flex>
 					<v-flex xs12>
 						<span class="font-weight-thin">內容</span>
-						<core-html-editor :content="htmlEditor.content" :version="htmlEditor.version"
-						@submit="onHtmlEditorSubmit" @content-changed="onHtmlContentChanged"
+						<core-html-editor v-model="model.content"
+						 @changed="onHtmlContentChanged"
 						/>
+
 						<core-error-text :text="getErrMsg('content')" />
 
-						<v-btn @click.prevent="onPreview" fab small>
+						<!-- <v-btn @click.prevent="onPreview" fab small>
 							<v-icon>mdi-eye-outline</v-icon>
-						</v-btn>
+						</v-btn> -->
 
 					</v-flex>
 					<v-flex xs12>
@@ -131,12 +132,6 @@ export default {
 			},
 
 			isValid: false,
-			draft: true,
-			htmlEditor: {
-				content: '',
-				version: 0
-			},
-
 			action: '',
 
 			deletion: {
@@ -168,8 +163,6 @@ export default {
 		
 		this.params.open = this.model.public ? 1 : 0;
 		this.params.active = this.model.active ? 1 : 0;
-
-		this.htmlEditor.content = this.model.content;
 		
 		this.ready = true;
 	},
@@ -185,10 +178,6 @@ export default {
 			}
 			return '';
 		},
-		onPreview() {
-			this.action = 'preview';
-			this.htmlEditor.version += 1;
-		},
 		cancelPreview() {
 			this.action = '';
 			this.preview.active = false;
@@ -202,30 +191,17 @@ export default {
 			this.action = 'submit';
 
          this.$validator.validate().then(valid => {
-				if(valid) this.htmlEditor.version += 1;
-				else this.isValid = false;
-         });         
-		},
-		onHtmlContentChanged() {
-			this.errors.remove('content');
-		},
-		onHtmlEditorSubmit(content) {
-			if(this.action === 'preview') {
-				this.model.content = content;
-				this.model.active = false;
-				this.submit();
-			}else {
+				if(!valid) return;
+
+				let content = this.model.content;
 				if(content && content != `<p></p>`) {
 					if(!this.model.active) {
 						//儲存草稿
-						
-						this.model.content = content;
 						this.submit();
 					}else {
 						//發送回覆, 先預覽
 						this.action = 'preview';
 						this.isValid = true,
-						this.model.content = content;
 						this.model.active = false;
 						this.submit();
 					}
@@ -236,7 +212,10 @@ export default {
 						msg: '必須填寫內容'
 					});
 				}
-			}
+         });         
+		},
+		onHtmlContentChanged() {
+			this.errors.remove('content');
 		},
 		onVersionChanged() {
 			if(this.action === 'preview' && this.model.id) {
@@ -245,12 +224,6 @@ export default {
 				this.preview.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
 				this.preview.active = true;
 			}
-		},
-		showPreview(content) {
-			this.preview.title = this.model.title;
-			this.preview.content = content;
-			this.preview.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
-			this.preview.active = true;
 		},
 		confirmActive() {
 			this.model.active = true;
@@ -263,7 +236,6 @@ export default {
 			this.$store.commit(CLEAR_ERROR);
          this.$store.dispatch(model.id ? UPDATE_NOTICE : STORE_NOTICE, model)
 			.then(notice => {
-				
 				if(this.action === 'preview') {
 					this.$emit('saved', notice);
 				}else {
@@ -280,6 +252,7 @@ export default {
 				if(this.responsive)  this.deletion.maxWidth = this.contentMaxWidth; 
 				else this.deletion.maxWidth = this.contentMaxWidth * 0.6;
 			}
+			this.deletion.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
 			this.deletion.active = true;
 		},
 		cancelDelete(){

@@ -9,7 +9,7 @@
       :actions = "appActions"
       />
 
-      <menu-notifications v-if="false"
+      <menu-notifications
       />
       
       <div class="ml-1">

@@ -23,6 +23,7 @@
     "vue-google-login": "^2.0.2",
     "vue-loading-overlay": "^3.2.0",
     "vue-meta": "^1.5.2",
+    "vue2-editor": "^2.10.2",
     "vuetify": "^1.2.9"
   },
   "devDependencies": {

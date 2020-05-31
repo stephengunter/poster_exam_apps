@@ -107,6 +107,16 @@ export const DELETE_RESOLVE = 'deleteResolve';
 //RecruitQuestions
 export const FETCH_RECRUIT_QUESTIONS = 'fetchRecruitQuestions';
 
+//Manuals
+export const FETCH_MANUALS = 'fetchManuals';
+export const CREATE_MANUAL = 'createManual';
+export const STORE_MANUAL = 'storeManual';
+export const EDIT_MANUAL = 'editManual';
+export const MANUAL_DETAILS = 'manualDetails';
+export const UPDATE_MANUAL = 'updateManual';
+export const DELETE_MANUAL = 'deleteManual';
+export const ORDER_MANUALS = 'orderManuals';
+
 //Attachments
 export const STORE_ATTACHMENT = 'storeAttachment';
 

@@ -107,7 +107,9 @@ const actions = {
       return new Promise((resolve) => {
          let token = JwtService.getToken();
          if(token) {
+           
             BaseService.setHeader(token);
+           
             let claims = jwtDecode(token);
             let user = {
                id: claims.id,
@@ -167,7 +169,9 @@ const mutations = {
       state.user = {
          id: claims.id,
          email: claims.sub,
-         picture: claims.picture
+         picture: claims.picture,
+         name: claims.name,
+         roles: claims.roles ? claims.roles.split(',') : []
       };
 
       state.isAuthenticated = true;

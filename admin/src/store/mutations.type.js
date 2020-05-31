@@ -46,6 +46,9 @@ export const SET_QUESTIONS = 'setQuestions';
 //Resolves
 export const SET_RESOLVES = 'setResolves';
 
+//Manuals
+export const SET_MANUALS = 'setManuals';
+
 //Analysis
 export const SET_ANALYSIS_VIEWS = 'setAnalysisViews';
 export const SET_ANALYSIS_RESULT = 'setAnalysisResult';
