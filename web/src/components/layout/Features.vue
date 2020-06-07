@@ -22,10 +22,10 @@
                <v-card-text class="subtitle-1" style="text-align: left">
                 	<ul>
 							<li>
-								附試題解析，幫助理解
+								歷屆考古題與試題解析
 							</li>
 							<li>
-								測驗模式，小試身手
+								了解出題方向與難易度
 							</li>
 						</ul>
                </v-card-text>
@@ -47,7 +47,7 @@
                <v-card-text class="subtitle-1" style="text-align: left">
                 	<ul>
 							<li>
-								收錄法條、教科書內容
+								完整收錄法條與教科書內容
 							</li>
 							<li>
 								重點濃縮整理，易於吸收
@@ -75,7 +75,7 @@
                <v-card-text class="subtitle-1" style="text-align: left">
                 	<ul>
 							<li>
-								精選題庫出題，測驗真實得分實力
+								精選題庫出題，測驗得分實力
 							</li>
 							<li>
 								檢視測驗紀錄，針對錯題加強

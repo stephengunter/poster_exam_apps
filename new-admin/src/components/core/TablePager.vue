@@ -1,7 +1,24 @@
 <template>
-   <v-row v-if="model">
-      <v-col v-if="canPage" cols="12">
-         <div v-if="responsive" class="text-xs-center pt-2">
+   <v-row v-if="responsive">
+      <v-col cols="12">
+         <v-select class="d-inline-flex" style="width:100px"
+            label="Rows per page"
+            :items="[10,25,50]" v-model="size" 
+            @change="onPageSizeChanged"
+         />
+      </v-col>
+      <!-- <v-col cols="6">
+         <span class="ml-3 mr-3">
+            {{ first }}-{{ last }} of {{model.totalItems}}
+         </span>
+         <v-pagination
+            v-model="page"
+            :length="model.totalPages"
+            :total-visible="7"
+            @previous="onPageChanged" @next="onPageChanged"
+         />
+      </v-col>    -->
+         <!-- <div v-if="responsive" class="text-xs-center pt-2">
             <v-select class="d-inline-flex" style="width:100px"
                label="Rows per page"
                :items="[10,25,50]" v-model="size" 
@@ -18,8 +35,8 @@
             <v-btn @click.prevent="next" flat icon :disabled="!model.hasNextPage" color="indigo">
                <v-icon style="color: #999;">mdi-chevron-right</v-icon>
             </v-btn>
-         </div>
-         <div v-else class="text-xs-center pt-2">
+         </div> -->
+         <!-- <div v-else class="text-center">
             <v-select class="d-inline-flex" style="width:100px"
                label="Rows per page"
                :items="[10,25,50]" v-model="size" 
@@ -36,14 +53,56 @@
                :total-visible="7"
                @previous="onPageChanged" @next="onPageChanged"
             />
-         </div>
-      </v-col>
-      <v-col v-else cols="12">
+         </div> -->
+      
+      <!-- <v-col v-else cols="12">
          <span class="ml-3 mr-3">
             {{ first }}-{{ last }} of {{model.totalItems}}
          </span>
+      </v-col> -->
+   </v-row>
+   <v-row v-else>
+      <v-col cols="12">
+         <div class="text-center">
+            <v-select style="width:100px" class="d-inline-flex" 
+               label="Rows per page"
+               :items="[10,25,50]" v-model="size" 
+               @change="onPageSizeChanged"
+            />
+            <span class="ml-3 mr-3">
+               {{ first }}-{{ last }} of {{model.totalItems}}
+            </span>
+            
+            <v-pagination style="width:auto"
+               v-model="page"
+               :length="model.totalPages"
+               :total-visible="7"
+               @previous="onPageChanged" @next="onPageChanged"
+            />
+         </div>
+         
+         <!-- <span class="ml-3 mr-3">
+            {{ first }}-{{ last }} of {{model.totalItems}}
+         </span>
+         <v-pagination
+            v-model="page"
+            :length="model.totalPages"
+            :total-visible="7"
+            @previous="onPageChanged" @next="onPageChanged"
+         /> -->
       </v-col>
-   </v-row>	
+      <!-- <v-col cols="6">
+         <span class="ml-3 mr-3">
+            {{ first }}-{{ last }} of {{model.totalItems}}
+         </span>
+         <v-pagination
+            v-model="page"
+            :length="model.totalPages"
+            :total-visible="7"
+            @previous="onPageChanged" @next="onPageChanged"
+         />
+      </v-col> -->
+   </v-row>   
 </template>
 
 <script>
@@ -53,6 +112,10 @@ export default {
       model: {
          type: Object,
          default: null
+      },
+      list_key: {
+         type: String,
+         default: 'viewList'
       },
       canPage: {
          type: Boolean,
@@ -87,18 +150,20 @@ export default {
 		first(){
          if(!this.model) return 0;
          if(!this.model.totalItems) return 0;
-			return this.model.pageSize * (this.model.pageNumber-1) + 1;			
+			return this.model.pageSize * (this.model.pageNumber - 1) + 1;			
 		},
 		last(){
          if(!this.model) return 0;
          if(!this.model.totalItems) return 0;
-			return this.first + this.model.viewList.length - 1;
+			return this.first + this.model[this.list_key].length - 1;
 		}
 	},   
    methods:{
       init(){
-         this.page = this.model.pageNumber;
-         this.size = this.model.pageSize;
+         if(this.model) {
+            this.page = this.model.pageNumber;
+            this.size = this.model.pageSize;
+         }
       },
 		next(){
          this.page ++;

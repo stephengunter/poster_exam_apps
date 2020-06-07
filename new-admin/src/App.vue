@@ -1,5 +1,6 @@
 <template>
-   <v-app id="app-container">
+   <v-app id="app-container" style="background: #eee;">
+	
 		<layout-drawer />
 		<layout-header />
 		<layout-container />

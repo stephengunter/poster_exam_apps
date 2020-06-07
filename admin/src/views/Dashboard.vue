@@ -1,86 +1,52 @@
 <template>
-   <v-container grid-list-md>
-      <core-html-editor v-model="model.content"/>
-      <div style="height:100px"></div>
-      <!-- <tiptap-vuetify ref="editor" v-model="model.content" :extensions="extensions">
-         <div slot="footer" style="background: #f5f5f5;" >
-            <v-tooltip  top content-class="top">
-               <v-btn @click.prevent="switchMode" flat icon slot="activator">
-                  <v-icon>{{ code ? 'mdi-view-quilt' : 'mdi-code-tags' }}</v-icon>
-               </v-btn>
-               <span>{{ code ? '視圖' : '原始碼' }}</span>
-            </v-tooltip>
-         </div>
-      </tiptap-vuetify> -->
-
-      <v-btn type="submit" @click.prevent="onSubmit" color="primary">存檔</v-btn>
+   <v-container>
+      
+      <core-html-editor :content="content" />
+      <!-- <UPLOADPHOTO>130</UPLOADPHOTO> -->
    </v-container>
   
 </template>
 
 <script>
+import axios from 'axios';
 import { mapState, mapGetters } from 'vuex';
-import { TiptapVuetify, Heading, Bold, Italic, Strike, Underline, Code, CodeBlock, Paragraph, BulletList, OrderedList,
-  ListItem, Link, Blockquote, HardBreak, HorizontalRule, History
-} from 'tiptap-vuetify';
+import { MANUAL } from '@/consts'; 
+import { DIALOG_MAX_WIDTH } from '@/config';
+import { SHOW_PHOTO } from '@/store/actions.type';
+
 export default {
-   components: {
-      TiptapVuetify
-   },
    data () {
       return {
-         code: false,
-         extensions: [
-            new Heading({
-            levels: [1, 2, 3]
-            }),
-            new Bold(),
-            new Italic(),
-            new Strike(),
-            new Underline(),
-            new Code(),
-            new CodeBlock(),
-            new Paragraph(),
-            new BulletList(),
-            new OrderedList(),
-            new ListItem(),
-            new Link(),
-            new Blockquote(),
-            new HardBreak(),
-            new HorizontalRule(),
-            new History()
-         ],
-         customToolbar: [
-            ["bold", "italic", "underline"],
-            [{ list: "ordered" }, { list: "bullet" }],
-            ["image", "code-block"]
-         ],
-         model: {
-            title: '',
-            content: `<h1>Some initial content</h1>`
-         }
+         result: '',
+         content: `<p>
+         “黑人弗洛伊德之死”再一次撕开了美国种族歧视的疮疤。对于美国民众来说，这又是一次或根治种族问题的机会，于是他们奋力呼喊、极力反抗，由此引发的抗议潮自上月26日以来已持续12天时间并蔓延至全美。
+         </p>
+         <p>
+         <img src="http://localhost:50070/photo/130?width=480" >
+         </p>
+         <p>
+         从白宫到金门大桥，从费城到纽约。当地时间6月6日，各地的抗议活动迎来了新高潮：首都华盛顿爆发最大规模抗议活动，市长本人也走到抗议者中间；全美抗议人数创下新高，纽约、旧金山、洛杉矶、费城等地也有成千上万人走上街头。
+          </p>
+         
+         
+         `
       }
    },
    computed: {
-		...mapGetters(['currentUser'])
-	},
-   beforeMount() {
-     
-		
+		...mapGetters(['contentMaxWidth'])
    },
-   mounted() {
-      console.log(this.$refs.editor);
-   },
-   methods: {
-      handleImageAdded(file, Editor, cursorLocation, resetUploader) {
+	beforeMount() {
+      // let matches = this.content.match(/<UPLOADPHOTO>(.*?)<\/UPLOADPHOTO>/g);
 
-      },
-      switchMode() {
-         this.code = !this.code;
-		},
-      onSubmit() {
-         console.log(this.model);
-      }
-   }
+      // let result = this.content;
+      // for(let i = 0; i < matches.length; i++) {
+      //    let id = matches[i].replace(/<\/?UPLOADPHOTO>/g, '');
+      //    result = result.replace(matches[i], `<a href="#" style="display: block" onclick="event.preventDefault(); ${SHOW_PHOTO}(${id});">&#128247;查看圖片</a>`)
+      // }
+      // this.result = result;
+   },
+	methods: {
+      
+	}
 }
 </script>

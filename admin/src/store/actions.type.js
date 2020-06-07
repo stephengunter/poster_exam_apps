@@ -5,8 +5,9 @@ export const INIT_GOOGLE_SIGNIN = 'initGoogleSignIn';
 export const GOOGLE_SIGNIN = 'googleSignIn';
 export const LOGIN = 'login';
 export const LOGOUT = 'logout';
-
 export const GET_MENUS = 'getMenus';
+export const SHOW_PHOTO = 'showPhoto';
+
 
 //AppAdmin
 export const FETCH_EXCEPTIONS = 'fetchExceptions';
@@ -118,6 +119,7 @@ export const DELETE_MANUAL = 'deleteManual';
 export const ORDER_MANUALS = 'orderManuals';
 
 //Attachments
+export const FETCH_ATTACHMENTS = 'fetchAttachments';
 export const STORE_ATTACHMENT = 'storeAttachment';
 
 //Analysis

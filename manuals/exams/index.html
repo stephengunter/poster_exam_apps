@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+   <style>
+      * :not(.v-icon) {
+         font-family: "微軟正黑體",sans-serif!important;
+      }
+      article img{
+         display: block;
+         max-width:  100%;
+         height: auto;
+      }
+      .inline-emoji {
+         float: left;
+         margin-right: .5em;
+         width: 22px;
+         height: 22px;
+      }
+      .article-imgDesc {
+         color: darkorange;
+         margin-top: 1em;
+      }
+      .article-imgDesc > li {
+         margin-bottom : 3px;
+      }
+  </style>
+</head>
+<body>
+   <div id="app">
+      <v-app>
+         <v-content>
+            <v-container>
+               <v-card>
+                  <v-card-title>
+                     <h3>{{ model.title }}</h3>
+                     <v-chip v-if="model.free" color="success ml-3" small>
+                        免費
+                     </v-chip>
+                     <v-chip v-else color="warning ml-3" small>
+                        訂閱會員
+                     </v-chip>
+                  </v-card-title>
+                  <v-card-text style="font-size: 1rem;">
+                     <v-row v-if="model.summary">
+                        <v-col cols="12">
+                           <p v-html="model.summary">
+                              
+                           </p>
+                           
+                        </v-col>
+                     </v-row>
+                     <v-row v-if="model.content">
+                        <v-col cols="12">
+                           <article v-html="model.content">
+                            
+                           </article>
+                        </v-col>
+                     </v-row>
+                     <v-row v-for="item in model.features" :key="item.key">
+                        <v-col cols="12">
+                           <h3>
+                              {{ item.title }}
+                           </h3>
+                           <div v-if="item.summary" class="mt-3" v-html="item.summary">
+                              
+                           </div>
+                        </v-col>
+                        <v-col cols="12">
+                           <article v-html="item.content">
+                           
+                           </article>
+                        </v-col>
+                     </v-row>
+                  </v-card-text>
+               </v-card>  
+
+            </v-container>
+         </v-content>
+      </v-app>
+   </div>
+
+   <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+   <script>
+      new Vue({
+         el: '#app',
+         vuetify: new Vuetify(),
+         data() {
+            return {
+               model: {
+                  title: '模擬測驗',
+                  free: false,
+                  content: '',
+                  summary: `<ul class="article-imgDesc" >
+                                    <li>
+                                       精選題庫出題，測驗得分實力
+                                    </li>
+                                    <li>
+                                       檢視測驗紀錄，針對錯題加強
+                                    </li>
+                   </ul>`,
+                  features: [],
+               }
+            }// end of data
+         },
+      })
+   </script>
+</body>
+</html>

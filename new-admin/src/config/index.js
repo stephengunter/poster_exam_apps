@@ -1,6 +1,6 @@
 export const PRODUCTION = false;
 export const CLIENT_URL = PRODUCTION ? 'https://poster.exam-learner.com' : 'http://localhost:8080';
-export const SITE_URL = PRODUCTION ? 'https://poster-admin.exam-learner.com' : 'http://localhost:8088';
+export const SITE_URL = PRODUCTION ? 'https://poster-admin.exam-learner.com' : 'http://localhost:8090';
 export const SITE_TITLE = 'PosterExam 管理';
 
 

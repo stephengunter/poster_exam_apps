@@ -1,13 +1,17 @@
 <template>
-   <ul>
-      <li v-for="(item, index) in breadItems" :key="index">
-         <router-link :to="item.path" class="a-btn" v-text="item.text">
-         </router-link>
-         <v-icon v-if="index < breadItems.length - 1" class="pb-1 ml-1 mr-1" size="16">
-            mdi-chevron-right
-         </v-icon>
-      </li>
-   </ul>
+   <v-row dense class="mb-2">
+		<v-col cols="12">
+         <ul>
+            <li v-for="(item, index) in breadItems" :key="index">
+               <router-link :to="item.path" class="a-btn" v-text="item.text">
+               </router-link>
+               <v-icon v-if="index < breadItems.length - 1" class="pb-1 ml-1 mr-1" size="16">
+                  mdi-chevron-right
+               </v-icon>
+            </li>
+         </ul>
+		</v-col>
+	</v-row>
 </template>
 
 <script>

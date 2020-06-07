@@ -1,8 +1,8 @@
 <template>
 <div>
-	<v-row>
+	<v-row dense>
 		<v-col>
-			<v-radio-group v-model="params.status" row>
+			<v-radio-group  v-model="params.status" row>
 				<v-radio v-for="(item, index) in status_options" :key="index"
 				:label="item.text" :value="item.value" 
 				/>

@@ -37,6 +37,9 @@ export const SET_TERMS = 'setTerms';
 export const SET_NOTE_CATEGORIES = 'setNoteCategories';
 export const SET_NOTES = 'setNotes';
 
+//Attachments
+export const SET_ATTACHMENTS = 'setAttachments';
+
 //Recruits
 export const SET_RECRUITS = 'setRecruits';
 

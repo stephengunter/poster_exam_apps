@@ -1,13 +1,13 @@
 import AttachmentService from '@/services/attachments.service';
 import { resolveErrorData } from '@/utils';
 
-import { STORE_ATTACHMENT } from '@/store/actions.type';
-import { SET_LOADING } from '@/store/mutations.type';
+import { FETCH_ATTACHMENTS, STORE_ATTACHMENT } from '@/store/actions.type';
+import { SET_ATTACHMENTS, SET_LOADING } from '@/store/mutations.type';
 
 
 
 const initialState = {
-   
+   pageList: null
 };
 
 export const state = { ...initialState };
@@ -18,6 +18,22 @@ const getters = {
 
 
 const actions = {
+   [FETCH_ATTACHMENTS](context, params) {
+      context.commit(SET_LOADING, true);
+      return new Promise((resolve, reject) => {
+         AttachmentService.fetch(params)
+         .then(model => {
+            context.commit(SET_ATTACHMENTS, model);
+            resolve(model);
+         })
+         .catch(error => {
+            reject(error); 
+         })
+         .finally(() => { 
+            context.commit(SET_LOADING, false);
+         });
+      });
+   },
    [STORE_ATTACHMENT](context, { postType, postId, files }) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
@@ -44,7 +60,9 @@ const actions = {
 
 
 const mutations = {
-
+   [SET_ATTACHMENTS](state, model) {
+      state.pageList = model;
+   }
 };
 
 export default {

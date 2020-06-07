@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+   <style>
+      * :not(.v-icon) {
+         font-family: "微軟正黑體",sans-serif!important;
+      }
+      article img{
+         display: block;
+         max-width:  100%;
+         height: auto;
+      }
+      .inline-emoji {
+         float: left;
+         margin-right: .5em;
+         width: 22px;
+         height: 22px;
+      }
+      .article-imgDesc {
+         color: darkorange;
+         margin-top: 1em;
+      }
+      .article-imgDesc > li {
+         margin-bottom : 3px;
+      }
+  </style>
+</head>
+<body>
+   <div id="app">
+      <v-app>
+         <v-content>
+            <v-container>
+               <v-card>
+                  <v-card-title>
+                     <h3>{{ model.title }}</h3>
+                  </v-card-title>
+                  <v-card-text style="font-size: 1rem;">
+                     <v-row v-if="model.summary">
+                        <v-col cols="12">
+                           <p v-html="model.summary">
+                              
+                           </p>
+                           
+                        </v-col>
+                     </v-row>
+                     <v-row v-if="model.content">
+                        <v-col cols="12">
+                           <article v-html="model.content">
+                            
+                           </article>
+                        </v-col>
+                     </v-row>
+                     <v-row v-for="item in model.features" :key="item.key">
+                        <v-col cols="12">
+                           <h3>
+                              {{ item.title }}
+                           </h3>
+                           <div v-if="item.summary" class="mt-3" v-html="item.summary">
+                              
+                           </div>
+                        </v-col>
+                        <v-col cols="12">
+                           <article v-html="item.content">
+                           
+                           </article>
+                        </v-col>
+                     </v-row>
+                  </v-card-text>
+               </v-card>  
+
+            </v-container>
+         </v-content>
+      </v-app>
+   </div>
+
+   <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+   <script>
+      new Vue({
+         el: '#app',
+         vuetify: new Vuetify(),
+         data() {
+            return {
+               model: {
+                  title: '測驗紀錄',
+                  free: false,
+                  content: '',
+                  summary: '',
+                  content:`
+                  <p>
+                              <img src="./images/exams-records.png" />
+                             
+                                 <ul class="article-imgDesc" style="list-style:none;padding:0;margin:0;">
+                                    <li>
+                                       <img src="../images/one-red.png" class="inline-emoji"  />
+                                       叫出功能選單按鈕
+                                    </li>
+                                    <li>
+                                       <img src="../images/two.png" class="inline-emoji" />
+                                       功能選單
+                                    </li>
+                                 </ul>
+                              
+                           </p>
+                  `,
+                  features: [{
+                     key: 'exam-select',
+                     title: '',
+                     summary: '',
+                     content: `<p>
+                        <img src="./images/exam-select.png" />
+                        <ul class="article-imgDesc" style="list-style:none;padding:0;margin:0;">
+                                    <li>
+                                       <img src="../images/one.png" class="inline-emoji"  />
+                                       選擇一筆測驗紀錄
+                                    </li>
+                                 </ul>
+                     </p>
+                           `
+                  },{
+                     key: 'exam-summary-not-done',
+                     title: '摘要 - 未完成的測驗',
+                     summary: '',
+                     content: `<p>
+                        <img src="./images/exam-summary-not-done.png" />
+                        <ul class="article-imgDesc" style="list-style:none;padding:0;margin:0;">
+                                    <li>
+                                       <img src="../images/one.png" class="inline-emoji"  />
+                                       修改存檔名稱
+                                    </li>
+                                    
+                                    <li>
+                                       <img src="../images/two.png" class="inline-emoji" />
+                                       刪除測驗
+                                    </li>
+                                    <li>
+                                       <img src="../images/three.png" class="inline-emoji" />
+                                       繼續作答
+                                    </li>
+                                 </ul>
+                     </p>
+                           `
+                  },{
+                     key: 'exam-summary-not-done',
+                     title: '摘要 - 已完成的測驗',
+                     summary: '',
+                     content: `<p>
+                        <img src="./images/exam-summary-done.png" />
+                        <ul class="article-imgDesc" style="list-style:none;padding:0;margin:0;">
+                                    <li>
+                                       <img src="../images/one.png" class="inline-emoji"  />
+                                       閱讀解析
+                                    </li>
+                                 </ul>
+                     </p>
+                           `
+                  },{
+                     key: 'exams-filter',
+                     title: '篩選',
+                     summary: '',
+                     content: `<p>
+                        <img src="./images/exams-filter.png" />
+                        <ul class="article-imgDesc" style="list-style:none;padding:0;margin:0;">
+                                    <li>
+                                       <img src="../images/one.png" class="inline-emoji"  />
+                                       選擇狀態
+                                    </li>
+                                    <li>
+                                       <img src="../images/two.png" class="inline-emoji"  />
+                                       選擇科目
+                                    </li>
+                                    <li>
+                                       <img src="../images/three.png" class="inline-emoji"  />
+                                       選擇排序
+                                    </li>
+                                 </ul>
+                     </p>
+                           `
+                  },{
+                     key: 'exams-filter-result',
+                     title: '篩選結果',
+                     summary: '',
+                     content: `<p>
+                       
+                                 <img src="./images/exams-filter-result.png" />
+                     </p>
+                           `
+                  }],
+               }
+            }// end of data
+         },
+      })
+   </script>
+</body>
+</html>

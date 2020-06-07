@@ -1,10 +1,35 @@
 <template>
-	<v-container>
+<v-container fluid>
+	<core-bread />
+	<v-card>
+		<v-card-text>
+			<message-header :params="params" :status_options="statusOptions"
+			@submit="fetchData"
+			/>
+			<v-row>
+				<v-col cols="12">
+					<message-table :list="viewList"
+					@edit="onEdit"
+					/>
+				</v-col>
+			</v-row>
+			<core-table-pager v-if="pagedList" v-show="viewList.length > 0"
+			:model="pagedList" :responsive="responsive"
+			@pageChanged="onPageChanged" @sizeChanged="onPageSizeChanged"
+			/>
+		</v-card-text>
+	</v-card>
+
+</v-container>
+	<!-- <v-container style="padding:20px">
 		<core-bread />
-		<message-header :params="params" :status_options="statusOptions"
-		@submit="fetchData"
-		/>
-	</v-container>
+		<v-card>
+			<message-header :params="params" :status_options="statusOptions"
+			@submit="fetchData"
+			/>
+		</v-card>
+		
+	</v-container> -->
    <!-- <v-container fluid grid-list-xl fill-height>
        <v-layout v-if="ready" justify-center  align-center>
 			<v-flex xs12>
