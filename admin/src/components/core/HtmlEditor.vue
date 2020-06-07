@@ -1,21 +1,6 @@
 <template>
 <div>
-   <tiptap-vuetify v-model="draft" :extensions="extensions">
-      <div slot="footer" style="background: #f5f5f5;" >
-         <v-tooltip  top content-class="top">
-            <v-btn @click.prevent="editCode" flat icon slot="activator">
-               <v-icon>mdi-code-tags</v-icon>
-            </v-btn>
-            <span>原始碼</span>
-         </v-tooltip>
-         <v-tooltip  top content-class="top">
-            <v-btn @click.prevent="addImage" flat icon slot="activator">
-               <v-icon>mdi-image</v-icon>
-            </v-btn>
-            <span>插入圖片</span>
-         </v-tooltip>
-      </div>
-   </tiptap-vuetify>
+   <editor-content :editor="editor" />
    <v-dialog v-model="code.active" persistent :max-width="code.maxWidth">
       <v-card>
          <core-close-icon-button @close="code.active = false" />
@@ -41,9 +26,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { TiptapVuetify, Heading, Bold, Italic, Strike, Underline, Code, CodeBlock, Paragraph, BulletList, OrderedList,
-  ListItem, Link, Blockquote, HardBreak, HorizontalRule, History
-} from 'tiptap-vuetify';
+import { Editor, EditorContent } from 'tiptap'
 import { photoIdUrl } from '@/utils';
 import { DIALOG_MAX_WIDTH } from '@/config';
 import { SHOW_PHOTO } from '@/store/actions.type';
@@ -56,12 +39,12 @@ export default {
          default: ''
       }
    },
+   components: {
+      EditorContent,
+   },
    model: {
       prop: 'content',
       event: 'update'
-   },
-   components: { 
-      TiptapVuetify
    },
    data () {
 		return {
@@ -69,26 +52,7 @@ export default {
 
          draft: '',
          text: '',
-         extensions: [
-            new Heading({
-               levels: [1, 2, 3]
-            }),
-            new Bold(),
-            new Italic(),
-            new Strike(),
-            new Underline(),
-            new Code(),
-            new CodeBlock(),
-            new Paragraph(),
-            new BulletList(),
-            new OrderedList(),
-            new ListItem(),
-            new Link(),
-            new Blockquote(),
-            new HardBreak(),
-            new HorizontalRule(),
-            new History()
-         ],
+         editor: null,
 
          code: {
 				active: false,
@@ -110,9 +74,13 @@ export default {
       console.log('beforeMount draft', this.draft);
    },
    mounted() {
-		window.addEventListener(SHOW_PHOTO, this.onShowPhoto);
+      window.addEventListener(SHOW_PHOTO, this.onShowPhoto);
+      this.editor = new Editor({
+         content: `<p>This is just a boring paragraph<img src="http://localhost:50070/photo/130?width=480" ></p>`,
+      })
 	},
 	beforeDestroy(){
+      this.editor.destroy();
 		window.removeEventListener(SHOW_PHOTO, this.onShowPhoto);
    },
    watch: {

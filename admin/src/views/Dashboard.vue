@@ -1,7 +1,20 @@
 <template>
    <v-container>
-      
-      <core-html-editor :content="content" />
+      <div class="editor">
+         <editor-menu-bar :editor="editor" v-slot="{ commands }">
+            <div class="menubar">  Damn
+               <button
+                  class="menubar__button"
+                  @click="showImagePrompt(commands.image)"
+               >
+                 
+               </button>
+            </div>
+         </editor-menu-bar>
+
+         <editor-content class="editor__content" :editor="editor" />
+      </div>
+      <!-- <core-html-editor :content="content" /> -->
       <!-- <UPLOADPHOTO>130</UPLOADPHOTO> -->
    </v-container>
   
@@ -12,11 +25,44 @@ import axios from 'axios';
 import { mapState, mapGetters } from 'vuex';
 import { MANUAL } from '@/consts'; 
 import { DIALOG_MAX_WIDTH } from '@/config';
-import { SHOW_PHOTO } from '@/store/actions.type';
+import { SHOW_PHOTO } from '@/store/actions.type';import { Editor, EditorContent, EditorMenuBar } from 'tiptap'
+import {
+  HardBreak,
+  Heading,
+  Image,
+  Bold,
+  Code,
+  Italic,
+} from 'tiptap-extensions'
 
 export default {
+   components: {
+      EditorContent,
+      EditorMenuBar,
+   },
    data () {
       return {
+         editor: new Editor({
+        extensions: [
+          new HardBreak(),
+          new Heading({ levels: [1, 2, 3] }),
+          new Image(),
+          new Bold(),
+          new Code(),
+          new Italic(),
+        ],
+        content: `
+          <h2>
+            Images
+          </h2>
+          <p>
+            This is basic example of implementing images. Try to drop new images here. Reordering also works.
+          </p>
+          <img src="http://localhost:50070/photo/130?width=420" />
+        `,
+      }),
+
+
          result: '',
          content: `<p>
          “黑人弗洛伊德之死”再一次撕开了美国种族歧视的疮疤。对于美国民众来说，这又是一次或根治种族问题的机会，于是他们奋力呼喊、极力反抗，由此引发的抗议潮自上月26日以来已持续12天时间并蔓延至全美。
@@ -46,7 +92,12 @@ export default {
       // this.result = result;
    },
 	methods: {
-      
+      showImagePrompt(command) {
+      const src = prompt('Enter the url of your image here')
+      if (src !== null) {
+        command({ src })
+      }
+    },
 	}
 }
 </script>
