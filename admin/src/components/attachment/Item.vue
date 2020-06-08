@@ -3,8 +3,8 @@
    style="display: block; margin: auto;"
    @error="onImageError" :max-width="item.width"
    :max-height="item.height"
-   :src="item.id | photoIdUrl()"
-   :lazy-src="item.id | photoIdUrl(50)"
+   :src="item.previewPath | photoNameUrl()"
+   :lazy-src="item.previewPath | photoNameUrl(50)"
    @click.prevent="select"
    >
       <template v-slot:placeholder>

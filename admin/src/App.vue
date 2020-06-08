@@ -139,6 +139,15 @@ export default {
 }
 @import '@/styles/index.scss';
 
+
+article img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+}
+
 /* Remove in 1.2 */
 .v-datatable thead th.column.sortable i {
   vertical-align: unset;

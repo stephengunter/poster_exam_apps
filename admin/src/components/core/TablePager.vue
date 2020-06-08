@@ -2,7 +2,7 @@
    <v-layout v-if="model" row>
       <v-flex v-if="canPage" sm12>
          <div v-if="responsive" class="text-xs-center pt-2">
-            <v-select class="d-inline-flex" style="width:100px"
+            <v-select v-if="can_size" class="d-inline-flex" style="width:100px"
                label="Rows per page"
                :items="[10,25,50]" v-model="size" 
                @change="onPageSizeChanged"
@@ -20,7 +20,7 @@
             </v-btn>
          </div>
          <div v-else class="text-xs-center pt-2">
-            <v-select class="d-inline-flex" style="width:100px"
+            <v-select v-if="can_size" class="d-inline-flex" style="width:100px"
                label="Rows per page"
                :items="[10,25,50]" v-model="size" 
                @change="onPageSizeChanged"
@@ -30,11 +30,7 @@
                {{ first }}-{{ last }} of {{model.totalItems}}
             </span>
                
-            <v-pagination
-               v-model="page"
-               :length="model.totalPages"
-               :total-visible="7"
-               @previous="onPageChanged" @next="onPageChanged"
+            <v-pagination v-model="page" :length="model.totalPages" :total-visible="7" 
             />
          </div>
       </v-flex>
@@ -62,6 +58,10 @@ export default {
          type: Boolean,
          default: true
       },
+      can_size: {
+         type: Boolean,
+         default: true
+      },
       responsive: {
          type: Boolean,
          default: false
@@ -74,12 +74,6 @@ export default {
       }
    },
    watch: {
-      model:{
-         handler(){
-            this.init();
-         },
-         deep: true
-      },
       page(){
          this.onPageChanged();
       }

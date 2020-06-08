@@ -27,10 +27,6 @@
 
 						<core-error-text :text="getErrMsg('content')" />
 
-						<!-- <v-btn @click.prevent="onPreview" fab small>
-							<v-icon>mdi-eye-outline</v-icon>
-						</v-btn> -->
-
 					</v-flex>
 					<v-flex xs12>
 						<v-checkbox v-model="model.top" label="置頂" 

@@ -121,6 +121,7 @@ export const ORDER_MANUALS = 'orderManuals';
 //Attachments
 export const FETCH_ATTACHMENTS = 'fetchAttachments';
 export const STORE_ATTACHMENT = 'storeAttachment';
+export const DELETE_ATTACHMENT = 'deleteAttachment';
 
 //Analysis
 export const ANALYSIS_INDEX = 'analysisIndex';

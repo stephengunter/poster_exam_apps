@@ -255,6 +255,14 @@ html {
   scroll-behavior: smooth;
 }
 
+article img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+}
+
 .errText{
 	color: #fff;
 }

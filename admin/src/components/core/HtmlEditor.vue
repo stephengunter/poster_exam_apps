@@ -1,16 +1,46 @@
 <template>
 <div>
-   <editor-content :editor="editor" />
+   <v-card>
+      <editor-menu-bar :editor="editor" v-slot="{ commands }">
+         <v-layout row style="background: #f5f5f5;">
+            <v-flex sm12>
+               <v-tooltip  top content-class="top">
+                  <v-btn @click.prevent="editCode" flat icon slot="activator">
+                     <v-icon>mdi-code-tags</v-icon>
+                  </v-btn>
+                  <span>原始碼</span>
+               </v-tooltip>
+               <v-btn @click="addImage(commands.image)" flat icon>
+                  <v-icon>mdi-image</v-icon>
+               </v-btn>
+            </v-flex>
+         </v-layout>
+      </editor-menu-bar>
+      <v-layout row>
+         <v-flex sm12 style="background: #fafafa; min-height:240px">
+            <article>
+            <editor-content style="margin: 1em;" :editor="editor" />
+            </article> 
+         </v-flex>
+      </v-layout>
+
+      
+   </v-card>
    <v-dialog v-model="code.active" persistent :max-width="code.maxWidth">
       <v-card>
-         <core-close-icon-button @close="code.active = false" />
+         <core-close-icon-button @close="cancelEditCode" />
          <v-container grid-list-md>
-            <v-layout wrap>
+            <v-layout row>
                <v-flex xs12 style="background: #fafafa;">
-                  <v-textarea ref="codeInput" v-model="text" flat full-width filled solo 
+                  <v-textarea ref="codeInput" v-model="code.text" flat full-width filled solo 
                   background-color="#fafafa" auto-grow
-                  rows="15" row-height="15" @change="onChanged"
+                  rows="15" row-height="15"
                   />
+               </v-flex>
+            </v-layout>
+            <v-layout row>
+               <v-flex xs12>
+                  <v-btn @click.prevent="submitCode" color="success">確定</v-btn>
                </v-flex>
             </v-layout>
          </v-container>
@@ -18,7 +48,7 @@
    </v-dialog>
    <v-dialog v-model="photo.active" persistent :max-width="photo.maxWidth">
       <attachment-selector 
-      @cancel="photo.active = false" 
+      @selected="onImageSelected" @cancel="cancelSelectImage" 
       />
    </v-dialog>
 </div>   
@@ -26,108 +56,139 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { Editor, EditorContent } from 'tiptap'
-import { photoIdUrl } from '@/utils';
-import { DIALOG_MAX_WIDTH } from '@/config';
+import { Editor, EditorContent, EditorMenuBar } from 'tiptap';
+import { HardBreak, Heading, Image, Bold, Link } from 'tiptap-extensions';
+
+import { photoNameUrl } from '@/utils';
+import { DIALOG_MAX_WIDTH, API_URL, PHOTO_ACTION_PATH } from '@/config';
 import { SHOW_PHOTO } from '@/store/actions.type';
 
 export default {
    name: 'HtmlEditor',
+   components: {
+      EditorContent, EditorMenuBar
+   },
    props: {
 		content: {
          type: String,
          default: ''
       }
    },
-   components: {
-      EditorContent,
-   },
-   model: {
-      prop: 'content',
-      event: 'update'
-   },
    data () {
 		return {
-         version: 0,
-
-         draft: '',
-         text: '',
          editor: null,
 
          code: {
+            text: '',
 				active: false,
 				maxWidth: DIALOG_MAX_WIDTH
          },
          photo: {
 				active: false,
-				maxWidth: DIALOG_MAX_WIDTH
+            maxWidth: DIALOG_MAX_WIDTH,
+            command: null
          }
 		}
    },
    computed: {
 		...mapGetters(['contentMaxWidth'])
    },
-   beforeMount() {
-      this.text = this.content;
-      this.draft = this.convert(this.content);
-
-      console.log('beforeMount draft', this.draft);
-   },
    mounted() {
-      window.addEventListener(SHOW_PHOTO, this.onShowPhoto);
-      this.editor = new Editor({
-         content: `<p>This is just a boring paragraph<img src="http://localhost:50070/photo/130?width=480" ></p>`,
-      })
+      this.initEditor();
 	},
 	beforeDestroy(){
-      this.editor.destroy();
-		window.removeEventListener(SHOW_PHOTO, this.onShowPhoto);
-   },
-   watch: {
-      text: 'onChanged'
+      if(this.editor) this.editor.destroy();
    },
    methods: {
-      onChanged() {
-         if(!this.version) {
-            this.version += 1;
-            return;
-         }
-         
-         this.draft = this.convert(this.text);
-         this.$emit('update', this.text);
-         this.$emit('changed', this.text);
-
-         console.log('draft', this.draft);
+      initEditor() {
+         this.editor = new Editor({
+            extensions: [
+               new HardBreak(),
+               new Heading({ levels: [1, 2, 3] }),
+               new Image(),
+               new Bold(),
+               new Link()
+            ],
+            content: this.convertDraft(this.content),
+            onUpdate: this.onContentChanged
+         });
       },
-      convert(text) {
+      onContentChanged() {
+         this.$emit('changed');
+      },
+      convertDraft(text) {
          let result = text;
          let matches = text.match(/<UPLOADPHOTO>(.*?)<\/UPLOADPHOTO>/g);
          if(!matches) return result;
          
          for(let i = 0; i < matches.length; i++) {
-            let id = matches[i].replace(/<\/?UPLOADPHOTO>/g, '');
-            let photoUrl = photoIdUrl(id, DIALOG_MAX_WIDTH);
+            let name = matches[i].replace(/<\/?UPLOADPHOTO>/g, '');
+            let photoUrl = photoNameUrl(name, DIALOG_MAX_WIDTH);
             
-            result = result.replace(matches[i], `<a href="#" style="display: block" onclick="event.preventDefault(); ${SHOW_PHOTO}(${id});">&#128247;查看圖片</a>`)
-            //result = result.replace(matches[i], `<img src="${photoUrl}">`);
+            //result = result.replace(matches[i], `<a href="#" style="display: block" onclick="event.preventDefault(); ${SHOW_PHOTO}(${id});">&#128247;查看圖片</a>`)
+            result = result.replace(matches[i], `<img src="${photoUrl}">`);
          }
-         
+         return result;
+      },
+      convertText(draft) {
+         let result = draft;
+         let matches = draft.match(/<img [^>]*src="[^"]*"[^>]*>/gm);
+         if(!matches) return result;
+        
+         for(let i = 0; i < matches.length; i++) {
+            let parts = /<img[^>]+src="(.*?)"/.exec(matches[i]);
+            let src = parts[1].trim();
+            let url = new URL(src);
+            if(url.origin === API_URL && url.pathname.toLowerCase() === PHOTO_ACTION_PATH) {
+               let params = url.searchParams;
+               if(params.has('name')) {
+                  let name = params.get('name');
+                  // let isEmoji = name.split('/')[0] === 'emoji';
+                  // let newTag = isEmoji ? `<UPLOADEMOJI>${name}<\/UPLOADEMOJI>` : `<UPLOADPHOTO>${name}<\/UPLOADPHOTO>`;
+                  result = result.replace(matches[i], `<UPLOADPHOTO>${name}<\/UPLOADPHOTO>`);
+               }
+            }
+         }
+         return result;
       },
       editCode() {
-			this.code.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
-			this.code.active = true;
+         this.code = {
+            text: this.editor.getHTML(),
+				active: true,
+				maxWidth: this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH
+         };
       },
-      addImage() {
+      cancelEditCode() {
+         this.code = {
+            text: '',
+				active: false,
+				maxWidth: DIALOG_MAX_WIDTH
+         };
+      },
+      submitCode() {
+         this.editor.setContent(this.convertDraft(this.code.text));
+         this.cancelEditCode();
+      },
+      addImage(command) {
+         this.photo.command = command;
          this.photo.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
-			this.photo.active = true;
+         this.photo.active = true;
       },
-      onImageSelected(id) {
-
+      onImageSelected(item) {
+         this.photo.command({ src: photoNameUrl(item.previewPath, DIALOG_MAX_WIDTH) });
+         this.$nextTick(() => {
+            this.cancelSelectImage();
+         })
       },
-      onShowPhoto(e) {
-         let id = e.detail.id;
-			console.log('onShowPhoto', id);
-		}
+      cancelSelectImage() {
+         this.photo.command = null;
+         this.photo.maxWidth = DIALOG_MAX_WIDTH;
+         this.photo.active = false;
+      },
+      getContent() {
+         let draft =  this.editor.getHTML();
+         return this.convertText(draft);
+      }
    }
 }
 </script>

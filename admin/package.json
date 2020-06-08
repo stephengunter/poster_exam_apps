@@ -2,6 +2,12 @@
   "name": "vuetify-material-dashboard",
   "version": "1.0.0",
   "private": true,
+  "resolutions": {
+    "prosemirror-model": "1.8.2",
+    "prosemirror-state": "1.3.2",
+    "prosemirror-transform": "1.2.2",
+    "prosemirror-view": "1.13.4"
+  },
   "scripts": {
     "serve": "vue-cli-service serve --port 8088",
     "dev": "npm run serve",
