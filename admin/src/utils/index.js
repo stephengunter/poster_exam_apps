@@ -1,4 +1,4 @@
-import { API_URL } from '@/config';
+import { API_URL, PHOTO_ACTION_PATH } from '@/config';
 import { isEmptyObject } from './helper';
 
 export const resolveErrorData = (error) => {
@@ -35,8 +35,9 @@ export const buildQuery = (url, params) => {
    return url.substr(0, url.length - 1);
 }
 
+
 export const photoNameUrl = (name, width = 0, height = 0, type = '') => {
-   let url = `${API_URL}/photo`;
+   let url = `${API_URL}${PHOTO_ACTION_PATH}`;
    let params = { name };
    if(width) params['width'] = width;
    if(height) params['height'] = height;
@@ -46,7 +47,7 @@ export const photoNameUrl = (name, width = 0, height = 0, type = '') => {
 }
 
 export const photoIdUrl = (id, width = 0, height = 0, type = '') => {
-   let url = `${API_URL}/photo/${id}`;
+   let url = `${API_URL}${PHOTO_ACTION_PATH}/${id}`;
    let params = {};
    if(width) params['width'] = width;
    if(height) params['height'] = height;

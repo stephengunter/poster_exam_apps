@@ -21,15 +21,12 @@
 					</v-flex>
 					<v-flex xs12>
 						<span class="font-weight-thin">內容</span>
-						<core-html-editor v-model="model.content"
-						 @changed="onHtmlContentChanged"
+						<core-html-editor ref="htmlEditor"
+						:content="model.content"
+						@changed="onHtmlContentChanged"
 						/>
 
-						<core-error-text :text="getErrMsg('content')" />
-
-						<!-- <v-btn @click.prevent="onPreview" fab small>
-							<v-icon>mdi-eye-outline</v-icon>
-						</v-btn> -->
+						<core-error-text class="mt-3" :text="getErrMsg('content')" />
 
 					</v-flex>
 					<v-flex xs12>
@@ -144,7 +141,8 @@ export default {
 				active: false,
 				maxWidth: DIALOG_MAX_WIDTH,
 				content: ''
-			}
+			},
+			references: {}
 		}
 	},
 	computed: {
@@ -155,16 +153,23 @@ export default {
 			if(this.model.id) return `編輯${text}`;
 			return `新增${text}`;	
 		},
+		htmlEditor() {
+			if(this.$refs.htmlEditor) return this.$refs.htmlEditor;
+			else if (this.references.htmlEditor) return this.references.htmlEditor;
+			return null;
+      }
 	},
 	watch: {
       version: 'onVersionChanged'
    },
 	beforeMount() {
-		
 		this.params.open = this.model.public ? 1 : 0;
 		this.params.active = this.model.active ? 1 : 0;
 		
 		this.ready = true;
+	},
+	mounted() {
+		this.references = { ...this.$refs };
 	},
 	methods: {
 		onActiveChanged(val) {
@@ -189,9 +194,12 @@ export default {
 		onSubmit() {
 			this.isValid = false;
 			this.action = 'submit';
-
+			
          this.$validator.validate().then(valid => {
 				if(!valid) return;
+
+				let convert = true;
+				this.model.content = this.htmlEditor.getContent(convert);
 
 				let content = this.model.content;
 				if(content && content != `<p></p>`) {

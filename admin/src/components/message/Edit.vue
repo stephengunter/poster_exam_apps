@@ -28,10 +28,12 @@
 						/>
 					</v-flex>
 					<v-flex xs12>
-						<core-html-editor v-model="reply.text"
-						 @changed="onHtmlContentChanged"
+						<core-html-editor ref="htmlEditor" :allow_image="false"
+						:content="reply.text"
+						@changed="onHtmlContentChanged"
 						/>
-						<core-error-text :text="getErrMsg('content')" />
+
+						<core-error-text class="mt-3" :text="getErrMsg('content')" />
 
 						<v-btn @click.prevent="onPreview" fab small>
 							<v-icon>mdi-eye-outline</v-icon>
@@ -110,11 +112,18 @@ export default {
 				active: false,
 				maxWidth: DIALOG_MAX_WIDTH,
 				content: ''
-			}
+			},
+
+			references: {}
 		}
 	},
 	computed: {
-		...mapGetters(['responsive','contentMaxWidth'])
+		...mapGetters(['responsive','contentMaxWidth']),
+		htmlEditor() {
+			if(this.$refs.htmlEditor) return this.$refs.htmlEditor;
+			else if (this.references.htmlEditor) return this.references.htmlEditor;
+			return null;
+      }
 	},
 	beforeMount() {
 		let returnContent = this.model.returnContentView;
@@ -128,6 +137,9 @@ export default {
 		if(!this.reply.subject) this.reply.subject = `Re: ${this.model.subject}`;
 		
 		this.ready = true;
+	},
+	mounted() {
+		this.references = { ...this.$refs };
 	},
 	methods: {
 		getErrMsg(key){
@@ -156,8 +168,12 @@ export default {
 		onSubmit() {
 			this.isValid = false;
 			this.action = 'submit';
+
          this.$validator.validate().then(valid => {
 				if(!valid) return;
+
+				let convert = false;
+				this.reply.text = this.htmlEditor.getContent(convert);
 
 				let content = this.reply.text;
 				if(content && content != `<p></p>`) {

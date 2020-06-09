@@ -235,8 +235,20 @@ const adminlinks = [
          type: ADMIN_ONLY,
          menu: true
       } 
-   }
-      
+   },
+   {
+      name: 'attachments',
+      path: '/attachments',
+      view: 'Attachments',
+      parent: 'settings',
+      meta: {
+         order: 0,
+         icon: 'mdi-folder-image',
+         title: 'Attachments',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
+   }      
 ];
 
 const guestLinks = [{

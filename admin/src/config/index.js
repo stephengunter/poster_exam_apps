@@ -6,6 +6,7 @@ export const SITE_TITLE = 'PosterExam 管理';
 
 export const API_URL = PRODUCTION ? 'https://poster-api.exam-learner.com' : 'http://localhost:50070';
 
+export const PHOTO_ACTION_PATH = '/photo';
 
 //AUTH
 export const GOOGLE_AUTH_PARAMS = {
