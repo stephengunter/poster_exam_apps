@@ -118,6 +118,15 @@ export const UPDATE_MANUAL = 'updateManual';
 export const DELETE_MANUAL = 'deleteManual';
 export const ORDER_MANUALS = 'orderManuals';
 
+//Features
+export const FETCH_FEATURES = 'fetchFeatures';
+export const CREATE_FEATURE = 'createFeature';
+export const STORE_FEATURE = 'storeFeature';
+export const EDIT_FEATURE = 'editFeature';
+export const UPDATE_FEATURE = 'updateFeature';
+export const DELETE_FEATURE = 'deleteFeature';
+export const ORDER_FEATURES = 'orderFeatures';
+
 //Attachments
 export const FETCH_ATTACHMENTS = 'fetchAttachments';
 export const STORE_ATTACHMENT = 'storeAttachment';

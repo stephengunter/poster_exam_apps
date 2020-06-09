@@ -20,13 +20,16 @@
             </td>
             <td>
                <ul style="list-style:none;padding:0;margin:0;">
-                  <li v-for="(feature, index) in props.item.features" :key="index">
-                     <a href="#" @click.prevent="editFeature(feature.id)">{{ feature.title }}</a>
-                  </li>
                   <li>
                      <v-btn small @click.prevent="addFeature(props.item)" flat icon color="warning">
                         <v-icon small>mdi-plus</v-icon>
                      </v-btn>
+                  </li>
+                  <li v-for="(feature, index) in props.item.features" :key="index">
+                     <v-icon class="mr-1" :color="feature.active ? 'success' : ''" >
+                     {{ feature.active ? 'mdi-check-circle' : 'mdi-minus-circle' }}
+                     </v-icon>
+                     <a href="#" @click.prevent="editFeature(props.item, feature)">{{ feature.title }}</a>
                   </li>
                </ul>
             </td>
@@ -132,11 +135,11 @@ export default {
       addSubItem(item) {
          this.$emit('add-subItem', item);
       },
-      editFeature(id) {
-         this.$emit('edit-feature', id);
+      editFeature(manual, feature) {
+         this.$emit('edit-feature', { manual, feature });
       },
-      addFeature(item) {
-         this.$emit('add-feature', item);
+      addFeature(manual) {
+         this.$emit('add-feature', manual);
       }
    }
 

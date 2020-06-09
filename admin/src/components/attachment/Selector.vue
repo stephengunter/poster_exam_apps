@@ -128,7 +128,6 @@ export default {
          };
          this.$store.dispatch(STORE_ATTACHMENT, media)
 			.then(attachments => {
-            console.log(this.select_mode);
             if(this.select_mode) this.$emit('select', attachments[0]);
             else this.fetchData();
 			})

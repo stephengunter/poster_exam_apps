@@ -54,6 +54,9 @@ export const SET_EXAM_TITLE = 'setExamTitle';
 export const SET_EXAM_RESERVED = 'setExamReserved';
 export const SET_EXAM_ACTIONS = 'setExamActions';
 
+//Manuals
+export const SET_MANUALS = 'setManuals';
+
 //Subscribes
 export const SET_CURRENT_SUBSCRIBE = 'setCurrentSubscribe';
 export const SET_BILLS = 'setBills';

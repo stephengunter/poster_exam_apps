@@ -1,17 +1,18 @@
 <template>
 	<v-container>
       <div class="mb-2">
-			<core-bread :items="bread.items"
-			/>
+			<core-bread />
       </div>
-		<manual-item :model="model" />
+		
       
    </v-container>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex';
+import { FETCH_MANUALS } from '@/store/actions.type';
 import { onError, getRouteTitle } from '@/utils';
+import { SET_BREAD_ITEMS } from '@/store/mutations.type';
 
 export default {
 	name: 'ManualsView',
@@ -22,66 +23,34 @@ export default {
             items: []
 			},
 
-			model: {
-				title: '歷屆試題',
-				summary: '',
-				features: [{
-					key: 'select-mode',
-					title: '選擇模式',
-					content: `<p>
-<img class="article-img" src="https://7pwc0w.ch.files.1drv.com/y4mKbj8HGigj0u6V3RjCxkvcTde597nw3I_6uv3OoYgQj220bG4jnw5y1-ee-yQO9x6BL2kCfUQ3Mp6vQK7ZqIcVMKPaBfqEDmdl9nXqX4oU36Qx9sMGXbVcorF9t_ZH080oxyMxUs71FUpn8lPMmACw5kzM26aHGjkAQ-uXE0Je5FNJk_yzaKuoq56igCTAzTXlZjc02mqlZCzEq7FkZjxuA?width=358&height=590&cropmode=none" />
-                  
-<span class="article-imgDesc">
-   <ul style="list-style:none;padding:0;margin:0;">
-      <li >
-         <img src="http://localhost:8080/images/one.png" class="inline-emoji" />
-         選擇模式
-      </li>
-      <li>
-         <img src="http://localhost:8080/images/two.png" class="inline-emoji" />
-         選擇招考年度
-      </li>
-      <li>
-         <img src="http://localhost:8080/images/three.png" class="inline-emoji" />
-         選擇考試科目
-      </li>
-   </ul>
-</span>
-</p>`
-				}],
-				subItems: [{
-					title: '閱讀模式',
-					summary: '',
-					features: []
-					
-				},{
-					title: '測驗模式',
-					summary: '',
-					features: []
-				}]
-			}
+			model: null
 		}
 	},
 	computed:{
-		...mapGetters(['responsive'])
+		...mapState({
+			list: state => state.manuals.list
+		})
 	},
 	beforeMount() {
 		this.title = getRouteTitle(this.$route);
 		this.setTitle();
+
+		this.fetchData();
 	},
 	methods: {
 		setTitle() {
-			this.clearBread();
-			this.addBreadItem('', this.title);
+			let items = [{
+				action: '', text: this.title
+			}];
+			this.$store.commit(SET_BREAD_ITEMS, items);
 		},
-		clearBread() {
-         this.bread.items = [];
-      },
-		addBreadItem(action ,text) {
-         this.bread.items.push({
-            action, text
-         });
-		},
+		fetchData() {
+			this.$store.dispatch(FETCH_MANUALS)
+			.catch(error => {
+				console.error(error);
+				//onError(error);
+			})
+		}
 	}
 }
 </script>

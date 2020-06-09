@@ -25,16 +25,14 @@
 						</v-flex>
 						<v-flex xs12>
 							<v-textarea v-model="model.summary" label="簡介" outlined auto-grow
-							:error-messages="getErrMsg('summary')"
-							name="text"
+							name="summary"
 							rows="5"
 							row-height="15"
 							/>
 						</v-flex>
 						<v-flex xs12>
 							<v-textarea v-model="model.content" label="內容" outlined auto-grow
-							:error-messages="getErrMsg('content')"
-							name="text"
+							name="content"
 							rows="5"
 							row-height="15"
 							/>
@@ -98,7 +96,7 @@ export default {
 			let err = this.errors.collect(key);
 			if(err && err.length){
 				let msg = err[0];
-				return msg.replace('title', '標題').replace('summary', '簡介').replace('content', '內容');
+				return msg.replace('title', '標題');
 			}
 			return '';
 		},

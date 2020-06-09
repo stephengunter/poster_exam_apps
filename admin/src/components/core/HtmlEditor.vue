@@ -1,7 +1,7 @@
 <template>
 <div>
    <v-card>
-      <editor-menu-bar :editor="editor" v-slot="{ commands }">
+      <editor-menu-bar :editor="editor" v-slot="{ commands, isActive }">
          <v-layout row style="background: #f5f5f5;">
             <v-flex sm12>
                <v-tooltip  top content-class="top">
@@ -12,6 +12,9 @@
                </v-tooltip>
                <v-btn v-if="allow_image" @click="addImage(commands.image)" flat icon>
                   <v-icon>mdi-image</v-icon>
+               </v-btn>
+               <v-btn @click="commands.bullet_list" flat icon :color="isActive.bullet_list() ? 'primary' : ''">
+                  <v-icon>mdi-format-list-bulleted</v-icon>
                </v-btn>
             </v-flex>
          </v-layout>
@@ -57,7 +60,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { Editor, EditorContent, EditorMenuBar } from 'tiptap';
-import { HardBreak, Heading, Image, Bold, Link } from 'tiptap-extensions';
+import { HardBreak, Heading, Image, Bold, Link, BulletList, ListItem } from 'tiptap-extensions';
 
 import { photoNameUrl } from '@/utils';
 import { DIALOG_MAX_WIDTH, API_URL, PHOTO_ACTION_PATH } from '@/config';
@@ -111,7 +114,9 @@ export default {
                new Heading({ levels: [1, 2, 3] }),
                new Image(),
                new Bold(),
-               new Link()
+               new Link(),
+               new BulletList(),
+               new ListItem()
             ],
             content: this.convertDraft(this.content),
             onUpdate: this.onContentChanged

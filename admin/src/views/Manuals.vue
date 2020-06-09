@@ -19,10 +19,15 @@
 					</v-layout>
 				</material-card>
 			</v-flex>
-     </v-layout>
-	  <v-dialog v-model="editor.active" persistent :max-width="editor.maxWidth">
+      </v-layout>
+	   <v-dialog v-model="editor.active" persistent :max-width="editor.maxWidth">
 			<manual-edit v-if="editor.active" :model="editor.model"
 			@submit="submit" @cancel="cancelEdit" @remove="remove"
+			/>
+		</v-dialog>
+		<v-dialog v-model="featureEditor.active" persistent :max-width="featureEditor.maxWidth">
+			<feature-edit v-if="featureEditor.active" :manual="featureEditor.manual" :id="featureEditor.id"
+			@saved="onFeatureSaved" @cancel="cancelEditFeature"
 			/>
 		</v-dialog>
 		<v-dialog v-model="deletion.active" :max-width="deletion.maxWidth">
@@ -62,11 +67,16 @@ export default {
 			},
 
 			editor: {
-				subjectOptions: [],
 				active: false,
 				maxWidth: DIALOG_MAX_WIDTH,
-				model: null,
-				allItems: []
+				model: null
+			},
+
+			featureEditor: {
+				active: false,
+				maxWidth: DIALOG_MAX_WIDTH,
+				manual: null,
+				id: 0
 			},
 
 			deletion: {
@@ -101,6 +111,8 @@ export default {
 			this.fetchData(this.params);
 		},
 		fetchData(params){
+			if(!params) params = this.params;
+
 			this.$store.commit(CLEAR_ERROR);
 			this.$store.dispatch(FETCH_MANUALS, params)
 			.then(() => {
@@ -210,11 +222,30 @@ export default {
 		editSubItem(id) {
 			console.log('editSubItem',id);
 		},
-		addFeature(item) {
-			console.log('addFeature',item);
+		addFeature(manual) {
+			this.setFeatureEditor(manual);
 		},
-		editFeature(id) {
-			console.log('editFeature',id);
+		setFeatureEditor(manual = null, id = 0) {
+			if(manual) {
+				this.featureEditor.manual = manual;
+				this.featureEditor.id = id;
+				this.featureEditor.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
+				this.featureEditor.active = true;
+			}else {
+				this.featureEditor.manual = null;
+				this.featureEditor.id = 0;
+				this.featureEditor.active = false;
+			}
+		},
+		cancelEditFeature() {
+			this.setFeatureEditor(null);
+		},
+		editFeature({ manual, feature }) {
+			this.setFeatureEditor(manual, feature.id);
+		},
+		onFeatureSaved() {
+			this.cancelEditFeature();
+			this.fetchData();
 		}
 	}
 }
