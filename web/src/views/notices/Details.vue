@@ -11,9 +11,7 @@
 				<span class="subtitle-1">{{ model.lastUpdatedText }}</span>
 			</v-card-title>
 			<v-card-text>
-				<div v-html="model.content">
-			
-				</div>
+				<core-article :text="model.content" />
 			</v-card-text>
 			<v-card-actions v-show="canBack">
 				<v-spacer />		

@@ -10,7 +10,7 @@
                   </v-btn>
                   <span>原始碼</span>
                </v-tooltip>
-               <v-btn @click="addImage(commands.image)" flat icon>
+               <v-btn v-if="allow_image" @click="addImage(commands.image)" flat icon>
                   <v-icon>mdi-image</v-icon>
                </v-btn>
             </v-flex>
@@ -72,6 +72,10 @@ export default {
 		content: {
          type: String,
          default: ''
+      },
+      allow_image: {
+         type: Boolean,
+         default: true
       }
    },
    data () {
@@ -117,6 +121,8 @@ export default {
          this.$emit('changed');
       },
       convertDraft(text) {
+         if(!text) return '';
+
          let result = text;
          let matches = text.match(/<UPLOADPHOTO>(.*?)<\/UPLOADPHOTO>/g);
          if(!matches) return result;
@@ -166,7 +172,9 @@ export default {
          };
       },
       submitCode() {
-         this.editor.setContent(this.convertDraft(this.code.text));
+         let text = this.code.text;
+         if(!text) text = `<p></p>`;
+         this.editor.setContent(this.convertDraft(text));
          this.cancelEditCode();
       },
       addImage(command) {
@@ -185,9 +193,10 @@ export default {
          this.photo.maxWidth = DIALOG_MAX_WIDTH;
          this.photo.active = false;
       },
-      getContent() {
+      getContent(convert = false) {
          let draft =  this.editor.getHTML();
-         return this.convertText(draft);
+         if(convert) return this.convertText(draft);
+         return draft;
       }
    }
 }
