@@ -24,13 +24,17 @@
 							/>
 						</v-flex>
 						<v-flex xs12>
-							<core-html-editor ref="summaryEditor"
-							:content="model.summary"
+							<v-textarea v-model="model.summary" label="簡介" outlined auto-grow
+							name="text"
+							rows="5"
+							row-height="15"
 							/>
 						</v-flex>
 						<v-flex xs12>
-							<core-html-editor ref="contentEditor"
-							:content="model.content"
+							<v-textarea v-model="model.content" label="內容" outlined auto-grow
+							name="text"
+							rows="5"
+							row-height="15"
 							/>
 						</v-flex>
 						<v-flex xs12>
@@ -74,9 +78,7 @@ export default {
 	},
 	data () {
 		return {
-			model: null,
-
-			references: {}
+			model: null
 		}
 	},
 	computed: {
@@ -92,17 +94,7 @@ export default {
 		},
 		canRemove(){
 			return this.mode === 'edit' && !this.model.active;
-		},
-		summaryEditor() {
-			if(this.$refs.summaryEditor) return this.$refs.summaryEditor;
-			else if (this.references.summaryEditor) return this.references.summaryEditor;
-			return null;
-		},
-		contentEditor() {
-			if(this.$refs.contentEditor) return this.$refs.contentEditor;
-			else if (this.references.contentEditor) return this.references.contentEditor;
-			return null;
-      }
+		}
 	},
 	beforeMount(){
 		this.$store.commit(CLEAR_ERROR);
@@ -126,9 +118,6 @@ export default {
 			})
 		}
 	},
-	mounted() {
-		this.references = { ...this.$refs };
-	},
 	methods: {
 		getErrMsg(key){
 			let err = this.errors.collect(key);
@@ -147,13 +136,8 @@ export default {
 		onSubmit() {
 			this.$store.commit(CLEAR_ERROR);
 			this.$validator.validate().then(valid => {
-				if(valid) {
-					let convert = true;
-					this.model.summary = this.summaryEditor.getContent(convert);
-					this.model.content = this.contentEditor.getContent(convert);
-
-					this.submit();
-				} 
+				if(!valid) return;
+				this.submit();
 			});     
 		},
 		submit() {

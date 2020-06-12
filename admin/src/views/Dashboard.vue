@@ -48,8 +48,8 @@ export default {
       }
    },
 	beforeMount() {
-   //   const imgTags = this.content.match(/<img [^>]*src="[^"]*"[^>]*>/gm);
-   //   console.log(imgTags);
+      let name = '';
+      console.log(name.split('/'));
    },
    mounted() {
 		this.references = { ...this.$refs };

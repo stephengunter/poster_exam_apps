@@ -64,6 +64,20 @@ const actions = {
          });
       });
    },
+   [EDIT_MANUAL](context, id) {
+      return new Promise((resolve, reject) => {
+         ManualsService.edit(id)
+            .then(model => {
+               resolve(model);
+            })
+            .catch(error => {
+               reject(error);        
+            })
+            .finally(() => { 
+               context.commit(SET_LOADING, false);
+            });
+      });
+   },
    [MANUAL_DETAILS](context, id) {
       return new Promise((resolve, reject) => {
          ManualsService.details(id)

@@ -12,7 +12,8 @@
 				<v-container grid-list-md>
 					<v-layout wrap>
 						<v-flex xs12 v-if="model.parentId">
-							<v-text-field :value="`${model.parentId} ${model.parentTitle}`" label="Parent" readonly
+							<v-select label="Parent"
+							:items="parent_options" v-model="model.parentId"
 							/>
 						</v-flex>
 						<v-flex xs12>
@@ -37,10 +38,29 @@
 							row-height="15"
 							/>
 						</v-flex>
-						<v-flex xs12>
+						<v-flex xs6>
 							<v-switch
-							v-model="model.active"
+							v-model="model.active" @change="onActiveChanged"
 							label="上架中"
+							/>
+						</v-flex>
+						<v-flex xs6>
+							<v-text-field v-model="model.order" label="排序"
+							name="order"
+							>
+								<template v-slot:append>
+									<v-btn small icon @click.prevent="addOrder(1)">
+										<v-icon small>mdi-plus</v-icon>
+									</v-btn>
+									<v-btn small icon @click.prevent="addOrder(-1)">
+										<v-icon small>mdi-minus</v-icon>
+									</v-btn>
+								</template>
+
+							</v-text-field>
+						</v-flex>
+						<v-flex xs12>
+							<v-switch v-model="model.free" label="免費"
 							/>
 						</v-flex>
 					</v-layout>
@@ -66,6 +86,10 @@ export default {
 		model: {
          type: Object,
          default: null
+		},
+		parent_options: {
+         type: Array,
+         default: null
 		}
 	},
 	data () {
@@ -74,17 +98,17 @@ export default {
 		}
 	},
 	computed: {
-		mode(){
+		mode() {
 			if(this.model && this.model.id) return 'edit';
 			return 'create';
 		},
-		title(){
+		title() {
 			let text = '手冊';
 
 			if(this.mode === 'edit') return `編輯${text}`;
 			return `新增${text}`;	
 		},
-		canRemove(){
+		canRemove() {
 			return this.mode === 'edit' && !this.model.active;
 		}
 	},
@@ -99,6 +123,19 @@ export default {
 				return msg.replace('title', '標題');
 			}
 			return '';
+		},
+		onActiveChanged(val) {
+			if(val) {
+				if(this.model.order < 0) this.model.order = 0;
+			}else {
+				if(this.model.order >= 0) this.model.order = -1;
+			}
+		},
+		addOrder(val) {
+			this.model.order += val;
+
+			this.model.active = this.model.order >= 0;
+
 		},
 		remove(){
 			this.$emit('remove');

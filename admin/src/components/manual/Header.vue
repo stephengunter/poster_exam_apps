@@ -24,7 +24,7 @@
 
 <script>
 export default {
-   name: 'RecruitsHeader',
+   name: 'ManualHeader',
    props: {
 		params: {
 			type: Object,
@@ -41,9 +41,7 @@ export default {
    },
    data () {
 		return {
-			
-			
-		}
+      }
    },
    beforeMount(){
 		

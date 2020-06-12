@@ -16,6 +16,11 @@
                {{ props.item.id }}
             </td>
             <td>
+               <v-chip v-if="props.item.isRoot" :color="props.item.free ? 'success' : 'warning'" text-color="white">
+                  {{ props.item.free ? '免費' : '訂閱會員'  }}
+               </v-chip>
+            </td>
+            <td>
                {{ props.item.title }}
             </td>
             <td>
@@ -35,12 +40,18 @@
             </td>
             <td>
                <ul style="list-style:none;padding:0;margin:0;">
-                  <li v-for="(subItem, index) in props.item.subItems" :key="index">
-                     <a href="#" @click.prevent="editSubItem(subItem.id)">{{ subItem.title }}</a>
-                  </li>
                   <li>
-                     <v-btn small @click.prevent="addSubItem(props.item)" flat icon color="warning">
+                     <v-btn v-if="props.item.parentId < 1" small @click.prevent="addSubItem(props.item)" flat icon color="warning">
                         <v-icon small>mdi-plus</v-icon>
+                     </v-btn>
+                  </li>
+                  <li v-for="(subItem, index) in props.item.subItems" :key="index">
+                     <v-icon class="mr-1" :color="subItem.active ? 'success' : ''" >
+                     {{ subItem.active ? 'mdi-check-circle' : 'mdi-minus-circle' }}
+                     </v-icon>
+                     <a href="#" @click.prevent="selectSubItem(subItem)">{{ subItem.title }}</a>
+                     <v-btn class="mb-2" @click.prevent="editSubItem(subItem.id)" flat icon color="success">
+                        <v-icon small>mdi-pencil</v-icon>
                      </v-btn>
                   </li>
                </ul>
@@ -81,6 +92,11 @@ export default {
 					text: 'Id',
                value: '',
                width: '30px'
+            },
+            {
+					sortable: false,
+               text: '',
+               width: '100px'
             },
 				{
 					sortable: false,
@@ -128,6 +144,9 @@ export default {
       },
       edit(id){
          this.$emit('edit', id);
+      },
+      selectSubItem(item) {
+         this.$emit('select', item);
       },
       editSubItem(id) {
          this.$emit('edit', id);
