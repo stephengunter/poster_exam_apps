@@ -71,6 +71,9 @@ export const LOAD_EXAM_SUMMARY = 'loadExamSummary';
 
 //Manuals
 export const FETCH_MANUALS = 'fetchManuals';
+export const MANUAL_CATEGORY = 'manualCategory';
+export const MANUAL_DETAILS = 'manualDetails';
+export const SHOW_MANUAL = 'showManual';
 
 //Subscribes
 export const FETCH_PLANS = 'fetchPlans';

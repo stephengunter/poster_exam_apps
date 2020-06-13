@@ -11,10 +11,6 @@
 			<v-card-text>
 				<v-container grid-list-md>
 					<v-layout wrap>
-						<!-- <v-flex xs12>
-							<v-text-field :value="`${model.parentId} ${model.parentTitle}`" label="Parent" readonly />
-							
-						</v-flex> -->
 						<v-flex xs12>
 							<v-text-field v-model="model.title" label="標題"
 							v-validate="'required'"
@@ -37,11 +33,26 @@
 							row-height="15"
 							/>
 						</v-flex>
-						<v-flex xs12>
+						<v-flex xs6>
 							<v-switch
-							v-model="model.active"
+							v-model="model.active" @change="onActiveChanged"
 							label="上架中"
 							/>
+						</v-flex>
+						<v-flex xs6>
+							<v-text-field v-model="model.order" label="排序"
+							name="order"
+							>
+								<template v-slot:append>
+									<v-btn small icon @click.prevent="addOrder(1)">
+										<v-icon small>mdi-plus</v-icon>
+									</v-btn>
+									<v-btn small icon @click.prevent="addOrder(-1)">
+										<v-icon small>mdi-minus</v-icon>
+									</v-btn>
+								</template>
+
+							</v-text-field>
 						</v-flex>
 					</v-layout>
 					<core-error-list  />
@@ -126,6 +137,19 @@ export default {
 				return msg.replace('title', '標題');
 			}
 			return '';
+		},
+		onActiveChanged(val) {
+			if(val) {
+				if(this.model.order < 0) this.model.order = 0;
+			}else {
+				if(this.model.order >= 0) this.model.order = -1;
+			}
+		},
+		addOrder(val) {
+			this.model.order += val;
+
+			this.model.active = this.model.order >= 0;
+
 		},
 		remove(){
 			this.$emit('remove');

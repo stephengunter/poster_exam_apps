@@ -1,8 +1,9 @@
-import { DIALOG_MAX_WIDTH } from '@/config';
+import { SHOW_MANUAL } from '@/store/actions.type';
 import { POST_TYPES } from '@/consts';
 import { photoNameUrl } from './photo';
 
-export const convertHtmlContent = (text) => {
+export const convertHtmlContent = (text, maxWidth) => {
+   console.log('convertHtmlContent', maxWidth);
    if(!text) return '';
 
    let result = text;
@@ -15,7 +16,7 @@ export const convertHtmlContent = (text) => {
 
       let isEmoji = name.split('/')[0].toLowerCase() === POST_TYPES.EMOJI.toLowerCase();
       
-      let photoUrl = photoNameUrl(name, DIALOG_MAX_WIDTH);
+      let photoUrl = photoNameUrl(name, maxWidth);
       
       //result = result.replace(matches[i], `<a href="#" style="display: block" onclick="event.preventDefault(); ${SHOW_PHOTO}(${id});">&#128247;查看圖片</a>`)
       result = isEmoji ? 
@@ -23,5 +24,17 @@ export const convertHtmlContent = (text) => {
                result.replace(matches[i], `<img src="${photoUrl}">`);
                
    }
+
+   let manualMatches = result.match(/<MANUAL>(.*?)<\/MANUAL>/g);
+   if(manualMatches) {
+      
+      for(let i = 0; i < manualMatches.length; i++) {
+         let content = manualMatches[i].replace(/<\/?MANUAL>/g, '');
+         if(!content) continue;
+         let link = { text: content.split(',')[0], id: content.split(',')[1] };
+         result = result.replace(manualMatches[i], `<a href="#" onclick="event.preventDefault(); ${SHOW_MANUAL}(${link.id});">${link.text}</a>`);
+      }
+   }
+
    return result;
 }

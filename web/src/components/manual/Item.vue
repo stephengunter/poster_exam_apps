@@ -1,6 +1,6 @@
 <template>
-   <v-card v-if="model">
-      <v-card-title>
+   <v-card v-if="model" >
+      <v-card-title :id="`manual_${model.id}`">
          <h3>{{ model.title }}</h3>
          <v-chip v-if="model.isRoot" :color="model.free ? 'success' : 'warning'" class="ml-3" small>
             {{ model.free ? '免費' : '訂閱會員'  }}
@@ -22,10 +22,11 @@
             </v-col>
          </v-row>
          <feature-item v-for="(item, index) in model.features" :key="index" 
-         :item="item"
+         :item="item" :max_width="max_width"
          />
          <manual-item v-for="subItem in model.subItems" :key="subItem.id"
-         :item="subItem" class="mt-3"
+         :item="subItem" :max_width="max_width"
+         class="mt-3"
          />
       </v-card-text>
    </v-card>
@@ -39,6 +40,10 @@ export default {
       item: {
          type: Object,
          default: null
+      },
+      max_width: {
+         type: Number,
+         default: 0
       }
    },
    data() {
@@ -52,19 +57,20 @@ export default {
             this.init();
          },
          deep: true
-      }
+      },
+      'max_width' : 'init'
    },
    beforeMount() {
       this.init();
-	},
+   },
    methods: {
 		init() {
          if(!this.item) return;
-        
+         
          this.model = {
             ...this.item,
-            summary: convertHtmlContent(this.item.summary),
-            content: convertHtmlContent(this.item.content),
+            summary: convertHtmlContent(this.item.summary, this.max_width),
+            content: convertHtmlContent(this.item.content, this.max_width)
          };
 		}
 	}

@@ -2,7 +2,8 @@ import { CANCEL, SUBMIT, SELECT,
    NOTE_CATEGORY, SEE_QUESTIONS,
    RQS_INDEX, SELECT_RQS_MODE, STORE_EXAM, DELETE_EXAM,
    SAVE_EXAM, ABORT_EXAM, NEW_EXAM, EXAM_RECORDS,
-   FILTER_EXAMS, EXAM_SUMMARY
+   FILTER_EXAMS, EXAM_SUMMARY,
+   MANUAL_CATEGORY
 } from '@/store/actions.type';
 
 const actions = [
@@ -113,7 +114,19 @@ const actions = [
    title: '刪除',
    color: 'error',
    description: '刪除這個測驗'
-}];
+}
+//Manuals
+,{
+   views: ['manuals'],
+   name: MANUAL_CATEGORY,
+   order: 0,
+   type: SELECT,
+   icon: 'mdi-format-list-bulleted',
+   title: '目錄',
+   description: ''
+   
+}
+];
 
 
 export const fetchViewActions = (view) => actions.filter(item => item.views.includes(view));

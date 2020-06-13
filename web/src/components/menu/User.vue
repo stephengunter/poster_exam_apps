@@ -63,7 +63,6 @@ export default {
          })
       },
       onMenuSelected(name) {
-         console.log('onMenuSelected', name);
          this.$router.push({ name });
       }
    }

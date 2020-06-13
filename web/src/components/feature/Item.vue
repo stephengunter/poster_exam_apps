@@ -2,7 +2,7 @@
    <v-row v-if="model">
       <v-col cols="12">
          <h3>
-            {{ model.title }}
+           {{ model.title }}
          </h3>
          <div v-if="model.summary" class="mt-3" v-html="model.summary">
             
@@ -24,6 +24,10 @@ export default {
       item: {
          type: Object,
          default: null
+      },
+      max_width: {
+         type: Number,
+         default: 0
       }
    },
    data() {
@@ -37,21 +41,21 @@ export default {
             this.init();
          },
          deep: true
-      }
+      },
+      'max_width' : 'init'
    },
    beforeMount() {
       this.init();
    },
    methods: {
 		init() {
-         console.log(this.item);
+         if(!this.item) return;
+
 			this.model = {
             ...this.item,
-            summary: convertHtmlContent(this.item.summary),
-            content: convertHtmlContent(this.item.content),
+            summary: convertHtmlContent(this.item.summary, this.max_width),
+            content: convertHtmlContent(this.item.content, this.max_width)
          };
-
-         console.log(this.model);
 		}
 	}
 }

@@ -156,9 +156,6 @@ export default {
 				action: NOTE_CATEGORY, text: this.rootSubject.text
 			}];
 			
-			// this.addBreadItem(NOTE_CATEGORY, this.title);
-			// this.addBreadItem(NOTE_CATEGORY, this.rootSubject.text);
-			
 			if(this.params.keyword) {
 				if(this.subject) items.push({ action: NOTE_CATEGORY, text: this.subject.text });
 				items.push({ action: NOTE_CATEGORY, text: `搜尋：${this.params.keyword}` });

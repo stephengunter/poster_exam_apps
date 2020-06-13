@@ -95,7 +95,7 @@ const actions = {
    [SCROLL_TOP](context) {
       var element = document.getElementById('app-container');
       if(!element) return;
-      element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest'});
+      element.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest'});
    },
 }
 

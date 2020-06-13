@@ -56,6 +56,7 @@ export const SET_EXAM_ACTIONS = 'setExamActions';
 
 //Manuals
 export const SET_MANUALS = 'setManuals';
+export const SET_MANUAL_CATEGORIES = 'setManualCategories';
 export const SET_MANUAL = 'setManual';
 
 //Subscribes
