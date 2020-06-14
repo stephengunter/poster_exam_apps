@@ -26,7 +26,7 @@ export default {
          references: {},
          content: `<p>
          “黑人弗洛伊德之死”再一次撕开了美国种族歧视的疮疤。对于美国民众来说，这又是一次或根治种族问题的机会，于是他们奋力呼喊、极力反抗，由此引发的抗议潮自上月26日以来已持续12天时间并蔓延至全美。
-         <UPLOADPHOTO>20200203/2193fa14-4ea9-419b-a1ba-c371525d8a11.jpg&width=420<\/UPLOADPHOTO>
+         
          
          </p>
          
@@ -48,8 +48,8 @@ export default {
       }
    },
 	beforeMount() {
-   //   const imgTags = this.content.match(/<img [^>]*src="[^"]*"[^>]*>/gm);
-   //   console.log(imgTags);
+      let name = '';
+      console.log(name.split('/'));
    },
    mounted() {
 		this.references = { ...this.$refs };

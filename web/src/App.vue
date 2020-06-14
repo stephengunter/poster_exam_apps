@@ -255,12 +255,23 @@ html {
   scroll-behavior: smooth;
 }
 
-article img {
+article img{
 	display: block;
-	max-width: 100%;
+	max-width:  100%;
 	height: auto;
-	margin-top: 1rem;
-	margin-bottom: 1rem;
+}
+.inline-emoji {
+	float: left;
+	margin-right: .5em;
+	width: 22px;
+	height: 22px;
+}
+.article-imgDesc {
+	color: darkorange;
+	margin-top: 1em;
+}
+.article-imgDesc > li {
+	margin-bottom : 3px;
 }
 
 .errText{
@@ -320,21 +331,5 @@ article img {
 	max-width: 130px;
 	overflow: hidden;
 	text-overflow: ellipsis;
-}
-
-.article-img {
-	display: block;
-	max-width:  100%;
-	height: auto;
-}
-.article-imgDesc {
-	display : block;
-	color: darkorange;
-	margin-top: 1em;
-}
-.inline-emoji {
-	height: 24px;
-	margin: 3px;
-	vertical-align: middle;
 }
 </style>

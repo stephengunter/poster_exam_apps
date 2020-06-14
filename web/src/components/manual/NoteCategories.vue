@@ -1,27 +1,24 @@
 <template>
-   <div class="mb-2">
-      <core-bread @selected="onBreadSelected" />
+   <v-dialog v-model="category.active" :max-width="category.maxWidth" :persistent="true">
+      <note-category :allow_select="false"
+      :allow_cancel="true" :version="category.version"
+      :params="category.params" :mode_options="modeOptions"
+      :subject_options="subjectOptions"
+      :tree_items="tree.items"
+      @cancel="onCancel"
+      @root-changed="onRootSubjectChanged"
       
-      <v-dialog v-model="category.active" :max-width="category.maxWidth" :persistent="true">
-			<note-category
-			:allow_cancel="version > 0 || paramsValid" :version="category.version"
-         :params="category.params" :mode_options="modeOptions"
-			:subject_options="subjectOptions"
-			:tree_items="tree.items"
-			@cancel="category.active = false;"
-			@root-changed="onRootSubjectChanged"
-         @submit="onParamsChanged"
-         />
-      </v-dialog>
-   </div>
+      />
+   </v-dialog>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { FETCH_NOTE_CATEGORIES, NOTE_CATEGORY, ACTION_SELECTED } from '@/store/actions.type';
-import { SET_BREAD_ITEMS } from '@/store/mutations.type';
+import { NOTE_CATEGORY } from '@/store/actions.type';
+import { SET_LOADING, SET_NOTE_CATEGORIES } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH,  NOTES_SETTINGS} from '@/config';
-import { resolveErrorData } from '@/utils';
+import { resolveErrorData, onError } from '@/utils';
+import CategoriesService from '@/services/categories.service';
 
 export default {
 	name: 'NoteHeader',
@@ -94,32 +91,28 @@ export default {
          return this.params.subject > 0 || this.params.term > 0
       }
 	},
-   beforeMount(){
-      this.$store.dispatch(FETCH_NOTE_CATEGORIES)
-      .then(() => {
+   beforeMount() {
+      this.$store.commit(SET_LOADING, true);
+      CategoriesService.fetch()
+      .then(categories => {
+         this.$store.commit(SET_NOTE_CATEGORIES, categories);
          this.$nextTick(() => {
             this.init();
          });
       })
       .catch(error => {
-         Bus.$emit('errors', resolveErrorData(error));
+         onError(error);
       })
+      .finally(() => { 
+         this.$store.commit(SET_LOADING, false);
+      });
    },
    methods: {
       init() {
 			this.params.rootSubject = this.subjectOptions[0].value;
-			this.loadModeOptions(this.params.rootSubject);
-
 			this.setTreeItems(this.params.rootSubject);
 			
 			this.showCategory();
-		},
-		loadModeOptions(subjectId) {
-			let rootSubject = NOTES_SETTINGS.subjects.find(item => item.id === subjectId);
-			if(rootSubject) this.modeOptions = rootSubject.modes;
-			else this.modeOptions = [];
-
-			if(!this.modeOptions.length) this.params.mode = 0;
 		},
       setTreeItems(rootSubjectId) {
          let category = this.categories.find(item => item.id === rootSubjectId);
@@ -129,50 +122,20 @@ export default {
 			this.params.rootSubject = val;
          this.params.subject = 0;
 			this.params.term = 0;
-			this.loadModeOptions(val);
+			
 			this.category.params = { ...this.params };
 			this.setTreeItems(val);
-		},
-		onParamsChanged(params) {
-			this.params = { ...params };
-			this.$emit('params-changed', params);
-			
-			this.$nextTick(() => {
-				this.setTitle();
-				this.category.active = false;
-			});
-		},
-		setTitle() {
-			let items = [{
-            action: NOTE_CATEGORY, text: this.title
-         },{
-				action: NOTE_CATEGORY, text: this.rootSubject.text
-			}];
-			
-			if(this.params.keyword) {
-				if(this.subject) items.push({ action: NOTE_CATEGORY, text: this.subject.text });
-				items.push({ action: NOTE_CATEGORY, text: `搜尋：${this.params.keyword}` });
-			}else {
-				
-				items.push({ action: NOTE_CATEGORY, text: this.subject.text });
-				if(this.term) items.push({ action: NOTE_CATEGORY, text: this.term.text });
-
-				let mode = this.modeOptions.find(item => item.value === this.params.mode);
-				if(mode) items.push({ action: NOTE_CATEGORY, text: mode.text });
-			}
-
-			this.$store.commit(SET_BREAD_ITEMS, items);
-			
-      },
-		onBreadSelected(item) {
-			Bus.$emit(ACTION_SELECTED, item.action);
 		},
 		showCategory() {
 			this.category.params = { ...this.params };
 			this.category.version += 1;
 			this.category.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
 			this.category.active = true;
-		}
+      },
+      onCancel() {
+         this.category.active = false;
+         this.$emit('cancel');
+      }
       
 
    }

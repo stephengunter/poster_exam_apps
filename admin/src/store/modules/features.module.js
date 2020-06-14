@@ -1,10 +1,10 @@
-import ManualsService from '@/services/manuals.service';
+import FeaturesService from '@/services/features.service';
 import { resolveErrorData } from '@/utils';
 
-import { FETCH_MANUALS, CREATE_MANUAL, STORE_MANUAL,
-   EDIT_MANUAL, MANUAL_DETAILS, UPDATE_MANUAL, DELETE_MANUAL, ORDER_MANUALS
+import { FETCH_FEATURES, CREATE_FEATURE, STORE_FEATURE,
+   EDIT_FEATURE, UPDATE_FEATURE, DELETE_FEATURE, ORDER_FEATURES
 } from '@/store/actions.type';
-import { SET_LOADING, SET_MANUALS } from '@/store/mutations.type';
+import { SET_LOADING } from '@/store/mutations.type';
 
 
 
@@ -19,12 +19,11 @@ const getters = {
 };
 
 const actions = {
-   [FETCH_MANUALS](context, params) {
+   [FETCH_FEATURES](context, params) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         ManualsService.fetch(params)
+         FeaturesService.fetch(params)
             .then(list => {
-               context.commit(SET_MANUALS, list);
                resolve(list);
             })
             .catch(error => {
@@ -35,9 +34,9 @@ const actions = {
             });
       });
    },
-   [CREATE_MANUAL](context, params) {
+   [CREATE_FEATURE](context) {
       return new Promise((resolve, reject) => {
-         ManualsService.create(params)
+         FeaturesService.create()
             .then(model => {
                resolve(model);
             })
@@ -49,10 +48,10 @@ const actions = {
             });
       });
    },
-   [STORE_MANUAL](context, model) {
+   [STORE_FEATURE](context, model) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         ManualsService.store(model)
+         FeaturesService.store(model)
          .then(data => {
             resolve(data);
          })
@@ -64,38 +63,25 @@ const actions = {
          });
       });
    },
-   [EDIT_MANUAL](context, id) {
-      return new Promise((resolve, reject) => {
-         ManualsService.edit(id)
-            .then(model => {
-               resolve(model);
-            })
-            .catch(error => {
-               reject(error);        
-            })
-            .finally(() => { 
-               context.commit(SET_LOADING, false);
-            });
-      });
-   },
-   [MANUAL_DETAILS](context, id) {
-      return new Promise((resolve, reject) => {
-         ManualsService.details(id)
-            .then(model => {
-               resolve(model);
-            })
-            .catch(error => {
-               reject(error);        
-            })
-            .finally(() => { 
-               context.commit(SET_LOADING, false);
-            });
-      });
-   },
-   [UPDATE_MANUAL](context, model) {
+   [EDIT_FEATURE](context, id) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         ManualsService.update(model.id, model)
+         FeaturesService.edit(id)
+            .then(model => {
+               resolve(model);
+            })
+            .catch(error => {
+               reject(error);
+            })
+            .finally(() => { 
+               context.commit(SET_LOADING, false);
+            });
+      });
+   },
+   [UPDATE_FEATURE](context, model) {
+      context.commit(SET_LOADING, true);
+      return new Promise((resolve, reject) => {
+         FeaturesService.update(model.id, model)
             .then(() => {
                resolve(true);
             })
@@ -107,10 +93,10 @@ const actions = {
             });
       });
    },
-   [ORDER_MANUALS](context, model) {
+   [ORDER_FEATURES](context, model) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         ManualsService.order(model)
+         FeaturesService.order(model)
             .then(() => {
                resolve(true);
             })
@@ -122,10 +108,10 @@ const actions = {
             });
       });
    },
-   [DELETE_MANUAL](context, id) {
+   [DELETE_FEATURE](context, id) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         ManualsService.remove(id)
+         FeaturesService.remove(id)
             .then(() => {
                resolve(true);
             })
@@ -141,9 +127,7 @@ const actions = {
 
 
 const mutations = {
-   [SET_MANUALS](state, list) {
-      state.list = list;
-   }
+   
 };
 
 export default {

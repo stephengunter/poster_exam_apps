@@ -3,7 +3,7 @@
       <v-layout justify-center  align-center>
 			<v-flex xs12>
 				<material-card>
-					<manual-header :params="params"
+					<manual-header ref="manualHeader" :params="params"
 					:active_options="activeOptions"
 					:can_create="canCreate"
 					@create="create" @params-changed="onParamsChanged"
@@ -11,6 +11,7 @@
 					<v-layout row wrap>
 						<v-flex xs12>
 							<manual-table :list="list" @edit="edit"
+							@select="onSelected"
 							@edit-subItem="editSubItem" @add-subItem="addSubItem"
 							@edit-feature="editFeature" @add-feature="addFeature"
 							@order-changed="onOrderChanged"
@@ -19,10 +20,25 @@
 					</v-layout>
 				</material-card>
 			</v-flex>
-     </v-layout>
-	  <v-dialog v-model="editor.active" persistent :max-width="editor.maxWidth">
-			<manual-edit v-if="editor.active" :model="editor.model"
+      </v-layout>
+	   <v-dialog v-model="editor.active" persistent :max-width="editor.maxWidth">
+			<manual-edit v-if="editor.active" :model="editor.model" :parent_options="parentOptions"
 			@submit="submit" @cancel="cancelEdit" @remove="remove"
+			/>
+		</v-dialog>
+		<v-dialog v-model="selection.active" persistent :max-width="selection.maxWidth">
+			<v-card>
+				<core-close-icon-button @close="setSelectionItem(null)" />
+				<manual-table :list="selection.list" @edit="edit"
+				@edit-subItem="editSubItem" @add-subItem="addSubItem"
+				@edit-feature="editFeature" @add-feature="addFeature"
+				@order-changed="onOrderChanged"
+				/>
+			</v-card>
+		</v-dialog>
+		<v-dialog v-model="featureEditor.active" persistent :max-width="featureEditor.maxWidth">
+			<feature-edit v-if="featureEditor.active" :manual="featureEditor.manual" :id="featureEditor.id"
+			@saved="onFeatureSaved" @cancel="cancelEditFeature"
 			/>
 		</v-dialog>
 		<v-dialog v-model="deletion.active" :max-width="deletion.maxWidth">
@@ -62,18 +78,33 @@ export default {
 			},
 
 			editor: {
-				subjectOptions: [],
 				active: false,
 				maxWidth: DIALOG_MAX_WIDTH,
-				model: null,
-				allItems: []
+				model: null
+			},
+
+			selection: {
+				list: [],
+				active: false,
+				maxWidth: DIALOG_MAX_WIDTH
+			},
+
+			parentOptions: [],
+
+			featureEditor: {
+				active: false,
+				maxWidth: DIALOG_MAX_WIDTH,
+				manual: null,
+				id: 0
 			},
 
 			deletion: {
 				id: 0,
 				active: false,
 				maxWidth: DIALOG_MAX_WIDTH
-			}
+			},
+
+			references: {}
 			
 		}
    },
@@ -84,11 +115,19 @@ export default {
 		}),
 		canCreate(){
 			return !this.editor.active && !this.deletion.active;
-		}
+		},
+		manualHeader() {
+			if(this.$refs.manualHeader) return this.$refs.manualHeader;
+			else if (this.references.manualHeader) return this.references.manualHeader;
+			return null;
+      }
    },
    beforeMount(){
 		this.init();
-   },
+	},
+	mounted() {
+		this.references = { ...this.$refs };
+	},
    methods: {
 		init(){
 			this.editor.active = false;
@@ -101,6 +140,11 @@ export default {
 			this.fetchData(this.params);
 		},
 		fetchData(params){
+			if(!params) params = this.params;
+
+			this.setEditModel(null);
+			this.setSelectionItem(null);
+
 			this.$store.commit(CLEAR_ERROR);
 			this.$store.dispatch(FETCH_MANUALS, params)
 			.then(() => {
@@ -110,15 +154,32 @@ export default {
 				onError(error);
 			})
 		},
+		setParentOptions(options) {
+			options.unshift({ value: 0, text: '-----'})
+			this.parentOptions = options;
+		},
+		onSelected(item) {
+			this.setSelectionItem(item);
+		},
+		setSelectionItem(item) {
+			if(item) {
+				this.selection.list = [item];
+				this.selection.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
+				this.selection.active = true;
+			}else {
+				this.selection.list = [];
+				this.selection.active = false;
+			}
+		},
 		create(parent = null){
 			this.$store.commit(CLEAR_ERROR);
 			this.$store.dispatch(CREATE_MANUAL)
 			.then(model => {
-				if(parent) {
-					model.parentId = parent.id;
-					model.parentTitle = parent.title;
-				}
-				this.setEditModel(model);
+				this.setParentOptions(model.parents);
+
+				let manual = model.manual;
+				if(parent) manual.parentId = parent.id;
+				this.setEditModel(manual);
 			})
 			.catch(error => {
 				onError(error);
@@ -128,8 +189,8 @@ export default {
 			this.$store.commit(CLEAR_ERROR);
 			this.$store.dispatch(EDIT_MANUAL, id)
 			.then(model => {
-				console.log('model', model);
-				this.setEditModel(model);
+				this.setParentOptions(model.parents);
+				this.setEditModel(model.manual);
 			})
 			.catch(error => {
 				onError(error);
@@ -137,6 +198,8 @@ export default {
 		},
 		setEditModel(model) {
 			if(model) {
+				this.setSelectionItem(null);
+
 				this.editor.model = model;
 				this.editor.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
 				this.editor.active = true;
@@ -210,11 +273,30 @@ export default {
 		editSubItem(id) {
 			console.log('editSubItem',id);
 		},
-		addFeature(item) {
-			console.log('addFeature',item);
+		addFeature(manual) {
+			this.setFeatureEditor(manual);
 		},
-		editFeature(id) {
-			console.log('editFeature',id);
+		setFeatureEditor(manual = null, id = 0) {
+			if(manual) {
+				this.featureEditor.manual = manual;
+				this.featureEditor.id = id;
+				this.featureEditor.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
+				this.featureEditor.active = true;
+			}else {
+				this.featureEditor.manual = null;
+				this.featureEditor.id = 0;
+				this.featureEditor.active = false;
+			}
+		},
+		cancelEditFeature() {
+			this.setFeatureEditor(null);
+		},
+		editFeature({ manual, feature }) {
+			this.setFeatureEditor(manual, feature.id);
+		},
+		onFeatureSaved() {
+			this.cancelEditFeature();
+			this.fetchData();
 		}
 	}
 }

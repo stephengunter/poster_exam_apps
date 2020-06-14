@@ -1,6 +1,6 @@
 <template>
 	<form @submit.prevent="onSubmit">
-		<v-card>
+		<v-card v-if="model">
 			<v-card-title>
 				<span class="headline">{{ title }}</span>
 				<v-spacer />
@@ -11,11 +11,6 @@
 			<v-card-text>
 				<v-container grid-list-md>
 					<v-layout wrap>
-						<v-flex xs12 v-if="model.parentId">
-							<v-select label="Parent"
-							:items="parent_options" v-model="model.parentId"
-							/>
-						</v-flex>
 						<v-flex xs12>
 							<v-text-field v-model="model.title" label="標題"
 							v-validate="'required'"
@@ -26,14 +21,14 @@
 						</v-flex>
 						<v-flex xs12>
 							<v-textarea v-model="model.summary" label="簡介" outlined auto-grow
-							name="summary"
+							name="text"
 							rows="5"
 							row-height="15"
 							/>
 						</v-flex>
 						<v-flex xs12>
 							<v-textarea v-model="model.content" label="內容" outlined auto-grow
-							name="content"
+							name="text"
 							rows="5"
 							row-height="15"
 							/>
@@ -59,10 +54,6 @@
 
 							</v-text-field>
 						</v-flex>
-						<v-flex xs12>
-							<v-switch v-model="model.free" label="免費"
-							/>
-						</v-flex>
 					</v-layout>
 					<core-error-list  />
 				</v-container>
@@ -80,40 +71,63 @@
 
 <script>
 import { SET_ERROR, CLEAR_ERROR } from '@/store/mutations.type';
+import { CREATE_FEATURE, STORE_FEATURE, EDIT_FEATURE, UPDATE_FEATURE
+} from '@/store/actions.type';
+import { onError } from '@/utils';
+
 export default {
-	name: 'ManualEdit',
+	name: 'FeatureEdit',
 	props: {
-		model: {
-         type: Object,
-         default: null
+		id: {
+			type: Number,
+         default: 0
 		},
-		parent_options: {
-         type: Array,
+		manual: {
+         type: Object,
          default: null
 		}
 	},
 	data () {
 		return {
-			
+			model: null
 		}
 	},
 	computed: {
-		mode() {
+		mode(){
 			if(this.model && this.model.id) return 'edit';
 			return 'create';
 		},
-		title() {
-			let text = '手冊';
+		title(){
+			let text = '功能';
 
 			if(this.mode === 'edit') return `編輯${text}`;
 			return `新增${text}`;	
 		},
-		canRemove() {
+		canRemove(){
 			return this.mode === 'edit' && !this.model.active;
 		}
 	},
 	beforeMount(){
-		
+		this.$store.commit(CLEAR_ERROR);
+
+		if(this.id) {
+			this.$store.dispatch(EDIT_FEATURE, this.id)
+			.then(model => {
+				this.model = model;
+			})
+			.catch(error => {
+				onError(error);
+			})
+		}else {
+			this.$store.dispatch(CREATE_FEATURE)
+			.then(model => {
+				model.manualId = this.manual.id;
+				this.model = model;
+			})
+			.catch(error => {
+				onError(error);
+			})
+		}
 	},
 	methods: {
 		getErrMsg(key){
@@ -146,8 +160,24 @@ export default {
 		onSubmit() {
 			this.$store.commit(CLEAR_ERROR);
 			this.$validator.validate().then(valid => {
-				if(valid) this.$emit('submit');
+				if(!valid) return;
+				this.submit();
 			});     
+		},
+		submit() {
+			let model = this.model;
+
+			this.$store.commit(CLEAR_ERROR);
+			let action = model.id ? UPDATE_FEATURE : STORE_FEATURE;
+         this.$store.dispatch(action, model)
+			.then(() => {
+				this.$emit('saved');
+				Bus.$emit('success');
+			})
+			.catch(error => {
+				if(!error)  Bus.$emit('errors');
+				else this.$store.commit(SET_ERROR, error);
+			})
 		}
 	}
 }

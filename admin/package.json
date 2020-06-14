@@ -23,6 +23,7 @@
     "sortablejs": "^1.10.1",
     "tiptap": "^1.27.1",
     "tiptap-extensions": "^1.29.1",
+    "v-clipboard": "^2.2.3",
     "valid-url": "^1.0.9",
     "vee-validate": "^2.2.14",
     "vue": "^2.5.17",

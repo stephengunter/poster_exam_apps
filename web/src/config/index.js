@@ -16,7 +16,7 @@ export const GOOGLE_RECAPTCHA_PARAMS = {
 
 
 //UI
-export const DIALOG_MAX_WIDTH = 480;
+export const DIALOG_MAX_WIDTH = 420;
 
 export const NOTES_SETTINGS = {
    subjects: [{

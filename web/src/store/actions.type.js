@@ -51,7 +51,6 @@ export const RQS_INDEX = 'rqsIndex';
 export const SELECT_RQS_MODE = 'selectRQsMode';
 export const FETCH_RQS = 'fetchRQs';
 
-
 //Exams
 export const EXAM_RECORDS = 'examRecords';
 export const NEW_EXAM = 'newExam';
@@ -69,6 +68,12 @@ export const READ_EXAM = 'readExam';
 export const FILTER_EXAMS = 'filterExams';
 export const FETCH_EXAMS = 'fetchExams';
 export const LOAD_EXAM_SUMMARY = 'loadExamSummary';
+
+//Manuals
+export const FETCH_MANUALS = 'fetchManuals';
+export const MANUAL_CATEGORY = 'manualCategory';
+export const MANUAL_DETAILS = 'manualDetails';
+export const SHOW_MANUAL = 'showManual';
 
 //Subscribes
 export const FETCH_PLANS = 'fetchPlans';

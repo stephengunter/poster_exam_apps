@@ -11,6 +11,7 @@ import questions from './modules/questions.module';
 import terms from './modules/terms.module';
 import rqs from './modules/rqs.module';
 import exams from './modules/exams.module';
+import manuals from './modules/manuals.module';
 import subscribes from './modules/subscribes.module';
 import bills from './modules/bills.module';
 
@@ -28,6 +29,7 @@ export default new Vuex.Store({
       terms,
       rqs,
       exams,
+      manuals,
       subscribes,
       bills      
    }

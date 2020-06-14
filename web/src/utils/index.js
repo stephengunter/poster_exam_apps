@@ -1,6 +1,3 @@
-import queryString from 'query-string';
-import { API_URL } from '@/config';
-
 export const isBadRequest = (error) => error.status ? error.status === 400 : false;
 
 export const resolveErrorData = (error) => {
@@ -30,35 +27,6 @@ export const activeOptions = () => {
    }];
 }
 
-export const resolveQueryString = (params) => queryString.stringify(params);
-
-export const buildQuery = (url, params) => {
-   let queryString = resolveQueryString(params);
-   if(!queryString) return url;
-  
-   return `${url}?${queryString}`;
-}
-
-
-export const photoNameUrl = (name, width = 0, height = 0, type = '') => {
-   let url = `${API_URL}/photo`;
-   let params = { name };
-   if(width) params['width'] = width;
-   if(height) params['height'] = height;
-   if(type) params['type'] = type;
-  
-   return buildQuery(url, params);
-}
-
-export const photoIdUrl = (id, width = 0, height = 0, type = '') => {
-   let url = `${API_URL}/photo/${id}`;
-   let params = {};
-   if(width) params['width'] = width;
-   if(height) params['height'] = height;
-   if(type) params['type'] = type;
-  
-   return buildQuery(url, params);
-}
 
 export const uuid = (len = 8, radix = 16) => {
    let chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
@@ -91,9 +59,12 @@ export const uuid = (len = 8, radix = 16) => {
 
 
 export * from './helper';
+export * from './query';
+export * from './photo';
 export * from './route';
 export * from './actions';
 export * from './user';
 export * from './subscribe';
 export * from './exam';
 export * from './highlight';
+export * from './html';

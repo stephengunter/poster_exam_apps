@@ -1,11 +1,29 @@
 <template>
 	<v-container>
-		<manual-item :model="model" />
+		<v-row>
+			<v-col>
+				<v-select :items="options" @change="test"
+        		/>
+			</v-col>
+		</v-row>
+		
+		<v-card v-for="(item, index) in items" :key="index" :id="`man_${index}`" style="margin-top:20px;">
+			<v-card-title>
+				<h3>{{ index }}</h3>
+			</v-card-title>
+			<v-card-text style="font-size: 1rem;">
+				<article v-html="item">
+					
+				</article>
+			</v-card-text>
+			
+		</v-card>
 		
 	</v-container>
 </template>
 
 <script>
+import scrollIntoView from 'scroll-into-view';
 import { mapState, mapGetters } from 'vuex';
 import { isEmptyObject } from '@/utils';
 
@@ -13,81 +31,52 @@ export default {
 	name: 'TestView',
 	data() {
 		return {
-			model: {
-				title: '測驗模式',
-				summary: '針對歷屆試題進行模擬測驗，判斷你的得分實力與錄取標準的差距',
-				content:`<p>
-<img class="article-img" src="https://pvwc0w.ch.files.1drv.com/y4mO4YgsTzLTITOWNyVDUqhqeBIc0ZOhn4Yx9dkgcSYjFVuiy-6PkVs1Qp7jpqDYBjTwcJR6YKQTMQFTFq11ZhfxmAE-cCi_wLpYoSzifliR9dl3eJmN55BjhH0zrc6xYIH0h4fR6h1pKWxMSx_PWHPbqWvijFpE5G3QUocVk_yyt3Hxezm-97XqnSG4PdLrV3UrL-jvuAn5G5DuiebGYvQoQ?width=358&height=589&cropmode=none" />
-     
-   <ul class="article-imgDesc" style="list-style:none;padding:0;margin:0;">
-      <li >
-         <img src="http://localhost:8080/images/one-red.png" class="inline-emoji" />
-         叫出功能選單按鈕
-      </li>
-      <li >
-         <img src="http://localhost:8080/images/two.png" class="inline-emoji" />
-         功能選單
-      </li>
-   </ul>
-</p>`,
-				features: [{
-					key: 'rq-exam-summary', title: '作答概況',
-					summary: '顯示已作答與未作答的題號',
-					content: `<p>
-<img class="article-img" src="https://8qzfog.ch.files.1drv.com/y4m5JO_hPBuxYp4h58UfODkL2VOV5UqaoutXbPMzYnV_H8vscBAZlLMfz2MNKWNIUpu4f4YvAYaGYLGCrncY3PDrD2Tc8_jZk106Fucr3wy4Ke8C3wJ9gXh49hg6mC2b_s6P0o_Cp2OLHuJK6Ppg5XUuB-5nFZGEJDsyawzSU0wSIjF9WkiYXnCw4p2REjjNuPD-Ncrt8ixbrvxKIKpOqS_1w?width=360&height=416&cropmode=none" />
-     
-   <ul class="article-imgDesc" style="list-style:none;padding:0;margin:0;">
-      <li >
-         點擊題號會直接跳到該題目
-      </li>
-   </ul>
-</p>`
-				},{
-					key: 'rq-exam-save', title: '存檔',
-					summary: '沒時間作完時，將測驗存檔，下次打開繼續作答',
-					content: `<p>
-<img class="article-img" src="https://8vzfog.ch.files.1drv.com/y4mN25ePXLjmkLCQOv_etSYxgRhmspmv4BK-vAT3m6KhoDz9YnavKwsha_Iz3WFsItlLp5RYgCfgVqKA1jbVy7k-IkhEb8GVKvn_lRzzRUvtrY3OU-VfRpCU0I6Kv7Al2qOCdg-Ifot60ztTi9pbBUNpb1VsinzbovQTFOZ23Pqj6W46I4tgMsYs3_OTJ05HhxjKLMLAFIvQXgdAHnpTBYTEA?width=359&height=535&cropmode=none" />
-     
-   <ul class="article-imgDesc" style="list-style:none;padding:0;margin:0;">
-      <li >
-         存檔名稱可以自訂
-      </li>
-   </ul>
-</p>`
-				},{
-					key: 'rq-exam-done', title: '交券',
-					summary: '作答完畢，交券後系統將進行存檔與評分',
-					content: `<p>
-<img class="article-img" src="https://8fzfog.ch.files.1drv.com/y4msd1eXnFKLl1gvOfFAG3B70G6jvmVQAu4NnnAf17l_TGWCW19JpAjhOGd7nO1gzIc9n-qteNxebno0tyqeqQEHPfvoJ-rwUxwQS6iJWgJgcdr7pULmMyESktw75FBzVuCIh8mQW0T4nPLlcSBxS05HrHei5gbTNe-_HOQ01nDgIjkhkhghhn8izkj2DGoFvgQdC9zqIaoKLa6CFgyl-6coA?width=360&height=537&cropmode=none" />
-   <br>
-	交券後，可看到正確答案與閱讀解析。 <br>
-	詳細說明請 <a href="#">點此查看</a>
-</p>`
-				}],
-			}
+			options: [],
+			items: [],
+			content: `
+				<p>
+					观察者网讯）据国家卫健委13日上午最新通报，6月12日北京新增本土确诊病例6例。这也就意味着，6月11日至12日两天内，北京新增本土确诊病例7例。
+
+北京市疾控中心副主任庞星火13日表示，这些确诊病例均有新发地农产品批发市场活动史。此外，在新发地采集的517件样品中，有45人咽拭子阳性，另在海淀一农贸市场中发现1例阳性，是1例新发地确诊病例的密切接触者。
+
+目前，作为北京重要“菜篮子”的新发地批发市场已成为流调溯源的重中之重。12日晚，北京市委、市政府已约谈丰台区委、区政府主要负责同志，要求向新发地批发市场派驻工作组。
+
+丰台区区长初军威13日表示，丰台区迅速启动战时机制，成立现场指挥部，已对新发地市场及周边11个小区采取封闭管理措施，市场周边3所小学、6所幼儿园已返校的班级立即停课。
+
+北京市卫健委新闻发言人高小俊介绍，北京将对5月30日以来与新发地市场有密切接触的人员开展核酸检测。
+
+与此同时，自13日3时起新发地批发市场暂时休市。另据北京市交通委员会消息，京开高速出京方向新发地出口（K6）采取临时交通管制措施。
+				</p>
+			`
 		}
 	},
 	computed: {
 		
 	},
 	beforeMount() {
-		let query = this.$route.query;
-		if(query && !isEmptyObject(query)) {
-			for (let field in this.params) {
-				if(query.hasOwnProperty(field)) {
-					this.params[field] = query[field]
-				}
-			}
+		//console.log('scrollIntoView', scrollIntoView);
+		for(let i = 0; i < 10; i++) {
+			this.items.push(this.content);
+			this.options.push({
+				value: i, text: i
+			})
 		}
-
-		console.log('beforeMount', this.params);
 		
 	},
 	methods: {
-		test() {
-			this.$router.push({ path: '/test/details' });
+		test(val) {
+			var element = document.getElementById(`man_${val}`);
+			if(!element) return;
+			scrollIntoView(element, {
+				time: 500
+			}, (type) => {
+				console.log('type', type);
+			});
+			//element.scrollIntoView(true);
 			
-			
+			// setTimeout(() => {
+			// 	window.scrollBy(0, 60)
+			// }, 500);
 		}
 	},
 	
