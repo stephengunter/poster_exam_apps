@@ -15,6 +15,7 @@
       <div class="ml-1">
          
       </div>
+
       <menu-user v-if="currentUser" :user="currentUser"
       :menu_list = "userMenus"
       />
@@ -49,7 +50,7 @@ export default {
 </script>
 
 <style scoped>
-.site-title{
+.site-title {
    font-size : 1.5rem!important;
 }
 </style>

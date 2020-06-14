@@ -45,9 +45,18 @@
             <v-col cols="12">
                <span v-if="errText" class="red--text">{{ errText }}</span>
               
-               <v-treeview :items="tree_items" item-children="subItems"
+               <v-treeview v-if="allow_select" :items="tree_items" item-children="subItems"
                activatable hoverable return-object  active-class="primary--text"
                :active.sync="tree.active"
+               >
+                  <template v-slot:label="{ item }">
+                     <span style="font-size: 16px;">
+                        {{ item.text }}
+                     </span>
+                  </template>
+               </v-treeview>
+               <v-treeview v-else :items="tree_items" item-children="subItems"
+               hoverable return-object  active-class="primary--text"
                >
                   <template v-slot:label="{ item }">
                      <span style="font-size: 16px;">
@@ -65,7 +74,7 @@
             </v-col>
 			</v-row>
       </v-card-text>
-      <v-card-actions>
+      <v-card-actions v-if="allow_select">
          <v-spacer></v-spacer>
          <v-btn @click="submit" color="success">
             確定
@@ -81,6 +90,10 @@ import { resolveErrorData } from '@/utils';
 export default {
    name: 'NoteCategory',
    props: {
+      allow_select: {
+         type: Boolean,
+         default: true
+      },
       allow_cancel: {
          type: Boolean,
          default: true
@@ -121,7 +134,7 @@ export default {
    computed: {
       ...mapGetters(['responsive','contentMaxWidth']),
       title() {
-         return '讀書筆記';
+         return '讀書筆記 - 目錄';
       },
       selectItem() {
 			if(this.tree.active.length) return this.tree.active[0];

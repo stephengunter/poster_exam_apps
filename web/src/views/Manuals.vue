@@ -3,6 +3,7 @@
       <div class="mb-2">
 			<core-bread @selected="onBreadSelected" />
       </div>
+
 		<manual-item :item="model" :max_width="maxWidth"
 		/>
       
@@ -12,13 +13,17 @@
 			@selected="onCategorySelected" @cancel="hideCategory"
 			/>
       </v-dialog>
+
+		<manual-note-categories v-if="noteCategories.active"
+		@cancel="noteCategories.active = false"
+		/>
    </v-container>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex';
 import scrollIntoView from 'scroll-into-view';
-import { SCROLL_TOP, LOAD_ACTIONS, ACTION_SELECTED, MANUAL_CATEGORY,
+import { LOAD_ACTIONS, ACTION_SELECTED, MANUAL_CATEGORY, NOTE_CATEGORY,
 FETCH_MANUALS, MANUAL_DETAILS, SHOW_MANUAL } from '@/store/actions.type';
 import { tryParseInt, onError, getRouteTitle } from '@/utils';
 import { DIALOG_MAX_WIDTH } from '@/config';
@@ -41,7 +46,11 @@ export default {
 			category: {
 				active: false,
 				maxWidth: DIALOG_MAX_WIDTH
-         },
+			},
+			
+			noteCategories: {
+				active: false
+			}
 		}
 	},
 	computed:{
@@ -65,9 +74,11 @@ export default {
 	mounted() {
 		this.references = { ...this.$refs };
 		window.addEventListener(SHOW_MANUAL, this.onShowManual);
+		window.addEventListener(NOTE_CATEGORY, this.showNoteCategories);
 	},
 	beforeDestroy(){
 		window.removeEventListener(SHOW_MANUAL, this.onShowManual);
+		window.removeEventListener(NOTE_CATEGORY, this.showNoteCategories);
    },
 	watch:{
 		$route (to, from){
@@ -172,6 +183,11 @@ export default {
 		onShowManual(e) {
 			let id = e.detail.id;
 			this.$router.push({ name, query: { id } });
+		},
+		showNoteCategories() {
+			if(this.$route.name !== this.pageName) return;
+
+			this.noteCategories.active = true;
 		}
 	}
 }

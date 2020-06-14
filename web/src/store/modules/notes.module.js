@@ -8,6 +8,11 @@ import { SET_LOADING, SET_NOTE_CATEGORIES, SET_NOTES } from '@/store/mutations.t
 
 const initialState = {
    categories: [],
+
+   allSubjects: [],
+   subjectOptions: [],
+   allTerms: [],
+
    terms: []
 };
 
@@ -70,7 +75,18 @@ const actions = {
 
 const mutations = {
    [SET_NOTE_CATEGORIES](state, categories) {
-      state.categories = categories;
+      if(categories && categories.length) {
+         state.categories = categories;
+         state.subjectOptions = categories.map(item => ({ value: item.id, text: item.text }));
+         
+         let subjects = categories.flatMap(item => item.subItems);
+         let allTerms = subjects.flatMap(item => item.subItems);
+         state.allSubjects = subjects;
+			state.allTerms = allTerms;
+      }else {
+         state.categories = [];
+      } 
+      
    },
    [SET_NOTES](state, terms) {
       state.terms = terms;
