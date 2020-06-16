@@ -34,8 +34,7 @@ export default {
    name: 'TheHeader',
    data() {
       return {
-         title: SITE_TITLE,
-         messages: 10,
+         title: SITE_TITLE
       }
    },
    computed:{

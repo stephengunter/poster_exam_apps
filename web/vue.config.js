@@ -1,5 +1,5 @@
 module.exports = {
-  devServer: {
+   devServer: {
 		disableHostCheck: true
 	},
 	chainWebpack: config => {
