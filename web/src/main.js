@@ -19,6 +19,7 @@ import '@/filters';
 import JwtService from '@/services/jwt.service';
 import { INIT, CHECK_AUTH, REFRESH_TOKEN, FETCH_ACTIONS } from '@/store/actions.type';
 import { FOR_ALL, GUEST_ONLY, USER_ONLY } from '@/routes/route.type';
+import { SITE_TITLE } from '@/config';
 import Menu from '@/common/menu';
 import { SET_CURRENT_PAGE, SET_MENUS, SET_FOOTER_MENUS, SET_USER_MENUS,
 	SET_AUTH_CHANGED
@@ -61,6 +62,12 @@ router.beforeEach((to, from, next) => {
 });
 
 router.afterEach((to, from) => {
+	if(to.meta.title) {
+		document.title = `${SITE_TITLE} - ${to.meta.title}`;
+	}else {
+		document.title = SITE_TITLE;
+	}
+	
 	store.commit(SET_CURRENT_PAGE, to);
 })
 
