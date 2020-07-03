@@ -2,7 +2,7 @@
    <v-navigation-drawer v-model="drawer" id="app-drawer" app>
       <div class="text-center mt-2">
          <v-avatar>
-            <img :src="require('@/assets/m-logo.png')">
+            <img :src="require('@/assets/logo.png')">
          </v-avatar>
       </div>
       <v-list dense>

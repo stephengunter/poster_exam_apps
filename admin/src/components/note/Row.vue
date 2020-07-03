@@ -166,7 +166,6 @@ export default {
 		}
    },
    mounted() {
-      if(this.model.id == 2616) console.log(this.model);
       
    },
    methods: {
