@@ -7,7 +7,6 @@
       :tree_items="tree.items"
       @cancel="onCancel"
       @root-changed="onRootSubjectChanged"
-      
       />
    </v-dialog>
 </template>
@@ -92,6 +91,12 @@ export default {
       }
 	},
    beforeMount() {
+		if(this.categories && this.categories.length) {
+			this.init();
+			return;
+		}
+
+		
       this.$store.commit(SET_LOADING, true);
       CategoriesService.fetch()
       .then(categories => {

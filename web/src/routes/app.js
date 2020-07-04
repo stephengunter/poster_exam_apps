@@ -15,27 +15,27 @@ const applinks = [{
       title: '首頁'
    } 
 },
-// {
-//    name: 'test',
-//    path: '/test',
-//    view: 'test/Index',
-//    parent: '',
-//    meta: {
-//       type: FOR_ALL,
-//       menus: [],
-//       title: 'Test'
-//    } 
-// },{
-//    name: 'test-details',
-//    path: '/test/details',
-//    view: 'test/Details',
-//    parent: 'test',
-//    meta: {
-//       type: FOR_ALL,
-//       menus: [],
-//       title: 'Test'
-//    } 
-// },
+{
+   name: 'test',
+   path: '/test',
+   view: 'test/Index',
+   parent: '',
+   meta: {
+      type: FOR_ALL,
+      menus: [],
+      title: 'Test'
+   } 
+},{
+   name: 'test-details',
+   path: '/test/details',
+   view: 'test/Details',
+   parent: 'test',
+   meta: {
+      type: FOR_ALL,
+      menus: [],
+      title: 'Test'
+   } 
+},
 {
    name: 'contact',
    path: '/contact',

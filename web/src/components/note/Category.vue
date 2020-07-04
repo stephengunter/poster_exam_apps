@@ -1,5 +1,5 @@
 <template>
-   <v-card>
+   <v-card v-show="ready">
       <core-close-icon-button v-if="allow_cancel" @close="cancel" />
       <v-card-title>
          <h3>{{ title }}</h3>
@@ -45,14 +45,17 @@
             <v-col cols="12">
                <span v-if="errText" class="red--text">{{ errText }}</span>
               
-               <v-treeview v-if="allow_select" :items="tree_items" item-children="subItems"
-               activatable hoverable return-object  active-class="primary--text"
+               <v-treeview v-if="allow_select" :open="tree.open"
+               :items="tree_items" item-children="subItems"  item-key="id"
+               activatable active-class="primary--text"
                :active.sync="tree.active"
                >
-                  <template v-slot:label="{ item }">
-                     <span style="font-size: 16px;">
-                        {{ item.text }}
-                     </span>
+                  <template v-slot:label="{ item, active }">
+                     <v-btn text>
+                        <span style="font-size: 16px;" :class="{ 'primary--text' : active }">
+                           {{ item.text }}
+                        </span>
+                     </v-btn>
                   </template>
                </v-treeview>
                <v-treeview v-else :items="tree_items" item-children="subItems"
@@ -60,7 +63,7 @@
                >
                   <template v-slot:label="{ item }">
                      <span style="font-size: 16px;">
-                        {{ item.text }}
+                     {{ item.text }}
                      </span>
                   </template>
                </v-treeview>
@@ -121,11 +124,13 @@ export default {
    },
    data() {
 		return {
-         
+         ready: false,
          showSearch: false,
          errText: '',
          tree: {
-				active: []
+            open: [],
+            active: [],
+            selectedType: ''
          },
          cloneTreeActive: [],
          canceled: false
@@ -136,7 +141,7 @@ export default {
       title() {
          return '讀書筆記 - 目錄';
       },
-      selectItem() {
+      selectId() {
 			if(this.tree.active.length) return this.tree.active[0];
 			return null;
 		},
@@ -148,18 +153,26 @@ export default {
       }
    },
    watch: {
-      selectItem: 'onSelectItemChanged',
+      selectId: 'onSelectIdChanged',
       version: 'init'
+   },
+   beforeMount() {
+      if(this.params.subject) this.tree.open = [this.params.subject];
+      if(this.params.term) this.tree.active = [this.params.term];
+
+      if(!this.tree.active.length) this.ready = true;
    },
 	methods: {
       init() {
          this.canceled = false;
          this.cloneTreeActive = this.tree.active.slice(0);
+         this.ready = true;
       },
       cancel() {
          this.canceled = true;
          this.tree.active = this.cloneTreeActive.slice(0);
          this.$emit('cancel');
+         this.ready = false;
       },
       onSubjectChanged(val) {
          this.$emit('root-changed', val);
@@ -167,39 +180,36 @@ export default {
       onModeChanged(val) {
          
       },
-      onSelectItemChanged(newVal, oldVal) {
+      onSelectIdChanged(newVal, oldVal) {
          if(this.canceled && this.version > 0) return;
-
-         if(oldVal) {
-            if(oldVal.type === 'Subject') {
-               if(newVal) this.params.subject = newVal.id;
-               else this.params.subject = 0;
-            }else {
-               if(newVal) this.params.term = newVal.id;
-               else this.params.term = 0;
-            }
-         }
-
-         if(!newVal) return;
          
-         let item = newVal;
-        
-         if(item.type === 'Subject') {
-            this.params.subject = item.id;
+         if(!newVal) {
+            if(this.tree.selectedType === 'Subject') this.params.subject = 0;
+            else if(this.tree.selectedType === 'Term') this.params.term = 0;
+
+            this.tree.selectedType = '';
+            return;
+         } 
+         
+         let item = this.tree_items.find(x => x.id === newVal);
+         if(item) {
+            this.tree.selectedType = 'Subject';
+            //選擇的是Subject
+            this.params.subject = newVal;
             this.params.term = 0;
+
+            this.errText = '';
          }else {
-            this.params.term = item.id;
+            //選擇的是Term
+            this.tree.selectedType = 'Term';
+
+            this.params.term = newVal;
             this.params.subject = 0;
             this.params.keyword = '';
+            
+            this.errText = '';
+            this.$emit('submit', this.params);
          }
-
-         this.onParamsChanged();
-
-         if(this.selectItem.subItems.length) return;
-         else this.submit();
-      },
-      onParamsChanged() {
-         this.errText = '';
       },
       search() {
          if(this.params.keyword) {
@@ -214,14 +224,15 @@ export default {
       },
       submit() {
          if(this.params.term) {
+            this.errText = '';
             this.$emit('submit', this.params);
          }else {
             if(this.params.subject) {
                if(this.params.keyword) {
                   this.params.term = 0;
                   this.params.mode = 0;
-                  this.$emit('submit', this.params);
-               }else if(this.selectItem.subItems.length < 1) {
+
+                  this.errText = '';
                   this.$emit('submit', this.params);
                }
                else this.errText = '請選擇章節';

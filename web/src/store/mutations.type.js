@@ -39,6 +39,7 @@ export const SET_NOTIFICATION = 'setNotification';
 
 //Notes
 export const SET_NOTE_CATEGORIES = 'setNoteCategories';
+export const SET_NOTE_PARAMS = 'setNoteParams';
 export const SET_NOTES = 'setNotes';
 
 //Questions
