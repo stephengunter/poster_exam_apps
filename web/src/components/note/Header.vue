@@ -21,7 +21,7 @@ import { mapState, mapGetters } from 'vuex';
 import { FETCH_NOTE_CATEGORIES, NOTE_CATEGORY, ACTION_SELECTED } from '@/store/actions.type';
 import { SET_BREAD_ITEMS } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH,  NOTES_SETTINGS} from '@/config';
-import { resolveErrorData } from '@/utils';
+import { resolveErrorData, tryParseInt } from '@/utils';
 
 export default {
 	name: 'NoteHeader',
@@ -65,9 +65,10 @@ export default {
 		}
    },
    computed: {
-      ...mapGetters(['responsive','contentMaxWidth']),
+      ...mapGetters(['responsive','contentMaxWidth', 'currentUser']),
 		...mapState({
 			categories: state => state.notes.categories,
+			userParams: state => state.notes.params,
 			allSubjects: state => state.notes.allSubjects,
 			subjectOptions: state => state.notes.subjectOptions,
 			allTerms: state => state.notes.allTerms
@@ -94,8 +95,14 @@ export default {
          return this.params.subject > 0 || this.params.term > 0
       }
 	},
-   beforeMount(){
-      this.$store.dispatch(FETCH_NOTE_CATEGORIES)
+   beforeMount() {
+		if(this.userParams && this.categories.length) {
+			this.init();
+			return;
+		}
+		
+		let userId = this.currentUser ? this.currentUser.id : '';
+      this.$store.dispatch(FETCH_NOTE_CATEGORIES, userId)
       .then(() => {
          this.$nextTick(() => {
             this.init();
@@ -107,11 +114,36 @@ export default {
    },
    methods: {
       init() {
-			this.params.rootSubject = this.subjectOptions[0].value;
+			
+			if(this.userParams) {
+				this.params.mode = tryParseInt(this.userParams.mode);
+				this.params.term = tryParseInt(this.userParams.termId);
+			}
+
+			if(this.params.term) {
+				let term = this.allTerms.find(x => x.id === this.params.term);
+				if(term) {
+					let subject = this.allSubjects.find(x => x.id === term.parentId);
+					if(subject) {
+						this.params.subject = subject.id;
+						this.params.rootSubject = subject.parentId;
+					} 
+					else {
+						this.params.term = 0;
+						this.params.subject = 0;
+						this.params.rootSubject = 0;
+					}
+				}
+				else this.params.term = 0;
+			}
+
+
+			if(!this.params.rootSubject) this.params.rootSubject = this.subjectOptions[0].value;
+			
 			this.loadModeOptions(this.params.rootSubject);
 
 			this.setTreeItems(this.params.rootSubject);
-			
+
 			this.showCategory();
 		},
 		loadModeOptions(subjectId) {
@@ -123,7 +155,7 @@ export default {
 		},
       setTreeItems(rootSubjectId) {
          let category = this.categories.find(item => item.id === rootSubjectId);
-         this.tree.items = category.subItems;
+			this.tree.items = category.subItems;
 		},
 		onRootSubjectChanged(val) {
 			this.params.rootSubject = val;
@@ -134,8 +166,9 @@ export default {
 			this.setTreeItems(val);
 		},
 		onParamsChanged(params) {
-			this.params = { ...params };
-			this.$emit('params-changed', params);
+			if(params) this.params = { ...params };
+			
+			this.$emit('params-changed', this.params);
 			
 			this.$nextTick(() => {
 				this.setTitle();

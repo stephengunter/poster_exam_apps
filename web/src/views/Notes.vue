@@ -153,6 +153,7 @@ export default {
 				mode, subject, term, keyword
 			};
 			this.params = params;
+			
 			this.$store.dispatch(FETCH_NOTES, params)
 			.then(terms => {
 				if(this.params.keyword) {

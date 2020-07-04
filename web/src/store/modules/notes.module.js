@@ -2,12 +2,13 @@ import NotesService from '@/services/notes.service';
 
 import { FETCH_NOTE_CATEGORIES, FETCH_NOTES, NOTE_DETAILS } from '@/store/actions.type';
 
-import { SET_LOADING, SET_NOTE_CATEGORIES, SET_NOTES } from '@/store/mutations.type';
+import { SET_LOADING, SET_NOTE_CATEGORIES, SET_NOTE_PARAMS, SET_NOTES } from '@/store/mutations.type';
 
 
 
 const initialState = {
    categories: [],
+   params: null,
 
    allSubjects: [],
    subjectOptions: [],
@@ -28,9 +29,11 @@ const actions = {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          NotesService.categories()
-            .then(categories => {
-               context.commit(SET_NOTE_CATEGORIES, categories);
-               resolve(categories);
+            .then(model => {
+               context.commit(SET_NOTE_CATEGORIES, model.categories);
+               context.commit(SET_NOTE_PARAMS, model.params);
+               
+               resolve(model);
             })
             .catch(error => {
                reject(error);
@@ -41,6 +44,7 @@ const actions = {
       });
    },
    [FETCH_NOTES](context, params) {
+      if(params.term) context.commit(SET_NOTE_PARAMS, { termId: params.term,  mode: params.mode });
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          NotesService.fetch(params)
@@ -87,6 +91,15 @@ const mutations = {
          state.categories = [];
       } 
       
+   },
+   [SET_NOTE_PARAMS](state, params) {
+      if(params) state.params = params;
+      else {
+         state.params = {
+            mode: 0,
+            term: 0
+         }; 
+      }     
    },
    [SET_NOTES](state, terms) {
       state.terms = terms;
