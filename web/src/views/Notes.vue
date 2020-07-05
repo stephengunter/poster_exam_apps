@@ -88,6 +88,7 @@ export default {
 				pageSize: 10,
 				pageList: [],
 				showAnswers: false,
+				callback: null
 			},
 
 			references: {}
@@ -123,7 +124,7 @@ export default {
 		Bus.$on(ACTION_SELECTED, this.onActionSelected);
 	},
 	beforeMount() {
-		this.init();
+		this.init();	
 	},
 	mounted() {
 		this.references = { ...this.$refs };
@@ -148,7 +149,8 @@ export default {
       fetchData({ mode, rootSubject, subject, term, keyword }) {
 			this.setSubjectSettings(rootSubject);
 			this.setReady(false);
-			this.relatedQuestions.init();
+			if(this.relatedQuestions) this.relatedQuestions.init();
+
 			let params = {
 				mode, subject, term, keyword
 			};

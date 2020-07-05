@@ -153,14 +153,19 @@ export default {
       }
    },
    watch: {
-      selectId: 'onSelectIdChanged',
+      selectId(newVal, oldVal) {
+         if(!this.ready) return;
+         if(this.canceled && this.version > 0) return;
+         this.onSelectIdChanged(newVal, oldVal);
+      },
       version: 'init'
    },
    beforeMount() {
       if(this.params.subject) this.tree.open = [this.params.subject];
       if(this.params.term) this.tree.active = [this.params.term];
-
-      if(!this.tree.active.length) this.ready = true;
+      
+      if(this.tree.active.length) this.onSelectIdChanged(this.tree.active[0], null);
+      else this.ready = true;
    },
 	methods: {
       init() {
@@ -181,8 +186,6 @@ export default {
          
       },
       onSelectIdChanged(newVal, oldVal) {
-         if(this.canceled && this.version > 0) return;
-         
          if(!newVal) {
             if(this.tree.selectedType === 'Subject') this.params.subject = 0;
             else if(this.tree.selectedType === 'Term') this.params.term = 0;

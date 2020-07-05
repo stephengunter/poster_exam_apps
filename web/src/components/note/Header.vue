@@ -101,8 +101,7 @@ export default {
 			return;
 		}
 		
-		let userId = this.currentUser ? this.currentUser.id : '';
-      this.$store.dispatch(FETCH_NOTE_CATEGORIES, userId)
+      this.$store.dispatch(FETCH_NOTE_CATEGORIES)
       .then(() => {
          this.$nextTick(() => {
             this.init();
