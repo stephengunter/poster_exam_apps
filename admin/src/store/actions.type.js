@@ -39,6 +39,8 @@ export const DELETE_PLAN = 'deletePlan';
 
 //Users
 export const FETCH_USERS = 'fetchUsers';
+export const USER_DETAILS = 'userDetails';
+export const ADD_USER_PASSWORD = 'addUserPassword';
 
 //Subjects
 export const FETCH_SUBJECTS = 'fetchSubjects';

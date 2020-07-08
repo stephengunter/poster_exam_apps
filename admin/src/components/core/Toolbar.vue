@@ -54,6 +54,14 @@
                            <v-list-tile-title>Log out</v-list-tile-title>
                         </v-list-tile-content>
                      </v-list-tile>
+							<v-list-tile @click.prevent="profile">
+                        <v-list-tile-action>
+                           <v-icon>mdi-account</v-icon>
+                        </v-list-tile-action>
+                        <v-list-tile-content>
+                           <v-list-tile-title>Profile</v-list-tile-title>
+                        </v-list-tile-content>
+                     </v-list-tile>
                   </v-list>
                </v-card>
             </v-menu>
@@ -102,7 +110,10 @@ export default {
       logout(){
 			this.$store.dispatch(LOGOUT)
 			.then(() => this.$router.push({ path: '/login' }))
-      }
+		},
+		profile() {
+			this.$router.push({ path: '/profile' });
+		}
 	}
 }
 </script>
