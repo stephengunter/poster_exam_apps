@@ -96,6 +96,7 @@ export default {
       }
 	},
    beforeMount() {
+		
 		if(this.userParams && this.categories.length) {
 			this.init();
 			return;
@@ -116,6 +117,7 @@ export default {
 			
 			if(this.userParams) {
 				this.params.mode = tryParseInt(this.userParams.mode);
+				this.params.subject = tryParseInt(this.userParams.subjectId);
 				this.params.term = tryParseInt(this.userParams.termId);
 			}
 
@@ -134,6 +136,19 @@ export default {
 					}
 				}
 				else this.params.term = 0;
+
+			}else if(this.params.subject) {
+				let subject = this.allSubjects.find(x => x.id === this.params.subject);
+
+				if(subject) {
+					this.params.subject = subject.id;
+					this.params.rootSubject = subject.parentId;
+				} 
+				else {
+					this.params.term = 0;
+					this.params.subject = 0;
+					this.params.rootSubject = 0;
+				}
 			}
 
 

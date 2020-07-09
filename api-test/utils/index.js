@@ -10,6 +10,10 @@ export const SUBSCRIBER = 'Subscriber';
 
 export const API_URL = process.env.API_URL;
 
+export const ADMIN_USER = process.env.ADMIN_USER;
+
+export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
 export const testAction = '/api/atests';
 
 

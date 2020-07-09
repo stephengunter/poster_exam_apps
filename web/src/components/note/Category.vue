@@ -130,7 +130,7 @@ export default {
          tree: {
             open: [],
             active: [],
-            selectedType: ''
+            selectedItem: ''
          },
          cloneTreeActive: [],
          canceled: false
@@ -138,6 +138,9 @@ export default {
    },
    computed: {
       ...mapGetters(['responsive','contentMaxWidth']),
+      ...mapState({
+			allTerms: state => state.notes.allTerms
+		}),
       title() {
          return '讀書筆記 - 目錄';
       },
@@ -156,15 +159,20 @@ export default {
       selectId(newVal, oldVal) {
          if(!this.ready) return;
          if(this.canceled && this.version > 0) return;
-         this.onSelectIdChanged(newVal, oldVal);
+         this.onSelectIdChanged(newVal, oldVal, false);
       },
       version: 'init'
    },
    beforeMount() {
-      if(this.params.subject) this.tree.open = [this.params.subject];
-      if(this.params.term) this.tree.active = [this.params.term];
+      if(this.params.subject) {
+         this.tree.open = [this.params.subject];
+         if(!this.params.keyword) this.tree.active = [this.params.subject];
+      }
+      if(this.params.term) {
+         this.tree.active = [this.params.term];
+      } 
       
-      if(this.tree.active.length) this.onSelectIdChanged(this.tree.active[0], null);
+      if(this.tree.active.length) this.onSelectIdChanged(this.tree.active[0], null, );
       else this.ready = true;
    },
 	methods: {
@@ -185,26 +193,32 @@ export default {
       onModeChanged(val) {
          
       },
-      onSelectIdChanged(newVal, oldVal) {
+      onSelectIdChanged(newVal, oldVal, submit = true) {
+         
          if(!newVal) {
-            if(this.tree.selectedType === 'Subject') this.params.subject = 0;
-            else if(this.tree.selectedType === 'Term') this.params.term = 0;
-
-            this.tree.selectedType = '';
+            if(this.tree.selectedItem) {
+               if(this.tree.selectedItem.type === 'Subject') this.params.subject = 0;
+               else this.params.term = 0;
+            }
+            this.tree.selectedItem = null;
             return;
          } 
          
          let item = this.tree_items.find(x => x.id === newVal);
+         
          if(item) {
-            this.tree.selectedType = 'Subject';
+            this.tree.selectedItem = item;
             //選擇的是Subject
             this.params.subject = newVal;
             this.params.term = 0;
 
             this.errText = '';
+            if(submit) this.submit();
+
          }else {
             //選擇的是Term
-            this.tree.selectedType = 'Term';
+            item = this.allTerms.find(x => x.id === newVal);
+            this.tree.selectedItem = item;
 
             this.params.term = newVal;
             this.params.subject = 0;
@@ -237,8 +251,17 @@ export default {
 
                   this.errText = '';
                   this.$emit('submit', this.params);
+               }else {
+                  if(this.tree.selectedItem.subItems.length) {
+                     this.errText = '請選擇章節';
+                  }else {
+                     this.params.term = 0;
+                     this.params.mode = 0;
+
+                     this.errText = '';
+                     this.$emit('submit', this.params);
+                  }
                }
-               else this.errText = '請選擇章節';
             }            
             else this.errText = '請選擇章節';
          }

@@ -44,7 +44,9 @@ const actions = {
       });
    },
    [FETCH_NOTES](context, params) {
-      if(params.term) context.commit(SET_NOTE_PARAMS, { termId: params.term,  mode: params.mode });
+      if(!params.keyword) {
+         context.commit(SET_NOTE_PARAMS, { subjectId: params.subject, termId: params.term,  mode: params.mode });
+      }
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          NotesService.fetch(params)
@@ -97,9 +99,10 @@ const mutations = {
       else {
          state.params = {
             mode: 0,
+            subject: 0, 
             term: 0
          }; 
-      }     
+      }
    },
    [SET_NOTES](state, terms) {
       state.terms = terms;
