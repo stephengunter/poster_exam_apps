@@ -6,12 +6,13 @@ import {
    EDIT_TERM, UPDATE_TERM, DELETE_TERM
 } from '@/store/actions.type';
 
-import { SET_TERMS, SET_LOADING } from '@/store/mutations.type';
+import { SET_TERMS, SET_TERM_PARENTS, SET_LOADING } from '@/store/mutations.type';
 
 
 
 const initialState = {
-   list: []
+   list: [],
+   parents: []
 };
 
 export const state = { ...initialState };
@@ -27,7 +28,6 @@ const actions = {
       return new Promise((resolve, reject) => {
          TermsService.fetch(params)
             .then(terms => {
-               context.commit(SET_TERMS, terms);
                resolve(terms);
             })
             .catch(error => {
@@ -42,7 +42,8 @@ const actions = {
       return new Promise((resolve, reject) => {
          TermsService.create(params)
             .then(model => {
-               resolve(model);
+               context.commit(SET_TERM_PARENTS, model.parents);
+               resolve(model.term);
             })
             .catch(error => {
                reject(error);      
@@ -68,61 +69,64 @@ const actions = {
       });
    },
    [TERM_DETAILS](context, id) {
+      context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          TermsService.details(id)
-            .then(model => {
-               resolve(model);
-            })
-            .catch(error => {
-               reject(error);        
-            })
-            .finally(() => { 
-               context.commit(SET_LOADING, false);
-            });
+         .then(model => {
+            resolve(model);
+         })
+         .catch(error => {
+            reject(error);        
+         })
+         .finally(() => { 
+            context.commit(SET_LOADING, false);
+         });
       });
    },
    [EDIT_TERM](context, id) {
+      context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          TermsService.edit(id)
-            .then(model => {
-               resolve(model);
-            })
-            .catch(error => {
-               reject(error);        
-            })
-            .finally(() => { 
-               context.commit(SET_LOADING, false);
-            });
+         .then(model => {
+            context.commit(SET_TERM_PARENTS, model.parents);
+            resolve(model.term);
+         })
+         .catch(error => {
+            reject(error);        
+         })
+         .finally(() => { 
+            context.commit(SET_LOADING, false);
+         });
       });
    },
    [UPDATE_TERM](context, model) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          TermsService.update(model.id, model)
-            .then(() => {
-               resolve(true);
-            })
-            .catch(error => {
-               reject(resolveErrorData(error)); 
-            })
-            .finally(() => { 
-               context.commit(SET_LOADING, false);
-            });
+         .then(() => {
+            resolve(true);
+         })
+         .catch(error => {
+            reject(resolveErrorData(error)); 
+         })
+         .finally(() => { 
+            context.commit(SET_LOADING, false);
+         });
       });
    },
    [DELETE_TERM](context, id) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          TermsService.remove(id)
-            .then(() => {
-               resolve(true);
-            })
-            .catch(error => {
-               reject(resolveErrorData(error));
-            })
-            .finally(() => { 
-               context.commit(SET_LOADING, false);
-            });
+         .then(() => {
+            resolve(true);
+         })
+         .catch(error => {
+            reject(resolveErrorData(error));
+         })
+         .finally(() => { 
+            context.commit(SET_LOADING, false);
+         });
       });
    },
    
@@ -133,6 +137,9 @@ const actions = {
 const mutations = {
    [SET_TERMS](state, terms) {
       state.list = terms;
+   },
+   [SET_TERM_PARENTS](state, parents) {
+      state.parents = parents;
    }
 };
 

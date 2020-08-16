@@ -1,11 +1,18 @@
 import { API_URL, PHOTO_ACTION_PATH } from '@/config';
 import { isEmptyObject } from './helper';
 
+export const scrollToTop = () => {
+   let element = document.getElementById('app');
+   if(!element) return;
+
+   element.scrollIntoView();
+}
+
 export const resolveErrorData = (error) => {
    console.log(error);
-   if(!error) return null;
-   if(error.status && error.status === 400) return error.data;
-  
+   if(error) {
+      if(error.status && error.status === 400) return error.data;
+   }
    return null; 
 }
 
@@ -91,6 +98,13 @@ export const uuid = (len = 8, radix = 16) => {
    return uuid.join('');
 }
 
+
+
+export * from './user';
+export * from './format';
 export * from './helper';
+export * from './subject';
 export * from './highlight';
 export * from './reference';
+export * from './recruit';
+export * from './validator';

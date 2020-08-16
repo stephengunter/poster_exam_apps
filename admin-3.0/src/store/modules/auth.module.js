@@ -1,27 +1,20 @@
-import jwtDecode from 'jwt-decode';
 import Errors from '@/common/errors';
 import BaseService from '@/common/baseService';
-
 import AuthService from '@/services/auth.service';
 import OAuthService from '@/services/oAuth.service';
 import JwtService from '@/services/jwt.service';
 
 import { GOOGLE_AUTH_PARAMS } from '@/config';
 import GoogleAuth from '@/common/googleAuth';
+import { resolveUserFromClaims, isAdmin } from '@/utils';
 
+import { CHECK_AUTH, LOGIN, LOGOUT, INIT_GOOGLE_SIGNIN, GOOGLE_SIGNIN,
+   REFRESH_TOKEN
+} from '@/store/actions.type';
 
-import {
-   CHECK_AUTH,
-   REFRESH_TOKEN,
-   LOGIN,
-   INIT_GOOGLE_SIGNIN,
-   GOOGLE_SIGNIN,
-   LOGOUT
-} from '../actions.type';
-
-import { SET_AUTH, PURGE_AUTH, SET_USER, 
-   SET_ERROR, CLEAR_ERROR, SET_LOADING 
-} from '../mutations.type';
+import { 
+   SET_AUTH, PURGE_AUTH, SET_USER,  SET_ERROR, CLEAR_ERROR, SET_LOADING
+} from '@/store/mutations.type';
 
  
 const state = {
@@ -38,16 +31,6 @@ const getters = {
      return state.isAuthenticated;
    }
 };
-
-const hasAdminRole = (claims) => {
-   let roles = claims.roles.split(',');
-   let adminRoles = roles.filter(role => 
-      role.toUpperCase() === 'DEV' || role.toUpperCase() === 'BOSS'
-   );
-
-   if(adminRoles && adminRoles.length) return true;
-   return false;
-}
 
 const actions = {
    [INIT_GOOGLE_SIGNIN](context) {
@@ -74,7 +57,7 @@ const actions = {
          })
          .catch(err => {
             reject(err);
-         })    
+         })
       });
        
    },
@@ -99,7 +82,7 @@ const actions = {
    },
    [LOGOUT](context) {
       context.commit(PURGE_AUTH);
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
          setTimeout(() => {
             resolve(true);
          }, 500)
@@ -108,19 +91,15 @@ const actions = {
    [CHECK_AUTH](context) {
       return new Promise((resolve) => {
          let token = JwtService.getToken();
-         if (token) {
+         if(token) {
             BaseService.setHeader(token);
-            let claims = jwtDecode(token);
-            if(hasAdminRole(claims)){
-               context.commit(SET_USER, {
-                  id: claims.id,
-                  email: claims.sub
-               }); 
+            let claims = JwtService.resolveClaims(token);
+            let user = resolveUserFromClaims(claims);
+            if(isAdmin(user)){
+               context.commit(SET_USER, user); 
                resolve(true);
             }else{
-               //有token沒權限,保留token
-               let destroyToken = false;
-               context.commit(PURGE_AUTH, destroyToken);
+               context.commit(PURGE_AUTH);
                resolve(false);
             }            
          }else {
@@ -130,31 +109,32 @@ const actions = {
       });
    },
    [REFRESH_TOKEN](context) {
+      context.commit(SET_LOADING, true);
       return new Promise((resolve) => {
          let accessToken = JwtService.getToken();
          let refreshToken = JwtService.getRefreshToken();
          if(accessToken && refreshToken) {
-            context.commit(SET_LOADING, true);
             AuthService.refreshToken({ accessToken, refreshToken })
             .then(model => {
                context.commit(SET_AUTH, {
                   token: model.accessToken.token,
                   refreshToken: model.refreshToken
                });
-               context.commit(SET_LOADING, false);
                resolve(true);
             })
             .catch(err => {
-               context.commit(SET_LOADING, false);
                context.commit(PURGE_AUTH);
                resolve(false);           
             })
+            .finally(() => { 
+               context.commit(SET_LOADING, false);
+            });
          }else {
             context.commit(PURGE_AUTH);
             resolve(false);
          }
       });
-   }
+   }   
 };
 
 
@@ -171,12 +151,9 @@ const mutations = {
    [SET_AUTH](state, model) {
       
       JwtService.saveToken(model.token, model.refreshToken);
-
-      let claims = jwtDecode(model.token);
-      state.user = {
-         id: claims.id,
-         name: claims.sub
-      };
+      let claims = JwtService.resolveClaims(model.token);
+      let user = resolveUserFromClaims(claims);
+      state.user = user;
 
       state.isAuthenticated = true;
       state.errors = new Errors();
@@ -184,10 +161,10 @@ const mutations = {
    },
    [PURGE_AUTH](state) {
       state.isAuthenticated = false;
-      state.user = {};
-    
-      state.errors = new Errors();
+      state.user = null;
+      
       JwtService.destroyToken();
+      BaseService.setHeader(null);
    }
 };
 

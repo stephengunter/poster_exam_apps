@@ -1,4 +1,5 @@
 import Vue from 'vue';
-import Clipboard from 'v-clipboard'
+import VueClipboard from 'vue-clipboard2';
 
-Vue.use(Clipboard);
+VueClipboard.config.autoSetContainer = true;
+Vue.use(VueClipboard);

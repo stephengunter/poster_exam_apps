@@ -1,18 +1,20 @@
 import Vue from 'vue';
 window.Bus = new Vue({});
 
+import App from './App.vue';
+import router from '@/routes';
+import store from './store';
+import vuetify from './plugins/vuetify';
+import '@/plugins';
+import '@/filters';
 import '@/events';
 import '@/components';
-import '@/filters';
-import vuetify from './plugins/vuetify';
-import router from '@/routes';
-import store from '@/store';
-import App from './App.vue';
+
 import JwtService from '@/services/jwt.service';
+import { FOR_ALL, GUEST_ONLY } from '@/consts';
 import { CHECK_AUTH, REFRESH_TOKEN } from '@/store/actions.type';
 import { SET_MENUS } from '@/store/mutations.type';
-import Menu from '@/common/menu';
-import { FOR_ALL, GUEST_ONLY, ADMIN_ONLY } from '@/routes/route.type';
+import { getMainMenus } from '@/common/menu';
 
 router.beforeEach((to, from, next) => {
 	store.dispatch(CHECK_AUTH).then(auth => {
@@ -44,7 +46,7 @@ router.beforeEach((to, from, next) => {
 const redirect = (next, route) => next(route);
 
 const authDone = (next, to, auth = false) => {
-	let mainMenus = Menu.getMainMenus(router.options.routes, to, auth);
+	let mainMenus = getMainMenus(router.options.routes, to, auth);
 	store.commit(SET_MENUS, mainMenus);
 	return next();
 }

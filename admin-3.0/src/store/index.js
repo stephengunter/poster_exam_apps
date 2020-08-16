@@ -3,13 +3,15 @@ import Vuex from 'vuex';
 
 import app from './modules/app.module';
 import auth from './modules/auth.module';
-import dashboard from './modules/dashboard.module';
+import show from './modules/show.module';
+import exceptions from './modules/exceptions.module';
 import messages from './modules/messages.module';
 import notices from './modules/notices.module';
 import plans from './modules/plans.module';
 import users from './modules/users.module';
 import subjects from './modules/subjects.module';
 import terms from './modules/terms.module';
+import medias from './modules/medias.module';
 import notes from './modules/notes.module';
 import termQuestions from './modules/term-questions.module';
 import questions from './modules/questions.module';
@@ -30,13 +32,15 @@ export default new Vuex.Store({
    modules: {
       app,
       auth,
-      dashboard,
+      show,
+      exceptions,
       messages,
       notices,
       plans,
       users,
       subjects,
       terms,
+      medias,
       notes,
       termQuestions,
       questions,

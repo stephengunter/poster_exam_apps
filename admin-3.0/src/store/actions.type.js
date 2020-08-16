@@ -60,6 +60,11 @@ export const ORDER_TERMS = 'orderTerms';
 export const TERM_DETAILS = 'termDetails';
 export const SHOW_TERM = 'showTerm';
 
+//Medias
+export const INIT_MEDIAS = 'initMedias';
+export const ADD_MEDIA = 'addMedia';
+export const REMOVE_MEDIA = 'removeMedia';
+
 //TermQuestions
 export const FETCH_TERM_QUESTIONS = 'fetchTermQuestions';
 export const STORE_TERM_QUESTION = 'storeTermQuestion';
@@ -119,7 +124,6 @@ export const DELETE_MANUAL = 'deleteManual';
 export const ORDER_MANUALS = 'orderManuals';
 
 //Features
-export const FETCH_FEATURES = 'fetchFeatures';
 export const CREATE_FEATURE = 'createFeature';
 export const STORE_FEATURE = 'storeFeature';
 export const EDIT_FEATURE = 'editFeature';

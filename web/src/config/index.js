@@ -1,4 +1,4 @@
-export const PRODUCTION = true;
+export const PRODUCTION = false;
 export const SITE_URL = PRODUCTION ? 'https://poster.exam-learner.com' : 'http://localhost:8080';
 export const SITE_TITLE = '郵差筆試學習器';
 export const LOGO_SRC = './img/logo.png';

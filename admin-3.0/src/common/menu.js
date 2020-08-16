@@ -1,6 +1,6 @@
-import { GUEST_ONLY, ADMIN_ONLY } from '@/routes/route.type';
+import { GUEST_ONLY, ADMIN_ONLY } from '@/consts';
 
-const getMainMenus = (appRoutes, currentRoute, auth) => {
+export const getMainMenus = (appRoutes, currentRoute, auth) => {
    let routes = [];
    if(auth) {
       routes = appRoutes.filter(item => item.meta.type !== GUEST_ONLY);
@@ -23,5 +23,3 @@ const getMainMenus = (appRoutes, currentRoute, auth) => {
 const getMainLinks = (routes) => routes.filter(item => item.meta.menu && !item.parent);
 
 const getSubLinks = (routes, parent) => routes.filter(item => item.meta.menu && item.parent === parent);
-
-export default { getMainMenus };

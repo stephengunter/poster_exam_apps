@@ -1,7 +1,7 @@
 import FeaturesService from '@/services/features.service';
 import { resolveErrorData } from '@/utils';
 
-import { FETCH_FEATURES, CREATE_FEATURE, STORE_FEATURE,
+import { CREATE_FEATURE, STORE_FEATURE,
    EDIT_FEATURE, UPDATE_FEATURE, DELETE_FEATURE, ORDER_FEATURES
 } from '@/store/actions.type';
 import { SET_LOADING } from '@/store/mutations.type';
@@ -19,21 +19,6 @@ const getters = {
 };
 
 const actions = {
-   [FETCH_FEATURES](context, params) {
-      context.commit(SET_LOADING, true);
-      return new Promise((resolve, reject) => {
-         FeaturesService.fetch(params)
-            .then(list => {
-               resolve(list);
-            })
-            .catch(error => {
-               reject(error);
-            })
-            .finally(() => { 
-               context.commit(SET_LOADING, false);
-            });
-      });
-   },
    [CREATE_FEATURE](context) {
       return new Promise((resolve, reject) => {
          FeaturesService.create()

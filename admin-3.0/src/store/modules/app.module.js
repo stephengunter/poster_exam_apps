@@ -1,17 +1,17 @@
 import Errors from '@/common/errors';
-import { SET_LOADING, SET_ERROR, CLEAR_ERROR, 
+import { SET_BREAD_ITEMS, SET_LOADING, SET_ERROR, CLEAR_ERROR, 
    SET_DRAWER, SET_MENUS, SET_WINDOW_WIDTH,
-   SET_RESPONSIVE, TOGGLE_DRAWER } from '@/store/mutations.type';
+   SET_RESPONSIVE, TOGGLE_DRAWER 
+} from '@/store/mutations.type';
 
 const initialState = {
+   breadItems: [],
    loading: false,
    sideBarWidth: 260,
    windowWidth: 991,
    responsive: false,
    drawer: null,
    menus: [],
-   color: 'info',
-   image: '',
    errorList: new Errors(),
 };
 
@@ -19,6 +19,9 @@ export const state = { ...initialState };
 
 
 const getters = {
+   breadItems(state) {
+      return state.breadItems;
+   },
    loading(state) {
       return state.loading;
    },
@@ -43,6 +46,9 @@ const getters = {
 
 
 const mutations = {
+   [SET_BREAD_ITEMS](state, items) {
+      state.breadItems = items;
+   },
    [SET_LOADING](state, loading) {
       state.loading = loading;
    },

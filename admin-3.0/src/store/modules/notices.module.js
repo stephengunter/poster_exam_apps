@@ -89,6 +89,7 @@ const actions = {
                resolve(notice);
             })
             .catch(error => {
+               console.log('error', error);
                reject(resolveErrorData(error)); 
             })
             .finally(() => { 

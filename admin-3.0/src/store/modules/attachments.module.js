@@ -7,7 +7,7 @@ import { SET_ATTACHMENTS, SET_LOADING } from '@/store/mutations.type';
 
 
 const initialState = {
-   pageList: null
+   pagedList: null
 };
 
 export const state = { ...initialState };
@@ -61,7 +61,7 @@ const actions = {
 
 const mutations = {
    [SET_ATTACHMENTS](state, model) {
-      state.pageList = model;
+      state.pagedList = model;
    }
 };
 

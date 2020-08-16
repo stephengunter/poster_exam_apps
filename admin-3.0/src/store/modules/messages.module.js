@@ -5,12 +5,12 @@ import {
    FETCH_MESSAGES, EDIT_MESSAGE, UPDATE_MESSAGE
 } from '@/store/actions.type';
 
-import { SET_LOADING } from '@/store/mutations.type';
+import { SET_MESSAGES, SET_LOADING } from '@/store/mutations.type';
 
 
 
 const initialState = {
-   
+   pagedList: null
 };
 
 export const state = { ...initialState };
@@ -26,6 +26,7 @@ const actions = {
       return new Promise((resolve, reject) => {
          MessagesService.fetch(params)
             .then(model => {
+               context.commit(SET_MESSAGES, model);
                resolve(model);
             })
             .catch(error => {
@@ -69,7 +70,9 @@ const actions = {
 
 
 const mutations = {
-   
+   [SET_MESSAGES](state, model) {
+      state.pagedList = model;
+   }
 };
 
 export default {

@@ -2,7 +2,7 @@ import NotesService from '@/services/notes.service';
 import { resolveErrorData } from '@/utils';
 
 import { ORDER_NOTES, NOTE_DETAILS, FETCH_NOTE_CATEGORIES,
-   FETCH_NOTES, CREATE_NOTE, STORE_NOTE, UPDATE_NOTE, DELETE_NOTE
+   FETCH_NOTES, CREATE_NOTE, STORE_NOTE, EDIT_NOTE, UPDATE_NOTE, DELETE_NOTE
 } from '@/store/actions.type';
 
 import { SET_LOADING, SET_NOTE_CATEGORIES, SET_NOTES } from '@/store/mutations.type';
@@ -95,6 +95,21 @@ const actions = {
             .finally(() => { 
                context.commit(SET_LOADING, false);
             });
+      });
+   },
+   [EDIT_NOTE](context, id) {
+      context.commit(SET_LOADING, true);
+      return new Promise((resolve, reject) => {
+         NotesService.edit(id)
+         .then(model => {
+            resolve(model);
+         })
+         .catch(error => {
+            reject(error);        
+         })
+         .finally(() => { 
+            context.commit(SET_LOADING, false);
+         });
       });
    },
    [UPDATE_NOTE](context, model) {

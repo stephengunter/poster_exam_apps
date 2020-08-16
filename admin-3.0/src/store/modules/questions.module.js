@@ -11,7 +11,10 @@ import { SET_QUESTIONS, SET_LOADING } from '@/store/mutations.type';
 
 
 const initialState = {
-   pageList: null
+   subjects: [],
+   terms: [],
+   recruits: [],
+   pagedList: null
 };
 
 export const state = { ...initialState };
@@ -27,7 +30,13 @@ const actions = {
       return new Promise((resolve, reject) => {
          QuestionsService.fetch(params)
             .then(model => {
-               context.commit(SET_QUESTIONS, model);
+               if(params.page < 1) {
+                  context.state.subjects = model.subjects;
+                  context.state.terms = model.terms;
+                  context.state.recruits = model.recruits;
+               }else {
+                  context.commit(SET_QUESTIONS, model);
+               }
                resolve(model);
             })
             .catch(error => {
@@ -117,8 +126,9 @@ const actions = {
 
 
 const mutations = {
-   [SET_QUESTIONS](state, model) {
-      state.pageList = model;
+   [SET_QUESTIONS](state, pagedList) {
+      if(pagedList) state.pagedList = pagedList;
+      else state.pagedList = null;
    }
 };
 

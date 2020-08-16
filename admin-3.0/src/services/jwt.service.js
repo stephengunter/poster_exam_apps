@@ -17,6 +17,8 @@ const destroyToken = () => {
    window.localStorage.removeItem(REFRESH_TOKEN_KEY);
 };
 
+const resolveClaims = (token) => jwtDecode(token);
+
 const tokenStatus = () => {
    let token = window.localStorage.getItem(ID_TOKEN_KEY);
    if(!token) return -2; //無token
@@ -32,4 +34,4 @@ const tokenStatus = () => {
 };
 
 
-export default { getToken, getRefreshToken, saveToken, destroyToken, tokenStatus };
+export default { getToken, getRefreshToken, saveToken, destroyToken, resolveClaims, tokenStatus };

@@ -1,11 +1,9 @@
 <template>
    <div :style="{ 'max-width': `${max_width}px` }"  style="display:inline-block;">
-     
-      <p >
+      <p>
          <v-icon v-if="item.chapterTitle && item.hide">mdi-close</v-icon>
          <span style="font-size:16px"  v-html="getContent()"></span>
       </p>
-     
    </div>
 </template>
 

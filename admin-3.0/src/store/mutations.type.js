@@ -9,6 +9,7 @@ export const SET_DRAWER = 'setDrawer';
 export const TOGGLE_DRAWER = 'toggleDrawer';
 
 export const SET_MENUS = 'setMenus';
+export const SET_BREAD_ITEMS = 'setBreadItems';
 
 export const PURGE_AUTH = 'logOut';
 export const SET_AUTH = 'setAuth';
@@ -18,6 +19,14 @@ export const SET_USER = 'setUser';
 export const SET_ERROR = 'setError';
 export const CLEAR_ERROR = 'clearError';
 
+//Exceptions
+export const SET_EXCEPTIONS = 'setExceptions';
+export const SET_EXCEPTION_TYPES = 'setExceptionTypes';
+export const SET_EXCEPTION_PERIOD = 'setExceptionPeriod';
+
+//Messages
+export const SET_MESSAGES = 'setMessages';
+
 //Notices
 export const SET_NOTICES = 'setNotices';
 
@@ -26,12 +35,14 @@ export const SET_PLANS = 'setPlans';
 
 //Users
 export const SET_USERS = 'setUsers';
+export const SET_ROLE_OPTIONS = 'setRoleOptions';
 
 //Subjects
 export const SET_SUBJECTS = 'setSubjects';
 
 //Terms
 export const SET_TERMS = 'setTerms';
+export const SET_TERM_PARENTS = 'setTermParents';
 
 //Notes
 export const SET_NOTE_CATEGORIES = 'setNoteCategories';

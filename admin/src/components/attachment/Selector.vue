@@ -1,6 +1,5 @@
 <template>
    <v-card>
-      <core-close-icon-button v-if="allow_cancel" @close="cancel" />
       <v-card-title >
          <v-layout wrap :class="{ 'mt-3' : allow_cancel }">
             <v-flex xs12 sm6>

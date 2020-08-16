@@ -46,7 +46,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { CHECK_AUTH, REFRESH_TOKEN } from '@/store/actions.type';
-import { SET_WINDOW_WIDTH, SET_RESPONSIVE, TOGGLE_DRAWER } from '@/store/mutations.type';
+import { SET_WINDOW_WIDTH, SET_RESPONSIVE } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
 export default {
