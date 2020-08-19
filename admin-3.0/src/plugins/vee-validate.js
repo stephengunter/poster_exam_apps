@@ -17,8 +17,6 @@ import {
 setInteractionMode('eager');
 
 
-extend('max', max);
-extend('min', min);
 extend('required', {
   ...required,
   message: '必須填寫{_field_}',
@@ -34,6 +32,14 @@ extend('integer', {
 extend('email', {
   ...email,
   message: 'Email 格式不正確',
+});
+extend('max', {
+  ...max,
+  message: '{_field_}長度上限{length}個字元',
+});
+extend('min', {
+  ...min,
+  message: '{_field_}長度要求{length}個字元以上',
 });
 
 Vue.component('validation-provider', ValidationProvider);

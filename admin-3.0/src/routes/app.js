@@ -250,6 +250,19 @@ const adminlinks = [
          menu: true
       } 
    },
+   {
+      name: 'profile',
+      path: '/profile',
+      view: 'Profile',
+      parent: '',
+      meta: {
+         order: 0,
+         icon: 'mdi-account',
+         title: 'Profile',
+         type: ADMIN_ONLY,
+         menu: false
+      } 
+   }
 ];
 
 const guestLinks = [{

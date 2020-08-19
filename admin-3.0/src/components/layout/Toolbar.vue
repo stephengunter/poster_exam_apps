@@ -8,7 +8,7 @@
 
       <menu-notifications v-if="false" />
       
-      <!-- <menu-user v-if="currentUser" :user="currentUser" /> -->
+      <menu-user v-if="currentUser" :user="currentUser" />
    </v-app-bar>
 </template>
 
