@@ -20,12 +20,13 @@ import {
 } from '../actions.type';
 
 import { SET_AUTH, SET_AUTH_CHANGED, PURGE_AUTH, SET_USER, 
-   SET_LOADING 
+   SET_CHECKING_AUTH, SET_LOADING 
 } from '../mutations.type';
 
  
 const state = {
    isAuthenticated: !!JwtService.getToken(),
+   checkingAuth: false,
    user: null,
    changed: false
    
@@ -38,9 +39,12 @@ const getters = {
    isAuthenticated(state) {
      return state.isAuthenticated;
    },
+   checkingAuth(state) {
+      return state.checkingAuth;
+   },
    authChanged(state) {
       return state.changed;
-    },
+   },
    userIsSubscriber(state) {
       if(state.user) return isSubscriber(state.user);       
       return false;
@@ -127,11 +131,11 @@ const actions = {
       });
    },
    [REFRESH_TOKEN](context) {
-      context.commit(SET_LOADING, true, '重新登入中...');
       return new Promise((resolve) => {
          let accessToken = JwtService.getToken();
          let refreshToken = JwtService.getRefreshToken();
          if(accessToken && refreshToken) {
+            context.commit(SET_LOADING, true, '重新登入中...');
             AuthService.refreshToken({ accessToken, refreshToken })
             .then(model => {
                context.commit(SET_AUTH, {
@@ -144,7 +148,7 @@ const actions = {
                context.commit(PURGE_AUTH);
                resolve(false);           
             })
-            .finally(() => { 
+            .finally(() => {
                context.commit(SET_LOADING, false);
             });
          }else {
@@ -175,6 +179,9 @@ const mutations = {
       };
 
       state.isAuthenticated = true;
+   },
+   [SET_CHECKING_AUTH](state, val) {
+      state.checkingAuth = val;
    },
    [SET_AUTH_CHANGED](state, val) {
       state.changed = val;

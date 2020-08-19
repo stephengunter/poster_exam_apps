@@ -1,12 +1,6 @@
 <template>
 	<v-container>
-		<v-row>
-			Test
-		</v-row>
-		<v-row>
-			<test-item />
-		</v-row>
-		
+		TestItem
 		
 	</v-container>
 </template>
@@ -19,7 +13,7 @@ import { mapState, mapGetters } from 'vuex';
 import { resolveErrorData, onError } from '@/utils';
 
 export default {
-	name: 'TestView',
+	name: 'TestItem',
 	data() {
 		return {
 

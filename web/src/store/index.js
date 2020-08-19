@@ -31,6 +31,6 @@ export default new Vuex.Store({
       exams,
       manuals,
       subscribes,
-      bills      
+      bills     
    }
 });

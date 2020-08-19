@@ -116,7 +116,6 @@ export default {
 			.catch(error => {
             let status = error.status;
             if(status === 401) {
-               console.log('status', status);
                this.$store.commit(SET_AUTH_CHANGED, true);
             }
 			})

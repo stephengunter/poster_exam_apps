@@ -31,7 +31,7 @@ router.beforeEach((to, from, next) => {
 
 		if(to.meta.type === FOR_ALL) return authDone(next, to, user);
 	
-		if(user){
+		if(user) {
 			if(store.getters.authChanged) {
 				store.commit(SET_AUTH_CHANGED, false);
 				return refreshToken(next, to);

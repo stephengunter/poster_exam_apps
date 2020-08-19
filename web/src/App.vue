@@ -46,7 +46,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { CHECK_AUTH, REFRESH_TOKEN } from '@/store/actions.type';
-import { SET_WINDOW_WIDTH, SET_RESPONSIVE } from '@/store/mutations.type';
+import { SET_WINDOW_WIDTH, SET_RESPONSIVE, SET_CHECKING_AUTH } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
 export default {
@@ -54,6 +54,7 @@ export default {
 	data(){
 		return {
 			title: '',
+			
 			success: {
 				color: 'info',
 				show: false,
@@ -85,7 +86,7 @@ export default {
 		}
 	},
 	computed:{
-		...mapGetters(['currentUser','responsive','contentMaxWidth']),
+		...mapGetters(['currentUser', 'checkingAuth', 'responsive','contentMaxWidth']),
 		confirmNoAction() {
 			return !this.confirm.on_ok && !this.confirm.on_cancel
 		}
@@ -114,11 +115,13 @@ export default {
 				title: '伺服器暫時無回應，請稍候再試.',
 				text: ''
 			};
+			
 			if(error) {
 				confirm.title = error.title ? error.title : '伺服器暫時無回應，請稍候再試.';
 				confirm.text = error.text ? error.text : '';
-				
+
 				let status = error.status;
+				
 				if(status) {
 					if(status === 401) {
 						this.onFourZeroOne();
@@ -137,6 +140,10 @@ export default {
 			}
 		},
 		onFourZeroOne() {
+			if(this.checkingAuth) return;
+
+			this.$store.commit(SET_CHECKING_AUTH, true);
+			
 			this.reLogin(() => {
 				this.showConfirm({
 					type: '',
@@ -160,8 +167,8 @@ export default {
 		reLogin(callback = null) {
 			//重新登入
 			this.$store.dispatch(CHECK_AUTH).then(user => {
-				if(user){
-					this.$store.dispatch(REFRESH_TOKEN).then(token => {	
+				if(user) {
+					this.$store.dispatch(REFRESH_TOKEN).then(token => {
 						if(token) {
 							this.$store.dispatch(CHECK_AUTH);
 							if(callback) callback();

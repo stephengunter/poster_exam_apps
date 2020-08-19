@@ -16,6 +16,8 @@ export const SET_APP_ACTIONS = 'setAppActions';
 export const PURGE_AUTH = 'logOut';
 export const SET_AUTH = 'setAuth';
 export const SET_AUTH_CHANGED = 'setAuthChanged';
+
+export const SET_CHECKING_AUTH = 'setCheckingAuth';
 export const SET_USER = 'setUser';
 
 export const SET_ERROR = 'setError';
