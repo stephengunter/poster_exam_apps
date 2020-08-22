@@ -85,7 +85,7 @@ export default {
          dbName: '',
          action: '',
          title: '',
-         hasBackup: true,
+         hasBackup: false,
          model: {
             key: '',
             cmd: '',
