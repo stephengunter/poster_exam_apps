@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import request from 'supertest';
-import { API_URL, testAction, getAdminRequestModel
+import { API_URL, getAdminRequestModel
 } from '@/utils';
 
 export const subscribesIndex = (token, callback, expect = 200) => {
@@ -30,7 +30,7 @@ export const storeSubscribes = (token, model, callback, expect = 200) => {
 
 export const removeSubscribes = (callback, expect = 200) => {
    request(API_URL)
-   .post(testAction)      
+   .post('/tests/ASubsrcibesTest')      
    .send(getAdminRequestModel('remove-subsrcibes'))
    .expect(expect)
    .end(callback)

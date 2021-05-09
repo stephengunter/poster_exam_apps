@@ -4,8 +4,8 @@ import { isDevelopment, initState, getRandomItem,
    fakeEcPayATMInfo, fakeEcPayTradeResult
 } from '@/utils';
 
-import { removeSubscribes, login, subscribesIndex, notesCategories,
-   createSubscribe, storeSubscribes, editBill, updateBill, fakePay
+import { login, subscribesIndex, notesCategories,
+   editBill, updateBill, fakePay
 } from '@/actions';
 import { ATM, CREDIT } from '@/consts';
 

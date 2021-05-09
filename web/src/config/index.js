@@ -2,7 +2,7 @@ export const PRODUCTION = false;
 export const SITE_URL = PRODUCTION ? 'https://poster.exam-learner.com' : 'http://localhost:8080';
 export const SITE_TITLE = '郵差考試學習器';
 export const LOGO_SRC = './img/logo.png';
-export const API_URL = PRODUCTION ? 'https://poster-api.exam-learner.com' : 'http://localhost:50070';
+export const API_URL = PRODUCTION ? 'https://poster-api.exam-learner.com' : 'http://localhost:54741';
 
 //AUTH
 export const GOOGLE_AUTH_PARAMS = {

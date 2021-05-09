@@ -128,6 +128,7 @@ export default {
          })
 		},
 		init(model) {
+			
 			this.payWays = model.payWays;
 
 			let bill = model.bill;
@@ -138,7 +139,6 @@ export default {
 			}else {
 				
 				this.plan = model.plan;
-				
 				if(this.planId === model.plan.id) this.onPlanSelected();
 			}
 			

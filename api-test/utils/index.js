@@ -14,8 +14,6 @@ export const ADMIN_USER = process.env.ADMIN_USER;
 
 export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
-export const testAction = '/api/atests';
-
 
 export const initState = () => global.state = {};
 

@@ -1,12 +1,12 @@
 import { expect } from 'chai';
 import request from 'supertest';
 import { API_URL, ADMIN_USER, ADMIN_PASSWORD,
-   testAction, getAdminRequestModel
+   getAdminRequestModel
 } from '@/utils';
 
 export const login = (callback, expect = 200) => {
    request(API_URL)
-   .post(testAction)      
+   .post('/tests/ASubsrcibesTest')  
    .send(getAdminRequestModel('login'))
    .expect(expect)
    .end(callback)

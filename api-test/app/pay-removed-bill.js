@@ -87,7 +87,6 @@ describe('removed bill (Test)', (done) => {
       removeBill(data, (err, res) => {
          if(err) return done(err);
          else {
-            hasError = true;
             done();
          }
       })

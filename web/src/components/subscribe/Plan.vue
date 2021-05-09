@@ -50,7 +50,7 @@
                </p>
             </v-col>
          </v-row>
-         <v-row v-if="currentUser && currentUser.email === 'traders.com.tw@gmail.com'">
+         <v-row v-if="currentUser">
             <v-col cols="12">
                <v-btn color="primary" large @click.prevent="select">
                   我要訂閱
