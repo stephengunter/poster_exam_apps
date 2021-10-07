@@ -25,16 +25,6 @@ const applinks = [{
       menus: [],
       title: 'Test'
    } 
-},{
-   name: 'test-details',
-   path: '/test/details',
-   view: 'test/Details',
-   parent: 'test',
-   meta: {
-      type: FOR_ALL,
-      menus: [],
-      title: 'Test'
-   } 
 },
 {
    name: 'contact',
