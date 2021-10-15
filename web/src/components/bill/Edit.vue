@@ -168,7 +168,6 @@ export default {
 
 			this.$store.dispatch(BEGIN_PAY, this.model)
 			.then(model => {
-            
             this.pay.active = true;
 				this.pay.model = model;
          })

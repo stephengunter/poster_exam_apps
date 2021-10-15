@@ -1,8 +1,5 @@
 <template>
    <div v-if="ready">
-      <!-- <div v-if="isMobileAgent" v-show="false">
-
-      </div> -->
       <v-dialog v-model="active" :max-width="maxWidth" persistent>
          <v-card>
             <v-card-title class="font-weight-black">
@@ -125,7 +122,7 @@ export default {
          let checkMobile2 = new RegExp("mobile|mobi|nokia|samsung|sonyericsson|mot|blackberry|lg|htc|j2me|ucweb|opera mini|mobi|android|iphone");
 
          if(checkMobile.test(userAgent) || checkMobile2.test(userAgent.toLowerCase())) {
-            isMobileAgent= true;
+            isMobileAgent = true;
          }
 
          this.isMobileAgent = isMobileAgent;
@@ -155,15 +152,12 @@ export default {
       },
       onMessage(e) {
          if(e.origin != SITE_URL) {
-            //console.log('e.data', e.data);
             let data = tryParseJsonObj(e.data);
-            //console.log('dataObj', data);
             if(data && data.hasOwnProperty('RtnCode')) this.setResult(data);
          }
       },
       setResult(data) {
          this.result = data;
-
          let paymentType = this.model.paymentType;
          let rtnCode = tryParseInt(data.RtnCode);
          if(paymentType === CREDIT && rtnCode === 1) {

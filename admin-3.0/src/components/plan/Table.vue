@@ -11,6 +11,9 @@
                <td>
                   {{ item.id }}
                </td>
+               <td>
+                  {{ item.name }}
+               </td>
                <td style="padding: 10px 16px;">
                   <div v-if="item.price" class="item-price">
                      <span class="mr-1">$</span>
@@ -25,7 +28,7 @@
                   {{ item.startDateText }}
                </td>
                <td>
-                  {{ item.startDateText }}
+                  {{ item.endDateText }}
                </td>
                <td>
                   <v-chip v-if="item.active" small color="green" text-color="white">{{ item.statusText }}</v-chip>
@@ -75,6 +78,12 @@ export default {
             },
             {
 					sortable: false,
+					text: '名稱',
+               value: 'name',
+               width: '120px'
+            },
+            {
+					sortable: false,
 					text: '金額',
                value: 'price',
                width: '120px'
@@ -83,7 +92,7 @@ export default {
 					sortable: false,
 					text: '折扣',
                value: 'discount',
-               width: '120px'
+               width: '60px'
             },
             {
 					sortable: false,

@@ -42,7 +42,7 @@
 							v-model="endDate.active"
 							:close-on-content-click="false"
 							>
-								<template v-if="required_start" v-slot:activator="{ on }">
+								<template v-if="required_end" v-slot:activator="{ on }">
 									<validation-provider v-slot="{ errors }" name="結束日期" rules="required">
 										<v-text-field label="結束日期" readonly
 										:value="endDate.val" v-on="on"

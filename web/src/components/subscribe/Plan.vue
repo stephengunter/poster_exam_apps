@@ -50,7 +50,7 @@
                </p>
             </v-col>
          </v-row>
-         <v-row v-if="currentUser">
+         <v-row>
             <v-col cols="12">
                <v-btn color="primary" large @click.prevent="select">
                   我要訂閱
@@ -99,7 +99,7 @@ export default {
          if(this.model) {
             let end = getPlanEndDateText(this.model);
 
-            return `至 ${end} 止`;
+            return `至${end}止`;
          }
          return '';
       }

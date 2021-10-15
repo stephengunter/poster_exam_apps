@@ -12,6 +12,13 @@
 			<validation-observer ref="validator">
 				<v-container>
 					<v-row>
+						<v-col cols="12">
+							<validation-provider v-slot="{ errors }" name="名稱" rules="required">
+								<v-text-field label="名稱" v-model="model.name" required
+								:error-messages="errors"
+								/>
+							</validation-provider>
+						</v-col>
 						<v-col cols="12" sm="6">
 							<validation-provider v-slot="{ errors }" name="金額" rules="required|numeric">
 								<v-text-field label="金額" v-model="model.price" required
@@ -54,7 +61,7 @@
 		</v-card-text>
 
 		<v-dialog v-model="dateSelector.active" :max-width="dateSelector.maxWidth" persistent>
-			<core-period-selector :required_start="true" :required_end="true"
+			<core-period-selector :required_start="true" :required_end="false"
 			title="選擇期間"
 			:version="dateSelector.version"
 			:start="dateSelector.start" :end="dateSelector.end"
