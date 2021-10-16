@@ -69,19 +69,6 @@ const adminlinks = [
       } 
    },
    {
-      name: 'pays',
-      path: '/pays',
-      view: 'Pays',
-      parent: 'subscribes',
-      meta: {
-         order: 0,
-         icon: 'mdi-cash-usd-outline',
-         title: '付款',
-         type: ADMIN_ONLY,
-         menu: true
-      } 
-   },
-   {
       name: 'plans',
       path: '/plans',
       view: 'Plans',
@@ -90,6 +77,32 @@ const adminlinks = [
          order: 0,
          icon: 'mdi-text-box-outline',
          title: '方案',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
+   },
+   {
+      name: 'bills',
+      path: '/bills',
+      view: 'Bills',
+      parent: 'subscribes',
+      meta: {
+         order: 0,
+         icon: 'mdi-credit-card-multiple',
+         title: '帳單',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
+   },
+   {
+      name: 'pays',
+      path: '/pays',
+      view: 'Pays',
+      parent: 'subscribes',
+      meta: {
+         order: 0,
+         icon: 'mdi-cash-check',
+         title: '付款',
          type: ADMIN_ONLY,
          menu: true
       } 

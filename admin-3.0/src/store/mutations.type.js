@@ -30,6 +30,9 @@ export const SET_MESSAGES = 'setMessages';
 //Notices
 export const SET_NOTICES = 'setNotices';
 
+//Subscribes
+export const SET_SUBSCRIBES = 'setSubscribes';
+
 //Plans
 export const SET_PLANS = 'setPlans';
 

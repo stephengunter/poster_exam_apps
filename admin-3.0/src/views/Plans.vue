@@ -24,7 +24,7 @@
 		<v-row>
 			<v-col cols="12">
 				<plan-table :list="planList"
-				@edit="edit" 
+				@edit="edit" @clear="clearPlan" 
 				/>
 			</v-col>
 		</v-row>
@@ -68,6 +68,10 @@ export default {
 			},
 
 			deletion: {
+				id: 0
+			},
+
+			clear: {
 				id: 0
 			}
 		}
@@ -168,7 +172,30 @@ export default {
 			.catch(error => {
 				Bus.$emit('errors');
 			})
-		}
+		},
+		clearPlan(id) {
+			this.clear.id = id;
+			Bus.$emit('show-confirm', {
+				type: 'error',
+				title: '確定要結算嗎?',
+				onOk: this.submitClear,
+				onCancel: () => { this.clear.id = 0 }
+			});
+		},
+		submitClear(){
+			console.log('submitClear', this.clear.id);
+			// this.$store.commit(CLEAR_ERROR);
+			// let id = this.deletion.id;
+			// this.$store.dispatch(DELETE_PLAN, id)
+			// .then(() => {
+			// 	this.deletion.id = 0
+			// 	this.setEditModel(null);
+			// 	this.fetchData();
+			// })
+			// .catch(error => {
+			// 	Bus.$emit('errors');
+			// })
+		},
 	}
 }
 </script>
