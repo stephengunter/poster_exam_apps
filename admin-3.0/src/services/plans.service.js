@@ -13,6 +13,8 @@ const edit = (id) => BaseService.fetch(`${source}/edit/${id}`);
 
 const update = (id, model) => BaseService.put(`${source}/${id}`, model);
 
+const clear = (id) => BaseService.put(`${source}/clear/${id}`);
+
 const remove = (id) => BaseService.remove(`${source}/${id}`);
 
-export default { fetch, create, store, edit, update, remove };
+export default { fetch, create, store, edit, update, clear, remove };

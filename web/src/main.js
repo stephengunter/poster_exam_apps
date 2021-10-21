@@ -19,13 +19,14 @@ import '@/filters';
 import JwtService from '@/services/jwt.service';
 import { INIT, CHECK_AUTH, REFRESH_TOKEN, FETCH_ACTIONS } from '@/store/actions.type';
 import { FOR_ALL, GUEST_ONLY, USER_ONLY } from '@/routes/route.type';
-import { SITE_TITLE } from '@/config';
+import { CLOSE, SITE_TITLE } from '@/config';
 import Menu from '@/common/menu';
 import { SET_CURRENT_PAGE, SET_MENUS, SET_FOOTER_MENUS, SET_USER_MENUS,
 	SET_AUTH_CHANGED
 } from '@/store/mutations.type';
 
 router.beforeEach((to, from, next) => {
+	if(CLOSE && to.name !== 'close') return redirect(next, { name: 'close' });
 
 	store.dispatch(CHECK_AUTH).then(user => {
 

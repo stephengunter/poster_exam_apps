@@ -34,9 +34,9 @@
                   <v-chip v-if="item.active" small color="green" text-color="white">{{ item.statusText }}</v-chip>
                   <v-chip v-else small>{{ item.statusText }}</v-chip>
                </td>
-               <td >
+               <td>
                   {{ item.clearDateText }} 
-                  <v-btn small color="warning" @click.prevent="clear(item.id)">
+                  <v-btn v-if="item.canClear" small color="warning" @click.prevent="clear(item.id)">
                      進行結算
                   </v-btn>
                </td>

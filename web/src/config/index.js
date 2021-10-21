@@ -1,3 +1,4 @@
+export const CLOSE = false;
 export const PRODUCTION = false;
 export const SITE_URL = PRODUCTION ? 'https://poster.exam-learner.com' : 'http://localhost:8080';
 export const SITE_TITLE = '郵差考試學習器';

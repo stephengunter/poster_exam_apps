@@ -1,11 +1,13 @@
 <template>
 	<v-container>
 		<v-row>
-			Test
+			<v-col cols="12">
+				<v-alert outlined type="error"  prominent icon="mdi-tools">
+					系統維護中，暫時停止服務。
+				</v-alert>
+			</v-col>
 		</v-row>
-		<v-row>
-			<test-item />
-		</v-row>
+
 		
 		
 	</v-container>
@@ -30,13 +32,7 @@ export default {
 	},
 	methods: {
 		test() {
-			BaseService.fetch(source)
-			.then(model => {
-				console.log(model);
-			})
-			.catch(error => {
-				onError(resolveErrorData(error));
-			})
+			
 		}
 	},
 	

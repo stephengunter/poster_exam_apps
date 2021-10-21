@@ -41,7 +41,7 @@
 import { mapState, mapGetters } from 'vuex';
 import { CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
 import {
-   FETCH_PLANS, CREATE_PLAN, EDIT_PLAN, UPDATE_PLAN, STORE_PLAN, DELETE_PLAN
+   FETCH_PLANS, CREATE_PLAN, EDIT_PLAN, UPDATE_PLAN, CLEAR_PLAN, STORE_PLAN, DELETE_PLAN
 } from '@/store/actions.type';
 import { onError } from '@/utils';
 import { DIALOG_MAX_WIDTH } from '@/config';
@@ -160,7 +160,7 @@ export default {
 				onCancel: () => { this.deletion.id = 0 }
 			});
 		},
-		submitDelete(){
+		submitDelete() {
 			this.$store.commit(CLEAR_ERROR);
 			let id = this.deletion.id;
 			this.$store.dispatch(DELETE_PLAN, id)
@@ -170,7 +170,7 @@ export default {
 				this.fetchData();
 			})
 			.catch(error => {
-				Bus.$emit('errors');
+				onError(error);
 			})
 		},
 		clearPlan(id) {
@@ -182,19 +182,17 @@ export default {
 				onCancel: () => { this.clear.id = 0 }
 			});
 		},
-		submitClear(){
-			console.log('submitClear', this.clear.id);
-			// this.$store.commit(CLEAR_ERROR);
-			// let id = this.deletion.id;
-			// this.$store.dispatch(DELETE_PLAN, id)
-			// .then(() => {
-			// 	this.deletion.id = 0
-			// 	this.setEditModel(null);
-			// 	this.fetchData();
-			// })
-			// .catch(error => {
-			// 	Bus.$emit('errors');
-			// })
+		submitClear() {
+			this.$store.commit(CLEAR_ERROR);
+			let id = this.clear.id;
+			this.$store.dispatch(CLEAR_PLAN, id)
+			.then(() => {
+				this.clear.id = 0
+				this.fetchData();
+			})
+			.catch(error => {
+				onError(error);
+			})
 		},
 	}
 }

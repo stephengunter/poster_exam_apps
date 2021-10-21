@@ -201,7 +201,18 @@ const userLinks = [{
       icon: 'mdi-wallet-membership',
       title: '訂閱會員'
    } 
-}];
+},{
+   name: 'close',
+   path: '/close',
+   view: 'Close',
+   parent: '',
+   meta: {
+      type: FOR_ALL,
+      menus: [],
+      icon: '',
+      title: '系統維護中'
+   } 
+},];
 
 
 const guestLinks = [{

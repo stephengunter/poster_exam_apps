@@ -19,7 +19,7 @@ const actions = {
       return new Promise((resolve, reject) => {
          SubscribesService.fetch(params)
             .then(model => {
-               context.commit(SET_SUBSCRIBES, model.pagedList);
+               context.commit(SET_SUBSCRIBES, model);
                resolve(model);
             })
             .catch(error => {

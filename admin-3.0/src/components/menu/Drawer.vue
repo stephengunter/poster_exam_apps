@@ -1,5 +1,5 @@
 <template>
-   <v-list-group v-if="item.subs && item.subs.length" color="white" no-action
+   <v-list-group v-if="hasSubMenu(item)" color="white" no-action
    :prepend-icon="item.meta.icon"  append-icon="mdi-menu-down"
    :value="isActive(item)" :disabled="isActive(item)"
    :active-class="item.active ? 'primary' : ''"
@@ -9,7 +9,7 @@
             <v-list-item-title v-text="item.meta.title" style="font-size: 14px;" />
          </v-list-item-content>
       </template>
-      <v-list-item v-for="(subItem, subIndex) in item.subs" :key="subIndex" :to="subItem.path" active-class="primary white--text">
+      <v-list-item v-for="(subItem, subIndex) in getSubMenuItems(item)" :key="subIndex" :to="subItem.path" active-class="primary white--text">
          <v-list-item-title v-text="subItem.meta.title" style="font-size: 14px;" />
          <v-list-item-icon>
             <v-icon v-text="subItem.meta.icon"></v-icon>
@@ -39,9 +39,18 @@ export default {
       },
    },
    methods: {
+      hasSubMenu(item) {
+         if(item.subs && item.subs.length) {
+            let subMenu = this.getSubMenuItems(item);
+            if(subMenu && subMenu.length) return true;
+            return false;
+         }else return false;
+      },
+      getSubMenuItems(item) {
+         return item.subs.filter(subItem => subItem.meta.menu);
+      },
       isActive(item) {
          if(item.active) return true;
-
          let subActive = item.subs.find(subItem => subItem.active);
          if(subActive) return true;
          return false;

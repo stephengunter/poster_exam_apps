@@ -169,7 +169,7 @@ export default {
 				this.setEditModel(model);
 			})
 			.catch(error => {
-				Bus.$emit('errors');
+				onError(error);
 			})
 		},
 		setEditModel(model) {

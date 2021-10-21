@@ -95,6 +95,19 @@ const adminlinks = [
       } 
    },
    {
+      name: 'bill-details',
+      path: '/bills/:id',
+      view: 'bills/Details',
+      props: true,
+      parent: 'subscribes',
+      meta: {
+         order: 0,
+         title: '帳單',
+         type: ADMIN_ONLY,
+         menu: false
+      } 
+   },
+   {
       name: 'pays',
       path: '/pays',
       view: 'Pays',
