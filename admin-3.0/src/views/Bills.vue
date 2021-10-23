@@ -1,22 +1,28 @@
 <template>
    <core-container>
 		<v-row>
-			<v-col cols="12" sm="6">
+			<v-col cols="12" sm="6" >
 				<v-select label="方案"
 				:items="plansOptions" v-model="params.plan"
 				@change="onPlanChanged"
 				/>
 			</v-col>
 			<v-col cols="12" sm="6">
-            <v-text-field v-model="dateSelector.text" label="日期" clearable
-				@click.prevent="selectDate" @click:clear="clearDate"
-				/>
+				<v-radio-group v-model="params.payed" row @change="onPayedChanged">
+					<v-radio v-for="(item, index) in payedOptions" :key="index"
+					:label="item.text" :value="item.value"
+					/>
+				</v-radio-group>
+				<v-btn v-show="!params.payed" small color="warning" @click.prevent="clearBills">
+              清除無效帳單
+            </v-btn>
 			</v-col>
 		</v-row>
 		<v-row v-if="pagedList">
          <v-col cols="12">
-            <pay-table :list="dataList" :show_plan ="!planSelected"
-				@selected="onPaySelected"
+            <bill-table :list="dataList"
+				:payed="payed" :show_plan ="!planSelected"
+				@selected="onBillSelected"
 				/>
          </v-col>
       </v-row>
@@ -26,16 +32,8 @@
 		@pageChanged="onPageChanged" @sizeChanged="onPageSizeChanged"
 		/>
 
-      <v-dialog v-model="dateSelector.active" :max-width="dateSelector.maxWidth" persistent>
-			<core-period-selector
-			:version="dateSelector.version"
-			:start="dateSelector.start" :end="dateSelector.end"
-			@submit="onDateSelected" @cancel="dateSelector.active = false"
-			/>
-		</v-dialog>
-
 		<v-dialog v-model="details.active" persistent :max-width="details.maxWidth">
-			<pay-details v-if="details.active" :model="details.model"
+			<bill-details v-if="details.active" :model="details.model"
 			@cancel="cancelDetails"
 			/>
 		</v-dialog>
@@ -44,12 +42,13 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { FETCH_PLANS, FETCH_PAYS, PAY_DETAILS } from '@/store/actions.type';
+import { CLEAR_ERROR } from '@/store/mutations.type';
+import { FETCH_PLANS, FETCH_BILLS, BILL_DETAILS, CLEAR_BILLS } from '@/store/actions.type';
 import { onError, scrollToTop, isTrue } from '@/utils';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
 export default {
-   name: 'PaysView',
+   name: 'BillsView',
    data () {
 		return {
 			payedOptions: [{
@@ -60,21 +59,12 @@ export default {
 				text: '未付款'
 			}],
 			params: {
-				plan: 0,
-            start: '',
-				end: '',
-				page: -1,
+				plan: -1,
+				payed: 1,
+				page: 1,
 				pageSize: 10
 			},
-         plansOptions: [],
-         dateSelector: {
-				active: false,
-				maxWidth: DIALOG_MAX_WIDTH,
-				version: 0,
-            start: '',
-				end: '',
-            text: ''
-         },
+			plansOptions: [],
 			details: {
 				active: false,
 				maxWidth: DIALOG_MAX_WIDTH,
@@ -86,7 +76,7 @@ export default {
 		...mapGetters(['responsive','contentMaxWidth']),
 		...mapState({
 			allPlans: state => state.plans.all,
-			pagedList: state => state.pays.pagedList,
+			pagedList: state => state.bills.pagedList,
 		}),
 		dataList() {
 			if(this.pagedList) {
@@ -96,11 +86,15 @@ export default {
 		planSelected() {
 			return this.params.plan > 0;
 		},
+		selectedPlan() {
+			return this.planSelected ? this.allPlans.find(x => x.id === this.params.plan) : null;
+		},
 		payed() {
 			return isTrue(this.params.payed);
 		}
    },
    beforeMount() {
+		
 		if(this.allPlans.length) {
 			this.loadPlans(this.allPlans);
 			if(this.params.plan < 1) this.params.plan = this.allPlans[0].id;
@@ -127,36 +121,12 @@ export default {
 			this.plansOptions = [{ value: 0, text: '全部方案' }].concat(options);
 		},
 		fetchData() {
-			this.$store.dispatch(FETCH_PAYS, this.params)
-         .then(model => {
-            
-			})
+			this.$store.dispatch(FETCH_BILLS, this.params)
 			.catch(error => {
 				onError(error);
 			});
 
 			scrollToTop();
-		},
-      selectDate() {
-			this.dateSelector.start = this.params.start;
-			this.dateSelector.end = this.params.end;
-			this.dateSelector.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
-			this.dateSelector.version += 1;
-			this.dateSelector.active = true;
-		},
-      onDateSelected({ start, end }) {
-			this.params.start = start;
-			this.params.end = end;
-
-			this.dateSelector.active = false;
-			this.dateSelector.text = '';
-			if(start) this.dateSelector.text = `${start} 起`;
-			if(end) this.dateSelector.text += ` ${end} 止`;
-
-			this.fetchData();
-		},
-		clearDate() {
-			this.onDateSelected({ start: '', end: ''});
 		},
 		onPayedChanged() {
 			this.fetchData();
@@ -173,8 +143,8 @@ export default {
 			this.params.page = 1;
 			this.fetchData();
 		},
-		onPaySelected(id) {
-			this.$store.dispatch(PAY_DETAILS, id)
+		onBillSelected(id) {
+			this.$store.dispatch(BILL_DETAILS, id)
 			.then(model => {
 				this.setDetailsModel(model);
 			})
@@ -194,6 +164,28 @@ export default {
 		},
 		cancelDetails() {
 			this.setDetailsModel(null);
+		},
+		clearBills() {
+			let plan = this.selectedPlan;
+			let title = '確定要清除所有無效帳單嗎?';
+			if(plan) title = `確定要清除方案${plan.name}下的無效帳單嗎?`;
+			Bus.$emit('show-confirm', {
+				type: 'error',
+				title: title,
+				onOk: this.submitClearBills,
+				onCancel: () => {  }
+			});
+		},
+		submitClearBills() {
+			this.$store.commit(CLEAR_ERROR);
+			let plan = this.selectedPlan ? this.selectedPlan.id : 0;
+			this.$store.dispatch(CLEAR_BILLS, plan)
+			.then(() => {
+				this.fetchData();
+			})
+			.catch(error => {
+				onError(error);
+			})
 		}
 	}
 }

@@ -2,12 +2,14 @@ import PlansService from '@/services/plans.service';
 import { resolveErrorData } from '@/utils';
 
 import {
-   FETCH_PLANS, CREATE_PLAN, STORE_PLAN, EDIT_PLAN, UPDATE_PLAN, DELETE_PLAN
+   FETCH_PLANS, CREATE_PLAN, STORE_PLAN, EDIT_PLAN, UPDATE_PLAN, 
+   CLEAR_PLAN, DELETE_PLAN
 } from '@/store/actions.type';
 
-import { SET_LOADING, SET_PLANS } from '@/store/mutations.type';
+import { SET_LOADING, SET_PLANS, SET_ALL_PLANS } from '@/store/mutations.type';
 
 const initialState = {
+   all: [],
    list: []
 };
 
@@ -24,7 +26,10 @@ const actions = {
       return new Promise((resolve, reject) => {
          PlansService.fetch(params)
             .then(plans => {
-               context.commit(SET_PLANS, plans);
+               if(params != null && params.active >= 0) {
+                  context.commit(SET_PLANS, plans);
+               } 
+               else context.commit(SET_ALL_PLANS, plans);
                resolve(plans);
             })
             .catch(error => {
@@ -93,6 +98,21 @@ const actions = {
             });
       });
    },
+   [CLEAR_PLAN](context, id) {
+      context.commit(SET_LOADING, true);
+      return new Promise((resolve, reject) => {
+         PlansService.clear(id)
+            .then(() => {
+               resolve(true);
+            })
+            .catch(error => {
+               reject(resolveErrorData(error));
+            })
+            .finally(() => { 
+               context.commit(SET_LOADING, false);
+            });
+      });
+   },
    [DELETE_PLAN](context, id) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
@@ -107,13 +127,16 @@ const actions = {
                context.commit(SET_LOADING, false);
             });
       });
-   },
+   }
 };
 
 
 const mutations = {
    [SET_PLANS](state, plans) {
       state.list = plans;
+   },
+   [SET_ALL_PLANS](state, plans) {
+      state.all = plans;
    }
 };
 

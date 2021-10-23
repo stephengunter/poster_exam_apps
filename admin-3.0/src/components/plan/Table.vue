@@ -2,7 +2,7 @@
    <v-data-table :headers="headers" :items="list" hide-default-footer :server-items-length="list ? list.length : 0">
       <template v-slot:body="{ items }">
          <tbody>
-            <tr class="row-note" v-for="(item, index) in items" :key="index">
+            <tr v-for="(item, index) in items" :key="index">
                <td>
                   <v-btn v-if="can_edit" @click.prevent="edit(item.id)" icon color="success">
                      <v-icon small>mdi-pencil</v-icon>
@@ -33,6 +33,12 @@
                <td>
                   <v-chip v-if="item.active" small color="green" text-color="white">{{ item.statusText }}</v-chip>
                   <v-chip v-else small>{{ item.statusText }}</v-chip>
+               </td>
+               <td>
+                  {{ item.clearDateText }} 
+                  <v-btn v-if="item.canClear" small color="warning" @click.prevent="clear(item.id)">
+                     進行結算
+                  </v-btn>
                </td>
                <td>
                   <p v-html="item.description"></p>
@@ -80,13 +86,13 @@ export default {
 					sortable: false,
 					text: '名稱',
                value: 'name',
-               width: '120px'
+               width: '100px'
             },
             {
 					sortable: false,
 					text: '金額',
                value: 'price',
-               width: '120px'
+               width: '100px'
             },
             {
 					sortable: false,
@@ -110,6 +116,12 @@ export default {
 					sortable: false,
 					text: '狀態',
                value: 'status',
+               width: '100px'
+            },
+            {
+					sortable: false,
+					text: '結算日期',
+               value: 'clearDateText',
                width: '120px'
             },
 				{
@@ -127,6 +139,9 @@ export default {
       },
       edit(id){
          this.$emit('edit', id);
+      },
+      clear(id){
+         this.$emit('clear', id);
       }
    }
 

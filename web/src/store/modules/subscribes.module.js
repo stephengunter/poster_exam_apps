@@ -108,7 +108,8 @@ const mutations = {
       state.records = records;
    },
    [SET_PLAN](state, plan) {
-      state.plan = plan;
+      if(plan) state.plan = plan;
+      else state.plan = null;  
    },
    [SET_PAYWAYS](state, payWays) {
       state.payWays = payWays;

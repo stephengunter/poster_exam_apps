@@ -1,17 +1,19 @@
-export const PRODUCTION = false;
-export const SITE_URL = PRODUCTION ? 'https://poster.exam-learner.com' : 'http://localhost:8080';
-export const SITE_TITLE = '郵差考試學習器';
-export const LOGO_SRC = './img/logo.png';
-export const API_URL = PRODUCTION ? 'https://poster-api.exam-learner.com' : 'http://localhost:54741';
+import { isTrue } from '@/utils';
+export const APP_CLOSED = isTrue(process.env.VUE_APP_CLOSE);
+export const PRODUCTION = process.env.NODE_ENV === 'production';
+export const SITE_URL = process.env.VUE_APP_URL;
+export const SITE_TITLE = process.env.VUE_APP_TITLE;
+export const API_URL = process.env.VUE_APP_API_URL;
 
+export const LOGO_SRC = './img/logo.png';
 //AUTH
 export const GOOGLE_AUTH_PARAMS = {
-   client_id: PRODUCTION ? '54788512269-m8q9l3r9rr9igji0vge4iskub6e8t5ce.apps.googleusercontent.com' : '753186496069-ru78fhjhbdvif7dqhskiq8j3ln9ab777.apps.googleusercontent.com',
+   client_id: process.env.VUE_APP_GOOGLE_AUTH_CLIENT_ID,
    scope: 'email'
 };
 
 export const GOOGLE_RECAPTCHA_PARAMS = {
-   sitekey: PRODUCTION ? '6Leeu_QUAAAAAGZf2QcUPkexxklK3Rkj__qL-Kj7' : '6LeWpPMUAAAAAFEPuds36P9BawyiymYtZDo2eynh'  
+   sitekey: process.env.VUE_APP_GOOGLE_RECAPTCHA_SITEKEY,
 };
 
 

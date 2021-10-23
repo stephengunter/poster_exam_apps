@@ -35,7 +35,17 @@ export const CREATE_PLAN = 'createPlan';
 export const STORE_PLAN = 'storePlan';
 export const EDIT_PLAN = 'editPlan';
 export const UPDATE_PLAN = 'updatePlan';
+export const CLEAR_PLAN = 'clearPlan';
 export const DELETE_PLAN = 'deletePlan';
+
+//Bills
+export const FETCH_BILLS = 'fetchBills';
+export const BILL_DETAILS = 'billDetails';
+export const CLEAR_BILLS = 'clearBills';
+
+//Pays
+export const FETCH_PAYS = 'fetchPays';
+export const PAY_DETAILS = 'payDetails';
 
 //Users
 export const FETCH_USERS = 'fetchUsers';

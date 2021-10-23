@@ -139,6 +139,7 @@ export default {
 			this.dateSelector.active = true;
 		},
 		onDateSelected({ start, end }) {
+			
 			this.model.startDateText = start;
 			this.model.endDateText = end;
 

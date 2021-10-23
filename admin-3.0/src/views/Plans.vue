@@ -24,7 +24,7 @@
 		<v-row>
 			<v-col cols="12">
 				<plan-table :list="planList"
-				@edit="edit" 
+				@edit="edit" @clear="clearPlan" 
 				/>
 			</v-col>
 		</v-row>
@@ -41,7 +41,7 @@
 import { mapState, mapGetters } from 'vuex';
 import { CLEAR_ERROR, SET_ERROR } from '@/store/mutations.type';
 import {
-   FETCH_PLANS, CREATE_PLAN, EDIT_PLAN, UPDATE_PLAN, STORE_PLAN, DELETE_PLAN
+   FETCH_PLANS, CREATE_PLAN, EDIT_PLAN, UPDATE_PLAN, CLEAR_PLAN, STORE_PLAN, DELETE_PLAN
 } from '@/store/actions.type';
 import { onError } from '@/utils';
 import { DIALOG_MAX_WIDTH } from '@/config';
@@ -68,6 +68,10 @@ export default {
 			},
 
 			deletion: {
+				id: 0
+			},
+
+			clear: {
 				id: 0
 			}
 		}
@@ -156,7 +160,7 @@ export default {
 				onCancel: () => { this.deletion.id = 0 }
 			});
 		},
-		submitDelete(){
+		submitDelete() {
 			this.$store.commit(CLEAR_ERROR);
 			let id = this.deletion.id;
 			this.$store.dispatch(DELETE_PLAN, id)
@@ -166,7 +170,28 @@ export default {
 				this.fetchData();
 			})
 			.catch(error => {
-				Bus.$emit('errors');
+				onError(error);
+			})
+		},
+		clearPlan(id) {
+			this.clear.id = id;
+			Bus.$emit('show-confirm', {
+				type: 'error',
+				title: '確定要結算嗎?',
+				onOk: this.submitClear,
+				onCancel: () => { this.clear.id = 0 }
+			});
+		},
+		submitClear() {
+			this.$store.commit(CLEAR_ERROR);
+			let id = this.clear.id;
+			this.$store.dispatch(CLEAR_PLAN, id)
+			.then(() => {
+				this.clear.id = 0
+				this.fetchData();
+			})
+			.catch(error => {
+				onError(error);
 			})
 		}
 	}

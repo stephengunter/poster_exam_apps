@@ -1,6 +1,7 @@
 import { GUEST_ONLY, ADMIN_ONLY } from '@/consts';
 
 export const getMainMenus = (appRoutes, currentRoute, auth) => {
+   
    let routes = [];
    if(auth) {
       routes = appRoutes.filter(item => item.meta.type !== GUEST_ONLY);
@@ -22,4 +23,4 @@ export const getMainMenus = (appRoutes, currentRoute, auth) => {
 
 const getMainLinks = (routes) => routes.filter(item => item.meta.menu && !item.parent);
 
-const getSubLinks = (routes, parent) => routes.filter(item => item.meta.menu && item.parent === parent);
+const getSubLinks = (routes, parent) => routes.filter(item => item.parent === parent);
