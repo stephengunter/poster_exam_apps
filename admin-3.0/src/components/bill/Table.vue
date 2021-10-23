@@ -26,8 +26,11 @@
                   <v-chip v-else small @click.prevent="select(item.id)">{{ item.statusText }}</v-chip>
                   <span v-if="item.payed" class="ml-1">{{ item.payedDateText}}</span>
                </td>
-               <td v-else>
-                  {{ item.deadLineText }}
+               <td v-if="!payed">
+                  <v-chip small @click.prevent="select(item.id)">{{ item.statusText }}</v-chip>
+               </td>
+               <td v-if="!payed">
+                 {{ item.deadLineText }}
                   <v-chip v-if="item.expired" small>已過期</v-chip>
                </td>
             </tr>

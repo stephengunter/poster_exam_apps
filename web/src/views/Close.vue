@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { CLOSE } from '@/config';
+import { APP_CLOSED } from '@/config';
 export default {
 	name: 'CloseView',
 	data(){
@@ -20,7 +20,7 @@ export default {
 		}
 	},
 	beforeMount() {
-		if(CLOSE) this.ready = true;
+		if(APP_CLOSED) this.ready = true;
 		else this.$router.push({ path: '/' }); 
 	},
 	methods: {

@@ -11,11 +11,6 @@
             <v-text-field v-model="dateSelector.text" label="日期" clearable
 				@click.prevent="selectDate" @click:clear="clearDate"
 				/>
-				<!-- <v-radio-group v-model="params.payed" row @change="onPayedChanged">
-					<v-radio v-for="(item, index) in payedOptions" :key="index"
-					:label="item.text" :value="item.value"
-					/>
-				</v-radio-group> -->
 			</v-col>
 		</v-row>
 		<v-row v-if="pagedList">
@@ -134,10 +129,7 @@ export default {
 		fetchData() {
 			this.$store.dispatch(FETCH_PAYS, this.params)
          .then(model => {
-            console.log('model', model);
-				// this.$nextTick(() => {
-				// 	this.category = new Category(this.subjectList, 0);
-				// })
+            
 			})
 			.catch(error => {
 				onError(error);

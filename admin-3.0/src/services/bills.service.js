@@ -7,4 +7,6 @@ const fetch = (params) => BaseService.fetch(source, params);
 
 const details = (id) => BaseService.fetch(`${source}/${id}`);
 
-export default { fetch, details };
+const clear = (plan) => BaseService.put(`${source}/clear/${plan}`);
+
+export default { fetch, details, clear };

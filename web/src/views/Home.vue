@@ -1,6 +1,5 @@
 <template>
 <div>
-	
 	<section id="hero">
 		<layout-hero />
 	</section>

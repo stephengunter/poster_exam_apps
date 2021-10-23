@@ -193,7 +193,7 @@ export default {
 			.catch(error => {
 				onError(error);
 			})
-		},
+		}
 	}
 }
 </script>

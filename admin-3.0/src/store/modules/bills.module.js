@@ -1,5 +1,5 @@
 import BillsService from '@/services/bills.service';
-import { FETCH_BILLS, BILL_DETAILS } from '@/store/actions.type';
+import { FETCH_BILLS, BILL_DETAILS, CLEAR_BILLS } from '@/store/actions.type';
 import { SET_LOADING, SET_BILLS } from '@/store/mutations.type';
 
 const initialState = {
@@ -43,6 +43,21 @@ const actions = {
          .finally(() => { 
             context.commit(SET_LOADING, false);
          });
+      });
+   },
+   [CLEAR_BILLS](context, plan) {
+      context.commit(SET_LOADING, true);
+      return new Promise((resolve, reject) => {
+         BillsService.clear(plan)
+            .then(() => {
+               resolve(true);
+            })
+            .catch(error => {
+               reject(resolveErrorData(error));
+            })
+            .finally(() => { 
+               context.commit(SET_LOADING, false);
+            });
       });
    }
 };

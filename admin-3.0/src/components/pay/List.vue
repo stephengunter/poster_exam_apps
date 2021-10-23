@@ -22,7 +22,7 @@
                   {{ item.payWay }}
                </td>
                <td>
-                  {{ item.createdAtText }}
+                  {{ item.payedDateText }}
                </td>
             </tr>
          </tbody>

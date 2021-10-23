@@ -41,6 +41,7 @@ export const DELETE_PLAN = 'deletePlan';
 //Bills
 export const FETCH_BILLS = 'fetchBills';
 export const BILL_DETAILS = 'billDetails';
+export const CLEAR_BILLS = 'clearBills';
 
 //Pays
 export const FETCH_PAYS = 'fetchPays';

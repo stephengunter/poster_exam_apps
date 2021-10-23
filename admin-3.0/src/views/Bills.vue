@@ -1,7 +1,7 @@
 <template>
    <core-container>
 		<v-row>
-			<v-col cols="12" sm="6">
+			<v-col cols="12" sm="6" >
 				<v-select label="方案"
 				:items="plansOptions" v-model="params.plan"
 				@change="onPlanChanged"
@@ -13,6 +13,9 @@
 					:label="item.text" :value="item.value"
 					/>
 				</v-radio-group>
+				<v-btn v-show="!params.payed" small color="warning" @click.prevent="clearBills">
+              清除無效帳單
+            </v-btn>
 			</v-col>
 		</v-row>
 		<v-row v-if="pagedList">
@@ -39,7 +42,8 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { FETCH_PLANS, FETCH_BILLS, BILL_DETAILS } from '@/store/actions.type';
+import { CLEAR_ERROR } from '@/store/mutations.type';
+import { FETCH_PLANS, FETCH_BILLS, BILL_DETAILS, CLEAR_BILLS } from '@/store/actions.type';
 import { onError, scrollToTop, isTrue } from '@/utils';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
@@ -81,6 +85,9 @@ export default {
       },
 		planSelected() {
 			return this.params.plan > 0;
+		},
+		selectedPlan() {
+			return this.planSelected ? this.allPlans.find(x => x.id === this.params.plan) : null;
 		},
 		payed() {
 			return isTrue(this.params.payed);
@@ -157,6 +164,28 @@ export default {
 		},
 		cancelDetails() {
 			this.setDetailsModel(null);
+		},
+		clearBills() {
+			let plan = this.selectedPlan;
+			let title = '確定要清除所有無效帳單嗎?';
+			if(plan) title = `確定要清除方案${plan.name}下的無效帳單嗎?`;
+			Bus.$emit('show-confirm', {
+				type: 'error',
+				title: title,
+				onOk: this.submitClearBills,
+				onCancel: () => {  }
+			});
+		},
+		submitClearBills() {
+			this.$store.commit(CLEAR_ERROR);
+			let plan = this.selectedPlan ? this.selectedPlan.id : 0;
+			this.$store.dispatch(CLEAR_BILLS, plan)
+			.then(() => {
+				this.fetchData();
+			})
+			.catch(error => {
+				onError(error);
+			})
 		}
 	}
 }

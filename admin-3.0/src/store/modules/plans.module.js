@@ -3,7 +3,7 @@ import { resolveErrorData } from '@/utils';
 
 import {
    FETCH_PLANS, CREATE_PLAN, STORE_PLAN, EDIT_PLAN, UPDATE_PLAN, 
-   CLEAR_PLAN,DELETE_PLAN
+   CLEAR_PLAN, DELETE_PLAN
 } from '@/store/actions.type';
 
 import { SET_LOADING, SET_PLANS, SET_ALL_PLANS } from '@/store/mutations.type';
