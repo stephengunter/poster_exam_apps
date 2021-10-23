@@ -212,7 +212,7 @@ const userLinks = [{
       icon: '',
       title: '系統維護中'
    } 
-},];
+}];
 
 
 const guestLinks = [{

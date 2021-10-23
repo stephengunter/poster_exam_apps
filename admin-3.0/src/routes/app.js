@@ -288,6 +288,18 @@ const adminlinks = [
          type: ADMIN_ONLY,
          menu: false
       } 
+   },
+   {
+      name: 'close',
+      path: '/close',
+      view: 'Close',
+      parent: '',
+      meta: {
+         type: FOR_ALL,
+         menus: [],
+         icon: '',
+         title: '系統維護中'
+      } 
    }
 ];
 

@@ -12,11 +12,14 @@ import '@/components';
 
 import JwtService from '@/services/jwt.service';
 import { FOR_ALL, GUEST_ONLY } from '@/consts';
+import { APP_CLOSED } from '@/config';
 import { CHECK_AUTH, REFRESH_TOKEN } from '@/store/actions.type';
 import { SET_MENUS } from '@/store/mutations.type';
 import { getMainMenus } from '@/common/menu';
 
 router.beforeEach((to, from, next) => {
+	if(APP_CLOSED && to.name !== 'close') return redirect(next, { name: 'close' });
+	
 	store.dispatch(CHECK_AUTH).then(auth => {
 		
 		if(to.meta.type === FOR_ALL) return authDone(next, to, auth);

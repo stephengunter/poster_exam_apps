@@ -1,16 +1,19 @@
-export const PRODUCTION = true;
-export const CLIENT_URL = PRODUCTION ? 'https://poster.exam-learner.com' : 'http://localhost:8080';
-export const SITE_URL = PRODUCTION ? 'https://poster-admin.exam-learner.com' : 'http://localhost:8088';
-export const SITE_TITLE = 'PosterExam 管理';
+import { isTrue } from '@/utils';
+
+export const APP_CLOSED = isTrue(process.env.VUE_APP_CLOSE);
+export const PRODUCTION = process.env.NODE_ENV === 'production';
+export const CLIENT_URL = process.env.VUE_CLIENT_URL;
+export const SITE_URL = process.env.VUE_APP_URL;
+export const SITE_TITLE = process.env.VUE_APP_TITLE;
 
 
-export const API_URL = PRODUCTION ? 'https://poster-api.exam-learner.com' : 'http://localhost:54741';
+export const API_URL = process.env.VUE_APP_API_URL;
 
 export const PHOTO_ACTION_PATH = '/photo';
 
 //AUTH
 export const GOOGLE_AUTH_PARAMS = {
-   client_id: PRODUCTION ? '54788512269-m8q9l3r9rr9igji0vge4iskub6e8t5ce.apps.googleusercontent.com' : '753186496069-ru78fhjhbdvif7dqhskiq8j3ln9ab777.apps.googleusercontent.com',
+   client_id: process.env.VUE_APP_GOOGLE_AUTH_CLIENT_ID,
    scope: 'email'
 };
 
