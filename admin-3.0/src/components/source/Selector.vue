@@ -100,7 +100,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { FETCH_NOTE_CATEGORIES, FETCH_NOTES } from '@/store/actions.type';
+import { FETCH_NOTE_CATEGORIES, FETCH_NOTES, FETCH_TERMS } from '@/store/actions.type';
 import { onError } from '@/utils';
 export default {
 	name: 'SourceSelector',
@@ -243,9 +243,25 @@ export default {
       },
       setSubject() {
          let subject = this.allSubjects.find(item => item.id === this.subjectId);
-         this.tree.items = subject.subItems;
-
          this.subject = subject;
+         if(subject.subItems && subject.subItems.length) {
+            this.tree.items = subject.subItems;
+            
+         }else {
+            this.tree.items = [];
+            this.$store.dispatch(FETCH_TERMS, { subject: subject.id, parent: 0 })
+            .then(terms => {
+               this.tree.items = terms.map(item => {
+                  let model = { ...item };
+                  model.text = `${model.title} ${model.text}`;
+                  return model;
+               });
+            })
+            .catch(error => {
+               onError(error);
+            })
+         }
+         
       },
       fetchNotes() {
 			this.$store.dispatch(FETCH_NOTES, this.params)
@@ -291,6 +307,7 @@ export default {
       },
       edit(index) {
          let model = { ...this.sources[index] };
+        
          let highlight = model.highlights.length ? model.highlights.join('\n') : '';
          model.highlight = highlight;
 
