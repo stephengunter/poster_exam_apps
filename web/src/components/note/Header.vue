@@ -21,7 +21,7 @@ import { mapState, mapGetters } from 'vuex';
 import { FETCH_NOTE_CATEGORIES, NOTE_CATEGORY, ACTION_SELECTED } from '@/store/actions.type';
 import { SET_BREAD_ITEMS } from '@/store/mutations.type';
 import { DIALOG_MAX_WIDTH,  NOTES_SETTINGS} from '@/config';
-import { resolveErrorData, tryParseInt } from '@/utils';
+import { resolveErrorData, onError, tryParseInt } from '@/utils';
 
 export default {
 	name: 'NoteHeader',
@@ -109,12 +109,11 @@ export default {
          });
       })
       .catch(error => {
-         Bus.$emit('errors', resolveErrorData(error));
+         onError(resolveErrorData(error));
       })
    },
    methods: {
       init() {
-			
 			if(this.userParams) {
 				this.params.mode = tryParseInt(this.userParams.mode);
 				this.params.subject = tryParseInt(this.userParams.subjectId);

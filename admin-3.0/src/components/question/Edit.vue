@@ -25,6 +25,27 @@
 									/>
 								</validation-provider>
 							</v-col>
+							<v-col v-if="model.attachments.length && model.attachments[0].id" cols="12">
+								<v-img :src="model.attachments[0].previewPath | photoNameUrl(100)" max-width="100" aspect-ratio="1">
+									<core-close-icon-button color="success"
+									@close="removeAttachments"
+									/>
+								</v-img>
+							</v-col>
+							<v-col v-else cols="12">
+								<v-img v-if="model.medias[0]" :src="model.medias[0].thumb.data" max-width="100" aspect-ratio="1">
+									<core-close-icon-button color="success"
+									@close="removeMedia"
+									/>
+								</v-img>
+								<core-upload-button v-if="model.medias.length === 0" color="default" :multiple="false"
+								@file-added="onFileAdded"
+								>
+                           附圖<v-icon right dark>mdi-image</v-icon>
+                        </core-upload-button>
+							</v-col>
+						</v-row>
+						<v-row>
 							<v-col cols="6">
 								<v-checkbox v-model="model.multiAnswers" label="複選" 
 								/>
@@ -70,7 +91,7 @@ import { onError, isYearRecruit } from '@/utils';
 export default {
 	name: 'QuestionEdit',
 	props: {
-		model: {
+		init_model: {
          type: Object,
          default: null
 		},
@@ -81,25 +102,33 @@ export default {
 	},
 	data () {
 		return {
+			model: null,
 			header: {
 				mode: EDIT, 
 				params: null
 			},
+			media: {
+            fileNames: []
+         },
 			references: {}
 		}
 	},
 	beforeMount() {
-		let params = {
-			subject: this.model.subjectId,
-			terms: this.model.termIds ? this.model.termIds.split(',').map(x => parseInt(x)) : [],
-			recruits: []
-		};
+		if(this.init_model) {
+         let model = { ...this.init_model, medias: [] };
+			let params = {
+				subject: model.subjectId,
+				terms: model.termIds ? model.termIds.split(',').map(x => parseInt(x)) : [],
+				recruits: []
+			};
+			
+			if(model.recruits.length) {
+				params.recruits = model.recruits.map(item => item.id);
+			}
+			this.model = model;
+			this.header.params = params;
+      }
 		
-		if(this.model.recruits.length) {
-			params.recruits = this.model.recruits.map(item => item.id);
-		}
-
-		this.header.params = params;
 	},
 	computed: {
 		...mapGetters(['contentMaxWidth', 'responsive']),
@@ -115,13 +144,13 @@ export default {
 		isCreate() {
 			return this.mode === CREATE;
 		},
-		title(){
+		title() {
 			let text = '問題';
 
 			if(this.mode === EDIT) return `編輯${text}`;
 			return `新增${text}`;	
 		},
-		canRemove(){
+		canRemove() {
 			return this.mode === EDIT;
 		},
 		questionHeader() {
@@ -149,6 +178,21 @@ export default {
 		cancel(){
 			this.$emit('cancel');
 		},
+		fileExist(filename) {
+			if(this.model.medias && this.model.medias.length) {
+				return this.model.medias[0].file.name === filename;
+			}
+			return false;
+      },
+		onFileAdded({ files, thumbs }) {
+         let file = files[0];
+         if(this.fileExist(file.name)) {
+            Bus.$emit('warning', '圖片重複');
+         }else {
+            let thumb = thumbs[0];
+            this.model.medias = [{ file, thumb }];
+         }
+      },
 		onSubmit() {
 			let params = this.questionHeader.params;
 			this.model.subjectId = params.subject;
@@ -188,24 +232,32 @@ export default {
 				this.$store.commit(SET_ERROR, { 'options' : [msg] });
 				return;
 			}
+			if(this.model.medias.length) {
+				this.model.attachments = this.model.medias.map(item => ({ name: item.file.name }));
+			}
+			
 			
 			this.model.options = options.slice(0);
 			this.model.options.forEach(option => {
 				if(option.medias.length) {
-					option.attachments = option.medias.map(item => {
-						return {
-							name: item.file.name
-						}
-					})
+					option.attachments = option.medias.map(item => ({ name: item.file.name }));
 				}
 			});
 			
-			this.loadMedias();
+			let medias = this.model.medias.map(item => {
+				let id = item.id ? item.id : 0;
+				let postType = 'Question';
+				let postId = this.model.id;
+				let files = [this.model.medias[0].file];
+				return { id, postType, postId, files };
+			});
+			let optionMedias = this.loadOptionMedias();
+			this.submit(medias, optionMedias);
 		},
-		loadMedias() {
+		loadOptionMedias() {
+			let medias = [];
 			let hasMedia = (this.model.options.findIndex(item => item.medias.length > 0)) > -1;
 			if(hasMedia) {
-				let medias = [];
 				for(let i = 0; i < this.model.options.length; i++) {
 					let option = this.model.options[i];
 					for(let j = 0; j < option.medias.length; j++) {
@@ -216,22 +268,20 @@ export default {
 							files: [option.medias[j].file]
 						})
 					}
-				}
-
-				this.submit(medias);
-
-			}else this.submit();
+				}	
+			}
+			return medias;
 		},
-		submit(medias = []) {
-			if(this.model.id) this.update(medias);
-			else this.store(medias);
+		submit(medias, optionMedias) {
+			if(this.model.id) this.update(medias, optionMedias);
+			else this.store(medias, optionMedias);
 		},
-		store(medias) {
+		store(medias, optionMedias) {
 			this.$store.commit(CLEAR_ERROR);
          this.$store.dispatch(STORE_QUESTION, { choice: this.choice, question: this.model })
 			.then(question => {
-				if(medias && medias.length) {
-					this.saveAttachments(question, medias);
+				if(medias.length || optionMedias.length) {
+					this.saveAttachments(question, medias, optionMedias);
 				}else this.onSaved();
 			})
 			.catch(error => {
@@ -239,12 +289,12 @@ export default {
 				else this.$store.commit(SET_ERROR, error);
 			})
 		},
-		update(medias){
+		update(medias, optionMedias) {
 			this.$store.commit(CLEAR_ERROR);
          this.$store.dispatch(UPDATE_QUESTION, this.model)
 			.then(question => {
-				if(medias && medias.length) {
-					this.saveAttachments(question, medias);
+				if(medias.length || optionMedias.length) {
+					this.saveAttachments(question, medias, optionMedias);
 				}else this.onSaved();
 			})
 			.catch(error => {
@@ -252,18 +302,32 @@ export default {
 				else this.$store.commit(SET_ERROR, error);
 			})
 		},
-		saveAttachments(question, medias) {
+		removeMedia() {
+         this.model.medias = [];
+      },
+		removeAttachments() {
+         this.model.attachments = [];
+      },
+		saveAttachments(question, medias, optionMedias) {
+			for(let i = 0; i < question.attachments.length; i++) {
+				let attachment = question.attachments[i];
+				let media = medias.find(item => item.files[0].name === attachment.name);
+				if(media) {
+					media.postId = attachment.postId;
+					media.postType = attachment.postType;
+				}
+			}
 			question.options.forEach(option => {
 				for(let i = 0; i < option.attachments.length; i++) {
 					let attachment = option.attachments[i];
-					let media = medias.find(item => item.files[0].name === attachment.name);
+					let media = optionMedias.find(item => item.files[0].name === attachment.name);
 					if(media) {
 						media.postId = attachment.postId;
 						media.postType = attachment.postType;
 					}
 				}	
 			});
-			this.uploadAttachments(medias);
+			this.uploadAttachments(medias.concat(optionMedias));
 		},
 		uploadAttachments(medias) {
 			let media  = medias.shift();
@@ -274,7 +338,7 @@ export default {
 				else vm.onSaved();
 			})
 			.catch(error => {
-				Bus.$emit('errors');
+				onError(error);
 			})
 		},
 		onRemove() {

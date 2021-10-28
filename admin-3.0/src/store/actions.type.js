@@ -163,3 +163,9 @@ export const DB_IMPORT = 'dbImport';
 export const DB_EXPORT = 'dbExport';
 export const DB_BACKUP = 'dbBackup';
 export const DB_MIGRATE = 'dbMigrate';
+
+//Data
+export const STORE_YEAR_RECRUITS = 'storeYearRecruits';
+export const STORE_SUBJECT_QUESTIONS = 'storeSubjectQuestions';
+export const STORE_NOTE_CATEGORIES = 'storeNoteCategories';
+export const STORE_TERM_NOTES = 'storeTermNotes';

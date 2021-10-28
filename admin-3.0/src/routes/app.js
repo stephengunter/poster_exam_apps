@@ -251,6 +251,19 @@ const adminlinks = [
       } 
    },
    {
+      name: 'data',
+      path: '/data',
+      view: 'Data',
+      parent: 'db',
+      meta: {
+         order: 0,
+         icon: 'mdi-database-sync',
+         title: 'Data',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
+   },
+   {
       name: 'settings',
       path: '/settings',
       view: 'Settings',

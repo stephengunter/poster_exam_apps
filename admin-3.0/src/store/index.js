@@ -26,6 +26,7 @@ import recruitQuestions from './modules/recruit-questions.module';
 import manuals from './modules/manuals.module';
 import features from './modules/features.module';
 import db from './modules/db.module';
+import data from './modules/data.module';
 import analysis from './modules/analysis.module';
 import settings from './modules/settings.module';
 
@@ -58,6 +59,7 @@ export default new Vuex.Store({
       manuals,
       features,
       db,
+      data,
       analysis,
       settings
    }

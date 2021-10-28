@@ -120,7 +120,6 @@ export default {
 		fetchData() {
 			this.$store.dispatch(CREATE_SUBSCRIBE)
 			.then(model => {
-				console.log('model', model);
 				if(model.bill) this.init(model);
 				else this.redirect();
          })

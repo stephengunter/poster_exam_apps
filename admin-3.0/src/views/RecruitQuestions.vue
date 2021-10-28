@@ -25,7 +25,7 @@
 		</v-row>
 
 		<v-dialog v-model="editor.active" persistent :max-width="editor.maxWidth">
-			<question-edit v-if="editor.active" :model="editor.model"
+			<question-edit v-if="editor.active" :init_model="editor.model"
 			@saved="onSaved" @cancel="cancelEdit"
 			/>
 		</v-dialog>
@@ -82,7 +82,8 @@ export default {
 	computed: {
 		...mapGetters(['responsive','contentMaxWidth']),
 		...mapState({
-			pagedList: state => state.questions.pagedList
+			pagedList: state => state.questions.pagedList,
+			recruits: state => state.questions.recruits
 		}),
 		dataList() {
 			if(this.pagedList) {
@@ -129,8 +130,8 @@ export default {
 			this.$store.dispatch(CREATE_QUESTION)
 				.then(model => {
 					let recruits = this.rqHeader.getSelectedRecruits().recruits;
-					if(recruits && recruits.length) model.recruits = recruits.slice(0);
 					
+					if(recruits && recruits.length) model.recruits = recruits.slice(0);
 					if(this.editor.lastModel) {
 						model.subjectId = this.editor.lastModel.subjectId;
 						for(let i = 0; i < this.editor.lastModel.options.length; i++) {
@@ -146,7 +147,10 @@ export default {
 					}else {
 						let recruit = recruits[0];
 						if(recruit.subjectId) model.subjectId = recruit.subjectId;
-						else model.subjectId = recruit.parent.subjectId;
+						else {
+							let parent = this.recruits.find(x => x.id === recruit.parentId);
+							model.subjectId = parent.subjectId;
+						} 
 					}
 					
 					this.setEditModel(model);

@@ -18,6 +18,11 @@
                </td>
                <td>
                   {{ item.title }}
+                  <a href="#" v-if="item.attachments.length" @click.prevent="showPhoto(item.attachments[0])">
+                     <img  style="vertical-align:middle" 
+                     :src="item.attachments[0].previewPath | photoNameUrl(50)"
+                     >
+                  </a>
                </td>
                <td style="padding: 10px 16px;">
                   <option-list :options="item.options" 

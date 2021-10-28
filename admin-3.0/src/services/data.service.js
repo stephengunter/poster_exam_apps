@@ -9,4 +9,7 @@ const storeYearRecruits = (model) => BaseService.post(`${source}/year-recruits`,
 
 const storeNoteCategories = (model) => BaseService.post(`${source}/note-categories`, model);
 
-export default { storeSubjectQuestions, storeYearRecruits, storeNoteCategories };
+const storeTermNotes = (model) => BaseService.post(`${source}/term-notes`, model);
+
+
+export default { storeSubjectQuestions, storeYearRecruits, storeNoteCategories, storeTermNotes };

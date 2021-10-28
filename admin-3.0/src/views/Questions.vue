@@ -20,7 +20,7 @@
 		/>
 
 		<v-dialog v-model="editor.active" persistent :max-width="editor.maxWidth">
-			<question-edit v-if="editor.active" :model="editor.model"
+			<question-edit v-if="editor.active" :init_model="editor.model"
 			@saved="onSaved" @cancel="cancelEdit"
 			/>
 		</v-dialog>

@@ -16,7 +16,7 @@
          </slot>
       <v-card-actions v-show="hasAction">
          <v-spacer></v-spacer>
-         <v-btn text @click="cancel">
+         <v-btn v-if="on_cancel" text @click="cancel">
             {{ cancel_text }}
          </v-btn>
          <v-btn color="green darken-1" text @click="ok">

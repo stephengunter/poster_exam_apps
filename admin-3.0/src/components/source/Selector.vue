@@ -69,6 +69,15 @@
                                  <td style="padding: 10px 16px;">
                                     {{ item.title }}
                                     <core-highlight v-if="item.text" :queries="item.highlights" :content="item.text" />
+                                 
+                                    <div v-for="(media, mediaIndex) in item.attachments" :key="mediaIndex">
+                                       <a href="#" @click.prevent="showPhoto(media)">
+                                          <v-img class="mt-2" :src="media.previewPath | photoNameUrl(100)" max-width="100" aspect-ratio="1"
+                                          />
+                                       </a>
+                                       <span>{{ media.title }}</span>
+                                       
+                                    </div>
                                  </td>
                               </tr>
                            </tbody>
@@ -100,7 +109,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { FETCH_NOTE_CATEGORIES, FETCH_NOTES, FETCH_TERMS } from '@/store/actions.type';
+import { FETCH_NOTE_CATEGORIES, FETCH_NOTES, FETCH_TERMS, SHOW_PHOTO } from '@/store/actions.type';
 import { onError } from '@/utils';
 export default {
 	name: 'SourceSelector',
@@ -353,6 +362,7 @@ export default {
             noteId: 0,
             title: '',
             text: '',
+            attachments: [],
             highlight: '',
             highlights: []
          };
@@ -364,6 +374,7 @@ export default {
          else return `Term ${item.termId}`;
       },
       onSelectNoteChanged(id) {
+         
          if(id) {
             if(this.selected.term) {
                this.selected.note = this.selected.term.notes.find(item => item.id === id);
@@ -387,14 +398,16 @@ export default {
             model.termId = note.termId;
             model.title = note.title;
             model.text = note.text;
+            model.attachments = note.attachments.map(media => `${media.id},${media.title}`);
          }else {
             let term = this.selected.term;
             model.noteId = 0;
             model.termId = this.selected.term.id;
             model.title = term.title;
             model.text = term.text;
+            model.attachments = [];
          }
-        
+         
          this.setSelectedItem({ ...model });
          this.closeSelect();
       },
@@ -410,6 +423,9 @@ export default {
          }
 
          this.$emit('changed');
+      },
+      showPhoto(photo) {
+         Bus.$emit(SHOW_PHOTO, photo);
       }
 	}
 }

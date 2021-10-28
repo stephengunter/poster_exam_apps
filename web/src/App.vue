@@ -17,7 +17,7 @@
 			</span>
 		</v-snackbar>
 
-		<v-dialog v-model="confirm.active" :max-width="confirm.maxWidth" :persistent="!confirmNoAction">
+		<v-dialog v-model="confirm.active" :max-width="confirm.maxWidth" :persistent="true">
 			<core-confirmation :type="confirm.type"
 			:title="confirm.title" :text="confirm.text"
 			:ok_text="confirm.ok_text"  :cancel_text="confirm.cancel_text"

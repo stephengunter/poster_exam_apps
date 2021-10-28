@@ -1,9 +1,6 @@
 import NotesService from '@/services/notes.service';
-
 import { FETCH_NOTE_CATEGORIES, FETCH_NOTES, NOTE_DETAILS } from '@/store/actions.type';
-
 import { SET_LOADING, SET_NOTE_CATEGORIES, SET_NOTE_PARAMS, SET_NOTES } from '@/store/mutations.type';
-
 
 
 const initialState = {
@@ -32,7 +29,6 @@ const actions = {
             .then(model => {
                context.commit(SET_NOTE_CATEGORIES, model.categories);
                context.commit(SET_NOTE_PARAMS, model.params);
-               
                resolve(model);
             })
             .catch(error => {
