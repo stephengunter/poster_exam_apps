@@ -186,7 +186,7 @@ export default {
 			this.setEditModel(null);
 		},
 		onSaved(model) {
-			if(model) this.editor.lastModel = deepClone(this.editor.model);
+			if(model) this.editor.lastModel = deepClone(model);
 
 			Bus.$emit('success');
 			this.fetchData();
