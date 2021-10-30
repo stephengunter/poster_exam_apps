@@ -3,7 +3,12 @@
 	<v-col>
 			<p class="q-title">
 				<span class="mr-1">{{ model.index }}.</span>
-				{{ model.title }}
+				<span>{{ model.title }}</span>
+				<a href="#" v-if="model.attachments.length" @click.prevent="showPhoto(model.attachments[0])">
+               <img  style="vertical-align:middle" 
+               :src="model.attachments[0].previewPath | photoNameUrl(100)"
+               >
+            </a>
 			</p>
 			<option-list :options="model.options" 
 			@show-photo="showPhoto" 

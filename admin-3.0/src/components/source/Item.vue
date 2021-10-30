@@ -42,7 +42,8 @@ export default {
    },
    methods: {
       showPhoto(photo) {
-         Bus.$emit(SHOW_PHOTO, photo);
+          console.log('SHOW_PHOTO', photo);
+         //Bus.$emit(SHOW_PHOTO, photo);
       }
    }
 }

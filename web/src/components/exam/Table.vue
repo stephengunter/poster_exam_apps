@@ -13,7 +13,9 @@
       <tbody>
          <tr v-for="(item, index) in list" :key="index" @click.prevent="select(item)">
             <td v-if="subject < 1">{{ item.subject.title }}</td>
-            <td>{{ item.title }}</td>
+            <td>
+               <a href="#" v-text="item.title" class="a-btn" @click.prevent="() => {}"></a>
+            </td>
             <td v-if="status < 0">
                <v-chip :outlined="!item.isComplete" small color="primary">
                {{ item.examStatusText }}

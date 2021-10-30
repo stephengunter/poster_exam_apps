@@ -8,10 +8,6 @@
          />
       </v-card-text>
    </v-card>
-
-   <v-dialog v-model="showPhoto.active" :max-width="showPhoto.maxWidth">
-      <photo-show :model="showPhoto.model" @cancel="showPhoto.active = false" />
-   </v-dialog>
    
 </div>   
 </template>
@@ -19,7 +15,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { EXAM_SUMMARY, STORE_EXAM, SAVE_EXAM, 
-   ABORT_EXAM, DELETE_EXAM, EXAM_RECORDS, LEAVE_EXAM,
+   ABORT_EXAM, DELETE_EXAM, EXAM_RECORDS, LEAVE_EXAM, SHOW_PHOTO,
    LOAD_EXAM_SUMMARY, SELECT_RQS_MODE
 } from '@/store/actions.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
@@ -39,12 +35,6 @@ export default {
    },
    data() {
 		return {
-
-         showPhoto: {
-				active: false,
-				model: null,
-				maxWidth: DIALOG_MAX_WIDTH
-         },
 
          summary: {
 				active: false,
@@ -68,9 +58,7 @@ export default {
          this.$store.dispatch(LOAD_EXAM_SUMMARY);
       },
       onShowPhoto(photo) {
-         this.showPhoto.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
-			this.showPhoto.model = photo;
-			this.showPhoto.active = true;
+         Bus.$emit(SHOW_PHOTO, photo);
       },
       onAbortExam() {
          showConfirm({

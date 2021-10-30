@@ -32,7 +32,6 @@ export default {
          for(let i = 0; i < matches.length; i++) {
             let name = matches[i].replace(/<\/?UPLOADPHOTO>/g, '');
             let photoUrl = photoNameUrl(name, DIALOG_MAX_WIDTH);
-            
             //result = result.replace(matches[i], `<a href="#" style="display: block" onclick="event.preventDefault(); ${SHOW_PHOTO}(${id});">&#128247;查看圖片</a>`)
             result = result.replace(matches[i], `<img src="${photoUrl}">`);
          }

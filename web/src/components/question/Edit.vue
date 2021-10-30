@@ -6,12 +6,21 @@
 				{{ model.correct ? 'mdi-check-circle' : 'mdi-close-circle'  }}
 			</v-icon>
 			<span class="mr-1">{{ model.index }}.</span>
-			{{ model.question.title }} 
-			
+			<span>{{ model.question.title }}</span>
+			<a href="#" v-if="model.question.attachments.length" @click.prevent="showPhoto(model.question.attachments[0])">
+				<img  style="vertical-align:middle" 
+				:src="model.question.attachments[0].previewPath | photoNameUrl(100)"
+				>
+			</a>
 		</p>
-		<p v-else class="q-title">
-			<span class="mr-1">{{ index }}.</span>
-				{{ model.title }} 
+		<p v-else class="q-title">   
+			<span class="mr-1">{{ index }}.ppp</span>
+			<span>{{ model.title }}</span>
+			<a href="#" v-if="model.attachments.length" @click.prevent="showPhoto(model.attachments[0])">
+				<img  style="vertical-align:middle" 
+				:src="model.attachments[0].previewPath | photoNameUrl(100)"
+				>
+			</a>
 			<span v-if="show_recruits" class="ml-1 green--text" v-text="getRecruitsText(model)"></span>	
 		</p>
 		<v-radio-group v-model="selectedIndex" readonly>
@@ -44,7 +53,12 @@
 		<div v-if="exam_id">
 			<p class="q-title">
 				<span class="mr-1">{{ model.index }}.</span>
-				{{ model.question.title }} 
+				<span>{{ model.question.title }}</span>
+				<a href="#" v-if="model.question.attachments.length" @click.prevent="showPhoto(model.question.attachments[0])">
+					<img  style="vertical-align:middle" 
+					:src="model.question.attachments[0].previewPath | photoNameUrl(100)"
+					>
+				</a>
 			</p>
 			<core-deselectable-radio-group 
 			:options="options" :selected_index="selectedIndex" text_field="title"
@@ -54,10 +68,10 @@
 		<div v-else>
 			<p class="q-title">
 				<span class="mr-1">{{ index }}.</span>
-				{{ model.title }}
+				<span>{{ model.title }}</span>
 				<span v-if="show_recruits" class="ml-1 green--text" v-text="getRecruitsText(model)"></span>
 			</p>
-			<core-deselectable-radio-group 
+			<core-deselectable-radio-group
 			:options="options" :selected_index="selectedIndex" text_field="title"
 			@selected="onSelect" @show-photo="showPhoto"
 			/>

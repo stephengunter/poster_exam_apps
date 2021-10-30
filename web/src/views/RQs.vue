@@ -13,14 +13,13 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import {
-   LOAD_ACTIONS, ACTION_SELECTED, EXAM_SUMMARY,
-   RQS_INDEX, FETCH_RQS, SELECT_RQS_MODE, CREATE_EXAM,
-   STORE_EXAM, SAVE_EXAM, ABORT_EXAM, LEAVE_EXAM 
+   LOAD_ACTIONS, ACTION_SELECTED, 
+   RQS_INDEX, FETCH_RQS, SELECT_RQS_MODE 
 } from '@/store/actions.type';
-import { SET_RQS_PAGE_MODE, SET_APP_ACTIONS, SET_EXAM_TITLE,
+import { SET_RQS_PAGE_MODE, 
 SET_EXAM_CREATE_PARAMS, SET_LOADING } from '@/store/mutations.type';
 
-import { resolveErrorData, getRouteTitle, todayString } from '@/utils';
+import { resolveErrorData, getRouteTitle } from '@/utils';
 import { DIALOG_MAX_WIDTH } from '@/config';
 
 export default {

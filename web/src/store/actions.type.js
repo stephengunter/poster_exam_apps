@@ -15,6 +15,7 @@ export const FETCH_ACTIONS = 'fetchActions';
 export const LOAD_ACTIONS = 'loadActions';
 export const ACTION_SELECTED = 'actionSelected';
 export const SCROLL_TOP = 'scrollTop';
+export const SHOW_PHOTO = 'showPhoto';
 
 //Messages
 export const STORE_MESSAGE = 'storeMessage';

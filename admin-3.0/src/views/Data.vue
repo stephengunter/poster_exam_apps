@@ -35,6 +35,12 @@ export default {
       return {
          actionOptions: [{
             value: STORE_YEAR_RECRUITS, text: 'STORE_YEAR_RECRUITS'
+         },{
+            value: STORE_SUBJECT_QUESTIONS, text: 'STORE_SUBJECT_QUESTIONS'
+         },{
+            value: STORE_NOTE_CATEGORIES, text: 'STORE_NOTE_CATEGORIES'
+         },{
+            value: STORE_TERM_NOTES, text: 'STORE_TERM_NOTES'
          }],
          action: '',
          model: {

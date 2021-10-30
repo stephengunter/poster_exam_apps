@@ -45,8 +45,7 @@ export default {
 		model: {
          type: Object,
          default: null
-      },
-      
+      }      
    },
    methods: {
       showPhoto(item) {

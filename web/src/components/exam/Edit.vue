@@ -11,10 +11,6 @@
       @action-selected="handleAction"
       />
    </v-card>
-
-   <v-dialog v-model="showPhoto.active" :max-width="showPhoto.maxWidth">
-      <photo-show :model="showPhoto.model" @cancel="showPhoto.active = false" />
-   </v-dialog>
    
    <v-dialog v-model="save.active" :max-width="save.maxWidth" persistent>
       <exam-save v-if="save.active" :model="save.model" :on_ok="save.on_ok"
@@ -43,7 +39,7 @@
 import { mapState, mapGetters } from 'vuex';
 import { EXAM_SUMMARY, STORE_EXAM, SAVE_EXAM,
    ABORT_EXAM, DELETE_EXAM, EXAM_RECORDS, LEAVE_EXAM,
-   LOAD_EXAM_SUMMARY, SELECT_RQS_MODE, RQS_INDEX
+   LOAD_EXAM_SUMMARY, SELECT_RQS_MODE, RQS_INDEX, SHOW_PHOTO
 } from '@/store/actions.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
 import { showConfirm } from '@/utils';
@@ -63,12 +59,6 @@ export default {
    data() {
 		return {
          answerChangeds: 0,
-
-         showPhoto: {
-				active: false,
-				model: null,
-				maxWidth: DIALOG_MAX_WIDTH
-         },
 
          save: {
             model: null,
@@ -120,12 +110,6 @@ export default {
          this.stored = false;
          this.answerChangeds = 0;
 
-         this.showPhoto = {
-				active: false,
-				model: null,
-				maxWidth: DIALOG_MAX_WIDTH
-         };
-
          this.save = {
             model: null,
             maxWidth: DIALOG_MAX_WIDTH,
@@ -146,9 +130,7 @@ export default {
          this.$store.dispatch(LOAD_EXAM_SUMMARY);
       },
       onShowPhoto(photo) {
-         this.showPhoto.maxWidth = this.contentMaxWidth ? this.contentMaxWidth : DIALOG_MAX_WIDTH;
-			this.showPhoto.model = photo;
-			this.showPhoto.active = true;
+         Bus.$emit(SHOW_PHOTO, photo);
       },
       onAbortExam() {
          showConfirm({

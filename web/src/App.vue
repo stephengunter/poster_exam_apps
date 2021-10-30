@@ -6,6 +6,8 @@
 		
 		<layout-loading />
 
+		<layout-show />
+
 		<v-snackbar :timeout="success.timeout" top right dark
 			:color="success.color" v-model="success.show"
 		>

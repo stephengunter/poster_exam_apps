@@ -20,7 +20,7 @@ export default {
 		}
 	},
 	beforeMount() {
-		this.test();
+		
 	},
 	methods: {
 		test() {
