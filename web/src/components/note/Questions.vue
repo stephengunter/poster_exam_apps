@@ -78,10 +78,10 @@ export default {
 			this.$store.dispatch(FETCH_QUESTIONS, { term: this.term_id, subject: this.subject_id })
 			.then(questions => {
 				if(questions && questions.length) {
-               questions.sort((a, b) => {
-                  if(a.recruits.length === b.recruits.length) return a.id - b.id;
-                  else return a.recruits.length === b.recruits.length;
-               });
+               // questions.sort((a, b) => {
+               //    if(a.recruits.length === b.recruits.length) return a.id - b.id;
+               //    else return a.recruits.length === b.recruits.length;
+               // });
 
                let totalPages = Math.ceil(questions.length / pageSize);
                for(let i = 1; i <= totalPages; i++){

@@ -14,7 +14,7 @@
 			</a>
 		</p>
 		<p v-else class="q-title">   
-			<span class="mr-1">{{ index }}.ppp</span>
+			<span class="mr-1">{{ index }}.</span>
 			<span>{{ model.title }}</span>
 			<a href="#" v-if="model.attachments.length" @click.prevent="showPhoto(model.attachments[0])">
 				<img  style="vertical-align:middle" 
@@ -52,7 +52,7 @@
 	<v-col v-else>
 		<div v-if="exam_id">
 			<p class="q-title">
-				<span class="mr-1">{{ model.index }}.</span>
+				<span class="mr-1">{{ model.index }}</span>
 				<span>{{ model.question.title }}</span>
 				<a href="#" v-if="model.question.attachments.length" @click.prevent="showPhoto(model.question.attachments[0])">
 					<img  style="vertical-align:middle" 
@@ -69,6 +69,11 @@
 			<p class="q-title">
 				<span class="mr-1">{{ index }}.</span>
 				<span>{{ model.title }}</span>
+				<a href="#" v-if="model.attachments.length" @click.prevent="showPhoto(model.attachments[0])">
+					<img  style="vertical-align:middle" 
+					:src="model.attachments[0].previewPath | photoNameUrl(100)"
+					>
+				</a>
 				<span v-if="show_recruits" class="ml-1 green--text" v-text="getRecruitsText(model)"></span>
 			</p>
 			<core-deselectable-radio-group
@@ -146,7 +151,6 @@ export default {
 					let selectedOption = this.options[this.selectedIndex];
 					this.model.correct = selectedOption.correct;
 				}
-				
 			}
       }
    },
@@ -155,9 +159,7 @@ export default {
 	},
 	methods: {
 		init() {
-			
 			let model = this.model;
-
 			let userAnswerIndexes = model.userAnswerIndexes;
 			
 			if(userAnswerIndexes && userAnswerIndexes.length) {

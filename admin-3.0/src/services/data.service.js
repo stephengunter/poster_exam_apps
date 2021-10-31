@@ -11,5 +11,4 @@ const storeNoteCategories = (model) => BaseService.post(`${source}/note-categori
 
 const storeTermNotes = (model) => BaseService.post(`${source}/term-notes`, model);
 
-
 export default { storeSubjectQuestions, storeYearRecruits, storeNoteCategories, storeTermNotes };
