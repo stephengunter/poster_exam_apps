@@ -102,17 +102,17 @@ const applinks = [{
       title: '使用說明'
    } 
 },
-{
-   name: 'test',
-   path: '/test',
-   view: 'test/Index',
-   parent: '',
-   meta: {
-      type: FOR_ALL,
-      menus: [],
-      title: 'Test'
-   } 
-}
+// {
+//    name: 'test',
+//    path: '/test',
+//    view: 'test/Index',
+//    parent: '',
+//    meta: {
+//       type: FOR_ALL,
+//       menus: [],
+//       title: 'Test'
+//    } 
+// }
 ];
 
 const userLinks = [{
