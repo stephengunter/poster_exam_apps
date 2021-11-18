@@ -1,11 +1,10 @@
 <template>
 	<v-row v-if="responsive">
 		<v-col cols="8">
-			<v-radio-group v-model="params.open" @change="onParamsChanged" row>
-				<v-radio v-for="(item, index) in open_options" :key="index"
-				:label="item.text" :value="item.value"					
-				/>
-			</v-radio-group>
+			<v-select label="分類"
+         :items="category_options" v-model="params.category"
+         @change="onParamsChanged"
+         />
 		</v-col>
 		<v-col cols="4" class="text-right">
 			<core-button-create class_name="mt-2" tooltip="新增" :disabled="!can_create"
@@ -22,11 +21,10 @@
 	</v-row>
 	<v-row v-else>
 		<v-col cols="4">
-			<v-radio-group v-model="params.open" @change="onParamsChanged" row>
-				<v-radio v-for="(item, index) in open_options" :key="index"
-				:label="item.text" :value="item.value"					
-				/>
-			</v-radio-group>
+			<v-select label="分類"
+         :items="category_options" v-model="params.category"
+         @change="onParamsChanged"
+         />
 		</v-col>
 		<v-col cols="4">
 			<v-radio-group v-model="params.active" @change="onParamsChanged" row>
@@ -47,13 +45,13 @@
 import { mapGetters } from 'vuex';
 
 export default {
-	name: 'NoticeHeader',
+	name: 'ArticleHeader',
 	props: {
 		params: {
 			type: Object,
 			default: null
 		},
-		open_options: {
+		category_options: {
          type: Array,
          default: null
 		},

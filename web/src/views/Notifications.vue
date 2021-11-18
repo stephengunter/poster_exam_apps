@@ -11,10 +11,10 @@
 						<v-list-item-subtitle class="mt-1" v-text="plainText(item.notice.content)"></v-list-item-subtitle>
 					</v-list-item-content>
 					<v-list-item-action>
-                <v-list-item-action-text>
-						 <core-time-ago :val="item.notice.lastUpdated" />
-					 </v-list-item-action-text>
-              </v-list-item-action>
+						<v-list-item-action-text>
+							{{ item.notice.lastUpdated | timeAgo }}
+						</v-list-item-action-text>
+               </v-list-item-action>
 				</v-list-item>
 			</v-list>
 			
@@ -33,7 +33,7 @@
 import { mapState, mapGetters } from 'vuex';
 import { FETCH_NOTIFICATION_ITEMS, FETCH_NOTIFICATIONS, CLEAR_NOTIFICATIONS
  } from '@/store/actions.type';
-import { onError, getRouteTitle } from '@/utils';
+import { onError, getRouteTitle, removeHtmlTags } from '@/utils';
 import { SET_BREAD_ITEMS, SET_NOTIFICATION } from '@/store/mutations.type';
 
 
@@ -112,6 +112,9 @@ export default {
 			.finally(() => { 
 				this.loading = false;
 			});
+		},
+		plainText(str) {
+         return removeHtmlTags(str).trim();
 		},
 		select(item) {
 			this.$router.push({ name: 'notification-details', params: { id: item.id }})

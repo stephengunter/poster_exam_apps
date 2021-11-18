@@ -26,6 +26,15 @@ export const OFF_NOTICE = 'offNotice';
 export const UPDATE_NOTICE = 'updateNotice';
 export const DELETE_NOTICE = 'deleteNotice';
 
+//Articles
+export const FETCH_ARTICLES = 'fetchArticles';
+export const CREATE_ARTICLE = 'createArticle';
+export const EDIT_ARTICLE = 'editArticle';
+export const STORE_ARTICLE = 'storeArticle';
+export const OFF_ARTICLE = 'offArticle';
+export const UPDATE_ARTICLE = 'updateArticle';
+export const DELETE_ARTICLE = 'deleteArticle';
+
 //Subscribes
 export const FETCH_SUBSCRIBES = 'fetchSubscribes';
 

@@ -14,19 +14,31 @@ const applinks = [{
       icon: 'mdi-home',
       title: '首頁'
    } 
-},
-{
-   name: 'test',
-   path: '/test',
-   view: 'test/Index',
+},{
+   name: 'articles',
+   path: '/articles',
+   view: 'Articles',
    parent: '',
    meta: {
       type: FOR_ALL,
-      menus: [],
-      title: 'Test'
+      menus: [{
+         key: 'main', show: FOR_ALL, order: 5
+      }],
+      icon: 'mdi-post-outline',
+      title: '上榜心得'
    } 
-},
-{
+},{
+   name: 'article-details',
+   path: '/articles/:id/:title?/:user?',
+   view: 'articles/Details',
+   props: true,
+   parent: 'articles',
+   meta: {
+      type: FOR_ALL,
+      menus: [],
+      title: '上榜心得'
+   } 
+},{
    name: 'contact',
    path: '/contact',
    view: 'Contact',
@@ -88,6 +100,17 @@ const applinks = [{
       }],
       icon: 'mdi-book-open',
       title: '使用說明'
+   } 
+},
+{
+   name: 'test',
+   path: '/test',
+   view: 'test/Index',
+   parent: '',
+   meta: {
+      type: FOR_ALL,
+      menus: [],
+      title: 'Test'
    } 
 }
 ];
@@ -196,7 +219,7 @@ const userLinks = [{
    meta: {
       type: USER_ONLY,
       menus: [{
-         key: 'main', show: FOR_ALL, except: SUBSCRIBER, order: 5
+         key: 'main', show: FOR_ALL, except: SUBSCRIBER, order: 6
       }],
       icon: 'mdi-wallet-membership',
       title: '訂閱會員'

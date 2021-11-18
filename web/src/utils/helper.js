@@ -1,3 +1,12 @@
+export const removeHtmlTags = (str) => {
+   if((str === null) || (str === '')) return '';
+   else {
+      str = str.toString();
+      return removeWhiteSpaces(str.replace( /(<([^>]+)>)/ig, ''));
+   }   
+      
+}
+
 export const removeWhiteSpaces = (strVal) => strVal.replace(/\s/g,'');
 
 export const isSmallScreen = () => window.innerWidth < 991;
@@ -57,15 +66,6 @@ export const getListText = (items, splitText = ' > ') => {
       text += items[i];
    }
    return text;
-}
-
-export const removeTags = (str) => {
-   if((str === null) || (str === '')) return false;
-   else {
-      str = str.toString();
-      return str.replace( /(<([^>]+)>)/ig, '');
-   }   
-      
 }
 
 export const todayString = () => new Date().toJSON().slice(0,10);

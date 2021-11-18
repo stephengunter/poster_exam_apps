@@ -1,9 +1,12 @@
 export const POST_TYPES = {
-   NONE: 'None',
    OPTION: 'Option',
    RESOLVE: 'Resolve',
    NOTE: 'Note',
    MANUAL: 'Manual',
    FEATURE: 'Feature',
-   EMOJI: 'Emoji'
+   EMOJI: 'Emoji',
+   QUESTION: 'Question',
+   ARTICLE: 'Article',
+   NONE: 'None',
+   
 };

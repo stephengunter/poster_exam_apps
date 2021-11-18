@@ -7,6 +7,7 @@ import show from './modules/show.module';
 import exceptions from './modules/exceptions.module';
 import messages from './modules/messages.module';
 import notices from './modules/notices.module';
+import articles from './modules/articles.module';
 import subscribes from './modules/subscribes.module';
 import plans from './modules/plans.module';
 import bills from './modules/bills.module';
@@ -40,6 +41,7 @@ export default new Vuex.Store({
       exceptions,
       messages,
       notices,
+      articles,
       subscribes,
       plans,
       bills,

@@ -3,7 +3,7 @@
       <v-col cols="12" class="text-center">
          <v-select v-if="!responsive"  class="d-inline-flex" style="width:60px"
          label="Rows"
-         :items="[10,25,50]" v-model="size" 
+         :items="row_options" v-model="size" 
          @change="onPageSizeChanged"
          />
 
@@ -41,6 +41,10 @@ export default {
       can_page: {
          type: Boolean,
          default: true
+      },
+      row_options: {
+         type: Array,
+         default: () => [10,25,50]
       },
       responsive: {
          type: Boolean,

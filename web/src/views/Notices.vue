@@ -18,7 +18,7 @@
 					</v-list-item-content>
 					<v-list-item-action>
                 <v-list-item-action-text>
-						 <core-time-ago :val="item.lastUpdated" />
+						<span>{{ item.lastUpdated | timeAgo }}</span>
 					 </v-list-item-action-text>
               </v-list-item-action>
 				</v-list-item>
@@ -34,13 +34,14 @@
 import { mapState, mapGetters } from 'vuex';
 import { FETCH_NOTICES } from '@/store/actions.type';
 import { onError, getRouteTitle } from '@/utils';
-import { SET_BREAD_ITEMS, SET_NOTICE } from '@/store/mutations.type';
+import { SET_BREAD_ITEMS } from '@/store/mutations.type';
 
 
 export default {
 	name: 'NoticesView',
 	data(){
 		return {
+			title: '',
 			page: 1,
 			pageSize: 15,
 			  
@@ -61,8 +62,6 @@ export default {
 		}
 	},
 	beforeMount() {
-		this.$store.commit(SET_NOTICE, null);
-
 		if(this.list.length) {
 			if(this.params) {
 				this.page =  this.params.page;
@@ -73,14 +72,14 @@ export default {
 			this.fetchData();
 		}
 
-		this.title = getRouteTitle(this.$route);
-		this.setTitle();
+		let title = getRouteTitle(this.$route);
+		this.setTitle(title);
 		
 	},
 	methods: {
-      setTitle() {
+      setTitle(title) {
 			let items = [{
-				action: '', text: this.title
+				action: '', text: title
 			}];
 			this.$store.commit(SET_BREAD_ITEMS, items);
 		},

@@ -5,5 +5,7 @@ export const POST_TYPES = {
    NOTE: 'Note',
    MANUAL: 'Manual',
    FEATURE: 'Feature',
-   EMOJI: 'Emoji'
+   EMOJI: 'Emoji',
+   QUESTION: 'Question',
+   ARTICLE: 'Article'
 };

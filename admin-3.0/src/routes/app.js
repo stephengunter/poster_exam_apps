@@ -238,6 +238,19 @@ const adminlinks = [
       } 
    },
    {
+      name: 'articles',
+      path: '/articles',
+      view: 'Articles',
+      parent: '',
+      meta: {
+         order: 0,
+         icon: 'mdi-post-outline',
+         title: '文章管理',
+         type: ADMIN_ONLY,
+         menu: true
+      } 
+   },
+   {
       name: 'db',
       path: '/db',
       view: 'DB',

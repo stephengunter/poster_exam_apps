@@ -31,7 +31,6 @@ export const SET_RQS_MODEL = 'setRQsModel';
 //Notices
 export const SET_NOTICES = 'setNotices';
 export const SET_NOTICES_PARAMS = 'setNoticesParams';
-export const SET_NOTICE = 'setNotice';
 
 //Notifications
 export const SET_NOTIFICATION_ITEMS = 'setNotificationItems';
@@ -61,6 +60,9 @@ export const SET_EXAM_ACTIONS = 'setExamActions';
 export const SET_MANUALS = 'setManuals';
 export const SET_MANUAL_CATEGORIES = 'setManualCategories';
 export const SET_MANUAL = 'setManual';
+
+//Articles
+export const SET_ARTICLES = 'setArticles';
 
 //Subscribes
 export const SET_CURRENT_SUBSCRIBE = 'setCurrentSubscribe';
