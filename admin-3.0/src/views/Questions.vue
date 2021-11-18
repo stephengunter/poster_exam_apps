@@ -35,7 +35,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { SET_LOADING, CLEAR_ERROR, SET_ERROR, SET_NOTE_CATEGORIES } from '@/store/mutations.type';
+import { CLEAR_ERROR } from '@/store/mutations.type';
 import { FETCH_QUESTIONS, CREATE_QUESTION, EDIT_QUESTION, FETCH_RESOLVES } from '@/store/actions.type';
 import { DIALOG_MAX_WIDTH } from '@/config';
 import { onError, scrollToTop, deepClone } from '@/utils';

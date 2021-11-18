@@ -269,6 +269,10 @@ article img{
 	max-width:  100%;
 	height: auto;
 }
+.inline-point {
+	color:#fc8003
+}
+
 .inline-emoji {
 	float: left;
 	margin-right: .5em;
@@ -281,6 +285,21 @@ article img{
 }
 .article-imgDesc > li {
 	margin-bottom : 3px;
+}
+
+.videobox {
+	position: relative;
+	width: 100%;
+	height: 0;
+	padding-bottom: 56.25%;
+}
+
+.videobox iframe {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
 }
 
 .errText{
@@ -305,7 +324,7 @@ article img{
 }
 
 .q-title {
-	font-size: 16px;
+	font-size: 1rem;
 }
 
 

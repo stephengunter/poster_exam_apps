@@ -19,7 +19,7 @@
                   </v-list-item-content>
                   <v-list-item-action>
                   <v-list-item-action-text>
-                     <core-time-ago :val="item.notice.lastUpdated" />
+                     {{ item.notice.lastUpdated | timeAgo }}
                   </v-list-item-action-text>
                </v-list-item-action>
                </v-list-item>
@@ -40,7 +40,7 @@ import { mapState, mapGetters } from 'vuex';
 import { NOTIFICATIONS, FETCH_NOTIFICATION_ITEMS, CLEAR_NOTIFICATIONS } from '@/store/actions.type';
 import { SET_AUTH_CHANGED } from '@/store/mutations.type';
 import { API_URL, DIALOG_MAX_WIDTH } from '@/config';
-import { removeTags } from '@/utils';
+import { removeHtmlTags } from '@/utils';
 import Hub from '@/models/hub';
 
 export default {
@@ -98,7 +98,7 @@ export default {
          }
       },
       plainText(str) {
-			return removeTags(str).trim();
+         return removeHtmlTags(str);
 		},
       onCurrentPageChanged(newVal, oldVal) {
          if(oldVal) return;

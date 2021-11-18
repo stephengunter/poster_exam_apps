@@ -156,7 +156,7 @@ const actions = {
                context.commit(SET_LOADING, false);
             });
       });
-   },
+   }
 };
 
 

@@ -2,14 +2,13 @@ import NoticesService from '@/services/notices.service';
 
 import { FETCH_NOTICES, NOTICE_DETAILS} from '@/store/actions.type';
 
-import { SET_NOTICES_PARAMS, SET_LOADING, SET_NOTICES, SET_NOTICE } from '@/store/mutations.type';
+import { SET_NOTICES_PARAMS, SET_LOADING, SET_NOTICES } from '@/store/mutations.type';
 
 
 
 const initialState = {
    params: null,
    list: [],
-   model: null,
    pagedList: null,   
 };
 
@@ -42,7 +41,6 @@ const actions = {
       return new Promise((resolve, reject) => {
          NoticesService.details({ id, user })
             .then(model => {
-               context.commit(SET_NOTICE, model);
                resolve(model);
             })
             .catch(error => {
@@ -67,10 +65,6 @@ const mutations = {
       if(viewList && viewList.length) {
          state.list = state.list.concat(viewList);
       }
-   },
-   [SET_NOTICE](state, model) {
-      if(model) state.model = model;
-      else state.model = null;
    }
 };
 

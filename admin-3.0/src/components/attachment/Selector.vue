@@ -28,8 +28,8 @@
             />
             
             <v-col cols="12">
-               <core-table-pager v-if="pagedList"  v-show="list.length > 0"
-               :model="pagedList" :responsive="responsive" 
+               <core-table-pager v-if="pagedList"
+               :row_options="[12]" :model="pagedList" :responsive="responsive" 
                @pageChanged="onPageChanged" :can_size="false"
                />
             </v-col>
@@ -110,6 +110,7 @@ export default {
 			})
       },
       onTypeChanged() {
+         this.params.page = 1;
 			this.fetchData();
       },
       onPageChanged(page) {

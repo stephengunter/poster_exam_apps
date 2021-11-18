@@ -17,9 +17,9 @@
                <v-btn v-if="allow_image" @click="addImage(commands.image)" icon>
                   <v-icon>mdi-image</v-icon>
                </v-btn>
-               <v-btn @click="commands.bullet_list" icon :color="isActive.bullet_list() ? 'primary' : ''">
+               <!-- <v-btn @click="commands.bullet_list" icon :color="isActive.bullet_list() ? 'primary' : ''">
                   <v-icon>mdi-format-list-bulleted</v-icon>
-               </v-btn>
+               </v-btn> -->
             </v-col>
          </v-row>
       </editor-menu-bar>

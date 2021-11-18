@@ -35,7 +35,6 @@ export default {
    },
    methods: {
       select(item) {
-         console.log('select', item);
          this.$emit('selected', item);
       }        
    }

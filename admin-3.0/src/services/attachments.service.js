@@ -7,4 +7,6 @@ const fetch = (params) => BaseService.fetch(source, params);
 
 const store = (model) => BaseService.post(source, model);
 
-export default { fetch, store };
+const remove = (id) => BaseService.remove(`${source}/${id}`);
+
+export default { fetch, store, remove };

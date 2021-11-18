@@ -1,9 +1,7 @@
 <template>
 	<v-container>
 		
-		Test Details
-
-		<v-btn @click=back>Back</v-btn>
+		
 	</v-container>
 </template>
 

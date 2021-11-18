@@ -6,6 +6,7 @@ import auth from './modules/auth.module';
 import notifications from './modules/notifications.module';
 import messages from './modules/messages.module';
 import notices from './modules/notices.module';
+import articles from './modules/articles.module';
 import notes from './modules/notes.module';
 import questions from './modules/questions.module';
 import terms from './modules/terms.module';
@@ -24,6 +25,7 @@ export default new Vuex.Store({
       notifications,
       messages,
       notices,
+      articles,
       notes,
       questions,
       terms,

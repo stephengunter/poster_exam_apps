@@ -1,3 +1,12 @@
+export const removeHtmlTags = (str) => {
+   if((str === null) || (str === '')) return '';
+   else {
+      str = str.toString();
+      return removeWhiteSpaces(str.replace( /(<([^>]+)>)/ig, ''));
+   }   
+      
+}
+
 export const removeWhiteSpaces = (strVal) => strVal.replace(/\s/g,'');
 
 export const isSmallScreen = () => window.innerWidth < 991;

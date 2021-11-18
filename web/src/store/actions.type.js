@@ -76,6 +76,10 @@ export const MANUAL_CATEGORY = 'manualCategory';
 export const MANUAL_DETAILS = 'manualDetails';
 export const SHOW_MANUAL = 'showManual';
 
+//Notices
+export const FETCH_ARTICLES = 'fetchArticles';
+export const ARTICLE_DETAILS = 'articleDetails';
+
 //Subscribes
 export const FETCH_PLANS = 'fetchPlans';
 export const SUBSCRIBES_INDEX = 'subscribesIndex';

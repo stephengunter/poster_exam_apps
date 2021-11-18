@@ -58,6 +58,9 @@ export const SET_TERM_PARENTS = 'setTermParents';
 export const SET_NOTE_CATEGORIES = 'setNoteCategories';
 export const SET_NOTES = 'setNotes';
 
+//Articles
+export const SET_ARTICLES = 'setArticles';
+
 //Attachments
 export const SET_ATTACHMENTS = 'setAttachments';
 

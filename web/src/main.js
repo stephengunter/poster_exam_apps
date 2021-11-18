@@ -64,7 +64,7 @@ router.beforeEach((to, from, next) => {
 
 router.afterEach((to, from) => {
 	if(to.meta.title) {
-		document.title = `${SITE_TITLE} - ${to.meta.title}`;
+		document.title = `${ to.meta.title} - ${SITE_TITLE}`;
 	}else {
 		document.title = SITE_TITLE;
 	}
