@@ -13,7 +13,7 @@
 			<v-card-text>
 				<core-article :text="model.content" />
 			</v-card-text>
-			<v-card-actions v-show="canBack">
+			<v-card-actions>
 				<v-spacer />		
 				<v-btn @click.prevent="back" class="ma-2" tile outlined color="primary">
 					<v-icon left>mdi-arrow-left</v-icon> 返回
@@ -77,7 +77,7 @@ export default {
 			})
 		},
 		back() {
-			if(window.history.length) this.$router.go(-1);
+			if(this.canBack && window.history.length) this.$router.go(-1);
 			else this.$router.push({ name: 'notices' });
 		}
    }

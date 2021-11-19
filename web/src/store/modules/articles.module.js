@@ -35,6 +35,7 @@ const actions = {
       });
    },
    [ARTICLE_DETAILS](context, id) {
+      context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
          ArticlesService.details(id)
             .then(model => {
