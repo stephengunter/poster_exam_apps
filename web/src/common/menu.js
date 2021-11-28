@@ -1,5 +1,5 @@
 import { FOR_ALL, GUEST_ONLY, USER_ONLY } from '@/routes/route.type';
-import { SUBSCRIBER } from '@/consts';
+import { SUBSCRIBER, MENU_TYPES } from '@/consts';
 import { isSubscriber } from '@/utils';
 
 const getMainMenus = (appRoutes, currentRoute, user = null) => {
@@ -23,7 +23,7 @@ const getFooterMenus = (appRoutes, currentRoute, user) => {
 const getMainLinks = (routes, user = null) => routes.filter(item => {
    let menus = item.meta.menus;
    if(menus && menus.length) {
-      let mainMenu = menus.find(x => x.key === 'main');
+      let mainMenu = menus.find(x => x.key === MENU_TYPES.MAIN);
       if(!mainMenu) return false;
 
       if(user) {
@@ -43,7 +43,7 @@ const getMainLinks = (routes, user = null) => routes.filter(item => {
 const getUserLinks = (routes, user) => routes.filter(item => {
    let menus = item.meta.menus;
    if(menus && menus.length) {
-      let userMenu = menus.find(x => x.key === 'user');
+      let userMenu = menus.find(x => x.key === MENU_TYPES.USER);
       if(!userMenu) return false;
 
       if(isSubscriber(user)) {
@@ -59,7 +59,7 @@ const getUserLinks = (routes, user) => routes.filter(item => {
 const getFooterLinks = (routes, user = null) => routes.filter(item => {
    let menus = item.meta.menus;
    if(menus && menus.length) {
-      let footerMenu = menus.find(x => x.key === 'footer');
+      let footerMenu = menus.find(x => x.key === MENU_TYPES.FOOTER);
       if(!footerMenu) return false;
 
       if(user) {

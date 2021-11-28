@@ -1,4 +1,5 @@
 import Errors from '@/common/errors';
+import { MENU_TYPES } from '@/consts';
 import { INIT, FETCH_ACTIONS, LOAD_ACTIONS, SCROLL_TOP } from '@/store/actions.type';
 
 import { SET_CURRENT_PAGE, SET_BREAD_ITEMS, SET_LOADING, SET_ERROR, CLEAR_ERROR, 
@@ -127,8 +128,8 @@ const mutations = {
    },
    [SET_MENUS](state, menus) {
       menus.sort((a, b) => {
-         let menuA = a.meta.menus.find(x => x.key === 'main');
-         let menuB = b.meta.menus.find(x => x.key === 'main');
+         let menuA = a.meta.menus.find(x => x.key === MENU_TYPES.MAIN);
+         let menuB = b.meta.menus.find(x => x.key === MENU_TYPES.MAIN);
 
          if(menuA.order > menuB.order) return 1;
          if(menuB.order > menuA.order) return -1;

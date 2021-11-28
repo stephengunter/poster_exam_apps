@@ -1,5 +1,5 @@
 import { FOR_ALL, GUEST_ONLY, USER_ONLY } from './route.type';
-import { SUBSCRIBER } from '@/consts';
+import { SUBSCRIBER, MENU_TYPES } from '@/consts';
 
 const applinks = [{
    name: 'home',
@@ -9,7 +9,7 @@ const applinks = [{
    meta: {
       type: FOR_ALL,
       menus: [{
-         key: 'main', show: FOR_ALL, order: 0
+         key: MENU_TYPES.MAIN, show: FOR_ALL, order: 0
       }],
       icon: 'mdi-home',
       title: '首頁'
@@ -22,7 +22,7 @@ const applinks = [{
    meta: {
       type: FOR_ALL,
       menus: [{
-         key: 'main', show: FOR_ALL, order: 5
+         key: MENU_TYPES.MAIN, show: FOR_ALL, order: 5
       }],
       icon: 'mdi-post-outline',
       title: '上榜心得'
@@ -46,7 +46,7 @@ const applinks = [{
    meta: {
       type: FOR_ALL,
       menus: [{
-         key: 'footer', show: FOR_ALL
+         key: MENU_TYPES.FOOTER, show: FOR_ALL
       }],
       title: '聯絡我們'
    } 
@@ -58,7 +58,7 @@ const applinks = [{
    meta: {
       type: FOR_ALL,
       menus: [{
-         key: 'footer', show: FOR_ALL
+         key: MENU_TYPES.FOOTER, show: FOR_ALL
       }],
       title: '公告訊息'
    } 
@@ -82,7 +82,7 @@ const applinks = [{
    meta: {
       type: FOR_ALL,
       menus: [{
-         key: 'main', show: FOR_ALL, order: 1
+         key: MENU_TYPES.MAIN, show: FOR_ALL, order: 1
       }],
       icon: 'mdi-database',
       title: '歷屆試題'
@@ -96,12 +96,24 @@ const applinks = [{
    meta: {
       type: FOR_ALL,
       menus: [{
-         key: 'main', show: FOR_ALL, order: 4
+         key: MENU_TYPES.MAIN, show: FOR_ALL, order: 4
       }],
       icon: 'mdi-book-open',
       title: '使用說明'
    } 
 },
+{
+   name: 'close',
+   path: '/close',
+   view: 'Close',
+   parent: '',
+   meta: {
+      type: FOR_ALL,
+      menus: [],
+      icon: '',
+      title: '系統維護中'
+   } 
+}
 // {
 //    name: 'test',
 //    path: '/test',
@@ -123,7 +135,7 @@ const userLinks = [{
    meta: {
       type: USER_ONLY,
       menus: [{
-         key: 'user', show: USER_ONLY
+         key: MENU_TYPES.USER, show: USER_ONLY
       }],
       icon: 'mdi-wallet-membership',
       title: '我的訂閱'
@@ -136,7 +148,7 @@ const userLinks = [{
    meta: {
       type: USER_ONLY,
       menus: [{
-         key: 'user', show: USER_ONLY
+         key: MENU_TYPES.USER, show: USER_ONLY
       }],
       icon: 'mdi-email-outline',
       title: '訊息通知'
@@ -160,7 +172,7 @@ const userLinks = [{
    meta: {
       type: USER_ONLY,
       menus: [{
-         key: 'main', show: FOR_ALL, order: 3
+         key: MENU_TYPES.MAIN, show: FOR_ALL, order: 3
       }],
       icon: 'mdi-notebook-outline',
       title: '讀書筆記'
@@ -174,7 +186,7 @@ const userLinks = [{
    meta: {
       type: USER_ONLY,
       menus: [{
-         key: 'main', show: FOR_ALL, order: 3
+         key: MENU_TYPES.MAIN, show: FOR_ALL, order: 3
       }],
       icon: 'mdi-file-document-edit-outline',
       title: '模擬測驗'
@@ -219,23 +231,13 @@ const userLinks = [{
    meta: {
       type: USER_ONLY,
       menus: [{
-         key: 'main', show: FOR_ALL, except: SUBSCRIBER, order: 6
+         key: MENU_TYPES.MAIN, show: FOR_ALL, except: SUBSCRIBER, order: 6
       }],
       icon: 'mdi-wallet-membership',
       title: '訂閱會員'
    } 
-},{
-   name: 'close',
-   path: '/close',
-   view: 'Close',
-   parent: '',
-   meta: {
-      type: FOR_ALL,
-      menus: [],
-      icon: '',
-      title: '系統維護中'
-   } 
-}];
+}
+];
 
 
 const guestLinks = [{
@@ -245,7 +247,7 @@ const guestLinks = [{
    meta: {
       type: GUEST_ONLY,
       menus: [{
-         key: 'main', show: GUEST_ONLY, order: 6
+         key: MENU_TYPES.MAIN, show: GUEST_ONLY, order: 6
       }],
       icon: 'mdi-login-variant',
       title: '登入',
