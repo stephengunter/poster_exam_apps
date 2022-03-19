@@ -34,8 +34,7 @@ export default {
    },
    data() {
       return {
-         pictureError: false,
-         messages: 10
+         
       }
    },
    methods:{

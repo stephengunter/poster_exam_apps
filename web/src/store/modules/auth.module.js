@@ -55,10 +55,8 @@ const actions = {
    [INIT_GOOGLE_SIGNIN](context) {
       context.commit(SET_LOADING, true);
       return new Promise((resolve, reject) => {
-         GoogleAuth.load(GOOGLE_AUTH_PARAMS).then(auth2 => {
-            resolve({
-               signedIn: auth2.isSignedIn.get()
-            });		
+         GoogleAuth.load(GOOGLE_AUTH_PARAMS).then(() => {
+            resolve(true);		
          })
          .catch(err => {
             reject(err);
@@ -111,9 +109,7 @@ const actions = {
       return new Promise((resolve) => {
          let token = JwtService.getToken();
          if(token) {
-           
             BaseService.setHeader(token);
-           
             let claims = jwtDecode(token);
             let user = {
                id: claims.id,

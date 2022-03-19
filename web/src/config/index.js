@@ -8,9 +8,11 @@ export const API_URL = process.env.VUE_APP_API_URL;
 export const LOGO_SRC = './img/logo.png';
 //AUTH
 export const GOOGLE_AUTH_PARAMS = {
-   client_id: process.env.VUE_APP_GOOGLE_AUTH_CLIENT_ID,
-   scope: 'email'
+   clientId: process.env.VUE_APP_GOOGLE_AUTH_CLIENT_ID,
+   scope: 'email',
+   discoveryDocs: ['https://people.googleapis.com/$discovery/rest?version=v1']
 };
+
 
 export const GOOGLE_RECAPTCHA_PARAMS = {
    sitekey: process.env.VUE_APP_GOOGLE_RECAPTCHA_SITEKEY,

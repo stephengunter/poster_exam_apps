@@ -1,34 +1,39 @@
-let auth2;
-let loadingPromise;
+const ON_LOAD = 'onGapiLoad';
+var auth2 = null;
+var loadingPromise = null;
 
 const createScript = () => {
     return new Promise((resolve, reject) => {
-        const el = document.getElementById('auth2_script_id');
-        if (!el) {
-            let gplatformScript = document.createElement('script')
-            gplatformScript.setAttribute('src', 'https://apis.google.com/js/platform.js?onload=onGapiLoad')
-            gplatformScript.setAttribute("async", true)
-            gplatformScript.setAttribute("defer", "defer")
-            gplatformScript.setAttribute("id", "auth2_script_id")
-            document.head.appendChild(gplatformScript);
-        }
-        resolve();
+      const id = 'auth2_script_id';
+      const el = document.getElementById(id);
+      if (!el) {
+         let tag = document.createElement('script');
+         tag.setAttribute('id', id);
+         tag.setAttribute('async', '');
+         tag.setAttribute('defer', '');
+         tag.setAttribute('src', 'https://apis.google.com/js/api.js');
+         tag.setAttribute('onload', `${ON_LOAD}();`);
+         tag.setAttribute('onreadystatechange', `${ON_LOAD}();`);
+         document.head.appendChild(tag);
+      }
+      resolve(true);
     });
 
 }
 
+
 const onGapiLoadPromise = (params) => {
    return new Promise((resolve, reject) => {
-      window.onGapiLoad = () => {
-         window.gapi.load('auth2', () => {
-            try {
-               auth2 = window.gapi.auth2.init(
-                  Object.assign({}, params)
-               );
-            } catch (err) {
-               reject({ err: 'client_id missing or is incorrect, or if you added extra params maybe they are written incorrectly, did you add it to the component or plugin?' })
-            }
-            resolve(auth2);
+      window[ON_LOAD] = () => {
+         window.gapi.load('client:auth2', () => {
+            window.gapi.client.init(
+               Object.assign({}, params)
+            ).then(() => {
+               auth2 = window.gapi.auth2.getAuthInstance();
+               resolve(true);
+            }).catch(err => {
+               reject(err);
+            })
          })
       }
    })

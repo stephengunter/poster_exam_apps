@@ -14,8 +14,7 @@ export default {
    name: 'GoogleLoginButton',
    data() {
       return {
-         ready: false,
-         googleSignedIn: false
+         ready: false
       }
    },
    mounted() {
@@ -24,14 +23,13 @@ export default {
    methods: {
       init() {
          this.$store.dispatch(INIT_GOOGLE_SIGNIN)
-         .then(result => {
-            this.googleSignedIn = result.signedIn;
-            this.ready = true;    
+         .then(() => {
+            this.ready = true;
          }).catch(error => {
             onError(error);
          })
       },
-      signIn(){
+      signIn() {
          this.$store.dispatch(GOOGLE_SIGNIN)
          .then(id_token => {
             this.$emit('success', id_token);  
