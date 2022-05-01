@@ -14,7 +14,7 @@
     "core-js": "^3.4.3",
     "jwt-decode": "^2.2.0",
     "moment": "^2.24.0",
-    "sanitize-html": "^1.23.0",
+    "sanitize-html": "^2.3.2",
     "scroll-into-view": "^1.14.2",
     "vee-validate": "2.2.14",
     "vue": "^2.6.11",
